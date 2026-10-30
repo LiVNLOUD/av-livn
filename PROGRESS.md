@@ -37,7 +37,7 @@
   - Canlı 72 sa, 16 mera: gündüz 21.8–23.4 (hedef < 30 ✓), alacakaranlık 41.7–49.1, tam gece 65.9–70.1 (hepsi lamba bilinmiyor → ×0.75).
 - **F1.2 CPU:**
   - Worker cron'u 3 dakikaya bölününce bile tek grup (5 mera) **99 ms** harcadı. Puanlama saatlik GitHub Actions işine taşındı (`score.yml`, Node'da ~75 ms, D1 REST API ile yazar).
-  - Worker'da yalnız `:07` hava cron'u kaldı (8.6 ms).
+  - Worker'da yalnız `:07` hava cron'u kaldı: 14:07'de tek başına 8.6 ms; 15:07 dakikasında API istekleriyle karışık p99 13.2 ms. Sınıra yakın; aşarsa hücreler iki cron dakikasına bölünecek.
   - Okuma uçları (kontrollü ölçüm, 25 istek/dk): health p50 4.3 ms (taban), liste p50 4.3 ms, detay p50 3.2 / p99 7.1 ms. Paketli JSON ayrıştırılmadan döner, edge cache kaldırıldı.
 - **F1.3 Önbellek:** `/`, `/mera/`, `/sw.js`, `/manifest.webmanifest` → `no-cache`, `/_astro/*` → `immutable` (`_headers` ile; zone yeniden yazmıyor). API'de istemciye `no-cache`. SW sürümü build hash'iyle damgalanıyor, HTML network-first.
 - **F1.4 Meralar:** `docs/spots-review.md`.
