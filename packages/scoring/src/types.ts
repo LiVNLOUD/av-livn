@@ -9,7 +9,13 @@ export interface HourlyPoint {
   precip?: number | null;
   cloud?: number | null;
   waveH?: number | null;
+  /** Wave direction (deg, from). */
+  waveDir?: number | null;
   sst?: number | null;
+  /** Where `sst`/`curVel` come from (v2 source label); Open-Meteo when absent. */
+  sstSource?: 'copernicus' | 'open-meteo';
+  /** Short-term SST normal for this day of year (°C), when available (v2 deviation term). */
+  sstNormal?: number | null;
   curVel?: number | null;
   curDir?: number | null;
   seaLevel?: number | null;

@@ -13,6 +13,7 @@ const MAP: Record<string, [keyof HourlyPoint, (x: number) => number]> = {
   precipitation: ['precip', (x) => x],
   cloud_cover: ['cloud', (x) => x],
   wave_height: ['waveH', (x) => x],
+  wave_direction: ['waveDir', (x) => x],
   sea_surface_temperature: ['sst', (x) => x],
   ocean_current_velocity: ['curVel', (x) => x / 3.6],
   ocean_current_direction: ['curDir', (x) => x],

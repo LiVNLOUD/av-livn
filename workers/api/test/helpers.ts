@@ -82,3 +82,19 @@ export async function writeScores(now = new Date()): Promise<number> {
   ]);
   return recs.length;
 }
+
+export async function writeScoresV2(now = new Date(), draws = 20): Promise<number> {
+  const { scoreRecordsV2, fieldRecords, UPSERT_V2_SQL, DELETE_STALE_V2_SQL } = await import('../src/precompute_v2');
+  const { loadSnapshots } = await import('../src/lib/spots');
+  const { results } = await env.DB.prepare("SELECT * FROM spots WHERE status != 'rejected' ORDER BY id").all();
+  const rows = results as unknown as import('../src/lib/spots').SpotRow[];
+  const snaps = await loadSnapshots(env.DB, rows.flatMap((r) => (r.sea_cell ? [r.wx_cell, r.sea_cell] : [r.wx_cell])));
+  const obs = (await env.DB.prepare('SELECT * FROM field_obs').all()).results as never[];
+  const depths = (await env.DB.prepare('SELECT * FROM field_depth').all()).results as never[];
+  const recs = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), draws);
+  await env.DB.batch([
+    ...recs.map((r) => env.DB.prepare(UPSERT_V2_SQL).bind(r.spot_id, r.model_version, r.computed_at, r.start_hour, r.list_json, r.detail_json, 0)),
+    env.DB.prepare(DELETE_STALE_V2_SQL),
+  ]);
+  return recs.length;
+}

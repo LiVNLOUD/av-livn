@@ -28,6 +28,7 @@ export interface SpotRow {
   substrate_biozone?: string | null;
   substrate_dist_m?: number | null;
   substrate_conf?: number | null;
+  access?: string | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -65,6 +66,7 @@ export function publicSpot(r: SpotRow) {
     probe_source: r.probe_source ?? null,
     normal_source: r.normal_source ?? null,
     has_light: r.has_light === null ? null : r.has_light === 1,
+    access: r.access ?? null,
     notes: r.notes,
     source: r.source,
   };

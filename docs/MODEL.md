@@ -189,6 +189,40 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 - **Kartta:** beklenen puan + %10–90 bandı (B4).
 - **Taslakta ortalama bant genişliği 47.7 puan.** Bu, C-ağırlıklı modelin dürüst belirsizliği; saha formu ve av günlüğüyle daralması beklenir.
 
+## 6a. Ölçek kalibrasyonu (B1)
+
+```
+ham   = HSI_s · HSI_d                                    (0.05² … 1; geometrik ortalamaların çarpımı → log ölçeği doğal)
+puan  = clip( 8 + 84 · (ln ham − ln r_kötü) / (ln r_ideal − ln r_kötü), 0, 100 )
+```
+
+**Çapalar:** iki belgelenmiş referans senaryonun varsayılan parametrelerle hesaplanan ham değeri. Uydurma yok; ağırlıklara dokunulmadı.
+
+| Senaryo | Tanım | Ham | Puan |
+|---|---|---|---|
+| İdeal (`IDEAL_SPOT/WEATHER`) | 600 m mendirek, kaya + midyeli (saha), atışta 7–12 m (saha), lamba var, korunaklı, aysız açık gece, Ekim ortası, sakin, kararlı | 0.859 | 92 |
+| En kötü (`WORST_SPOT/WEATHER`) | 15 m iskele, çamur, 0.3–0.8 m, lamba yok, tam açık, Şubat öğlesi, kıyıya 45 km/sa + 2 m dalga, 40 mm yağış, −3 °C/48 sa soğuma | 0.050 | 8 |
+
+- Dönüşüm monoton: tüm sıralamalar ve yön testleri korunur.
+- Monte Carlo çekimlerine de aynı dönüşüm uygulanır.
+- **Birim testi** (`packages/scoring/test/v2/model.test.ts`): ideal ≥ 85, en kötü ≤ 15, ideale yakın varyantlar ≥ 75–80, en kötüye yakın ≤ 20; 5 yön testi dönüşüm sonrası.
+
+## 6b. Bileşen kaynağı (B1)
+
+Her bileşen değeriyle birlikte bir **kaynak** döner (UI rozeti):
+
+| Kaynak | Ne zaman |
+|---|---|
+| `saha` | saha formu (derinlik, taban, yapı, lamba) |
+| `Copernicus` | su sıcaklığı/akıntı Copernicus'tan (B2), kısa normal sapması |
+| `EUSeaMap` | taban sınıfı, güvenle ağırlıklı |
+| `DTM-ölçüm` | DTM hücresi ölçüm (CDI) kaynaklı — bu bbox'ta meralarda yok |
+| `yapı-uzunluğu-tahmini` | derinlik: DTM enterpolasyonlu veya yok → yapı türü/uzunluğu önseli baskın |
+| `önsel` | lamba bilinmiyor (önsel olasılık), mevsim eğrisi, taban bilinmiyor |
+| `OSM` | yapı türü ve uzunluğu |
+| `Open-Meteo` | rüzgar, dalga, yağış, basınç (Copernicus yoksa su/akıntı) |
+| `astronomi` | güneş/ay konumu |
+
 ## 7. Duyarlılık analizi: v1 ve v2, 16 mera × 72 sa
 
 **Kurulum:**
@@ -347,6 +381,16 @@ CREATE TABLE catch_log (id TEXT PRIMARY KEY, spot_id TEXT NOT NULL, start_at TEX
 - **Lamba:** saha durumu, önseli bastırır.
 - **Yapı:** saha türü OSM türünü bastırır.
 - Her alan kaynağıyla birlikte saklanır; kartta "saha / EUSeaMap / DTM / önsel" etiketi gösterilir.
+
+## 9a. Batma süresinden derinlik (B5)
+
+- **Ölçüm:** jighead suya değdiği andan misina gevşeyene kadar saniye; jighead gramajı ve atış mesafesi.
+- **Önsel batma hızı:** `v₀(g) = 0.25 · √g m/s` (jighead + küçük silikon; balıkçı kuralı, kanıt C, ±%40). 2 g → 0.35 m/s, 4 g → 0.50 m/s.
+- **Kalibrasyon:** aynı merada kurşunla dikine ölçüm varsa, ±15 m mesafedeki her batma ölçümü için `k = derinlik_dikine / (v₀ · t)`. Mera katsayısı `k` = medyan.
+  - Belirsizlik: `σ_rel = √(sd(k)/k)² + 0.10²` (zamanlama hatası %10); tek çiftte sd(k)/k = 0.15.
+- **Derinlik:** `d = k · v₀(g) · t` (kalibresizse k = 1, σ = %40).
+- **Model ağırlığı:** dikine 0.95, kalibre batma 0.90, kalibresiz batma 0.70 (kalan pay yapı önseli).
+- **Varsayım:** jighead serbest düşüşe yakın batar (gergin misinada sarkaç etkisi süreyi uzatır → derinliği fazla tahmin). Kalibrasyon bu sistematik hatayı da emer.
 
 ## 10. Referans projeler (kod kopyalanmadı)
 

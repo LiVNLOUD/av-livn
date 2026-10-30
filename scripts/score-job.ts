@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
+import { DELETE_STALE_V2_SQL, fieldRecords, scoreRecordsV2, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import type { SpotRow } from '../workers/api/src/lib/spots';
 
 const dryRun = process.argv.includes('--dry-run');
@@ -41,12 +42,26 @@ const t1 = performance.now();
 const records = scoreRecords(rows, snaps, now);
 const t2 = performance.now();
 const bytes = records.reduce((a, r) => a + r.detail_json.length + r.list_json.length, 0);
-console.log(`spots ${rows.length}, snapshots ${snaps.size}, records ${records.length}, ${(bytes / 1024).toFixed(0)} KiB JSON, compute ${(t2 - t1).toFixed(0)} ms`);
+console.log(`v1: spots ${rows.length}, snapshots ${snaps.size}, records ${records.length}, ${(bytes / 1024).toFixed(0)} KiB JSON, compute ${(t2 - t1).toFixed(0)} ms`);
+const obs = await query<FieldObsRow>('SELECT * FROM field_obs');
+const depths = await query<FieldDepthRow>('SELECT * FROM field_depth');
+const t3 = performance.now();
+const v2 = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths));
+const t4 = performance.now();
+const maxDetail = Math.max(...v2.map((r) => r.detail_json.length));
+console.log(`v2: records ${v2.length}, field obs ${obs.length}, max detail ${(maxDetail / 1024).toFixed(0)} KiB, compute ${(t4 - t3).toFixed(0)} ms`);
+const now0 = Math.floor(now.getTime() / 3_600_000);
+for (const r of v2) {
+  const e = (JSON.parse(r.list_json) as unknown[][])[now0 - r.start_hour];
+  console.log(`  ${r.spot_id.padEnd(20)} total ${e?.[0]} band ${e?.[1]}–${e?.[2]} rank ${e?.[3]}`);
+}
 
 if (dryRun) {
   console.log('dry run: nothing written');
 } else {
   for (const r of records) await query(UPSERT_SCORE_SQL, [r.spot_id, r.species, r.computed_at, r.start_hour, r.list_json, r.detail_json]);
   await query(DELETE_STALE_SCORES_SQL);
+  for (const r of v2) await query(UPSERT_V2_SQL, [r.spot_id, r.model_version, r.computed_at, r.start_hour, r.list_json, r.detail_json, 0]);
+  await query(DELETE_STALE_V2_SQL);
   console.log(`wrote ${records.length} rows in ${(performance.now() - t2).toFixed(0)} ms (total ${(performance.now() - t0).toFixed(0)} ms)`);
 }
