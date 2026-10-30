@@ -1,6 +1,7 @@
 import { getProfile, scoreAt, scoreSeries, type SpeciesProfile } from '@av-livn/scoring';
 import { Hono } from 'hono';
 import type { Env } from '../env';
+import { cachedJson } from '../lib/cache';
 import { mergeSnapshots } from '../lib/series';
 import { haversineKm, loadSnapshots, publicSpot, toSpotInput, type SpotRow } from '../lib/spots';
 
@@ -13,7 +14,7 @@ function profileFor(id: string | undefined): SpeciesProfile | { error: string } 
   return p;
 }
 
-publicRoutes.get('/spots', async (c) => {
+publicRoutes.get('/spots', (c) => cachedJson(c, 600, async () => {
   const profile = profileFor(c.req.query('species'));
   if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
   const { results } = await c.env.DB.prepare("SELECT * FROM spots WHERE status != 'rejected' ORDER BY name").all<SpotRow>();
@@ -31,9 +32,9 @@ publicRoutes.get('/spots', async (c) => {
     200,
     { 'cache-control': 'public, max-age=120' },
   );
-});
+}));
 
-publicRoutes.get('/spots/:id', async (c) => {
+publicRoutes.get('/spots/:id', (c) => cachedJson(c, 600, async () => {
   const profile = profileFor(c.req.query('species'));
   if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 96);
@@ -62,4 +63,4 @@ publicRoutes.get('/spots/:id', async (c) => {
     200,
     { 'cache-control': 'public, max-age=120' },
   );
-});
+}));
