@@ -1,0 +1,39 @@
+name: audit
+# v2 Part A data audit: Copernicus coverage/resolution, OSM structures and ferry terminals, OSM land polygons.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: audit
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUSMARINE_SERVICE_USERNAME }}
+      COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUSMARINE_SERVICE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: sudo apt-get update -q && sudo apt-get install -y -q gdal-bin unzip
+      - run: pip install -e './pipeline' copernicusmarine xarray netCDF4
+      - name: Copernicus products (anfc Marmara 500 m, multiyear, SST L4)
+        run: python analysis/audit/copernicus_audit.py data/spots.geojson docs/audit/copernicus.json
+      - name: OSM land polygons (vector land mask for fetch)
+        run: bash analysis/audit/land_polygons.sh data/osm/land_marmara.geojson
+      - name: OSM structures and ferry terminals (Overpass)
+        continue-on-error: true
+        run: PYTHONPATH=pipeline python analysis/audit/osm_audit.py docs/audit/osm_structures.json
+      - name: Commit audit outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f docs/audit data/osm/land_marmara.geojson
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "audit: Copernicus coverage, OSM structures, land polygons"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep $((i * 10)); done
