@@ -1,1 +1,422 @@
-{ "type": "FeatureCollection", "features": [] }
+{
+ "type": "FeatureCollection",
+ "attribution": "© OpenStreetMap contributors, ODbL",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.970898,
+     40.457728
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1005837524",
+    "name": "İskele · Kapaklı",
+    "kind": "pier",
+    "length_m": 283,
+    "shore_normal_deg": 114.7,
+    "probe_lat": 40.4549,
+    "probe_lon": 28.97894,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Kapaklı",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.789766,
+     40.517312
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1170373161",
+    "name": "İskele · Armutlu",
+    "kind": "pier",
+    "length_m": 93,
+    "shore_normal_deg": 178.9,
+    "probe_lat": 40.51053,
+    "probe_lon": 28.78993,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Armutlu",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.101885,
+     40.466648
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1218507890",
+    "name": "Küçükkumla İskelesi",
+    "kind": "pier",
+    "length_m": 128,
+    "shore_normal_deg": 208.7,
+    "probe_lat": 40.4607,
+    "probe_lon": 29.09763,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Kumla",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.889607,
+     40.375108
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1233883494",
+    "name": "Mudanya İskelesi",
+    "kind": "pier",
+    "length_m": 353,
+    "shore_normal_deg": 234.2,
+    "probe_lat": null,
+    "probe_lon": null,
+    "probe_ok": null,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Ömerbey Mah.",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.84933,
+     40.506039
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1364814104",
+    "name": "Mendirek · İskele",
+    "kind": "breakwater",
+    "length_m": 64,
+    "shore_normal_deg": 62.1,
+    "probe_lat": null,
+    "probe_lon": null,
+    "probe_ok": null,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "İskele",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.828213,
+     40.509813
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1394208144",
+    "name": "Mendirek · İskele",
+    "kind": "breakwater",
+    "length_m": 112,
+    "shore_normal_deg": 142.7,
+    "probe_lat": 40.50442,
+    "probe_lon": 28.83358,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "İskele",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.828639,
+     40.508129
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1413355181",
+    "name": "Mendirek · İskele",
+    "kind": "breakwater",
+    "length_m": 930,
+    "shore_normal_deg": 312.3,
+    "probe_lat": null,
+    "probe_lon": null,
+    "probe_ok": null,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "İskele",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.877289,
+     40.485724
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1414984335",
+    "name": "İskele · Fıstıklı",
+    "kind": "pier",
+    "length_m": 184,
+    "shore_normal_deg": 226.1,
+    "probe_lat": 40.48102,
+    "probe_lon": 28.87091,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Fıstıklı",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.824744,
+     40.509072
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1422122108",
+    "name": "Mendirek · İskele",
+    "kind": "breakwater",
+    "length_m": 292,
+    "shore_normal_deg": 69.9,
+    "probe_lat": null,
+    "probe_lon": null,
+    "probe_ok": null,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "İskele",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.84796,
+     40.380793
+    ]
+   },
+   "properties": {
+    "id": "osm-way-1456975486",
+    "name": "Petek Sitesi İskele",
+    "kind": "pier",
+    "length_m": 99,
+    "shore_normal_deg": 353.4,
+    "probe_lat": 40.38753,
+    "probe_lon": 28.84695,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Kumyaka",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.930124,
+     40.355826
+    ]
+   },
+   "properties": {
+    "id": "osm-way-252356832",
+    "name": "Mendirek · Güzelyalı Burgaz",
+    "kind": "breakwater",
+    "length_m": 1067,
+    "shore_normal_deg": 20.8,
+    "probe_lat": 40.36217,
+    "probe_lon": 28.93327,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Güzelyalı Burgaz",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.929093,
+     40.35678
+    ]
+   },
+   "properties": {
+    "id": "osm-way-252356833",
+    "name": "Mendirek · Güzelyalı Burgaz",
+    "kind": "breakwater",
+    "length_m": 204,
+    "shore_normal_deg": 114.7,
+    "probe_lat": null,
+    "probe_lon": null,
+    "probe_ok": null,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Güzelyalı Burgaz",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.091209,
+     40.417167
+    ]
+   },
+   "properties": {
+    "id": "osm-way-479047532",
+    "name": "İskele · İslamköy",
+    "kind": "pier",
+    "length_m": 16,
+    "shore_normal_deg": 326.3,
+    "probe_lat": 40.42281,
+    "probe_lon": 29.0863,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "İslamköy",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.798426,
+     40.393749
+    ]
+   },
+   "properties": {
+    "id": "osm-way-483965349",
+    "name": "İskele · Tirilye",
+    "kind": "pier",
+    "length_m": 116,
+    "shore_normal_deg": 20.4,
+    "probe_lat": 40.40011,
+    "probe_lon": 28.80151,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Tirilye",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.928711,
+     40.355731
+    ]
+   },
+   "properties": {
+    "id": "osm-way-503770078",
+    "name": "İDO Güzelyalı Feribot İskelesi",
+    "kind": "pier",
+    "length_m": 960,
+    "shore_normal_deg": 24.2,
+    "probe_lat": 40.36192,
+    "probe_lon": 28.93233,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Güzelyalı Eğitim",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.151263,
+     40.431742
+    ]
+   },
+   "properties": {
+    "id": "osm-way-77362926",
+    "name": "İskele · Demirsubaşı",
+    "kind": "pier",
+    "length_m": 353,
+    "shore_normal_deg": 245.1,
+    "probe_lat": 40.42888,
+    "probe_lon": 29.14324,
+    "probe_ok": true,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Demirsubaşı",
+    "source": "© OpenStreetMap contributors, ODbL"
+   }
+  }
+ ]
+}
