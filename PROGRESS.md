@@ -18,4 +18,16 @@
 - 2026-10-29 yüzey subset'i: 42×80 grid, 36 KB, thetao 17.2–18.6 °C, %61 kara (NaN)
 - `cmems_mod_blk_phy_anfc_mrm-500m_staticbathy` bulunamadı → F2'de doğru statik ID aranacak
 
-## F1 — MVP (bkz. ROADMAP)
+## F1 — MVP ✅ (2026-10-30)
+- **Meralar:** `spots.yml` (Actions) Overpass'tan 16 aday üretti (10 iskele, 6 mendirek) → `data/spots.geojson` main'e doğrudan commit. 13 merada deniz noktası var, 3'ünde yok. Hepsi `status: candidate`.
+- **Cron:** canlıda çalışıyor (13:07Z). 20 hücre, 20 snapshot, 20 gözlem. Kind başına tek Open-Meteo isteği.
+- **Puanlama:** 112 test, %100 kapsam. Sınır tabloları: açı 0/45/90/135/180, dalga 0.3/0.6/1.2, ay 0/0.5/1, kapı 39/40/41 km/sa ve 1.19/1.2/1.21 m.
+- **Worker:** 31 test (seed, cron, API, admin, edge cache). pytest: 22.
+- **Web:** liste, 72 saatlik SVG grafik, bileşen dökümü, admin, PWA. 390 px ekran görüntüleri `docs/screenshots/`.
+- **CPU:** ilk ölçümde `/api/spots` p99 ~16 ms (sınır ~10 ms) → yanıtlar 10 dk edge cache'te. Cron dakikası p50 7.8 / p99 10.6 ms (API istekleriyle karışık). Bir sonraki cron'da tekrar ölçülecek.
+- **Zone ayarı:** livn.tr zone'unun Browser Cache TTL'i (4 sa) API yanıtlarını yeniden yazıyor → istemciye `no-cache` dönülüyor.
+- **Bilinen sınırlar:**
+  - Open-Meteo Marine, körfez içi noktaları birkaç km uzaktaki açık deniz grid'ine kaydırıyor; arayüz mesafeyi gösteriyor, F3'te CMEMS 500 m gelecek.
+  - Gündüz puanı ~74 (gece bileşeni yalnız 25/100); kalibrasyon kararı bekliyor.
+  - `ADMIN_TOKEN` repo secret'ı yok → admin 503.
+  - `depth_200m`/`slope` F2'ye kaldı.

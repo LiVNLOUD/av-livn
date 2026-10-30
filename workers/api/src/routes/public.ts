@@ -30,7 +30,6 @@ publicRoutes.get('/spots', (c) => cachedJson(c, 600, async () => {
   return c.json(
     { ok: true, species: { id: profile.id, name: profile.name }, at: now.toISOString(), data_fetched_at: fetched.at(-1) ?? null, spots },
     200,
-    { 'cache-control': 'public, max-age=120' },
   );
 }));
 
@@ -61,6 +60,5 @@ publicRoutes.get('/spots/:id', (c) => cachedJson(c, 600, async () => {
       conditions,
     },
     200,
-    { 'cache-control': 'public, max-age=120' },
   );
 }));
