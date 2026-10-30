@@ -11,6 +11,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      HAS_ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,6 +31,16 @@ jobs:
           workingDirectory: workers/api
           packageManager: npm
           command: d1 migrations apply av-livn --remote
+      - name: Build spot seed SQL
+        run: node scripts/seed-spots.mjs seed.sql
+      - name: Seed spots (keeps admin-edited field data)
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/api
+          packageManager: npm
+          command: d1 execute av-livn --remote --file ../../seed.sql
       - name: Deploy worker
         uses: cloudflare/wrangler-action@v3
         with:
@@ -37,5 +49,17 @@ jobs:
           workingDirectory: workers/api
           packageManager: npm
           command: deploy
+      - name: Set ADMIN_TOKEN secret
+        if: env.HAS_ADMIN_TOKEN == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/api
+          packageManager: npm
+          secrets: ADMIN_TOKEN
+          command: whoami
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
       - name: Smoke test (av.livn.tr + livn.tr, www, /win untouched)
         run: bash scripts/smoke.sh

@@ -9,6 +9,8 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "7.3.8"
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "astro": "7.3.8",
+    "suncalc": "^2.1.1"
   }
 }

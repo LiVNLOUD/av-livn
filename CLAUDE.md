@@ -12,10 +12,16 @@ Her faz sonunda: testler yeşil, deploy canlı, PROGRESS.md güncel, 5 satırlı
 ## Komutlar
 ```bash
 npm install                 # Node 22
-npm test                    # web build + embed + scoring (%100 kapsam) + worker testleri
+npm test                    # web build + scoring (%100 kapsam) + worker testleri
 npm run typecheck
 cd pipeline && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]' && .venv/bin/pytest
 bash scripts/dns-inventory.sh   # her DNS işleminden önce, çıktıyı docs/dns-inventory.md'ye ekle
+bash scripts/smoke.sh           # canlı: av.livn.tr + livn.tr, www, /win 301
+# Lokal UI: yerel D1'e örnek veri + wrangler dev + 390 px Playwright
+cd workers/api && wrangler d1 migrations apply av-livn --local && cd ../..
+node scripts/dev-seed.mjs > /tmp/dev.sql && (cd workers/api && wrangler d1 execute av-livn --local --file /tmp/dev.sql)
+(cd workers/api && wrangler dev --local --var ADMIN_TOKEN:dev-token)   # ayrı terminal
+node scripts/ui-smoke.mjs http://localhost:8787 docs/screenshots
 ```
 
 ## Cloudflare (bulut oturumu)
@@ -25,7 +31,9 @@ bash scripts/dns-inventory.sh   # her DNS işleminden önce, çıktıyı docs/dn
 - R2 kullanılmaz: PMTiles static asset, oşinografi özetleri D1'de.
 - Copernicus kimliği yalnız Actions secrets'ta. Oturumda yok; F3 kodu mock veriyle test edilir.
 - Ücretsiz katman: cron hesap başına 5, cron başına CPU ~10 ms. netCDF/GDAL işleri yalnız GitHub Actions'ta (pipeline/) çalışır.
-- Overpass API'ye konteynerden erişilemiyor. OSM çekimi Actions'ta yapılır.
+- Overpass API'ye konteynerden erişilemiyor. OSM çekimi Actions'ta yapılır (`spots.yml`).
+- Tür profilleri `data/species/*.yaml`; değiştirince `npm run species -w packages/scoring` (senkron testi var).
+- Birim: km/sa (Türkçe "km/s" saniye demektir).
 
 ## Kesin kurallar
 - livn.tr ana sitesini (Pages `livn`, `@` ve `www` CNAME), MX/TXT kayıtlarını ve `livn.tr/win` Page Rule'unu bozma. DNS işleminden önce envanter al.

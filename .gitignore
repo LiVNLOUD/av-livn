@@ -13,3 +13,4 @@ __pycache__/
 *.tif
 *.pmtiles
 *.egg-info/
+data/osm/

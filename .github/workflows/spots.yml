@@ -1,0 +1,44 @@
+name: spots
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 1 * *' # monthly refresh of OSM candidates
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: spots
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e './pipeline[dev]'
+      - run: pytest pipeline
+      - name: Fetch OSM (Overpass)
+        run: python -m av_pipeline.spots.fetch_osm data/osm/raw.json
+      - name: Build candidate spots
+        run: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson --check-marine
+      - name: Commit to main if changed
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/spots.geojson
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: refresh OSM candidate spots"
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Trigger deploy (GITHUB_TOKEN pushes do not trigger workflows)
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

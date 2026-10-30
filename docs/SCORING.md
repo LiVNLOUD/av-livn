@@ -15,14 +15,14 @@ puan   = güvenlik_kapısı ? min(ham, 30) : ham
 - Ağırlık toplamı 100 olmak zorunda değildir, motor normalize eder.
 
 ## Güvenlik kapısı
-Hamle > **40 km/s** veya dalga > **1.2 m** → puan tavanı **30** ve uyarı (`warnings[]`). Eşikler tür dosyasındaki `safety` bölümünden gelir.
+Hamle > **40 km/sa** veya dalga > **1.2 m** → puan tavanı **30** ve uyarı (`warnings[]`). Eşikler tür dosyasındaki `safety` bölümünden gelir.
 
 ## İstavrit bileşenleri (ağırlık)
 
 | Anahtar | Ağırlık | Hesap |
 |---|---|---|
 | `gece_isik_penceresi` | 25 | Pencere: gün batımı + 1 sa → 00:00 (yerel) = 1.0. Gün batımı → +1 sa arası 0 → 1 doğrusal artar. 00:00 → şafak 0.5. Gündüz 0.1. Lamba çarpanı: `has_light` true 1.0 · bilinmiyor 0.75 · false 0.5 |
-| `ruzgar_dalga_kiyiya_gore` | 20 | `onshore = cos(rüzgarın geldiği yön − kıyı normali)`. Kıyı normali denize bakan yöndür, yani +1 rüzgar denizden kıyıya eser. **Kıyıya vuran:** `1 − onshore × clamp((w − 10)/25)`. **Karadan/yan:** w ≤ 20 km/s → 1, sonra 40 km/s'de 0.5'e iner. Dalga çarpanı: ≤0.3 m 1.0 → 0.6 m 0.7 → 1.2 m 0 (doğrusal). Sonuç `rüzgar × dalga` |
+| `ruzgar_dalga_kiyiya_gore` | 20 | `onshore = cos(rüzgarın geldiği yön − kıyı normali)`. Kıyı normali denize bakan yöndür, yani +1 rüzgar denizden kıyıya eser. **Kıyıya vuran:** `1 − onshore × clamp((w − 10)/25)`. **Karadan/yan:** w ≤ 20 km/sa → 1, sonra 40 km/sa'de 0.5'e iner. Dalga çarpanı: ≤0.3 m 1.0 → 0.6 m 0.7 → 1.2 m 0 (doğrusal). Sonuç `rüzgar × dalga` |
 | `su_sicakligi_ve_3g_trend` | 15 | Seviye: 14–20 °C → 1, aralığın 4 °C dışında 0. Trend: `|SST_şimdi − SST_72sa önce|` ≤ 0.5 °C → 1, ≥ 2 °C → 0. Değer `0.7·seviye + 0.3·trend`. Trend verisi yoksa yalnız seviye |
 | `basinc_trendi_3_6s` | 10 | `r = ortalama(Δp_3sa/3, Δp_6sa/6)` hPa/sa. −0.5…+0.3 → 1 (stabil/yavaş düşüş). Yükselişte +1.5'te 0'a, düşüşte −2.0'de 0.3'e iner |
 | `ay_evresi` | 10 | `1 − aydınlanma × (ay ufkun üstündeyse 1, değilse 0.4)` (suncalc). Lamba altı avda karanlık gece iyidir |

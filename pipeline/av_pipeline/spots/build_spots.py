@@ -1,0 +1,176 @@
+"""Turn raw Overpass output into candidate spots (data/spots.geojson).
+
+For each pier/breakwater/groyne: the fishing point is the vertex farthest from the coastline (the tip).
+The shore normal comes from the nearest coastline segment: OSM coastlines have land on the left, so the
+seaward normal is the segment bearing + 90°. A `sea_probe` point is placed 750 m along the normal
+(fallback 1000 m, then 500 m) and must lie on the sea side of the coastline.
+
+Usage: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson [--check-marine]
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import sys
+import urllib.request
+from dataclasses import dataclass
+from pathlib import Path
+
+from shapely.geometry import LineString, Point
+from shapely.ops import nearest_points
+
+from av_pipeline import BBOX
+from av_pipeline.spots.geo import bearing, offset, to_lonlat, to_xy
+
+KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
+MIN_LENGTH_M = 15.0
+DEDUPE_M = 100.0
+PROBE_DISTANCES_M = (750.0, 1000.0, 500.0)
+ATTRIBUTION = "© OpenStreetMap contributors, ODbL"
+
+
+@dataclass
+class Coast:
+    lines: list[LineString]
+
+    def nearest(self, p: Point) -> tuple[LineString, Point, float]:
+        best = min(self.lines, key=lambda ln: ln.distance(p))
+        return best, nearest_points(best, p)[0], best.distance(p)
+
+    def segment_bearing_at(self, line: LineString, q: Point) -> float:
+        """Bearing of the coastline segment containing q (closest segment to q)."""
+        coords = list(line.coords)
+        best_i = min(range(len(coords) - 1), key=lambda i: LineString(coords[i : i + 2]).distance(q))
+        return bearing(coords[best_i], coords[best_i + 1])
+
+    def is_sea(self, p: Point) -> bool:
+        """Sea is on the right-hand side of the nearest coastline segment."""
+        line, q, _ = self.nearest(p)
+        b = self.segment_bearing_at(line, q)
+        side = math.degrees(math.atan2(p.x - q.x, p.y - q.y)) % 360
+        rel = (side - b) % 360
+        return 0 < rel < 180
+
+
+def element_xy(el: dict) -> list[tuple[float, float]]:
+    return [to_xy(g["lon"], g["lat"]) for g in el.get("geometry", [])]
+
+
+def parse(raw: dict) -> tuple[list[dict], Coast, list[dict]]:
+    structures, coast, places = [], [], []
+    for el in raw.get("elements", []):
+        tags = el.get("tags", {})
+        if el["type"] == "node" and "place" in tags:
+            places.append({"name": tags.get("name"), "xy": to_xy(el["lon"], el["lat"])})
+        elif el["type"] == "way" and tags.get("natural") == "coastline":
+            xy = element_xy(el)
+            if len(xy) >= 2:
+                coast.append(LineString(xy))
+        elif el["type"] == "way" and tags.get("man_made") in KIND_TR:
+            xy = element_xy(el)
+            if len(xy) >= 2:
+                structures.append({"osm_id": el["id"], "tags": tags, "xy": xy})
+    return structures, Coast(coast), places
+
+
+def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
+    named = [p for p in places if p["name"]]
+    if not named:
+        return None
+    return min(named, key=lambda p: math.dist(p["xy"], xy))["name"]
+
+
+def build_candidate(s: dict, coast: Coast, places: list[dict]) -> dict | None:
+    line = LineString(s["xy"])
+    if line.length < MIN_LENGTH_M:
+        return None
+    pts = [Point(c) for c in s["xy"]]
+    root = min(pts, key=lambda p: coast.nearest(p)[2])
+    tip = max(pts, key=lambda p: coast.nearest(p)[2])
+    cl, q, _ = coast.nearest(root)
+    normal = (coast.segment_bearing_at(cl, q) + 90) % 360
+    probe = None
+    for d in PROBE_DISTANCES_M:
+        cand = Point(offset((tip.x, tip.y), normal, d))
+        if coast.is_sea(cand):
+            probe = cand
+            break
+    kind = s["tags"]["man_made"]
+    place = nearest_place((tip.x, tip.y), places)
+    name = s["tags"].get("name") or (f"{KIND_TR[kind]} · {place}" if place else KIND_TR[kind])
+    lon, lat = to_lonlat(tip.x, tip.y)
+    props = {
+        "id": f"osm-way-{s['osm_id']}",
+        "name": name,
+        "kind": kind,
+        "length_m": round(line.length),
+        "shore_normal_deg": round(normal, 1),
+        "probe_lat": None,
+        "probe_lon": None,
+        "probe_ok": None,
+        "depth_200m": None,
+        "slope": None,
+        "has_light": None,
+        "status": "candidate",
+        "place": place,
+        "source": ATTRIBUTION,
+    }
+    if probe is not None:
+        plon, plat = to_lonlat(probe.x, probe.y)
+        props.update(probe_lat=round(plat, 5), probe_lon=round(plon, 5))
+    return {"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]}, "properties": props}
+
+
+def in_bbox(f: dict) -> bool:
+    lon, lat = f["geometry"]["coordinates"]
+    return BBOX["south"] <= lat <= BBOX["north"] and BBOX["west"] <= lon <= BBOX["east"]
+
+
+def dedupe(features: list[dict]) -> list[dict]:
+    """Drop candidates whose tip is within DEDUPE_M of a longer one."""
+    kept: list[dict] = []
+    for f in sorted(features, key=lambda f: -f["properties"]["length_m"]):
+        xy = to_xy(*f["geometry"]["coordinates"])
+        if all(math.dist(xy, to_xy(*k["geometry"]["coordinates"])) > DEDUPE_M for k in kept):
+            kept.append(f)
+    return sorted(kept, key=lambda f: f["properties"]["id"])
+
+
+def build(raw: dict) -> dict:
+    structures, coast, places = parse(raw)
+    if not coast.lines:
+        raise ValueError("no coastline in Overpass data")
+    feats = [c for s in structures if (c := build_candidate(s, coast, places)) is not None and in_bbox(c)]
+    return {"type": "FeatureCollection", "attribution": ATTRIBUTION, "features": dedupe(feats)}
+
+
+def check_marine(fc: dict, batch: int = 50) -> None:
+    """Mark probe_ok by asking Open-Meteo Marine for current wave height at each probe (Actions only)."""
+    feats = [f for f in fc["features"] if f["properties"]["probe_lat"] is not None]
+    for i in range(0, len(feats), batch):
+        chunk = feats[i : i + batch]
+        lats = ",".join(str(f["properties"]["probe_lat"]) for f in chunk)
+        lons = ",".join(str(f["properties"]["probe_lon"]) for f in chunk)
+        url = f"https://marine-api.open-meteo.com/v1/marine?latitude={lats}&longitude={lons}&current=wave_height"
+        with urllib.request.urlopen(url, timeout=60) as r:
+            data = json.load(r)
+        data = data if isinstance(data, list) else [data]
+        for f, d in zip(chunk, data):
+            f["properties"]["probe_ok"] = d.get("current", {}).get("wave_height") is not None
+
+
+def main(argv: list[str]) -> int:
+    src = Path(argv[1] if len(argv) > 1 else "data/osm/raw.json")
+    dst = Path(argv[2] if len(argv) > 2 else "data/spots.geojson")
+    fc = build(json.loads(src.read_text()))
+    if "--check-marine" in argv:
+        check_marine(fc)
+    dst.write_text(json.dumps(fc, ensure_ascii=False, indent=1) + "\n")
+    ok = sum(1 for f in fc["features"] if f["properties"]["probe_ok"])
+    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

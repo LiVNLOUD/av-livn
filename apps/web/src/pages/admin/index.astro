@@ -1,0 +1,155 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Mera yönetimi — av.livn">
+  <div class="wrap">
+    <h1>Mera yönetimi</h1>
+    <form id="login" class="stack">
+      <label>Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
+      <button type="submit">Giriş yap</button>
+    </form>
+    <p class="msg" id="msg" role="status"></p>
+
+    <section id="panel" hidden>
+      <h2>Mevcut meralar</h2>
+      <label>Düzenlenecek mera<select id="pick"></select></label>
+      <form id="edit" class="stack">
+        <label>Ad<input id="e-name" maxlength="80" required /></label>
+        <label>Lamba
+          <select id="e-light"><option value="">Bilinmiyor</option><option value="true">Var</option><option value="false">Yok</option></select>
+        </label>
+        <label>Durum
+          <select id="e-status"><option value="candidate">Doğrulanmadı</option><option value="verified">Sahada doğrulandı</option><option value="rejected">Elendi</option></select>
+        </label>
+        <label>Notlar<textarea id="e-notes" rows="3" maxlength="1000"></textarea></label>
+        <button type="submit">Değişiklikleri kaydet</button>
+      </form>
+
+      <h2>Yeni mera ekle</h2>
+      <form id="add" class="stack">
+        <label>Ad<input id="a-name" maxlength="80" required /></label>
+        <div class="two">
+          <label>Enlem<input id="a-lat" inputmode="decimal" required placeholder="40.3760" /></label>
+          <label>Boylam<input id="a-lon" inputmode="decimal" required placeholder="28.8830" /></label>
+        </div>
+        <label>Denize bakan yön (derece, 0 = kuzey)<input id="a-normal" inputmode="numeric" required placeholder="0" /></label>
+        <div class="two">
+          <label>Deniz noktası enlem<input id="a-plat" inputmode="decimal" placeholder="isteğe bağlı" /></label>
+          <label>Deniz noktası boylam<input id="a-plon" inputmode="decimal" placeholder="isteğe bağlı" /></label>
+        </div>
+        <button type="submit">Merayı ekle</button>
+      </form>
+    </section>
+  </div>
+</Base>
+
+<style>
+  h1 { font-size: 1.8rem; font-weight: 740; font-stretch: 80%; margin: 16px 0 12px; }
+  h2 { font-size: 1rem; margin: 26px 0 10px; }
+  .stack { display: grid; gap: 12px; margin-top: 12px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .msg { min-height: 1.5em; font-size: 0.9rem; }
+  .msg.err { color: var(--storm); }
+</style>
+
+<script>
+  type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null };
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const KEY = 'av-livn-admin';
+  let token = '';
+  try { token = sessionStorage.getItem(KEY) ?? ''; } catch {}
+  let spots: Spot[] = [];
+
+  function say(text: string, err = false) {
+    const m = $('msg');
+    m.textContent = text;
+    m.classList.toggle('err', err);
+  }
+
+  async function api(path: string, method: string, body: unknown) {
+    const r = await fetch(path, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) throw new Error('Anahtar geçersiz. Tekrar giriş yapın.');
+    if (r.status === 503) throw new Error('Yönetim kapalı: sunucuda ADMIN_TOKEN tanımlı değil.');
+    if (!r.ok) throw new Error(`Kaydedilmedi (${j.error ?? r.status}).`);
+    return j;
+  }
+
+  async function load() {
+    const b = await (await fetch('/api/spots')).json();
+    spots = b.spots;
+    $('pick').innerHTML = spots.map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
+    fill();
+  }
+
+  function fill() {
+    const s = spots.find((x) => x.id === $<HTMLSelectElement>('pick').value);
+    if (!s) return;
+    $<HTMLInputElement>('e-name').value = s.name;
+    $<HTMLSelectElement>('e-light').value = s.has_light === null ? '' : String(s.has_light);
+    $<HTMLSelectElement>('e-status').value = s.status;
+    $<HTMLTextAreaElement>('e-notes').value = s.notes ?? '';
+  }
+
+  function open() {
+    $('login').hidden = true;
+    $('panel').hidden = false;
+    load().catch(() => say('Meralar alınamadı.', true));
+  }
+
+  $('login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    token = $<HTMLInputElement>('token').value.trim();
+    try {
+      // Probe auth with an empty patch: 400 means the token is accepted.
+      await api('/api/admin/spots/_', 'PATCH', {}).catch((err: Error) => { if (!/empty_patch/.test(err.message)) throw err; });
+      try { sessionStorage.setItem(KEY, token); } catch {}
+      say('Giriş yapıldı.');
+      open();
+    } catch (err) {
+      say((err as Error).message, true);
+    }
+  });
+
+  $('pick').addEventListener('change', fill);
+
+  $('edit').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = $<HTMLSelectElement>('pick').value;
+    const light = $<HTMLSelectElement>('e-light').value;
+    try {
+      await api(`/api/admin/spots/${encodeURIComponent(id)}`, 'PATCH', {
+        name: $<HTMLInputElement>('e-name').value,
+        has_light: light === '' ? null : light === 'true',
+        status: $<HTMLSelectElement>('e-status').value,
+        notes: $<HTMLTextAreaElement>('e-notes').value || null,
+      });
+      say('Değişiklikler kaydedildi.');
+      await load();
+      $<HTMLSelectElement>('pick').value = id;
+      fill();
+    } catch (err) {
+      say((err as Error).message, true);
+    }
+  });
+
+  $('add').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const n = (id: string) => ($<HTMLInputElement>(id).value.trim() === '' ? null : Number($<HTMLInputElement>(id).value.replace(',', '.')));
+    try {
+      const r = await api('/api/admin/spots', 'POST', {
+        name: $<HTMLInputElement>('a-name').value, lat: n('a-lat'), lon: n('a-lon'), shore_normal_deg: n('a-normal'),
+        probe_lat: n('a-plat'), probe_lon: n('a-plon'),
+      });
+      say(`Mera eklendi. Hava verisi bir sonraki saatlik güncellemede gelir.`);
+      ($('add') as HTMLFormElement).reset();
+      await load();
+      $<HTMLSelectElement>('pick').value = r.spot.id;
+      fill();
+    } catch (err) {
+      say((err as Error).message, true);
+    }
+  });
+
+  if (token) open();
+</script>

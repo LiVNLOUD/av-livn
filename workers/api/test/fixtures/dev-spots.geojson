@@ -1,0 +1,130 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.8833,
+     40.3765
+    ]
+   },
+   "properties": {
+    "id": "dev-1",
+    "name": "Mudanya İskelesi",
+    "kind": "pier",
+    "shore_normal_deg": 0,
+    "probe_lat": 40.3832,
+    "probe_lon": 28.8833,
+    "probe_ok": true,
+    "length_m": 100,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": true,
+    "status": "candidate",
+    "place": "Mudanya"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.9601,
+     40.3592
+    ]
+   },
+   "properties": {
+    "id": "dev-2",
+    "name": "Güzelyalı Mendireği",
+    "kind": "breakwater",
+    "shore_normal_deg": 350,
+    "probe_lat": 40.366,
+    "probe_lon": 28.9585,
+    "probe_ok": true,
+    "length_m": 100,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Güzelyalı"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.0335,
+     40.417
+    ]
+   },
+   "properties": {
+    "id": "dev-3",
+    "name": "Kumla İskelesi",
+    "kind": "pier",
+    "shore_normal_deg": 160,
+    "probe_lat": 40.41,
+    "probe_lon": 29.036,
+    "probe_ok": true,
+    "length_m": 100,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": true,
+    "status": "candidate",
+    "place": "Kumla"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.793,
+     40.392
+    ]
+   },
+   "properties": {
+    "id": "dev-4",
+    "name": "Tirilye Mahmuzu",
+    "kind": "groyne",
+    "shore_normal_deg": 20,
+    "probe_lat": 40.3985,
+    "probe_lon": 28.796,
+    "probe_ok": true,
+    "length_m": 100,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": false,
+    "status": "candidate",
+    "place": "Tirilye"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.109,
+     40.423
+    ]
+   },
+   "properties": {
+    "id": "dev-5",
+    "name": "Narlı İskelesi",
+    "kind": "pier",
+    "shore_normal_deg": 200,
+    "probe_lat": null,
+    "probe_lon": null,
+    "probe_ok": false,
+    "length_m": 100,
+    "depth_200m": null,
+    "slope": null,
+    "has_light": null,
+    "status": "candidate",
+    "place": "Narlı"
+   }
+  }
+ ]
+}

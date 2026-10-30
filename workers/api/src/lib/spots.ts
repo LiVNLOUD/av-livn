@@ -1,0 +1,71 @@
+import type { SpotInput } from '@av-livn/scoring';
+import type { Snapshot } from './openmeteo';
+
+export interface SpotRow {
+  id: string;
+  name: string;
+  kind: string;
+  lat: number;
+  lon: number;
+  probe_lat: number | null;
+  probe_lon: number | null;
+  probe_ok: number | null;
+  shore_normal_deg: number | null;
+  length_m: number | null;
+  depth_200m: number | null;
+  slope: number | null;
+  has_light: number | null;
+  status: string;
+  place: string | null;
+  notes: string | null;
+  source: string;
+  wx_cell: string;
+  sea_cell: string | null;
+  admin_edited_at: string | null;
+  updated_at: string;
+}
+
+export const STATUSES = ['candidate', 'verified', 'rejected'] as const;
+
+export function toSpotInput(r: SpotRow): SpotInput {
+  return { lat: r.lat, lon: r.lon, shoreNormalDeg: r.shore_normal_deg, hasLight: r.has_light === null ? null : r.has_light === 1 };
+}
+
+export function publicSpot(r: SpotRow) {
+  return {
+    id: r.id,
+    name: r.name,
+    kind: r.kind,
+    status: r.status,
+    place: r.place,
+    lat: r.lat,
+    lon: r.lon,
+    probe: r.probe_lat === null || r.probe_lon === null ? null : { lat: r.probe_lat, lon: r.probe_lon },
+    shore_normal_deg: r.shore_normal_deg,
+    length_m: r.length_m,
+    depth_200m: r.depth_200m,
+    has_light: r.has_light === null ? null : r.has_light === 1,
+    notes: r.notes,
+    source: r.source,
+  };
+}
+
+export function haversineKm(aLat: number, aLon: number, bLat: number, bLon: number): number {
+  const rad = Math.PI / 180;
+  const dLat = (bLat - aLat) * rad;
+  const dLon = (bLon - aLon) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(aLat * rad) * Math.cos(bLat * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+
+export async function loadSnapshots(db: D1Database, ids: string[]): Promise<Map<string, { snap: Snapshot; fetched_at: string }>> {
+  const out = new Map<string, { snap: Snapshot; fetched_at: string }>();
+  const uniq = [...new Set(ids)];
+  if (uniq.length === 0) return out;
+  const { results } = await db
+    .prepare(`SELECT cell_id, fetched_at, json FROM forecast_snapshots WHERE cell_id IN (${uniq.map((_, i) => `?${i + 1}`).join(',')})`)
+    .bind(...uniq)
+    .all<{ cell_id: string; fetched_at: string; json: string }>();
+  for (const r of results) out.set(r.cell_id, { snap: JSON.parse(r.json) as Snapshot, fetched_at: r.fetched_at });
+  return out;
+}

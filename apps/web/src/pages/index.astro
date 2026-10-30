@@ -1,39 +1,74 @@
 ---
-const year = new Date().getFullYear();
+import Base from '../layouts/Base.astro';
 ---
-<!doctype html>
-<html lang="tr" data-theme="dark" data-app="av-livn">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b1620" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>av.livn — Gemlik–Mudanya LRF</title>
-  </head>
-  <body>
-    <main>
-      <p class="tag">Gemlik · Mudanya · LRF</p>
-      <h1>Merhaba, deniz.</h1>
-      <p>Av öncesi asistanı kuruluyor. Mera puanları yakında burada.</p>
-      <p class="status">API: <span id="api">kontrol ediliyor…</span></p>
-    </main>
-    <footer>© {year} livn.tr</footer>
-    <script>
-      const el = document.getElementById('api')!;
-      fetch('/api/health')
-        .then((r) => r.json())
-        .then((b) => (el.textContent = b.ok ? 'çalışıyor' : 'hata'))
-        .catch(() => (el.textContent = 'ulaşılamıyor'));
-    </script>
-    <style is:global>
-      :root { color-scheme: dark; --bg: #0b1620; --fg: #e4eef2; --muted: #8aa3ad; --accent: #5fd3c4; }
-      body { margin: 0; min-height: 100dvh; display: grid; grid-template-rows: 1fr auto; background: var(--bg); color: var(--fg);
-        font: 16px/1.5 system-ui, sans-serif; }
-      main { padding: 2rem 1rem; max-width: 36rem; margin: auto; }
-      h1 { font-size: 2.2rem; margin: .25rem 0 1rem; }
-      .tag { color: var(--accent); letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; margin: 0; }
-      .status { color: var(--muted); }
-      footer { padding: 1rem; color: var(--muted); font-size: .8rem; text-align: center; }
-    </style>
-  </body>
-</html>
+<Base title="av.livn — Gemlik–Mudanya mera puanları">
+  <section class="wrap intro">
+    <h1>Bu gece nereye?</h1>
+    <p class="muted" id="meta">Meralar yükleniyor…</p>
+  </section>
+  <section class="wrap">
+    <ol class="spots" id="spots" aria-live="polite"></ol>
+    <p class="empty muted" id="empty" hidden></p>
+  </section>
+</Base>
+
+<style>
+  .intro { padding-top: 18px; padding-bottom: 10px; }
+  h1 { margin: 0; font-size: clamp(2rem, 9vw, 2.9rem); line-height: 1.02; font-weight: 750; font-stretch: 78%; letter-spacing: -0.02em; }
+  .intro p { margin: 8px 0 0; font-size: 0.92rem; }
+  .spots { list-style: none; margin: 8px 0 0; padding: 0; }
+  :global(.spot) {
+    display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: center;
+    padding: 12px 0; border-top: 1px solid var(--swell); text-decoration: none;
+  }
+  :global(.spot:last-child) { border-bottom: 1px solid var(--swell); }
+  :global(.spot h2) { margin: 0; font-size: 1.06rem; font-weight: 620; line-height: 1.25; }
+  :global(.spot .sub) { margin: 2px 0 0; font-size: 0.84rem; color: var(--mist); }
+  :global(.spot .why) { margin: 3px 0 0; font-size: 0.84rem; }
+  .empty { padding: 24px 0; }
+</style>
+
+<script>
+  import { esc, fmtAgo, KIND_TR, lamp } from '../scripts/format';
+
+  type Spot = {
+    id: string; name: string; kind: string; status: string; place: string | null; has_light: boolean | null;
+    score: { total: number | null; gated: boolean; warnings: string[]; missing: string[] };
+  };
+
+  const list = document.getElementById('spots')!;
+  const meta = document.getElementById('meta')!;
+  const empty = document.getElementById('empty')!;
+
+  function render(spots: Spot[], fetchedAt: string | null) {
+    meta.textContent = `${spots.length} mera, şu anki puana göre sıralı. ${fmtAgo(fetchedAt)}.`;
+    if (spots.length === 0) {
+      empty.hidden = false;
+      empty.textContent = 'Henüz mera yok. Aday meralar OpenStreetMap verisinden ayda bir eklenir.';
+      return;
+    }
+    list.innerHTML = spots
+      .map((s) => {
+        const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
+        const why = s.score.gated
+          ? `<p class="why warn">${esc(s.score.warnings[0])}</p>`
+          : s.score.missing.length
+            ? `<p class="why muted">Eksik veri: ${s.score.missing.length} bileşen</p>`
+            : '';
+        return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}">
+          <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
+          <span><h2>${esc(s.name)}</h2><p class="sub">${esc(sub)}</p>${why}</span></a></li>`;
+      })
+      .join('');
+    list.querySelectorAll<HTMLElement>('.lamp').forEach((el) =>
+      lamp(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'),
+    );
+  }
+
+  fetch('/api/spots')
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    .then((b: { spots: Spot[]; data_fetched_at: string | null }) => render(b.spots, b.data_fetched_at))
+    .catch(() => {
+      meta.textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.';
+    });
+</script>

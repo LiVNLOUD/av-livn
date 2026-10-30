@@ -1,0 +1,83 @@
+@import '@fontsource-variable/bricolage-grotesque';
+
+:root {
+  color-scheme: dark;
+  --sea: #0e1c27;        /* night sea: page */
+  --deep: #0a151e;       /* deeper water: chart well, inputs */
+  --swell: #1b2e3b;      /* lines, separators */
+  --foam: #dbe6ea;       /* primary text */
+  --mist: #8ba2ad;       /* secondary text */
+  --sodium: #f5a83c;     /* harbour sodium lamp: the one accent */
+  --sodium-dim: #7a5a2c;
+  --storm: #ef6a55;      /* safety warnings only */
+  --radius: 10px;
+  --gutter: 16px;
+  font-family: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--sea); }
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: var(--sea);
+  color: var(--foam);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--sodium); outline-offset: 2px; border-radius: 4px; }
+.wrap { width: 100%; max-width: 44rem; margin: 0 auto; padding: 0 var(--gutter); }
+.muted { color: var(--mist); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+header.site { padding: 14px 0 6px; }
+header.site .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+header.site a.brand { text-decoration: none; font-weight: 700; font-size: 1.05rem; font-stretch: 85%; letter-spacing: -0.01em; }
+header.site a.brand span { color: var(--sodium); }
+header.site .species { color: var(--mist); font-size: 0.9rem; }
+
+footer.site { padding: 28px 0 32px; color: var(--mist); font-size: 0.78rem; line-height: 1.6; }
+footer.site p { margin: 0 0 4px; max-width: 60ch; }
+
+/* Lamp: the score as a sodium glow whose strength follows the score. */
+.lamp {
+  --s: 0; /* 0..1 */
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--size, 52px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-weight: 700;
+  font-stretch: 80%;
+  font-size: calc(var(--size, 52px) * 0.42);
+  color: color-mix(in oklab, var(--sodium) calc(35% + var(--s) * 65%), var(--mist));
+  background: radial-gradient(circle at 50% 50%,
+    color-mix(in oklab, var(--sodium) calc(var(--s) * 38%), transparent) 0%,
+    transparent 70%);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--sodium) calc(15% + var(--s) * 60%), transparent);
+}
+.lamp.gated { color: var(--storm); box-shadow: inset 0 0 0 1.5px var(--storm); background: none; }
+.lamp.none { color: var(--mist); box-shadow: inset 0 0 0 1.5px var(--swell); background: none; }
+
+.warn { color: var(--storm); }
+.tag { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 0.75rem; line-height: 1.6; border: 1px solid var(--swell); color: var(--mist); }
+
+button, .button {
+  font: inherit; font-weight: 600; color: var(--sea); background: var(--sodium);
+  border: 0; border-radius: var(--radius); padding: 10px 16px; cursor: pointer;
+}
+button.ghost { background: transparent; color: var(--foam); border: 1px solid var(--swell); }
+input, select, textarea {
+  font: inherit; color: var(--foam); background: var(--deep); border: 1px solid var(--swell);
+  border-radius: 8px; padding: 9px 11px; width: 100%;
+}
+label { display: grid; gap: 4px; font-size: 0.9rem; color: var(--mist); }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

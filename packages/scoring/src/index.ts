@@ -1,5 +1,10 @@
-/** Clamp a number into [0, 1]. Shared helper for all score components. */
-export function clamp01(x: number): number {
-  if (Number.isNaN(x)) return 0;
-  return Math.min(1, Math.max(0, x));
-}
+export * from './types';
+export { scoreAt, scoreSeries, safetyGate, assertScorable, indexSeries, COMPONENTS } from './engine';
+export { windValue, waveValue } from './components/windWave';
+export { moonValue } from './components/moon';
+export { nightWindowValue, lightFactor } from './components/nightLight';
+export { pressureValue } from './components/pressure';
+export { sstLevel, sstTrend } from './components/sst';
+export { currentValue } from './components/current';
+export { clamp01, angleDiff, hourKey, localParts, nextLocalMidnight, TZ_OFFSET_MIN } from './util';
+export { PROFILES, getProfile } from './profiles';

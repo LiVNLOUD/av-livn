@@ -14,4 +14,8 @@
 - Oturumdan deploy yok; R2 kullanılmıyor
 
 ## F0.2 — Copernicus doğrulaması
-- `copernicus-check.yml` (describe + 1 günlük yüzey subset'i)
+- `copernicus-check.yml` ✅: kimlik geçerli; tem/cur/sal dataset'leri erişilebilir (BLKSEA_ANALYSISFORECAST_PHY_007_001, v202311)
+- 2026-10-29 yüzey subset'i: 42×80 grid, 36 KB, thetao 17.2–18.6 °C, %61 kara (NaN)
+- `cmems_mod_blk_phy_anfc_mrm-500m_staticbathy` bulunamadı → F2'de doğru statik ID aranacak
+
+## F1 — MVP (bkz. ROADMAP)
