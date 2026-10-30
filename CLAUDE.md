@@ -32,7 +32,7 @@ node scripts/ui-smoke.mjs http://localhost:8787 docs/screenshots
 - R2 kullanılmaz: PMTiles static asset, oşinografi özetleri D1'de.
 - Copernicus kimliği yalnız Actions secrets'ta. Oturumda yok; F3 kodu mock veriyle test edilir.
 - Ücretsiz katman: cron hesap başına 5 (4'ü kullanılıyor: `src/cron.ts` CRON_FETCH/CRON_SCORE, `wrangler.toml` ile aynı olmalı), çağrı başına CPU ~10 ms. Puanlar cron'da önceden hesaplanır; API yalnız okur. netCDF/GDAL işleri yalnız GitHub Actions'ta (pipeline/) çalışır.
-- Overpass API'ye konteynerden erişilemiyor. OSM çekimi Actions'ta yapılır (`spots.yml`).
+- Overpass API'ye konteynerden erişilemiyor. OSM çekimi Actions'ta yapılır (`geodata.yml`).
 - Tür profilleri `data/species/*.yaml`; değiştirince `npm run species -w packages/scoring` (senkron testi var).
 - Birim: km/sa (Türkçe "km/s" saniye demektir).
 

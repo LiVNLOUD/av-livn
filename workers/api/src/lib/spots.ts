@@ -14,6 +14,12 @@ export interface SpotRow {
   length_m: number | null;
   depth_200m: number | null;
   slope: number | null;
+  slope_pct?: number | null;
+  max_depth_100m?: number | null;
+  profile_json?: string | null;
+  probe_source?: string | null;
+  normal_source?: string | null;
+  osm_normal_deg?: number | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -44,6 +50,10 @@ export function publicSpot(r: SpotRow) {
     shore_normal_deg: r.shore_normal_deg,
     length_m: r.length_m,
     depth_200m: r.depth_200m,
+    slope_pct: r.slope_pct ?? null,
+    max_depth_100m: r.max_depth_100m ?? null,
+    probe_source: r.probe_source ?? null,
+    normal_source: r.normal_source ?? null,
     has_light: r.has_light === null ? null : r.has_light === 1,
     notes: r.notes,
     source: r.source,
@@ -68,4 +78,9 @@ export async function loadSnapshots(db: D1Database, ids: string[]): Promise<Map<
     .all<{ cell_id: string; fetched_at: string; json: string }>();
   for (const r of results) out.set(r.cell_id, { snap: JSON.parse(r.json) as Snapshot, fetched_at: r.fetched_at });
   return out;
+}
+
+/** Spot with its 0–500 m depth profile (detail endpoint only; the list stays small). */
+export function publicSpotDetail(r: SpotRow) {
+  return { ...publicSpot(r), profile: r.profile_json ? (JSON.parse(r.profile_json) as (number | null)[]) : null };
 }

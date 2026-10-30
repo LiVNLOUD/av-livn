@@ -3,7 +3,7 @@ name = "av-pipeline"
 version = "0.0.0"
 description = "Offline data pipeline for av-livn (OSM spots, bathymetry, CMEMS). Runs in GitHub Actions."
 requires-python = ">=3.11"
-dependencies = ["shapely>=2.0"]
+dependencies = ["shapely>=2.0", "numpy>=1.26", "netCDF4>=1.6"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

@@ -57,6 +57,27 @@ await page.screenshot({ path: `${out}/f1-5-night-390.png`, fullPage: true });
 if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) fail('horizontal overflow on spot');
 await page.locator('#chart').screenshot({ path: `${out}/f1-chart-390.png` });
 
+// Depth profile (F2): visible when the spot has DTM data.
+if (await page.locator('#depth:not([hidden]) svg').count()) {
+  const db = await page.locator('#depth').boundingBox();
+  await page.screenshot({ path: `${out}/f2-profile-390.png`, clip: { x: 0, y: db.y, width: 390, height: db.height }, fullPage: true });
+  console.log('depth profile:', await page.locator('#depth-note').textContent());
+} else console.log('depth profile: not available for this spot');
+
+// Map (F2): tiles + spots render, focused card opens from ?id=.
+await page.goto(base + `/harita/?id=${encodeURIComponent(spotId)}`, { waitUntil: 'networkidle' });
+await page.waitForSelector('#map[data-ready]', { timeout: 20000 });
+await page.waitForTimeout(1500);
+if (!(await page.locator('#map canvas').count())) fail('map canvas missing');
+if (await page.locator('#card').isHidden()) fail('spot card not shown for ?id=');
+console.log('map spots:', await page.locator('#map').getAttribute('data-ready'), '| card:', (await page.locator('#card h2').textContent()) ?? '');
+await page.screenshot({ path: `${out}/f2-map-390.png` });
+await page.locator('.legend summary').click();
+await page.goto(base + '/harita/', { waitUntil: 'networkidle' });
+await page.waitForSelector('#map[data-ready]', { timeout: 20000 });
+await page.waitForTimeout(1500);
+await page.screenshot({ path: `${out}/f2-map-overview-390.png` });
+
 await page.goto(base + '/mera/?id=yok', { waitUntil: 'networkidle' });
 const nf = await page.locator('h1').textContent();
 if (!/bulunamadı/.test(nf)) fail('404 spot message missing');

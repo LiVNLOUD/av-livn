@@ -19,7 +19,7 @@ Her fazın sonunda testler yeşil, deploy canlı, PROGRESS.md güncel olur ve 5 
 - [x] `copernicus-check.yml`
 
 ## F1 — MVP
-- [x] Overpass aday meralar: `spots.yml` (Actions, elle tetikleme + aylık) → `data/spots.geojson` doğrudan main'e commit → deploy tetiklenir. Her aday `status: candidate`
+- [x] Overpass aday meralar: `geodata.yml` (Actions, elle tetikleme + aylık) → `data/spots.geojson` doğrudan main'e commit → deploy tetiklenir. Her aday `status: candidate`
 - [x] Kıyı normali (OSM coastline, kara solda), `sea_probe` (750/1000/500 m), Open-Meteo Marine ile probe kontrolü
 - [x] D1: spots, cells, forecast_snapshots (hücre başına tek satır), observations (hücre × saat)
 - [x] Saatlik cron (`7 * * * *`): Open-Meteo Forecast + Marine, hücre başına çoklu koordinat, kind başına 1 istek
@@ -29,8 +29,19 @@ Her fazın sonunda testler yeşil, deploy canlı, PROGRESS.md güncel olur ve 5 
 - [x] Mobil (390 px) Playwright smoke: `scripts/ui-smoke.mjs`, ekran görüntüleri `docs/screenshots/`
 - Derinlik/eğim (`depth_200m`, `slope`) F2'ye kaldı (EMODnet DTM ile)
 
+## F1.1–F1.5 — Düzeltmeler
+- [x] Gece çarpanı modeli (tam gece / alacakaranlık / gündüz, lambasız ×0.75), ağırlıklar 27/20/13/13/13/14
+- [x] Puanlar cron'da önceden hesaplanır (`spot_scores`), cron 4'e bölündü, API yalnız okur
+- [x] Sürümlü service worker, `_headers` (HTML/SW no-cache, `_astro` immutable)
+- [x] `docs/spots-review.md`, admin ping + deploy'da admin kontrolü
+- [x] Koşul uygunluğu motordan (`conditionsAt`), 3 renk + gri, WCAG ≥ 4.5:1 testi
+
 ## F2 — Dip haritası
-EMODnet DTM (ERDDAP netCDF) + CMEMS statik batimetri (doğru dataset ID'si bulunacak; `cmems_mod_blk_phy_anfc_mrm-500m_staticbathy` mevcut değil) → gdal_contour (5,10,15,20,30,50,75,100 m) → tippecanoe → PMTiles → Workers static asset (dosya başına ≤25 MiB; aşarsa raporlanır) → MapLibre katmanı. Kıyı çizgisi + iskeleler. Mera kartında normal boyunca derinlik profili.
+- [x] EMODnet DTM 2024 (ERDDAP, ~115 m) → `gdal_contour` (2…100 m) + derinlik bantları + kara maskesi → tek PMTiles (~0.2 MB), static asset
+- [x] Copernicus Marmara 500 m statik batimetri ID'si `geodata.yml`'de aranır ve EMODnet'le karşılaştırılır (bulunamazsa yalnız EMODnet)
+- [x] Mera özellikleri: DTM'den kıyı normali (en hızlı derinleşen yön), deniz noktası, `depth_200m`, `slope_pct` (0–300 m), `max_depth_100m`, 0–500 m profil
+- [x] `/harita/`: MapLibre + PMTiles (bellekten okunur, Range gerekmez), meralar puan rengiyle, kart, lejant
+- [x] Mera sayfasında derinlik profili grafiği
 
 ## F3 — Oşinografi
 Copernicus Marmara 500 m günlük (Actions, `copernicusmarine` toolbox; dataset ID'leri `describe` ile doğrulanır) → mera başına 0/5/10/20 m sıcaklık, akıntı, tuzluluk → doğrudan D1 `ocean_daily` (Actions'ta `wrangler d1 execute --remote --file`). Modüller `pipeline/av_pipeline/ocean/`: `fetch.py` (yalnız Actions), `summarize.py` (saf: xarray Dataset + probe noktaları → özet), `emit_sql.py` (UPSERT). Oturumda sentetik xarray fixture'larıyla test edilir. Puanda SST trendi ve akıntı için öncelikli kaynak.

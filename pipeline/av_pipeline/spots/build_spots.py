@@ -5,7 +5,11 @@ The shore normal comes from the nearest coastline segment: OSM coastlines have l
 seaward normal is the segment bearing + 90°. A `sea_probe` point is placed 750 m along the normal
 (fallback 1000 m, then 500 m) and must lie on the sea side of the coastline.
 
-Usage: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson [--check-marine]
+With --dtm, depth features come from the EMODnet DTM (profile 0–500 m along the normal, depth at 200 m,
+0–300 m slope, max depth within 100 m) and spots without a coastline-based probe get the first DTM point
+along the normal that is ≥ 5 m deep.
+
+Usage: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson [--check-marine] [--dtm data/bathy/dtm.nc]
 """
 
 from __future__ import annotations
@@ -21,6 +25,8 @@ from shapely.geometry import LineString, Point
 from shapely.ops import nearest_points
 
 from av_pipeline import BBOX
+from av_pipeline.bathy.grid import Grid
+from av_pipeline.bathy.sample import dtm_normal, dtm_probe, features, sea_probe
 from av_pipeline.spots.geo import bearing, offset, to_lonlat, to_xy
 
 KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
@@ -94,7 +100,7 @@ def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
     return min(named, key=lambda p: math.dist(p["xy"], xy))["name"]
 
 
-def build_candidate(s: dict, coast: Coast, places: list[dict]) -> dict | None:
+def build_candidate(s: dict, coast: Coast, places: list[dict], grid: Grid | None = None) -> dict | None:
     line = LineString(s["xy"])
     if line.length < MIN_LENGTH_M:
         return None
@@ -127,8 +133,13 @@ def build_candidate(s: dict, coast: Coast, places: list[dict]) -> dict | None:
         "probe_lat": None,
         "probe_lon": None,
         "probe_ok": None,
+        "probe_source": None,
+        "normal_source": "osm",
+        "osm_normal_deg": round(normal, 1),
         "depth_200m": None,
-        "slope": None,
+        "slope_pct": None,
+        "max_depth_100m": None,
+        "profile": None,
         "has_light": None,
         "status": "candidate",
         "place": place,
@@ -136,7 +147,18 @@ def build_candidate(s: dict, coast: Coast, places: list[dict]) -> dict | None:
     }
     if probe is not None:
         plon, plat = to_lonlat(probe.x, probe.y)
-        props.update(probe_lat=round(plat, 5), probe_lon=round(plon, 5))
+        props.update(probe_lat=round(plat, 5), probe_lon=round(plon, 5), probe_source="normal")
+    if grid is not None:
+        # OSM harbour coastlines are jagged and some piers run along the shore; where the DTM shows water,
+        # the direction in which it deepens fastest is the more reliable seaward normal.
+        if (dn := dtm_normal(grid, lat, lon)) is not None:
+            normal = dn[0]
+            props.update(shore_normal_deg=round(normal, 1), normal_source="dtm")
+            if (p := sea_probe(grid, lat, lon, normal)) is not None:
+                props.update(probe_lat=round(p[0], 5), probe_lon=round(p[1], 5), probe_source="dtm")
+        elif props["probe_lat"] is None and (p := dtm_probe(grid, lat, lon, normal)) is not None:
+            props.update(probe_lat=round(p[0], 5), probe_lon=round(p[1], 5), probe_source="dtm")
+        props.update(features(grid, lat, lon, normal))
     return {"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]}, "properties": props}
 
 
@@ -155,11 +177,11 @@ def dedupe(features: list[dict]) -> list[dict]:
     return sorted(kept, key=lambda f: f["properties"]["id"])
 
 
-def build(raw: dict) -> dict:
+def build(raw: dict, grid: Grid | None = None) -> dict:
     structures, coast, places = parse(raw)
     if not coast.lines:
         raise ValueError("no coastline in Overpass data")
-    feats = [c for s in structures if (c := build_candidate(s, coast, places)) is not None and in_bbox(c)]
+    feats = [c for s in structures if (c := build_candidate(s, coast, places, grid)) is not None and in_bbox(c)]
     return {"type": "FeatureCollection", "attribution": ATTRIBUTION, "features": dedupe(feats)}
 
 
@@ -181,12 +203,15 @@ def check_marine(fc: dict, batch: int = 50) -> None:
 def main(argv: list[str]) -> int:
     src = Path(argv[1] if len(argv) > 1 else "data/osm/raw.json")
     dst = Path(argv[2] if len(argv) > 2 else "data/spots.geojson")
-    fc = build(json.loads(src.read_text()))
+    grid = Grid.from_netcdf(argv[argv.index("--dtm") + 1]) if "--dtm" in argv else None
+    fc = build(json.loads(src.read_text()), grid)
     if "--check-marine" in argv:
         check_marine(fc)
     dst.write_text(json.dumps(fc, ensure_ascii=False, indent=1) + "\n")
     ok = sum(1 for f in fc["features"] if f["properties"]["probe_ok"])
-    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe")
+    dtm = sum(1 for f in fc["features"] if f["properties"]["probe_source"] == "dtm")
+    none = sum(1 for f in fc["features"] if f["properties"]["probe_lat"] is None)
+    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe, {dtm} probes from DTM, {none} without probe")
     return 0
 
 

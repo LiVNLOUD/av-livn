@@ -10,9 +10,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@av-livn/scoring": "*",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "astro": "7.3.8",
-    "@av-livn/scoring": "*"
+    "maplibre-gl": "^6.16.0",
+    "pmtiles": "^4.5.0"
   },
   "devDependencies": {
     "vitest": "5.0.5"

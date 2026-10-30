@@ -9,7 +9,7 @@ export const SPOTS: SpotFeature[] = [
     geometry: { type: 'Point', coordinates: [28.883, 40.376] },
     properties: {
       id: 'osm-way-1', name: 'Mudanya İskelesi', kind: 'pier', shore_normal_deg: 0, probe_lat: 40.383, probe_lon: 28.883,
-      probe_ok: true, length_m: 120, depth_200m: null, slope: null, has_light: null, status: 'candidate', place: 'Mudanya',
+      probe_ok: true, length_m: 120, depth_200m: 8.5, slope_pct: 3.1, max_depth_100m: 5.2, profile: [1, 2.5, 4, 5.5, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.4, 11, 11.5, 12, 12.5, 13, 13.4, 14, 14.5], probe_source: 'dtm', normal_source: 'dtm', osm_normal_deg: 52, has_light: null, status: 'candidate', place: 'Mudanya',
     },
   },
   {
@@ -17,7 +17,7 @@ export const SPOTS: SpotFeature[] = [
     geometry: { type: 'Point', coordinates: [29.03, 40.36] },
     properties: {
       id: 'osm-way-2', name: "Kumla'nın Mendireği", kind: 'breakwater', shore_normal_deg: 200, probe_lat: 40.353, probe_lon: 29.027,
-      probe_ok: false, length_m: 80, depth_200m: null, slope: null, has_light: null, status: 'candidate', place: 'Kumla',
+      probe_ok: false, length_m: 80, depth_200m: null, slope_pct: null, has_light: null, status: 'candidate', place: 'Kumla',
     },
   },
   {
@@ -25,7 +25,7 @@ export const SPOTS: SpotFeature[] = [
     geometry: { type: 'Point', coordinates: [28.95, 40.42] },
     properties: {
       id: 'osm-way-3', name: 'Probsuz', kind: 'groyne', shore_normal_deg: null, probe_lat: null, probe_lon: null,
-      probe_ok: null, length_m: 30, depth_200m: null, slope: null, has_light: null, status: 'candidate', place: null,
+      probe_ok: null, length_m: 30, depth_200m: null, slope_pct: null, has_light: null, status: 'candidate', place: null,
     },
   },
 ];

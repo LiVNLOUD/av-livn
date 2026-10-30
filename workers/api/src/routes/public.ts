@@ -3,7 +3,7 @@ import { getProfile, type SpeciesProfile } from '@av-livn/scoring';
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { cachedJson } from '../lib/cache';
-import { publicSpot, type SpotRow } from '../lib/spots';
+import { publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
 import type { Detail } from '../precompute';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
@@ -65,7 +65,7 @@ publicRoutes.get('/spots/:id', (c) =>
     return c.json({
       ok: true,
       species: { id: profile.id, name: profile.name, weights: profile.weights },
-      spot: publicSpot(r),
+      spot: publicSpotDetail(r),
       data: detail?.meta ?? { computed_at: null, weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, conditions: [] },
       scores: detail ? detail.hours.slice(from, from + hours) : [],
     });

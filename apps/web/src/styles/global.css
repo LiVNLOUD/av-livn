@@ -45,7 +45,9 @@ header.site { padding: 14px 0 6px; }
 header.site .wrap { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 header.site a.brand { text-decoration: none; font-weight: 700; font-size: 1.05rem; font-stretch: 85%; letter-spacing: -0.01em; }
 header.site a.brand span { color: var(--sodium); }
-header.site .species { color: var(--mist); font-size: 0.9rem; }
+header.site nav { display: flex; gap: 4px; }
+header.site nav a { text-decoration: none; color: var(--mist); font-size: 0.92rem; padding: 4px 10px; border-radius: 999px; }
+header.site nav a[aria-current='page'] { color: var(--foam); background: var(--swell); }
 
 footer.site { padding: 28px 0 32px; color: var(--mist); font-size: 0.78rem; line-height: 1.6; }
 footer.site p { margin: 0 0 4px; max-width: 60ch; }
@@ -84,7 +86,7 @@ footer.site p { margin: 0 0 4px; max-width: 60ch; }
 .tag { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 0.75rem; line-height: 1.6; border: 1px solid var(--swell); color: var(--mist); }
 
 button, .button {
-  font: inherit; font-weight: 600; color: var(--sea); background: var(--sodium);
+  font: inherit; font-weight: 600; color: var(--sea); background: var(--foam);
   border: 0; border-radius: var(--radius); padding: 10px 16px; cursor: pointer;
 }
 button.ghost { background: transparent; color: var(--foam); border: 1px solid var(--swell); }

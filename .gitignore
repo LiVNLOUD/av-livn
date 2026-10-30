@@ -11,6 +11,6 @@ __pycache__/
 .pytest_cache/
 *.nc
 *.tif
-*.pmtiles
+
 *.egg-info/
 data/osm/

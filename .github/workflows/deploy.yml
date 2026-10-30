@@ -19,6 +19,16 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Which secrets are visible (names only, values never printed)
+        env:
+          S_CF: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+          S_ACC: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          S_ADMIN: ${{ secrets.ADMIN_TOKEN != '' }}
+        run: |
+          echo "CLOUDFLARE_API_TOKEN set: $S_CF"
+          echo "CLOUDFLARE_ACCOUNT_ID set: $S_ACC"
+          echo "ADMIN_TOKEN set: $S_ADMIN"
+          [ "$S_ADMIN" = true ] || echo "::warning::ADMIN_TOKEN repo secret is not visible to this workflow; admin API stays disabled (503)"
       - run: npm ci
       - run: npm test
       - run: npm run typecheck

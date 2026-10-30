@@ -13,7 +13,12 @@ export interface SpotFeature {
     probe_ok: boolean | null;
     length_m?: number | null;
     depth_200m: number | null;
-    slope: number | null;
+    slope_pct?: number | null;
+    max_depth_100m?: number | null;
+    profile?: (number | null)[] | null;
+    probe_source?: string | null;
+    normal_source?: string | null;
+    osm_normal_deg?: number | null;
     has_light: boolean | null;
     status: string;
     place?: string | null;
@@ -74,13 +79,19 @@ export function seedSql(fc: { features: SpotFeature[] }, now: string): string {
   for (const c of cells) {
     out.push(`INSERT INTO cells (id, kind, lat, lon) VALUES (${sql(c.id)}, ${sql(c.kind)}, ${sql(c.lat)}, ${sql(c.lon)}) ON CONFLICT(id) DO UPDATE SET lat = excluded.lat, lon = excluded.lon;`);
   }
-  const cols = ['id', 'name', 'kind', 'lat', 'lon', 'probe_lat', 'probe_lon', 'probe_ok', 'shore_normal_deg', 'length_m', 'depth_200m', 'slope', 'has_light', 'status', 'place', 'source', 'wx_cell', 'sea_cell', 'updated_at'];
+  const cols = [
+    'id', 'name', 'kind', 'lat', 'lon', 'probe_lat', 'probe_lon', 'probe_ok', 'shore_normal_deg', 'length_m', 'depth_200m', 'slope_pct',
+    'max_depth_100m', 'profile_json', 'probe_source', 'normal_source', 'osm_normal_deg', 'has_light', 'status', 'place', 'source', 'wx_cell', 'sea_cell', 'updated_at',
+  ];
   const geoCols = cols.filter((c) => c !== 'id' && !(FIELD_FROM_ADMIN as readonly string[]).includes(c));
   for (const f of fc.features) {
     const p = f.properties;
     const [lon, lat] = f.geometry.coordinates;
     const cell = bySpot.get(p.id)!;
-    const vals = [p.id, p.name, p.kind, lat, lon, p.probe_lat, p.probe_lon, p.probe_ok, p.shore_normal_deg, p.length_m, p.depth_200m, p.slope, p.has_light, p.status, p.place, 'osm', cell.wx, cell.sea, now];
+    const vals = [
+      p.id, p.name, p.kind, lat, lon, p.probe_lat, p.probe_lon, p.probe_ok, p.shore_normal_deg, p.length_m, p.depth_200m, p.slope_pct,
+      p.max_depth_100m, p.profile ? JSON.stringify(p.profile) : null, p.probe_source, p.normal_source, p.osm_normal_deg, p.has_light, p.status, p.place, 'osm', cell.wx, cell.sea, now,
+    ];
     const set = [
       ...geoCols.map((c) => `${c} = excluded.${c}`),
       ...FIELD_FROM_ADMIN.filter((c) => c !== 'notes').map((c) => `${c} = CASE WHEN spots.admin_edited_at IS NULL THEN excluded.${c} ELSE spots.${c} END`),

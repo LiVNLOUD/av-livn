@@ -1,0 +1,56 @@
+name: geodata
+# OSM candidate spots + EMODnet DTM depth features + contour PMTiles. Commits straight to main, then deploys.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 1 * *' # monthly refresh
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: geodata
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    env:
+      COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUSMARINE_SERVICE_USERNAME }}
+      COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUSMARINE_SERVICE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: GDAL (CLI only; PMTiles driver needs ≥ 3.8)
+        run: sudo apt-get update -q && sudo apt-get install -y -q gdal-bin && gdalinfo --version && ogrinfo --formats | grep -i pmtiles
+      - run: pip install -e './pipeline[dev]' copernicusmarine xarray
+      - run: pytest pipeline
+      - name: EMODnet DTM 2024 (ERDDAP)
+        run: python -m av_pipeline.bathy.fetch_dtm data/bathy/dtm.nc
+      - name: Copernicus Marmara 500 m static bathymetry (find ID, compare; never blocks)
+        run: python -m av_pipeline.ocean.static_bathy data/bathy/dtm.nc
+      - name: Contours → PMTiles
+        run: python -m av_pipeline.bathy.contours data/bathy/dtm.nc apps/web/public/tiles/bathy.pmtiles
+      - name: Fetch OSM (Overpass)
+        run: python -m av_pipeline.spots.fetch_osm data/osm/raw.json
+      - name: Build candidate spots with depth features
+        run: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson --check-marine --dtm data/bathy/dtm.nc
+      - name: Commit to main if changed
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: refresh spots, depth features and bathymetry tiles"
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Trigger deploy (GITHUB_TOKEN pushes do not trigger workflows)
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

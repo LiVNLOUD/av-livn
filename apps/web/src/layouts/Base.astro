@@ -19,14 +19,17 @@ const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatl
     <header class="site">
       <div class="wrap">
         <a class="brand" href="/">av<span>.</span>livn</a>
-        <span class="species">İstavrit, lamba altında</span>
+        <nav aria-label="Ana menü">
+          <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>Liste</a>
+          <a href="/harita/" aria-current={Astro.url.pathname.startsWith('/harita') ? 'page' : undefined}>Harita</a>
+        </nav>
       </div>
     </header>
     <main><slot /></main>
     <footer class="site">
       <div class="wrap">
         <p>Puan kural tabanlıdır (v1.1) ve sahada kalibre edilecektir. Denize çıkmadan önce hava durumunu ve güvenliği kendiniz kontrol edin.</p>
-        <p>Veri: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ve DWD ICON, Copernicus Marine Service, EMODnet Bathymetry, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları.</p>
+        <p>Tür: istavrit, lamba altında. Veri: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ve DWD ICON, Copernicus Marine Service, <a href="https://emodnet.ec.europa.eu/en/bathymetry">EMODnet Bathymetry Consortium (2024): EMODnet Digital Bathymetry (DTM 2024)</a>, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları.</p>
       </div>
     </footer>
     <script>

@@ -37,6 +37,7 @@ import Base from '../../layouts/Base.astro';
       <h2>Derinlik profili</h2>
       <div class="profile" id="profile"></div>
       <p class="note muted" id="depth-note"></p>
+      <p class="note"><a id="maplink" href="/harita/">Haritada gör</a></p>
     </section>
   </article>
 </Base>
@@ -98,7 +99,7 @@ import Base from '../../layouts/Base.astro';
     scores: Score[];
   };
 
-  const $ = (id: string) => document.getElementById(id)!;
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const id = new URLSearchParams(location.search).get('id');
   let data: Resp;
   let sel = 0;
@@ -238,6 +239,7 @@ import Base from '../../layouts/Base.astro';
       sp.slope_pct != null ? `0–300 m eğim %${sp.slope_pct.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}` : null,
     ].filter(Boolean);
     $('depth-note').textContent = `${bits.join(', ')}. Yatay eksen: meranın ucundan denize doğru metre. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki kaya, çukur gibi mikro yapıları göstermez.`;
+    $<HTMLAnchorElement>('maplink').href = `/harita/?id=${encodeURIComponent(data.spot.id)}`;
     $('depth').hidden = false;
   }
 
