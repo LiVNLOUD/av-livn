@@ -46,7 +46,8 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "data: refresh spots, depth features and bathymetry tiles"
-            git push origin HEAD:main
+            # main may have moved while Overpass was slow; data files do not overlap with code changes.
+            for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep $((i * 10)); done
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Trigger deploy (GITHUB_TOKEN pushes do not trigger workflows)
