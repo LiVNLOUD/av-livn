@@ -134,6 +134,7 @@ def build_candidate(s: dict, coast: Coast, places: list[dict], grid: Grid | None
         "probe_lon": None,
         "probe_ok": None,
         "probe_source": None,
+        "coast_probe_found": probe is not None,
         "normal_source": "osm",
         "osm_normal_deg": round(normal, 1),
         "depth_200m": None,

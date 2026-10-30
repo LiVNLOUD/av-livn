@@ -129,6 +129,7 @@ def test_build_spots_uses_dtm_probe_when_coastline_method_fails():
     far = way(2, {"natural": "coastline"}, [(LAT + 300 * DLAT, LON - 0.05), (LAT + 300 * DLAT, LON + 0.05)])
     raw = {"elements": [way(1, {"natural": "coastline"}, COASTS[0]), pier(10, 0, 20), far]}
     assert bs.build(raw)["features"][0]["properties"]["probe_lat"] is None
+    assert bs.build(raw)["features"][0]["properties"]["coast_probe_found"] is False
     g = sloped_grid(k=0.1)
     g.elev[g.lat > LAT + 300 * DLAT, :] = np.nan  # the far shore is land in the DTM too
     p = bs.build(raw, g)["features"][0]["properties"]

@@ -40,16 +40,17 @@ for (const f of fc.features) {
     maps: `[harita](https://www.google.com/maps?q=${lat.toFixed(6)},${lon.toFixed(6)})`,
     normal: p.shore_normal_deg == null ? '–' : `${Math.round(p.shore_normal_deg)}° ${COMPASS[Math.round(p.shore_normal_deg / 45) % 8]}`,
     probe: probe ? `${Math.round(km(lat, lon, probe.lat, probe.lon) * 1000)} m` : '⚠ yok',
-    source: p.probe_source === 'dtm' ? '⚠ DTM (≥5 m)' : probe ? 'kıyı normali' : '⚠ bulunamadı',
+    source: !probe ? '⚠ bulunamadı' : p.coast_probe_found === false ? '⚠ DTM ile bulundu' : p.probe_source === 'dtm' ? 'DTM normali' : 'kıyı normali',
+    normalSrc: p.normal_source === 'dtm' ? `DTM (OSM ${Math.round(p.osm_normal_deg)}°)` : 'OSM',
     shift: shift == null ? '–' : `${shift.toFixed(1)} km`,
     light: hasLight == null ? '?' : hasLight ? 'var' : 'yok',
     depth: p.depth_200m == null ? '–' : `${p.depth_200m.toFixed(1)} m`,
   });
 }
 
-const header = '| # | Ad | Tür | Koordinat | Harita | Kıyı normali | Deniz noktası | Kaynak | Open-Meteo kayması | Lamba | Derinlik 200 m |';
-const sep = '|---|---|---|---|---|---|---|---|---|---|---|';
-const lines = rows.map((r, i) => `| ${i + 1} | ${r.name} | ${r.kind} | ${r.coord} | ${r.maps} | ${r.normal} | ${r.probe} | ${r.source} | ${r.shift} | ${r.light} | ${r.depth} |`);
+const header = '| # | Ad | Tür | Koordinat | Harita | Kıyı normali | Normal kaynağı | Deniz noktası | Nokta kaynağı | Open-Meteo kayması | Lamba | Derinlik 200 m |';
+const sep = '|---|---|---|---|---|---|---|---|---|---|---|---|';
+const lines = rows.map((r, i) => `| ${i + 1} | ${r.name} | ${r.kind} | ${r.coord} | ${r.maps} | ${r.normal} | ${r.normalSrc} | ${r.probe} | ${r.source} | ${r.shift} | ${r.light} | ${r.depth} |`);
 const missing = rows.filter((r) => r.source.startsWith('⚠')).length;
 
 writeFileSync(
@@ -58,11 +59,12 @@ writeFileSync(
 
 Sahada doğrulama için aday meralar. Üretildi: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC, \`node scripts/spots-review.mjs\`.
 
-- **Kıyı normali:** meranın denize baktığı yön (iskele/mahmuzda kökten uca, mendirekte 300 m'lik kıyı ortalaması).
+- **Kıyı normali:** meranın denize baktığı yön. DTM'de su varsa en hızlı derinleşen yön (5° adım); yoksa OSM'den (iskele/mahmuzda kökten uca, mendirekte 300 m'lik kıyı ortalaması). OSM değeri karşılaştırma için parantezde.
 - **Deniz noktası:** uçtan normal yönünde Open-Meteo Marine için seçilen nokta ve uca uzaklığı.
 - **Open-Meteo kayması:** Marine modelinin deniz noktası yerine kullandığı grid noktasının uzaklığı. Büyükse dalga/su/akıntı başka bir yerin verisidir.
 - **Lamba:** \`?\` = bilinmiyor; puanda lambasız sayılır. Admin formundan (\`/admin/\`) güncellenir.
-- ⚠: deniz noktası kıyı normaliyle bulunamadı${missing ? ` (${missing} mera)` : ''}; F2'den itibaren DTM'de ≥5 m derinliğe ulaşan ilk noktadan seçilir.
+- ⚠: OSM kıyı çizgisi yöntemiyle deniz noktası bulunamadı${missing ? ` (${missing} mera)` : ''}; F2'de nokta DTM ile (normal boyunca su olan ilk mesafe veya ≥5 m derinlik) konuldu.
+- **Derinlik 200 m:** EMODnet DTM (~115 m) kıyıya yakın hücreleri sığ/0'a doğru yumuşatır; sahadaki gerçek derinlik genellikle daha fazladır.
 
 ${header}
 ${sep}
