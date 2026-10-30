@@ -32,11 +32,28 @@ if (parts !== 7) fail(`expected 7 components, got ${parts}`);
 const before = await page.locator('#when').textContent();
 await page.screenshot({ path: `${out}/f1-spot-390.png`, fullPage: true });
 
+const condCount = await page.locator('#cond > div[data-band]').count();
+if (condCount < 10) fail(`expected ≥10 condition boxes, got ${condCount}`);
+const bands = await page.locator('#cond > div[data-band]').evaluateAll((els) => els.map((e) => e.getAttribute('data-band')));
+console.log('condition bands now:', bands.join(' '));
+if (!(await page.locator('.part.mult').count())) fail('night multiplier row missing');
+await page.screenshot({ path: `${out}/f1-5-day-390.png`, fullPage: true });
+
+// Select the first full-night hour by asking the same API the page uses.
+const spotId = new URL(page.url()).searchParams.get('id');
+const nightIdx = await page.evaluate(async (id) => {
+  const b = await (await fetch(`/api/spots/${encodeURIComponent(id)}`)).json();
+  return b.scores.findIndex((s) => s.multipliers[0]?.phase === 'full');
+}, spotId);
 const box = await page.locator('#chart svg').boundingBox();
-await page.mouse.click(box.x + box.width * 0.4, box.y + box.height / 2);
+const n = await page.evaluate(() => Number(document.querySelector('#chart svg').getAttribute('aria-valuemax')) + 1);
+await page.mouse.click(box.x + box.width * ((nightIdx + 0.5) / n), box.y + box.height / 2);
 const after = await page.locator('#when').textContent();
 if (before === after) fail('hour selection did not change');
-console.log('selected:', before, '→', after);
+const nightRow = await page.locator('.part.mult .reason').textContent();
+if (!/gece|alacakaranlık/.test(nightRow)) fail('night hour not selected: ' + nightRow);
+console.log('selected:', before, '→', after, '|', nightRow);
+await page.screenshot({ path: `${out}/f1-5-night-390.png`, fullPage: true });
 if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) fail('horizontal overflow on spot');
 await page.locator('#chart').screenshot({ path: `${out}/f1-chart-390.png` });
 

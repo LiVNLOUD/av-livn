@@ -20,7 +20,8 @@ bash scripts/smoke.sh           # canlı: av.livn.tr + livn.tr, www, /win 301
 # Lokal UI: yerel D1'e örnek veri + wrangler dev + 390 px Playwright
 cd workers/api && wrangler d1 migrations apply av-livn --local && cd ../..
 node scripts/dev-seed.mjs > /tmp/dev.sql && (cd workers/api && wrangler d1 execute av-livn --local --file /tmp/dev.sql)
-(cd workers/api && wrangler dev --local --var ADMIN_TOKEN:dev-token)   # ayrı terminal
+(cd workers/api && wrangler dev --local --test-scheduled --var ADMIN_TOKEN:dev-token)   # ayrı terminal
+# cron tetikle: curl -X POST 'localhost:8787/cdn-cgi/local/explorer/api/local/scheduled?worker=av-livn' -d '{"cron":"9 * * * *"}'
 node scripts/ui-smoke.mjs http://localhost:8787 docs/screenshots
 ```
 
@@ -30,7 +31,7 @@ node scripts/ui-smoke.mjs http://localhost:8787 docs/screenshots
 - Deploy sonrası `bash scripts/smoke.sh` (av.livn.tr + livn.tr, www, /win).
 - R2 kullanılmaz: PMTiles static asset, oşinografi özetleri D1'de.
 - Copernicus kimliği yalnız Actions secrets'ta. Oturumda yok; F3 kodu mock veriyle test edilir.
-- Ücretsiz katman: cron hesap başına 5, cron başına CPU ~10 ms. netCDF/GDAL işleri yalnız GitHub Actions'ta (pipeline/) çalışır.
+- Ücretsiz katman: cron hesap başına 5 (4'ü kullanılıyor: `src/cron.ts` CRON_FETCH/CRON_SCORE, `wrangler.toml` ile aynı olmalı), çağrı başına CPU ~10 ms. Puanlar cron'da önceden hesaplanır; API yalnız okur. netCDF/GDAL işleri yalnız GitHub Actions'ta (pipeline/) çalışır.
 - Overpass API'ye konteynerden erişilemiyor. OSM çekimi Actions'ta yapılır (`spots.yml`).
 - Tür profilleri `data/species/*.yaml`; değiştirince `npm run species -w packages/scoring` (senkron testi var).
 - Birim: km/sa (Türkçe "km/s" saniye demektir).

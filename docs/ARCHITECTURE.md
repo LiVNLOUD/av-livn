@@ -10,7 +10,8 @@
  Telefon (PWA) ──HTTPS──► Worker `av-livn` (Hono, TS) ──► D1 `av-livn`
   av.livn.tr               ├─ /api/*  JSON API             (spots, forecast_snapshots,
                            ├─ /*      Workers static assets observations, catches)
-                           └─ cron (saatlik) → Open-Meteo → D1 → puan
+                           ├─ cron :07 → Open-Meteo → D1 (snapshot, gözlem)
+                           └─ cron :09/:11/:13 → mera grupları puanlanır → D1 spot_scores
 ```
 
 ## Bileşenler
@@ -21,8 +22,14 @@
 - **D1**: mera, hava/deniz tahmin snapshot'ları, saatlik gözlem tarihçesi, oşinografi özetleri (F3), av günlüğü (F4).
 - **PMTiles** (F2): R2 yok; static asset olarak Worker ile birlikte dağıtılır (Workers static assets dosya başına 25 MiB sınırı).
 
+## Puanların önceden hesaplanması (F1.2)
+- Puanlar ve koşul uygunlukları istek anında değil, cron'da hesaplanır. Mera başına 75 saatlik hazır JSON `spot_scores` tablosunda tutulur (`list_json`: liste için `[puan, kapı, uyarı, eksik]`; `detail_json`: grafik, döküm ve koşullar).
+- `/api/spots` ve `/api/spots/:id` yalnız okur ve mevcut saate göre dilimler (hedef < 3 ms CPU). Edge cache 10 dk, istemciye `no-cache`.
+- Ücretsiz katmanın 10 ms CPU sınırı için puanlama 3 cron dakikasına bölünür (meralar id sırasına göre `index % 3`). Admin düzenlemesi ilgili merayı anında yeniden puanlar.
+- Yerel ölçüm (Node, 16 mera × 75 saat): optimizasyon öncesi 123 ms, sonrası yalnız puanlama ~10.6 ms. Canlı ölçümler PROGRESS.md'de.
+
 ## Sınırlar (ücretsiz katman)
-- Cron: hesap başına 5. Kullanım: saatlik hava (F1), günlük oşinografi içe aktarma (F3).
+- Cron: hesap başına 5. Kullanım: 4 (hava :07 + puanlama :09/:11/:13). F3'teki günlük oşinografi içe aktarması Actions'ta yapılır; D1'e yazar, cron gerektirmez.
 - Cron CPU ~10 ms: Open-Meteo'ya çoklu koordinatlı tek istek atılır, D1'e batch yazılır. Gerekirse meralar parçalara bölünür.
 - Worker paket boyutu 3 MB (gzip; static assets bu sınıra dahil değil). Static asset dosyası başına 25 MiB.
 

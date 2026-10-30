@@ -18,7 +18,7 @@ database_id = "83445f2d-8c07-46ca-9a25-5fd9dc4d66b9"
 migrations_dir = "migrations"
 
 [triggers]
-crons = ["7 * * * *"]
+crons = ["7 * * * *", "9 * * * *", "11 * * * *", "13 * * * *"]
 
 [observability]
 enabled = true

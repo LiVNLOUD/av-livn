@@ -16,6 +16,12 @@ describe('moonValue: illumination × moon above horizon', () => {
 });
 
 describe('ay_evresi component', () => {
+  it('is neutral (0.5) at spots without a known lamp', () => {
+    const c = { series: { at: new Date('2026-11-24T21:00:00Z'), now: undefined, offset: () => undefined }, spot: { ...MUDANYA, hasLight: null }, profile: ISTAVRIT };
+    expect(ay_evresi(c)).toMatchObject({ value: 0.5 });
+    expect(ay_evresi({ ...c, spot: { ...MUDANYA, hasLight: false } }).reason).toContain('nötr');
+  });
+
   it('is dark around the 2026-11-09 new moon and bright around the 2026-11-24 full moon', () => {
     const at = (iso: string) => ({ series: { at: new Date(iso), now: undefined, offset: () => undefined }, spot: MUDANYA, profile: ISTAVRIT });
     const dark = ay_evresi(at('2026-11-09T19:00:00Z'));

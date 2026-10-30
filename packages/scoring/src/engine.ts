@@ -1,15 +1,14 @@
 import { akinti } from './components/current';
 import { ay_evresi } from './components/moon';
-import { gece_isik_penceresi } from './components/nightLight';
 import { basinc_trendi_3_6s } from './components/pressure';
 import { mevsim_katsayisi } from './components/season';
 import { su_sicakligi_ve_3g_trend } from './components/sst';
 import { ruzgar_dalga_kiyiya_gore } from './components/windWave';
+import { gece_carpani } from './multipliers/night';
 import type { Component, HourlyPoint, ScoreResult, ScoredComponent, SeriesView, SpeciesProfile, SpotInput } from './types';
 import { hourKey, isNum, round1 } from './util';
 
 export const COMPONENTS: Record<string, Component> = {
-  gece_isik_penceresi,
   ruzgar_dalga_kiyiya_gore,
   su_sicakligi_ve_3g_trend,
   basinc_trendi_3_6s,
@@ -25,17 +24,19 @@ export function assertScorable(profile: SpeciesProfile): void {
   for (const k of keys) if (!COMPONENTS[k]) throw new Error(`unknown component "${k}" in profile "${profile.id}"`);
 }
 
-export function indexSeries(points: HourlyPoint[]): Map<string, HourlyPoint> {
-  return new Map(points.map((p) => [hourKey(new Date(p.ts)), p]));
+/** Hourly points keyed by whole UTC hours since the epoch. */
+export type SeriesIndex = Map<number, HourlyPoint>;
+
+const HOUR = 3_600_000;
+const hourNo = (ms: number) => Math.floor(ms / HOUR);
+
+export function indexSeries(points: HourlyPoint[]): SeriesIndex {
+  return new Map(points.map((p) => [hourNo(Date.parse(p.ts)), p]));
 }
 
-function view(index: Map<string, HourlyPoint>, at: Date): SeriesView {
-  const base = new Date(hourKey(at)).getTime();
-  return {
-    at,
-    now: index.get(hourKey(at)),
-    offset: (h) => index.get(hourKey(new Date(base + h * 3_600_000))),
-  };
+export function view(index: SeriesIndex, at: Date): SeriesView {
+  const base = hourNo(at.getTime());
+  return { at, now: index.get(base), offset: (h) => index.get(base + h) };
 }
 
 /** Safety gate: gust above limit or waves above limit (strict >). */
@@ -49,7 +50,7 @@ export function safetyGate(p: HourlyPoint | undefined, profile: SpeciesProfile):
 }
 
 export function scoreAt(
-  args: { spot: SpotInput; at: Date; profile: SpeciesProfile } & ({ points: HourlyPoint[] } | { index: Map<string, HourlyPoint> }),
+  args: { spot: SpotInput; at: Date; profile: SpeciesProfile } & ({ points: HourlyPoint[] } | { index: SeriesIndex }),
 ): ScoreResult {
   const { spot, at, profile } = args;
   assertScorable(profile);
@@ -62,9 +63,11 @@ export function scoreAt(
   const available = components.filter((c) => c.value !== null && c.weight > 0);
   const wSum = available.reduce((a, c) => a + c.weight, 0);
   const raw = wSum > 0 ? round1((available.reduce((a, c) => a + c.contribution!, 0) / wSum) * 100) : null;
+  const night = gece_carpani(at, spot, profile);
   const warnings = safetyGate(series.now, profile);
   const gated = warnings.length > 0;
-  const total = raw === null ? null : gated ? Math.min(raw, profile.safety.cap) : raw;
+  const multiplied = raw === null ? null : round1(raw * night.value);
+  const total = multiplied === null ? null : gated ? Math.min(multiplied, profile.safety.cap) : multiplied;
   return {
     ts: hourKey(at),
     total,
@@ -73,14 +76,15 @@ export function scoreAt(
     warnings,
     missing: components.filter((c) => c.value === null).map((c) => c.key),
     components,
+    multipliers: [night],
   };
 }
 
 /** Score `hours` consecutive hours starting at the hour containing `from`. */
 export function scoreSeries(args: { spot: SpotInput; from: Date; hours: number; profile: SpeciesProfile; points: HourlyPoint[] }): ScoreResult[] {
   const index = indexSeries(args.points);
-  const start = new Date(hourKey(args.from)).getTime();
+  const start = hourNo(args.from.getTime()) * HOUR;
   return Array.from({ length: args.hours }, (_, i) =>
-    scoreAt({ spot: args.spot, profile: args.profile, index, at: new Date(start + i * 3_600_000) }),
+    scoreAt({ spot: args.spot, profile: args.profile, index, at: new Date(start + i * HOUR) }),
   );
 }

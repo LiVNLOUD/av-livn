@@ -33,7 +33,7 @@ import Base from '../layouts/Base.astro';
 
   type Spot = {
     id: string; name: string; kind: string; status: string; place: string | null; has_light: boolean | null;
-    score: { total: number | null; gated: boolean; warnings: string[]; missing: string[] };
+    score: { total: number | null; gated: boolean; warnings: string[]; missing_count: number };
   };
 
   const list = document.getElementById('spots')!;
@@ -52,9 +52,11 @@ import Base from '../layouts/Base.astro';
         const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
         const why = s.score.gated
           ? `<p class="why warn">${esc(s.score.warnings[0])}</p>`
-          : s.score.missing.length
-            ? `<p class="why muted">Eksik veri: ${s.score.missing.length} bileşen</p>`
-            : '';
+          : s.score.total === null
+            ? '<p class="why muted">Puan henüz hesaplanmadı</p>'
+            : s.score.missing_count
+              ? `<p class="why muted">Eksik veri: ${s.score.missing_count} bileşen</p>`
+              : '';
         return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}">
           <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
           <span><h2>${esc(s.name)}</h2><p class="sub">${esc(sub)}</p>${why}</span></a></li>`;
@@ -65,7 +67,7 @@ import Base from '../layouts/Base.astro';
     );
   }
 
-  fetch('/api/spots')
+  fetch('/api/spots', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: { spots: Spot[]; data_fetched_at: string | null }) => render(b.spots, b.data_fetched_at))
     .catch(() => {

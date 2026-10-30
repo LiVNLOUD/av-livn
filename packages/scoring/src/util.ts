@@ -33,10 +33,11 @@ export function nextLocalMidnight(d: Date): Date {
   return new Date(Date.UTC(p.year, p.month - 1, p.day + 1) - TZ_OFFSET_MIN * 60_000);
 }
 
+const pad = (n: number) => (n < 10 ? `0${n}` : String(n));
+
+/** 'YYYY-MM-DDTHH:00Z' of the UTC hour containing `d`. */
 export function hourKey(d: Date): string {
-  const h = new Date(d);
-  h.setUTCMinutes(0, 0, 0);
-  return h.toISOString().slice(0, 13) + ':00Z';
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:00Z`;
 }
 
 export const round1 = (x: number): number => Math.round(x * 10) / 10;

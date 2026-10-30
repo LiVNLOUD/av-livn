@@ -9,7 +9,12 @@
   --mist: #8ba2ad;       /* secondary text */
   --sodium: #f5a83c;     /* harbour sodium lamp: the one accent */
   --sodium-dim: #7a5a2c;
-  --storm: #ef6a55;      /* safety warnings only */
+  --storm: #ff7a6b;      /* safety warnings */
+  /* Suitability bands (mirror src/scripts/palette.ts; contrast tested ≥ 4.5:1 on --sea) */
+  --good: #5fd08a;
+  --warn: #f0a35e;
+  --bad: #ff7a6b;
+  --neutral: #8ba2ad;
   --radius: 10px;
   --gutter: 16px;
   font-family: 'Bricolage Grotesque Variable', system-ui, sans-serif;
@@ -45,9 +50,10 @@ header.site .species { color: var(--mist); font-size: 0.9rem; }
 footer.site { padding: 28px 0 32px; color: var(--mist); font-size: 0.78rem; line-height: 1.6; }
 footer.site p { margin: 0 0 4px; max-width: 60ch; }
 
-/* Lamp: the score as a sodium glow whose strength follows the score. */
+/* Lamp: the score as a glow in its suitability colour; strength follows the score. */
 .lamp {
   --s: 0; /* 0..1 */
+  --c: var(--neutral);
   position: relative;
   display: grid;
   place-items: center;
@@ -57,14 +63,22 @@ footer.site p { margin: 0 0 4px; max-width: 60ch; }
   font-weight: 700;
   font-stretch: 80%;
   font-size: calc(var(--size, 52px) * 0.42);
-  color: color-mix(in oklab, var(--sodium) calc(35% + var(--s) * 65%), var(--mist));
-  background: radial-gradient(circle at 50% 50%,
-    color-mix(in oklab, var(--sodium) calc(var(--s) * 38%), transparent) 0%,
-    transparent 70%);
-  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--sodium) calc(15% + var(--s) * 60%), transparent);
+  color: var(--c);
+  background: radial-gradient(circle at 50% 50%, color-mix(in oklab, var(--c) calc(var(--s) * 34%), transparent) 0%, transparent 70%);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--c) calc(25% + var(--s) * 60%), transparent);
 }
-.lamp.gated { color: var(--storm); box-shadow: inset 0 0 0 1.5px var(--storm); background: none; }
-.lamp.none { color: var(--mist); box-shadow: inset 0 0 0 1.5px var(--swell); background: none; }
+.lamp.good { --c: var(--good); }
+.lamp.warn { --c: var(--warn); }
+.lamp.bad { --c: var(--bad); }
+.lamp.none { --c: var(--neutral); background: none; box-shadow: inset 0 0 0 1.5px var(--swell); }
+.lamp.gated::after {
+  content: '!'; position: absolute; top: -2px; right: -2px; width: 18px; height: 18px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 12px; font-stretch: 100%; color: var(--sea); background: var(--storm);
+}
+.band-good { color: var(--good); }
+.band-warn { color: var(--warn); }
+.band-bad { color: var(--bad); }
+.band-neutral { color: var(--neutral); }
 
 .warn { color: var(--storm); }
 .tag { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 0.75rem; line-height: 1.6; border: 1px solid var(--swell); color: var(--mist); }

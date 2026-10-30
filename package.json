@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "npm run build -w apps/web",
-    "test": "npm run build && npm run test -w packages/scoring && npm run test -w workers/api",
+    "test": "npm run build && npm run test -w packages/scoring && npm run test -w workers/api && npm run test -w apps/web",
     "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }

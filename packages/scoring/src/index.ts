@@ -1,10 +1,12 @@
 export * from './types';
-export { scoreAt, scoreSeries, safetyGate, assertScorable, indexSeries, COMPONENTS } from './engine';
-export { windValue, waveValue } from './components/windWave';
-export { moonValue } from './components/moon';
-export { nightWindowValue, lightFactor } from './components/nightLight';
-export { pressureValue } from './components/pressure';
+export { scoreAt, scoreSeries, safetyGate, assertScorable, indexSeries, view, COMPONENTS, type SeriesIndex } from './engine';
+export { windValue, waveValue, windSide } from './components/windWave';
+export { moonValue, moonState, MOON_NEUTRAL } from './components/moon';
+export { pressureValue, pressureRate, pressureLabel } from './components/pressure';
 export { sstLevel, sstTrend } from './components/sst';
-export { currentValue } from './components/current';
+export { currentValue, currentLabel } from './components/current';
+export { gece_carpani, nightPhase, nightValue } from './multipliers/night';
+export { conditionsAt, bandOf, gustValue, BAND_THRESHOLDS, type Band, type ConditionView } from './suitability';
+export { DEFAULT_PARAMS, DEFAULT_NIGHT, paramsOf, nightOf } from './params';
 export { clamp01, angleDiff, hourKey, localParts, nextLocalMidnight, TZ_OFFSET_MIN } from './util';
 export { PROFILES, getProfile } from './profiles';

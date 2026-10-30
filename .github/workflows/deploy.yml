@@ -63,3 +63,8 @@ jobs:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
       - name: Smoke test (av.livn.tr + livn.tr, www, /win untouched)
         run: bash scripts/smoke.sh
+      - name: Admin API check (token from secrets, no writes)
+        if: env.HAS_ADMIN_TOKEN == 'true'
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: bash scripts/admin-smoke.sh

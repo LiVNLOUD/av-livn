@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "build": "astro build && node ../../scripts/stamp-sw.mjs",
+    "preview": "astro preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "astro": "7.3.8",
-    "suncalc": "^2.1.1"
+    "@av-livn/scoring": "*"
+  },
+  "devDependencies": {
+    "vitest": "5.0.5"
   }
 }

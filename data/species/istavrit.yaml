@@ -1,22 +1,42 @@
-# İstavrit (Trachurus spp.) — LRF, lamba altı. v1 kural tabanlı başlangıç ağırlıkları; kalibre edilecek.
+# İstavrit (Trachurus spp.) — LRF, lamba altı. v1.1 kural tabanlı; kalibre edilecek.
+# Puan = (Σ ağırlık × bileşen) × gece_carpani, sonra güvenlik kapısı (tavan).
 id: istavrit
 name: İstavrit
-version: 1
+version: 2
 weights:
-  gece_isik_penceresi: 25
-  ruzgar_dalga_kiyiya_gore: 20
-  su_sicakligi_ve_3g_trend: 15
-  basinc_trendi_3_6s: 10
-  ay_evresi: 10
-  akinti: 10
-  mevsim_katsayisi: 10
+  ruzgar_dalga_kiyiya_gore: 27
+  su_sicakligi_ve_3g_trend: 20
+  basinc_trendi_3_6s: 13
+  ay_evresi: 13
+  akinti: 13
+  mevsim_katsayisi: 14
+night_multiplier:
+  full: 1.0          # gün batımı +45 dk → gün doğumu −60 dk
+  twilight: 0.70     # gün batımı −30…+45 dk, gün doğumu −60…+15 dk
+  day: 0.25
+  no_light_factor: 0.75   # lambasız veya lambası bilinmeyen merada gece/alacakaranlık değerine çarpan
+  dusk_before_min: 30
+  dusk_after_min: 45
+  dawn_before_min: 60
+  dawn_after_min: 15
 params:
-  night_window: { start_after_sunset_h: 1, end_local: "00:00" }
   wave_soft_limit_m: 0.6
   sst_ideal_c: [14, 20]
+  sst_trend_ok_c: 0.5
+  sst_trend_zero_c: 2
   current_ideal_ms: [0.05, 0.25]
   current_max_ms: 0.6
-  dark_moon_preferred: true
+  wind:
+    onshore_start_kmh: 10   # kıyıya vuran rüzgarda ceza bu hızdan başlar
+    onshore_span_kmh: 25    # ... ve +25 km/sa'da tam cezaya ulaşır
+    offshore_ok_kmh: 20     # karadan/yandan bu hıza kadar ideal
+    offshore_span_kmh: 20
+  pressure:
+    ok: [-0.5, 0.3]         # hPa/sa: stabil veya yavaş düşüş
+    rise_zero: 1.5
+    fall_floor_at: -2
+    fall_floor: 0.3
+  gust_ok_kmh: 25
 season:  # ay → katsayı
   1: 0.6
   2: 0.4

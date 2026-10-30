@@ -31,3 +31,9 @@ function forClient(res: Response): Response {
   out.headers.set('cache-control', 'no-cache');
   return out;
 }
+
+/** Best-effort purge of cached public responses for a spot (same colo only; others expire within the TTL). */
+export async function purgeSpot(origin: string, id: string): Promise<void> {
+  if (typeof caches === 'undefined') return;
+  await Promise.all([`${origin}/api/spots`, `${origin}/api/spots/${encodeURIComponent(id)}`].map((u) => caches.default.delete(u)));
+}

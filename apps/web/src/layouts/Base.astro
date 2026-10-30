@@ -25,13 +25,19 @@ const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatl
     <main><slot /></main>
     <footer class="site">
       <div class="wrap">
-        <p>Puan kural tabanlıdır (v1) ve sahada kalibre edilecektir. Denize çıkmadan önce hava durumunu ve güvenliği kendiniz kontrol edin.</p>
+        <p>Puan kural tabanlıdır (v1.1) ve sahada kalibre edilecektir. Denize çıkmadan önce hava durumunu ve güvenliği kendiniz kontrol edin.</p>
         <p>Veri: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ve DWD ICON, Copernicus Marine Service, EMODnet Bathymetry, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları.</p>
       </div>
     </footer>
     <script>
       if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        // A new deploy installs a new worker that claims the page; reload once so HTML and assets match.
+        const hadController = !!navigator.serviceWorker.controller;
+        let reloaded = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (hadController && !reloaded) { reloaded = true; location.reload(); }
+        });
+        navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {});
       }
     </script>
   </body>

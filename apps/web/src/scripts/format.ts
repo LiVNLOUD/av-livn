@@ -1,8 +1,9 @@
+import { bandOf } from '@av-livn/scoring';
+
 export const KIND_TR: Record<string, string> = { pier: 'İskele', breakwater: 'Mendirek', groyne: 'Mahmuz', manual: 'Elle eklenen' };
 export const STATUS_TR: Record<string, string> = { candidate: 'Doğrulanmadı', verified: 'Sahada doğrulandı', rejected: 'Elendi' };
 
 export const COMPONENT_TR: Record<string, string> = {
-  gece_isik_penceresi: 'Gece ışık penceresi',
   ruzgar_dalga_kiyiya_gore: 'Rüzgar ve dalga (kıyıya göre)',
   su_sicakligi_ve_3g_trend: 'Su sıcaklığı ve 3 günlük eğilim',
   basinc_trendi_3_6s: 'Basınç eğilimi',
@@ -27,10 +28,12 @@ export function fmtAgo(iso: string | null): string {
   return `Veriler ${Math.round(min / 60)} sa önce güncellendi`;
 }
 
-/** Fill a .lamp element for a score. */
+/** Fill a .lamp element for a score; colour band comes from the scoring engine's thresholds. */
 export function lamp(el: HTMLElement, total: number | null, gated: boolean): void {
+  const band = total === null ? 'none' : bandOf(total / 100);
+  el.classList.remove('good', 'warn', 'bad', 'neutral', 'none');
+  el.classList.add(band);
   el.classList.toggle('gated', gated);
-  el.classList.toggle('none', total === null);
   el.style.setProperty('--s', total === null ? '0' : String(Math.max(0, Math.min(1, total / 100))));
   el.textContent = total === null ? '–' : String(Math.round(total));
   el.setAttribute('aria-label', total === null ? 'Puan yok' : `Puan ${Math.round(total)} / 100${gated ? ', güvenlik uyarısı' : ''}`);

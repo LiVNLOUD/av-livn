@@ -19,7 +19,7 @@ import Base from '../../layouts/Base.astro';
     <section class="chart-block">
       <h2 class="sr-only">72 saatlik puan</h2>
       <div class="chart" id="chart"></div>
-      <p class="hint muted">Bir saate dokunun ya da sürükleyin. Gölgeli bantlar gece, kırmızı çizgiler güvenlik uyarısı olan saatler.</p>
+      <p class="hint muted">Bir saate dokunun ya da sürükleyin. Koyu bantlar gece, açık bantlar alacakaranlık, kırmızı çizgiler güvenlik uyarısı olan saatler.</p>
     </section>
 
     <section>
@@ -31,6 +31,12 @@ import Base from '../../layouts/Base.astro';
       <h2>Koşullar</h2>
       <dl class="cond" id="cond"></dl>
       <p class="note muted" id="note"></p>
+    </section>
+
+    <section id="depth" hidden>
+      <h2>Derinlik profili</h2>
+      <div class="profile" id="profile"></div>
+      <p class="note muted" id="depth-note"></p>
     </section>
   </article>
 </Base>
@@ -46,39 +52,50 @@ import Base from '../../layouts/Base.astro';
   .when { font-weight: 600; font-size: 1.05rem; }
   .best { color: var(--mist); font-size: 0.9rem; margin-top: 2px !important; }
   .warn:empty { display: none; }
-  .warn { font-size: 0.9rem; margin-top: 4px !important; }
+  .warn { font-size: 0.9rem; margin-top: 4px !important; color: var(--storm); }
   .chart-block { margin-top: 18px; }
-  .chart { margin: 0 calc(var(--gutter) * -1); background: var(--deep); border-block: 1px solid var(--swell); touch-action: pan-y; }
-  .chart :global(svg) { display: block; width: 100%; height: auto; cursor: crosshair; }
+  .chart, .profile { margin: 0 calc(var(--gutter) * -1); background: var(--deep); border-block: 1px solid var(--swell); }
+  .chart { touch-action: pan-y; }
+  .chart :global(svg), .profile :global(svg) { display: block; width: 100%; height: auto; }
+  .chart :global(svg) { cursor: crosshair; }
   .hint { font-size: 0.78rem; margin: 6px 0 0; }
   .parts { list-style: none; padding: 0; margin: 0; }
   :global(.part) { padding: 10px 0; border-top: 1px solid var(--swell); }
   :global(.part .row) { display: flex; justify-content: space-between; gap: 12px; font-size: 0.95rem; }
   :global(.part .pts) { color: var(--mist); white-space: nowrap; }
-  :global(.part .pts b) { color: var(--foam); font-weight: 650; }
+  :global(.part .pts b) { font-weight: 650; }
   :global(.part .bar) { position: relative; height: 6px; margin: 6px 0 4px; border-radius: 3px; background: var(--deep); overflow: hidden; }
-  :global(.part .bar i) { position: absolute; inset: 0 auto 0 0; background: var(--sodium); border-radius: 3px; }
+  :global(.part .bar i) { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: currentColor; }
   :global(.part.na .bar i) { display: none; }
   :global(.part .reason) { margin: 0; font-size: 0.82rem; color: var(--mist); }
+  :global(.part.mult) { border-top: 1px dashed var(--swell); }
   .cond { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 0; }
-  :global(.cond div) { padding: 8px 0; border-top: 1px solid var(--swell); }
+  :global(.cond > div) { padding: 8px 0; border-top: 1px solid var(--swell); min-width: 0; }
   :global(.cond dt) { font-size: 0.8rem; color: var(--mist); }
-  :global(.cond dd) { margin: 0; font-size: 1.05rem; font-weight: 600; }
+  :global(.cond dd) { margin: 0; }
+  :global(.cond .val) { font-size: 1.02rem; font-weight: 620; line-height: 1.3; display: flex; gap: 6px; align-items: baseline; }
+  :global(.cond .ico) { flex: none; width: 1.1em; text-align: center; font-weight: 700; }
+  :global(.cond .state) { margin: 2px 0 0; font-size: 0.78rem; font-weight: 600; }
+  :global(.cond .target) { margin: 1px 0 0; font-size: 0.76rem; color: var(--mist); line-height: 1.35; }
   .note { font-size: 0.8rem; margin-top: 12px; }
 </style>
 
 <script>
-  import { getPosition } from 'suncalc';
   import { compass, COMPONENT_TR, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lamp, STATUS_TR } from '../../scripts/format';
+  import { PALETTE } from '../../scripts/palette';
+  import { bandOf, type Band } from '@av-livn/scoring';
 
   type Comp = { key: string; weight: number; value: number | null; contribution: number | null; reason: string };
-  type Score = { ts: string; total: number | null; gated: boolean; warnings: string[]; components: Comp[] };
-  type Cond = Partial<Record<'windSpeed' | 'windDir' | 'windGust' | 'waveH' | 'sst' | 'pressure' | 'curVel' | 'cloud' | 'precip' | 'temp', number>> & { ts: string };
+  type Mult = { key: string; value: number; phase: 'full' | 'twilight' | 'day'; reason: string };
+  type Cond = { key: string; display: string | null; suitability: number | null; band: Band };
+  type Score = { ts: string; total: number | null; raw: number | null; gated: boolean; warnings: string[]; components: Comp[]; multipliers: Mult[]; conditions: Cond[] };
   type Resp = {
-    spot: { id: string; name: string; kind: string; status: string; place: string | null; lat: number; lon: number; has_light: boolean | null; shore_normal_deg: number | null };
-    data: { weather_fetched_at: string | null; sea_grid: { distance_km: number } | null };
+    spot: {
+      id: string; name: string; kind: string; status: string; place: string | null; lat: number; lon: number; has_light: boolean | null;
+      shore_normal_deg: number | null; depth_200m: number | null; slope_pct?: number | null; max_depth_100m?: number | null; profile?: (number | null)[] | null;
+    };
+    data: { weather_fetched_at: string | null; sea_grid: { distance_km: number } | null; conditions: { key: string; label: string; target: string; affects: boolean }[] };
     scores: Score[];
-    conditions: Cond[];
   };
 
   const $ = (id: string) => document.getElementById(id)!;
@@ -96,11 +113,11 @@ import Base from '../../layouts/Base.astro';
     const bands: string[] = [];
     const days: string[] = [];
     data.scores.forEach((s, i) => {
-      const night = getPosition(new Date(s.ts), data.spot.lat, data.spot.lon).altitude < 0;
-      if (night) bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#14283a"/>`);
-      const local = fmtTime(s.ts);
-      if (local === '00:00') days.push(`<line x1="${(i * step).toFixed(1)}" x2="${(i * step).toFixed(1)}" y1="0" y2="${H}" stroke="#25404f" stroke-dasharray="2 3"/><text x="${(i * step + 4).toFixed(1)}" y="${H - 8}" fill="#8ba2ad" font-size="12.5">${esc(fmtWeekday(s.ts))}</text>`);
-      if (s.gated) bands.push(`<rect x="${(i * step + 1).toFixed(1)}" y="${BASE + 4}" width="${(step - 2).toFixed(1)}" height="5" fill="#ef6a55"/>`);
+      const phase = s.multipliers[0]?.phase;
+      if (phase === 'full') bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#14283a"/>`);
+      if (phase === 'twilight') bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#11212e"/>`);
+      if (fmtTime(s.ts) === '00:00') days.push(`<line x1="${(i * step).toFixed(1)}" x2="${(i * step).toFixed(1)}" y1="0" y2="${H}" stroke="#25404f" stroke-dasharray="2 3"/><text x="${(i * step + 4).toFixed(1)}" y="${H - 8}" fill="#8ba2ad" font-size="12.5">${esc(fmtWeekday(s.ts))}</text>`);
+      if (s.gated) bands.push(`<rect x="${(i * step + 1).toFixed(1)}" y="${BASE + 4}" width="${(step - 2).toFixed(1)}" height="5" fill="#ff7a6b"/>`);
     });
     const pts = data.scores.map((s, i) => [x(i), s.total === null ? null : y(s.total)] as const);
     let line = '';
@@ -113,13 +130,13 @@ import Base from '../../layouts/Base.astro';
     const valid = pts.filter((p) => p[1] !== null) as [number, number][];
     const area = valid.length ? `M${valid[0]![0]},${BASE}` + valid.map(([px, py]) => `L${px.toFixed(1)},${py.toFixed(1)}`).join('') + `L${valid.at(-1)![0]},${BASE}Z` : '';
     const grid = [25, 50, 75].map((v) => `<line x1="0" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#1b2e3b"/><text x="${W - 4}" y="${y(v) - 3}" fill="#6f8793" font-size="11" text-anchor="end">${v}</text>`).join('');
-    $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="slider" tabindex="0" aria-label="Saat seçimi" aria-valuemin="0" aria-valuemax="${n - 1}" aria-valuenow="${sel}" aria-valuetext="${esc(fmtDay(data.scores[sel]!.ts) + ' ' + fmtTime(data.scores[sel]!.ts))}">
-      <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f5a83c" stop-opacity=".45"/><stop offset="1" stop-color="#f5a83c" stop-opacity="0"/></linearGradient></defs>
+    $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="slider" tabindex="0" aria-label="Saat seçimi" aria-valuemin="0" aria-valuemax="${n - 1}" aria-valuenow="0">
+      <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dbe6ea" stop-opacity=".28"/><stop offset="1" stop-color="#dbe6ea" stop-opacity="0"/></linearGradient></defs>
       ${bands.join('')}${grid}${days.join('')}
       <path d="${area}" fill="url(#g)"/>
-      <path d="${line}" fill="none" stroke="#f5a83c" stroke-width="2.2" stroke-linejoin="round"/>
-      <line id="cur" x1="${x(sel)}" x2="${x(sel)}" y1="0" y2="${BASE}" stroke="#dbe6ea" stroke-width="1"/>
-      <circle id="dot" cx="${x(sel)}" cy="${pts[sel]![1] ?? BASE}" r="5" fill="#0e1c27" stroke="#f5a83c" stroke-width="2.5"/>
+      <path d="${line}" fill="none" stroke="#dbe6ea" stroke-width="2" stroke-linejoin="round"/>
+      <line id="cur" x1="${x(0)}" x2="${x(0)}" y1="0" y2="${BASE}" stroke="#dbe6ea" stroke-width="1" stroke-opacity=".6"/>
+      <circle id="dot" cx="${x(0)}" cy="${pts[0]?.[1] ?? BASE}" r="5.5" fill="#0e1c27" stroke-width="2.5"/>
       <text x="${x(0) + 4}" y="12" fill="#8ba2ad" font-size="12">şimdi</text>
     </svg>`;
     const svg = $('chart').querySelector('svg')!;
@@ -135,44 +152,93 @@ import Base from '../../layouts/Base.astro';
     });
   }
 
+  const pts = (v: number) => (Math.round(v * 10) / 10).toLocaleString('tr-TR', { minimumFractionDigits: 1 });
+
   function select(i: number): void {
     sel = i;
     const s = data.scores[i]!;
-    const c = data.conditions[i] ?? { ts: s.ts };
     lamp($('lamp'), s.total, s.gated);
     $('when').textContent = i === 0 ? `Şimdi, ${fmtTime(s.ts)}` : `${fmtDay(s.ts)}, ${fmtTime(s.ts)}`;
     $('warn').textContent = s.warnings.join(' ');
     const svg = $('chart').querySelector('svg');
     if (svg) {
       const py = s.total === null ? BASE : y(s.total);
-      svg.querySelector('#cur')!.setAttribute('x1', String(x(i)));
-      svg.querySelector('#cur')!.setAttribute('x2', String(x(i)));
-      svg.querySelector('#dot')!.setAttribute('cx', String(x(i)));
-      svg.querySelector('#dot')!.setAttribute('cy', String(py));
+      for (const a of ['x1', 'x2']) svg.querySelector('#cur')!.setAttribute(a, String(x(i)));
+      const dot = svg.querySelector('#dot')!;
+      dot.setAttribute('cx', String(x(i)));
+      dot.setAttribute('cy', String(py));
+      dot.setAttribute('stroke', s.total === null ? PALETTE.neutral.color : PALETTE[bandOf(s.total / 100)].color);
       svg.setAttribute('aria-valuenow', String(i));
       svg.setAttribute('aria-valuetext', `${fmtDay(s.ts)} ${fmtTime(s.ts)}, puan ${s.total === null ? 'yok' : Math.round(s.total)}`);
     }
-    $('parts').innerHTML = [...s.components]
-      .sort((a, b) => b.weight - a.weight)
-      .map((p) => {
-        const pts = p.contribution === null ? 'veri yok' : `<b>${p.contribution.toFixed(1)}</b> / ${p.weight}`;
-        return `<li class="part${p.value === null ? ' na' : ''}"><div class="row"><span>${esc(COMPONENT_TR[p.key] ?? p.key)}</span><span class="pts">${pts}</span></div>
-          <div class="bar" aria-hidden="true"><i style="width:${((p.value ?? 0) * 100).toFixed(0)}%"></i></div>
-          <p class="reason">${esc(p.reason)}</p></li>`;
+
+    const m = s.multipliers[0];
+    const multRow = m
+      ? `<li class="part mult band-${bandOf(m.value)}"><div class="row"><span>Gece çarpanı</span><span class="pts"><b>×${m.value.toLocaleString('tr-TR', { maximumFractionDigits: 3 })}</b></span></div>
+          <div class="bar" aria-hidden="true"><i style="width:${(m.value * 100).toFixed(0)}%"></i></div>
+          <p class="reason">${esc(m.reason)}${s.raw !== null ? `. Çarpandan önce ${pts(s.raw)} puan.` : ''}</p></li>`
+      : '';
+    $('parts').innerHTML =
+      multRow +
+      [...s.components]
+        .sort((a, b) => b.weight - a.weight)
+        .map((p) => {
+          const band: Band = bandOf(p.value);
+          const score = p.contribution === null ? 'veri yok' : `<b>${pts(p.contribution)}</b> / ${p.weight}`;
+          return `<li class="part band-${band}${p.value === null ? ' na' : ''}"><div class="row"><span style="color:var(--foam)">${esc(COMPONENT_TR[p.key] ?? p.key)}</span><span class="pts">${score}</span></div>
+            <div class="bar" aria-hidden="true"><i style="width:${((p.value ?? 0) * 100).toFixed(0)}%"></i></div>
+            <p class="reason">${esc(p.reason)}</p></li>`;
+        })
+        .join('');
+
+    const meta = new Map(data.data.conditions.map((c) => [c.key, c]));
+    $('cond').innerHTML = s.conditions
+      .map((c) => {
+        const info = meta.get(c.key)!;
+        const band: Band = c.display === null ? 'neutral' : c.band;
+        const p = PALETTE[band];
+        const state = c.display === null ? 'veri yok' : !info.affects ? 'puanı etkilemez' : band === 'neutral' ? 'değerlendirilemedi' : p.label;
+        return `<div class="band-${band}" data-key="${esc(c.key)}" data-band="${band}"><dt>${esc(info.label)}</dt><dd>
+          <span class="val"><span class="ico" aria-hidden="true">${p.icon}</span><span>${esc(c.display ?? '–')}</span></span>
+          <p class="state">${esc(state.charAt(0).toUpperCase() + state.slice(1))}</p>
+          ${!info.affects && info.target === 'Puanı etkilemez' ? '' : `<p class="target">${esc(info.affects ? `Hedef: ${info.target}` : info.target)}</p>`}</dd></div>`;
       })
       .join('');
-    const v = (n: number | undefined, d: number, u: string) => (n === undefined ? '–' : `${n.toFixed(d)} ${u}`);
-    const rows: [string, string][] = [
-      ['Rüzgar', c.windSpeed === undefined ? '–' : `${Math.round(c.windSpeed)} km/sa ${compass(c.windDir ?? null)}`],
-      ['Hamle', v(c.windGust, 0, 'km/sa')],
-      ['Dalga', v(c.waveH, 1, 'm')],
-      ['Su sıcaklığı', v(c.sst, 1, '°C')],
-      ['Basınç', v(c.pressure, 0, 'hPa')],
-      ['Akıntı', v(c.curVel, 2, 'm/s')],
-      ['Hava', v(c.temp, 0, '°C')],
-      ['Bulut', v(c.cloud, 0, '%')],
-    ];
-    $('cond').innerHTML = rows.map(([k, val]) => `<div><dt>${k}</dt><dd>${esc(val)}</dd></div>`).join('');
+  }
+
+  function profileChart(): void {
+    const prof = data.spot.profile;
+    if (!prof || prof.every((d) => d === null)) return;
+    const PW = 432, PH = 170, L = 34, R = 10, T = 14, B = 26;
+    const maxD = Math.max(5, ...prof.filter((d): d is number => d !== null)) * 1.1;
+    const px = (i: number) => L + (i / (prof.length - 1)) * (PW - L - R);
+    const py = (d: number) => T + (d / maxD) * (PH - T - B);
+    let path = '';
+    let pen = false;
+    prof.forEach((d, i) => {
+      if (d === null) { pen = false; return; }
+      path += `${pen ? 'L' : 'M'}${px(i).toFixed(1)},${py(d).toFixed(1)}`;
+      pen = true;
+    });
+    const valid = prof.map((d, i) => [i, d] as const).filter((p): p is readonly [number, number] => p[1] !== null);
+    const fill = valid.length ? `M${px(valid[0]![0])},${T}` + valid.map(([i, d]) => `L${px(i).toFixed(1)},${py(d).toFixed(1)}`).join('') + `L${px(valid.at(-1)![0])},${T}Z` : '';
+    const ticksD = [0, maxD / 2, maxD].map((d) => `<text x="${L - 6}" y="${py(d) + 4}" fill="#8ba2ad" font-size="11" text-anchor="end">${Math.round(d)} m</text><line x1="${L}" x2="${PW - R}" y1="${py(d)}" y2="${py(d)}" stroke="#1b2e3b"/>`).join('');
+    const ticksX = [0, 100, 200, 300, 400, 500].map((m) => `<text x="${px(m / 25)}" y="${PH - 8}" fill="#8ba2ad" font-size="11" text-anchor="middle">${m}</text>`).join('');
+    const mark200 = data.spot.depth_200m !== null && data.spot.depth_200m !== undefined
+      ? `<line x1="${px(8)}" x2="${px(8)}" y1="${T}" y2="${py(data.spot.depth_200m)}" stroke="#dbe6ea" stroke-dasharray="3 3" stroke-opacity=".6"/><circle cx="${px(8)}" cy="${py(data.spot.depth_200m)}" r="4" fill="#dbe6ea"/>`
+      : '';
+    $('profile').innerHTML = `<svg viewBox="0 0 ${PW} ${PH}" role="img" aria-label="Kıyı normali boyunca 0–500 m derinlik profili">
+      <rect x="${L}" y="${T}" width="${PW - L - R}" height="${PH - T - B}" fill="#0c1a24"/>${ticksD}
+      <path d="${fill}" fill="#1d4a63" fill-opacity=".55"/><path d="${path}" fill="none" stroke="#7cc4e4" stroke-width="2"/>${mark200}${ticksX}
+    </svg>`;
+    const sp = data.spot;
+    const bits = [
+      sp.depth_200m != null ? `200 m açıkta ${sp.depth_200m.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} m` : null,
+      sp.max_depth_100m != null ? `uçtan 100 m içinde en fazla ${sp.max_depth_100m.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} m` : null,
+      sp.slope_pct != null ? `0–300 m eğim %${sp.slope_pct.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}` : null,
+    ].filter(Boolean);
+    $('depth-note').textContent = `${bits.join(', ')}. Yatay eksen: meranın ucundan denize doğru metre. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki kaya, çukur gibi mikro yapıları göstermez.`;
+    $('depth').hidden = false;
   }
 
   function render(): void {
@@ -180,7 +246,15 @@ import Base from '../../layouts/Base.astro';
     document.title = `${spot.name} — av.livn`;
     $('name').textContent = spot.name;
     const lampTxt = spot.has_light === null ? 'lamba bilinmiyor' : spot.has_light ? 'lamba var' : 'lamba yok';
-    $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt].filter(Boolean).join(', ');
+    const facing = spot.shore_normal_deg === null ? null : `denize bakış ${compass(spot.shore_normal_deg)}`;
+    $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt, facing].filter(Boolean).join(', ');
+    if (data.scores.length === 0) {
+      $('when').textContent = 'Puan henüz hesaplanmadı';
+      $('best').textContent = 'Saatlik güncelleme birkaç dakika içinde çalışacak.';
+      profileChart();
+      $('spot').setAttribute('aria-busy', 'false');
+      return;
+    }
     const best = data.scores.reduce<{ i: number; v: number }>((b, s, i) => (!s.gated && (s.total ?? -1) > b.v ? { i, v: s.total ?? -1 } : b), { i: -1, v: -1 });
     $('best').textContent = best.i >= 0 ? `72 saatin en iyisi: ${fmtDay(data.scores[best.i]!.ts)} ${fmtTime(data.scores[best.i]!.ts)}, ${Math.round(best.v)} puan` : '';
     const notes = [fmtAgo(data.data.weather_fetched_at) + '.'];
@@ -190,6 +264,7 @@ import Base from '../../layouts/Base.astro';
     $('note').textContent = notes.join(' ');
     chart();
     select(0);
+    profileChart();
     $('spot').setAttribute('aria-busy', 'false');
   }
 
@@ -197,7 +272,7 @@ import Base from '../../layouts/Base.astro';
     $('name').textContent = 'Mera seçilmedi';
     $('sub').innerHTML = '<a href="/">Mera listesine dönün</a>.';
   } else {
-    fetch(`/api/spots/${encodeURIComponent(id)}`)
+    fetch(`/api/spots/${encodeURIComponent(id)}`, { cache: 'no-cache' })
       .then((r) => (r.status === 404 ? Promise.reject(new Error('404')) : r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((b: Resp) => { data = b; render(); })
       .catch((e: Error) => {

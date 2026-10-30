@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { refreshWeather } from './cron';
+import { runCron } from './cron';
 import type { Env } from './env';
 import { adminRoutes } from './routes/admin';
 import { publicRoutes } from './routes/public';
@@ -22,12 +22,12 @@ app.onError((err, c) => {
 
 export default {
   fetch: app.fetch,
-  async scheduled(_event, env, ctx) {
+  async scheduled(event, env, ctx) {
     ctx.waitUntil(
-      refreshWeather(env).then((r) => {
-        if (r.errors.length) console.error('refreshWeather', r);
-        else console.log('refreshWeather', r);
-      }),
+      runCron(event.cron, env, new Date(event.scheduledTime)).then(
+        (r) => console.log('cron', event.cron, r),
+        (e) => console.error('cron', event.cron, e),
+      ),
     );
   },
 } satisfies ExportedHandler<Env>;

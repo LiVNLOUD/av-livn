@@ -1,4 +1,5 @@
 import type { Component } from '../types';
+import { paramsOf } from '../params';
 import { isNum } from '../util';
 
 /** Current speed (m/s): slack penalised, moderate ideal, strong penalised to 0. */
@@ -9,10 +10,13 @@ export function currentValue(v: number, [lo, hi]: [number, number] = [0.05, 0.25
   return 1 - (v - hi) / (max - hi);
 }
 
+export function currentLabel(v: number, [lo, hi]: [number, number]): string {
+  return v < lo ? 'durgun' : v <= hi ? 'orta' : 'sert';
+}
+
 export const akinti: Component = ({ series, profile }) => {
   const v = series.now?.curVel;
   if (!isNum(v)) return { value: null, reason: 'akıntı verisi yok' };
-  const [lo, hi] = profile.params.current_ideal_ms ?? [0.05, 0.25];
-  const label = v < lo ? 'durgun' : v <= hi ? 'orta' : 'sert';
-  return { value: currentValue(v, [lo, hi], profile.params.current_max_ms), reason: `akıntı ${v.toFixed(2)} m/s, ${label}` };
+  const prm = paramsOf(profile);
+  return { value: currentValue(v, prm.current_ideal_ms, prm.current_max_ms), reason: `akıntı ${v.toFixed(2)} m/s, ${currentLabel(v, prm.current_ideal_ms)}` };
 };

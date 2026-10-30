@@ -1,11 +1,14 @@
-import { getProfile, scoreAt, scoreSeries, type SpeciesProfile } from '@av-livn/scoring';
+// Read-only endpoints: scores are precomputed by cron (see precompute.ts); handlers only slice stored JSON.
+import { getProfile, type SpeciesProfile } from '@av-livn/scoring';
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { cachedJson } from '../lib/cache';
-import { mergeSnapshots } from '../lib/series';
-import { haversineKm, loadSnapshots, publicSpot, toSpotInput, type SpotRow } from '../lib/spots';
+import { publicSpot, type SpotRow } from '../lib/spots';
+import type { Detail } from '../precompute';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
+
+const HOUR = 3_600_000;
 
 function profileFor(id: string | undefined): SpeciesProfile | { error: string } {
   const p = getProfile(id ?? 'istavrit');
@@ -14,51 +17,57 @@ function profileFor(id: string | undefined): SpeciesProfile | { error: string } 
   return p;
 }
 
-publicRoutes.get('/spots', (c) => cachedJson(c, 600, async () => {
-  const profile = profileFor(c.req.query('species'));
-  if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
-  const { results } = await c.env.DB.prepare("SELECT * FROM spots WHERE status != 'rejected' ORDER BY name").all<SpotRow>();
-  const snaps = await loadSnapshots(c.env.DB, results.flatMap((r) => (r.sea_cell ? [r.wx_cell, r.sea_cell] : [r.wx_cell])));
-  const now = new Date();
-  const spots = results.map((r) => {
-    const points = mergeSnapshots(snaps.get(r.wx_cell)?.snap, r.sea_cell ? snaps.get(r.sea_cell)?.snap : null);
-    const s = scoreAt({ spot: toSpotInput(r), at: now, profile, points });
-    return { ...publicSpot(r), score: { total: s.total, gated: s.gated, warnings: s.warnings, missing: s.missing } };
-  });
-  spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1));
-  const fetched = [...snaps.values()].map((s) => s.fetched_at).sort();
-  return c.json(
-    { ok: true, species: { id: profile.id, name: profile.name }, at: now.toISOString(), data_fetched_at: fetched.at(-1) ?? null, spots },
-    200,
-  );
-}));
+type ListEntry = [number | null, 0 | 1, string | null, number];
 
-publicRoutes.get('/spots/:id', (c) => cachedJson(c, 600, async () => {
-  const profile = profileFor(c.req.query('species'));
-  if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
-  const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 96);
-  const r = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(c.req.param('id')).first<SpotRow>();
-  if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
-  const snaps = await loadSnapshots(c.env.DB, r.sea_cell ? [r.wx_cell, r.sea_cell] : [r.wx_cell]);
-  const wx = snaps.get(r.wx_cell);
-  const sea = r.sea_cell ? snaps.get(r.sea_cell) : undefined;
-  const points = mergeSnapshots(wx?.snap, sea?.snap);
-  const scores = scoreSeries({ spot: toSpotInput(r), from: new Date(), hours, profile, points });
-  const byHour = new Map(points.map((p) => [p.ts.slice(0, 13), p]));
-  const conditions = scores.map((s) => byHour.get(s.ts.slice(0, 13)) ?? { ts: s.ts });
-  const seaGrid =
-    sea?.snap.lat !== undefined && sea.snap.lon !== undefined
-      ? { lat: sea.snap.lat, lon: sea.snap.lon, distance_km: Math.round(haversineKm(r.lat, r.lon, sea.snap.lat, sea.snap.lon) * 10) / 10 }
-      : null;
-  return c.json(
-    {
+publicRoutes.get('/spots', (c) =>
+  cachedJson(c, 600, async () => {
+    const profile = profileFor(c.req.query('species'));
+    if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
+    const [rows, fetched] = await c.env.DB.batch([
+      c.env.DB.prepare(
+        `SELECT s.*, sc.start_hour, sc.list_json, sc.computed_at FROM spots s
+         LEFT JOIN spot_scores sc ON sc.spot_id = s.id AND sc.species = ?1
+         WHERE s.status != 'rejected'`,
+      ).bind(profile.id),
+      c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
+    ]);
+    const nowHour = Math.floor(Date.now() / HOUR);
+    const spots = (rows!.results as (SpotRow & { start_hour: number | null; list_json: string | null })[]).map((r) => {
+      const entry = r.list_json && r.start_hour !== null ? (JSON.parse(r.list_json) as ListEntry[])[nowHour - r.start_hour] : undefined;
+      return {
+        ...publicSpot(r),
+        score: entry
+          ? { total: entry[0], gated: entry[1] === 1, warnings: entry[2] ? [entry[2]] : [], missing_count: entry[3] }
+          : { total: null, gated: false, warnings: [], missing_count: 0 },
+      };
+    });
+    spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
+    const at = (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null;
+    return c.json({ ok: true, species: { id: profile.id, name: profile.name }, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, spots });
+  }),
+);
+
+publicRoutes.get('/spots/:id', (c) =>
+  cachedJson(c, 600, async () => {
+    const profile = profileFor(c.req.query('species'));
+    if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
+    const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
+    const r = await c.env.DB.prepare(
+      `SELECT s.*, sc.start_hour, sc.detail_json FROM spots s
+       LEFT JOIN spot_scores sc ON sc.spot_id = s.id AND sc.species = ?2
+       WHERE s.id = ?1`,
+    )
+      .bind(c.req.param('id'), profile.id)
+      .first<SpotRow & { start_hour: number | null; detail_json: string | null }>();
+    if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
+    const detail = r.detail_json ? (JSON.parse(r.detail_json) as Detail) : null;
+    const from = r.start_hour === null ? 0 : Math.max(0, Math.floor(Date.now() / HOUR) - r.start_hour);
+    return c.json({
       ok: true,
       species: { id: profile.id, name: profile.name, weights: profile.weights },
       spot: publicSpot(r),
-      data: { weather_fetched_at: wx?.fetched_at ?? null, sea_fetched_at: sea?.fetched_at ?? null, sea_grid: seaGrid },
-      scores,
-      conditions,
-    },
-    200,
-  );
-}));
+      data: detail?.meta ?? { computed_at: null, weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, conditions: [] },
+      scores: detail ? detail.hours.slice(from, from + hours) : [],
+    });
+  }),
+);

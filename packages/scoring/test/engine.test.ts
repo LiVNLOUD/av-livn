@@ -94,11 +94,13 @@ describe('scoreSeries', () => {
 });
 
 describe('profiles', () => {
-  it('istavrit has the agreed v1 weights', () => {
+  it('istavrit has the agreed v1.1 weights (sum 100) and night multiplier', () => {
     expect(ISTAVRIT.weights).toEqual({
-      gece_isik_penceresi: 25, ruzgar_dalga_kiyiya_gore: 20, su_sicakligi_ve_3g_trend: 15,
-      basinc_trendi_3_6s: 10, ay_evresi: 10, akinti: 10, mevsim_katsayisi: 10,
+      ruzgar_dalga_kiyiya_gore: 27, su_sicakligi_ve_3g_trend: 20, basinc_trendi_3_6s: 13,
+      ay_evresi: 13, akinti: 13, mevsim_katsayisi: 14,
     });
+    expect(Object.values(ISTAVRIT.weights).reduce((a, b) => a + b, 0)).toBe(100);
+    expect(ISTAVRIT.night_multiplier).toMatchObject({ full: 1, twilight: 0.7, day: 0.25, no_light_factor: 0.75 });
     expect(ISTAVRIT.safety).toEqual({ gust_kmh_max: 40, wave_m_max: 1.2, cap: 30 });
   });
 

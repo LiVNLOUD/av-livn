@@ -28,15 +28,44 @@ export interface SpeciesProfile {
   name: string;
   version: number;
   weights: Record<string, number>;
-  params: {
-    wave_soft_limit_m?: number;
-    sst_ideal_c?: [number, number];
-    current_ideal_ms?: [number, number];
-    current_max_ms?: number;
-  };
+  params: Partial<SpeciesParams>;
+  night_multiplier?: Partial<NightMultiplierConfig>;
   /** Month (1–12, as string key) → coefficient. */
   season: Record<string, number>;
   safety: { gust_kmh_max: number; wave_m_max: number; cap: number };
+}
+
+/** All tunable thresholds of the v1 rules. Every key has a default (see params.ts). */
+export interface SpeciesParams {
+  wave_soft_limit_m: number;
+  sst_ideal_c: [number, number];
+  sst_trend_ok_c: number;
+  sst_trend_zero_c: number;
+  current_ideal_ms: [number, number];
+  current_max_ms: number;
+  wind: { onshore_start_kmh: number; onshore_span_kmh: number; offshore_ok_kmh: number; offshore_span_kmh: number };
+  pressure: { ok: [number, number]; rise_zero: number; fall_floor_at: number; fall_floor: number };
+  gust_ok_kmh: number;
+}
+
+export interface NightMultiplierConfig {
+  full: number;
+  twilight: number;
+  day: number;
+  no_light_factor: number;
+  dusk_before_min: number;
+  dusk_after_min: number;
+  dawn_before_min: number;
+  dawn_after_min: number;
+}
+
+export type NightPhase = 'full' | 'twilight' | 'day';
+
+export interface MultiplierResult {
+  key: string;
+  value: number;
+  phase: NightPhase;
+  reason: string;
 }
 
 export interface ComponentResult {
@@ -59,6 +88,7 @@ export interface ScoreResult {
   warnings: string[];
   missing: string[];
   components: ScoredComponent[];
+  multipliers: MultiplierResult[];
 }
 
 /** Read access to the hourly series relative to the scored hour. */
