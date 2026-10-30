@@ -1,0 +1,1362 @@
+{
+ "generated": "2026-10-30T16:54:19.168009+00:00",
+ "bbox": {
+  "south": 40.28,
+  "north": 40.62,
+  "west": 28.55,
+  "east": 29.25
+ },
+ "gemlik_gulf": {
+  "south": 40.37,
+  "north": 40.47,
+  "west": 28.95,
+  "east": 29.13
+ },
+ "products": {
+  "anfc": {
+   "product": "BLKSEA_ANALYSISFORECAST_PHY_007_001",
+   "datasets": {
+    "cmems_mod_blk_phy-cur_anfc_2.5km_P1D-m": {
+     "variables": [
+      "uo",
+      "vo",
+      "wo"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "2024-10-18T00:00:00+00:00",
+      "max": "2026-11-08T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-cur_anfc_2.5km_P1M-m": {
+     "variables": [
+      "uo",
+      "vo",
+      "wo"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-cur_anfc_2.5km_PT15M-i": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-10T00:15:00+00:00",
+      "max": "2026-11-04T00:00:00+00:00",
+      "step_s": 900.0
+     }
+    },
+    "cmems_mod_blk_phy-cur_anfc_2.5km_PT1H-m": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "2024-10-10T00:00:00+00:00",
+      "max": "2026-11-03T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-cur_anfc_detided-2.5km_P1D-m": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-02T00:00:00+00:00",
+      "max": "2026-11-07T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-cur_anfc_mrm-500m_P1D-m": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": {
+      "min": "2024-08-05T00:00:00+00:00",
+      "max": "2026-11-06T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-cur_anfc_mrm-500m_PT1H-i": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": {
+      "min": "2022-09-12T00:00:00+00:00",
+      "max": "2026-11-06T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-ice_anfc_2.5km_P1D-m": {
+     "variables": [
+      "siconc",
+      "sithick"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-02T00:00:00+00:00",
+      "max": "2026-11-08T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-mld_anfc_2.5km_P1D-m": {
+     "variables": [
+      "mlotst"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-02T00:00:00+00:00",
+      "max": "2026-11-08T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-mld_anfc_2.5km_P1M-m": {
+     "variables": [
+      "mlotst"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-mld_anfc_2.5km_PT1H-m": {
+     "variables": [
+      "mlotst"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-10T00:00:00+00:00",
+      "max": "2026-11-03T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-sal_anfc_2.5km_P1D-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "2024-10-18T00:00:00+00:00",
+      "max": "2026-11-08T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-sal_anfc_2.5km_P1M-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-sal_anfc_2.5km_PT1H-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "2024-10-10T00:00:00+00:00",
+      "max": "2026-11-03T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-sal_anfc_mrm-500m_P1D-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": {
+      "min": "2024-08-05T00:00:00+00:00",
+      "max": "2026-11-06T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-sal_anfc_mrm-500m_PT1H-i": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": {
+      "min": "2024-09-01T00:00:00+00:00",
+      "max": "2026-11-06T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_2.5km_P1D-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-02T00:00:00+00:00",
+      "max": "2026-11-08T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_2.5km_P1M-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_2.5km_PT15M-i": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-10T00:15:00+00:00",
+      "max": "2026-11-04T00:00:00+00:00",
+      "step_s": 900.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_2.5km_PT1H-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-10T00:00:00+00:00",
+      "max": "2026-11-03T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_detided-2.5km_P1D-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-10-02T00:00:00+00:00",
+      "max": "2026-11-07T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_mrm-500m_P1D-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-08-05T00:00:00+00:00",
+      "max": "2026-11-06T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_anfc_mrm-500m_PT1H-i": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2024-09-01T00:00:00+00:00",
+      "max": "2026-11-06T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-tem_anfc_mrm-500m_P1D-m": {
+     "variables": [
+      "thetao"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": {
+      "min": "2021-11-01T00:00:00+00:00",
+      "max": "2026-11-06T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-tem_anfc_mrm-500m_PT1H-i": {
+     "variables": [
+      "thetao"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": {
+      "min": "2022-09-12T00:00:00+00:00",
+      "max": "2026-11-06T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy-temp_anfc_2.5km_P1D-m": {
+     "variables": [
+      "bottomT",
+      "thetao"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "2024-10-18T00:00:00+00:00",
+      "max": "2026-11-08T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-temp_anfc_2.5km_P1M-m": {
+     "variables": [
+      "bottomT",
+      "thetao"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-temp_anfc_2.5km_PT1H-m": {
+     "variables": [
+      "bottomT",
+      "thetao"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "2024-10-10T00:00:00+00:00",
+      "max": "2026-11-03T23:00:00+00:00",
+      "step_s": 3600.0
+     }
+    },
+    "cmems_mod_blk_phy_anfc_2.5km_static": {
+     "variables": [
+      "deptho",
+      "deptho_lev",
+      "e1t",
+      "e2t",
+      "e3t",
+      "mask",
+      "mdt"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": null
+    },
+    "cmems_mod_blk_phy_anfc_mrm-500m_static": {
+     "variables": [
+      "deptho",
+      "mask"
+     ],
+     "depth": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+     ],
+     "time": null
+    }
+   },
+   "marmara_hourly_datasets": [
+    "cmems_mod_blk_phy-cur_anfc_mrm-500m_PT1H-i",
+    "cmems_mod_blk_phy-sal_anfc_mrm-500m_PT1H-i",
+    "cmems_mod_blk_phy-ssh_anfc_mrm-500m_PT1H-i",
+    "cmems_mod_blk_phy-tem_anfc_mrm-500m_PT1H-i"
+   ],
+   "tests": {
+    "cmems_mod_blk_phy_anfc_mrm-500m_static": {
+     "resolution_deg": [
+      0.00625,
+      0.00625
+     ],
+     "grid": [
+      55,
+      113
+     ],
+     "wet_cells_bbox": 2668,
+     "wet_cells_gemlik_gulf": 397,
+     "nearest_wet_km_per_spot": {
+      "osm-way-1005837524": 0.25,
+      "osm-way-1170373161": 0.25,
+      "osm-way-1218507890": 0.28,
+      "osm-way-1233883494": 0.35,
+      "osm-way-1364814104": 0.06,
+      "osm-way-1394208144": 0.4,
+      "osm-way-1413355181": 0.3,
+      "osm-way-1414984335": 0.28,
+      "osm-way-1422122108": 0.31,
+      "osm-way-1456975486": 0.18,
+      "osm-way-252356832": 0.75,
+      "osm-way-252356833": 0.66,
+      "osm-way-479047532": 0.28,
+      "osm-way-483965349": 0.13,
+      "osm-way-503770078": 0.78,
+      "osm-way-77362926": 0.12
+     }
+    },
+    "cmems_mod_blk_phy-tem_anfc_mrm-500m_P1D-m": {
+     "resolution_deg": [
+      0.00625,
+      0.00625
+     ],
+     "grid": [
+      55,
+      112
+     ],
+     "wet_cells_bbox": 2588,
+     "wet_cells_gemlik_gulf": 379,
+     "nearest_wet_km_per_spot": {
+      "osm-way-1005837524": 0.25,
+      "osm-way-1170373161": 0.57,
+      "osm-way-1218507890": 0.49,
+      "osm-way-1233883494": 0.35,
+      "osm-way-1364814104": 0.06,
+      "osm-way-1394208144": 0.47,
+      "osm-way-1413355181": 0.3,
+      "osm-way-1414984335": 0.28,
+      "osm-way-1422122108": 0.31,
+      "osm-way-1456975486": 0.18,
+      "osm-way-252356832": 0.75,
+      "osm-way-252356833": 0.66,
+      "osm-way-479047532": 0.28,
+      "osm-way-483965349": 0.13,
+      "osm-way-503770078": 0.78,
+      "osm-way-77362926": 0.12
+     },
+     "depth_levels_m": [
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      10.0,
+      11.0,
+      12.0,
+      13.0,
+      14.0,
+      15.0,
+      16.0,
+      17.0,
+      18.0,
+      19.0,
+      20.0,
+      21.0,
+      22.0,
+      23.0,
+      24.0,
+      25.0
+     ]
+    }
+   }
+  },
+  "multiyear": {
+   "product": "BLKSEA_MULTIYEAR_PHY_007_004",
+   "datasets": {
+    "cmems_mod_blk_phy-cur_my_2.5km-climatology_P1M-m": {
+     "variables": [
+      "climatology_bounds",
+      "uo_mean",
+      "uo_std",
+      "vo_mean",
+      "vo_std"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-cur_my_2.5km_P1D-m": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-cur_my_2.5km_P1M-m": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-cur_my_2.5km_P1Y-m": {
+     "variables": [
+      "uo",
+      "vo"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-hflux_my_2.5km_P1D-m": {
+     "variables": [
+      "hfds",
+      "hfls",
+      "hfss",
+      "rlds",
+      "rsntds"
+     ],
+     "depth": null,
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-hflux_my_2.5km_P1M-m": {
+     "variables": [
+      "hfds",
+      "hfls",
+      "hfss",
+      "rlds",
+      "rsntds"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-mflux_my_2.5km_P1D-m": {
+     "variables": [
+      "tauuo",
+      "tauvo"
+     ],
+     "depth": null,
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-mflux_my_2.5km_P1M-m": {
+     "variables": [
+      "tauuo",
+      "tauvo"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-mld_my_2.5km-climatology_P1M-m": {
+     "variables": [
+      "climatology_bounds",
+      "mlotst_mean",
+      "mlotst_std"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-mld_my_2.5km_P1D-m": {
+     "variables": [
+      "mlotst"
+     ],
+     "depth": null,
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-mld_my_2.5km_P1M-m": {
+     "variables": [
+      "mlotst"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-mld_my_2.5km_P1Y-m": {
+     "variables": [
+      "mlotst"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-sal_my_2.5km-climatology_P1M-m": {
+     "variables": [
+      "climatology_bounds",
+      "so_mean",
+      "so_std"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-sal_my_2.5km_P1D-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-sal_my_2.5km_P1M-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-sal_my_2.5km_P1Y-m": {
+     "variables": [
+      "so"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-ssh_my_2.5km-climatology_P1M-m": {
+     "variables": [
+      "climatology_bounds",
+      "zos_mean",
+      "zos_std"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-ssh_my_2.5km_P1D-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-ssh_my_2.5km_P1M-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-ssh_my_2.5km_P1Y-m": {
+     "variables": [
+      "zos"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-temp_my_2.5km-climatology_P1M-m": {
+     "variables": [
+      "bottomT_mean",
+      "bottomT_std",
+      "climatology_bounds",
+      "thetao_mean",
+      "thetao_std"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-temp_my_2.5km_P1D-m": {
+     "variables": [
+      "bottomT",
+      "thetao"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-temp_my_2.5km_P1M-m": {
+     "variables": [
+      "bottomT",
+      "thetao"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-temp_my_2.5km_P1Y-m": {
+     "variables": [
+      "bottomT",
+      "thetao"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy-wflux_my_2.5km_P1D-m": {
+     "variables": [
+      "evs",
+      "friver",
+      "pr"
+     ],
+     "depth": null,
+     "time": {
+      "min": "1993-01-01T00:00:00+00:00",
+      "max": "2025-07-31T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "cmems_mod_blk_phy-wflux_my_2.5km_P1M-m": {
+     "variables": [
+      "evs",
+      "friver",
+      "pr"
+     ],
+     "depth": null,
+     "time": {
+      "min": null,
+      "max": null,
+      "step_s": null
+     }
+    },
+    "cmems_mod_blk_phy_my_2.5km_static": {
+     "variables": [
+      "deptho",
+      "deptho_lev",
+      "e1t",
+      "e2t",
+      "e3t",
+      "mask",
+      "mdt"
+     ],
+     "depth": [
+      0.5001727938652039,
+      1.5015978813171387,
+      2.5045619010925293,
+      3.509192705154419,
+      4.515629291534424,
+      5.524022102355957,
+      6.534533977508545,
+      7.547341346740723,
+      8.56263542175293,
+      9.580622673034668,
+      10.60152816772461,
+      11.625594139099121
+     ],
+     "time": null
+    }
+   },
+   "tests": {
+    "cmems_mod_blk_phy-temp_my_2.5km_P1D-m": {
+     "resolution_deg": [
+      0.025,
+      0.025
+     ],
+     "grid": [
+      5,
+      29
+     ],
+     "wet_cells_bbox": 0,
+     "wet_cells_gemlik_gulf": 0,
+     "nearest_wet_km_per_spot": {
+      "osm-way-1005837524": null,
+      "osm-way-1170373161": null,
+      "osm-way-1218507890": null,
+      "osm-way-1233883494": null,
+      "osm-way-1364814104": null,
+      "osm-way-1394208144": null,
+      "osm-way-1413355181": null,
+      "osm-way-1414984335": null,
+      "osm-way-1422122108": null,
+      "osm-way-1456975486": null,
+      "osm-way-252356832": null,
+      "osm-way-252356833": null,
+      "osm-way-479047532": null,
+      "osm-way-483965349": null,
+      "osm-way-503770078": null,
+      "osm-way-77362926": null
+     },
+     "depth_levels_m": [
+      0.5,
+      1.5,
+      2.5
+     ]
+    }
+   }
+  },
+  "sst_l4_nrt": {
+   "product": "SST_BS_SST_L4_NRT_OBSERVATIONS_010_006",
+   "datasets": {
+    "SST_BS_SSTA_L4_NRT_OBSERVATIONS_010_006_b": {
+     "variables": [
+      "sst_anomaly"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2008-01-01T00:00:00+00:00",
+      "max": "2026-10-30T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "SST_BS_SSTA_L4_NRT_OBSERVATIONS_010_006_d": {
+     "variables": [
+      "sst_anomaly"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2008-01-01T00:00:00+00:00",
+      "max": "2026-10-30T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "SST_BS_SST_L4_NRT_OBSERVATIONS_010_006_a_V2": {
+     "variables": [
+      "analysed_sst",
+      "analysis_error",
+      "mask",
+      "sea_ice_fraction"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2008-01-01T00:00:00+00:00",
+      "max": "2026-10-30T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    },
+    "SST_BS_SST_L4_NRT_OBSERVATIONS_010_006_c_V2": {
+     "variables": [
+      "analysed_sst",
+      "analysis_error",
+      "mask",
+      "sea_ice_fraction"
+     ],
+     "depth": null,
+     "time": {
+      "min": "2008-01-01T00:00:00+00:00",
+      "max": "2026-10-30T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    }
+   },
+   "tests": {
+    "SST_BS_SSTA_L4_NRT_OBSERVATIONS_010_006_b": {
+     "resolution_deg": [
+      0.0625,
+      0.0625
+     ],
+     "grid": [
+      5,
+      12
+     ],
+     "wet_cells_bbox": 13,
+     "wet_cells_gemlik_gulf": 0,
+     "nearest_wet_km_per_spot": {
+      "osm-way-1005837524": 13.59,
+      "osm-way-1170373161": 2.72,
+      "osm-way-1218507890": 24.7,
+      "osm-way-1233883494": 9.53,
+      "osm-way-1364814104": 3.19,
+      "osm-way-1394208144": 1.72,
+      "osm-way-1413355181": 1.64,
+      "osm-way-1414984335": 5.7,
+      "osm-way-1422122108": 1.45,
+      "osm-way-1456975486": 6.98,
+      "osm-way-252356832": 13.48,
+      "osm-way-252356833": 13.34,
+      "osm-way-479047532": 23.7,
+      "osm-way-483965349": 5.01,
+      "osm-way-503770078": 13.4,
+      "osm-way-77362926": 28.68
+     }
+    }
+   }
+  },
+  "sst_l4_rep": {
+   "product": "SST_BS_SST_L4_REP_OBSERVATIONS_010_022",
+   "datasets": {
+    "cmems_SST_BS_SST_L4_REP_OBSERVATIONS_010_022": {
+     "variables": [
+      "analysed_sst",
+      "analysis_error",
+      "mask",
+      "sea_ice_fraction"
+     ],
+     "depth": null,
+     "time": {
+      "min": "1982-01-01T00:00:00+00:00",
+      "max": "2026-09-30T00:00:00+00:00",
+      "step_s": 86400.0
+     }
+    }
+   },
+   "tests": {
+    "cmems_SST_BS_SST_L4_REP_OBSERVATIONS_010_022": {
+     "resolution_deg": [
+      0.0505,
+      0.05
+     ],
+     "grid": [
+      7,
+      14
+     ],
+     "wet_cells_bbox": 0,
+     "wet_cells_gemlik_gulf": 0,
+     "nearest_wet_km_per_spot": {
+      "osm-way-1005837524": null,
+      "osm-way-1170373161": null,
+      "osm-way-1218507890": null,
+      "osm-way-1233883494": null,
+      "osm-way-1364814104": null,
+      "osm-way-1394208144": null,
+      "osm-way-1413355181": null,
+      "osm-way-1414984335": null,
+      "osm-way-1422122108": null,
+      "osm-way-1456975486": null,
+      "osm-way-252356832": null,
+      "osm-way-252356833": null,
+      "osm-way-479047532": null,
+      "osm-way-483965349": null,
+      "osm-way-503770078": null,
+      "osm-way-77362926": null
+     }
+    }
+   }
+  }
+ }
+}
