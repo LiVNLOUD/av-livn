@@ -239,7 +239,7 @@ import Base from '../../layouts/Base.astro';
       ['Bulut', cloud === undefined || cloud === '–' ? '–' : `%${cloud}`, val(h, 'diel'), 'ışığı değiştirir: gündüz yumuşatır, gece lamba kontrastını artırır'],
       ['Lamba', lampLine, d.spot.has_light === null ? null : val(h, 'diel'), d.spot.has_light === null ? 'var/yok karışımı; saha formundan girin' : 'saha bilgisi'],
       ['Su sıcaklığı (48 sa)', why(h, 'su_degisim'), val(h, 'su_degisim'), 'ani soğuma cezalandırılır'],
-      ['Kısa normalden sapma', why(h, 'su_sapma'), val(h, 'su_sapma'), meta.ocean_normal ? `${meta.ocean_normal.years} yıllık kısa normal (kanıt C)` : 'normal yok'],
+      ['Kısa normalden sapma', why(h, 'su_sapma'), val(h, 'su_sapma'), meta.ocean_normal ? `${Math.round(meta.ocean_normal.years)} yıllık kısa normal (kanıt C)` : 'normal yok'],
       ['Bulanıklık', why(h, 'bulaniklik'), val(h, 'bulaniklik'), 'yağış ve dalgadan'],
       ['Basınç', why(h, 'basinc'), val(h, 'basinc'), 'düşük ağırlık (kanıt zayıf)'],
       ['Akıntı', why(h, 'akinti'), val(h, 'akinti'), 'düşük ağırlık'],
@@ -327,7 +327,7 @@ import Base from '../../layouts/Base.astro';
     const notes = [fmtAgo(m.weather_fetched_at) + '.'];
     if (m.ocean) notes.push(`Su sıcaklığı ve akıntı Copernicus Marmara 500 m modelinden (en yakın deniz hücresi ${n1(m.ocean.cell.distance_km)} km).`);
     else if (m.sea_grid && m.sea_grid.distance_km > 2) notes.push(`Dalga ve su verisi ${n1(m.sea_grid.distance_km)} km uzaktaki model noktasından.`);
-    if (m.ocean_normal) notes.push(`Sapma, ${m.ocean_normal.from.slice(0, 4)}–${m.ocean_normal.to.slice(0, 4)} günlük analiz arşivinden kurulan ${m.ocean_normal.years} yıllık kısa normale göre: uzun dönem klimatoloji değil, kanıt C.`);
+    if (m.ocean_normal) notes.push(`Sapma, ${m.ocean_normal.from.slice(0, 4)}–${m.ocean_normal.to.slice(0, 4)} günlük analiz arşivinden kurulan ${Math.round(m.ocean_normal.years)} yıllık kısa normale göre: uzun dönem klimatoloji değil, kanıt C.`);
     if (d.field) notes.push(`${d.field.observations} saha girişi, sonuncusu ${fmtDay(d.field.latestAt)}.${d.field.last_note ? ` Not: “${d.field.last_note}”` : ''}`);
     $('note').textContent = notes.join(' ');
     chart();
