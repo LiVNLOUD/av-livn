@@ -1,0 +1,11 @@
+# TODO: Lüfer / Çinekop profili — ağırlıklar ve parametreler henüz belirlenmedi (F6).
+id: lufer_cinekop
+name: Lüfer / Çinekop
+version: 0
+weights: {}
+params: {}
+season: {}
+safety:
+  gust_kmh_max: 40
+  wave_m_max: 1.2
+  cap: 30

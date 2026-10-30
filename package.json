@@ -1,0 +1,20 @@
+{
+  "name": "av-livn",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/scoring",
+    "workers/api",
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "npm run build -w apps/web && node scripts/embed-assets.mjs",
+    "test": "npm run build && npm run test -w packages/scoring && npm run test -w workers/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "deploy": "npm run build && npm run deploy -w workers/api"
+  }
+}

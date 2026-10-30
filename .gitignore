@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+coverage/
+.dev.vars
+.env*
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.nc
+*.tif
+*.pmtiles
+workers/api/src/generated/
+*.egg-info/

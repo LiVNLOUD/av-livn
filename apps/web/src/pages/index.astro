@@ -1,0 +1,39 @@
+---
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="tr" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1620" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>av.livn — Gemlik–Mudanya LRF</title>
+  </head>
+  <body>
+    <main>
+      <p class="tag">Gemlik · Mudanya · LRF</p>
+      <h1>Merhaba, deniz.</h1>
+      <p>Av öncesi asistanı kuruluyor. Mera puanları yakında burada.</p>
+      <p class="status">API: <span id="api">kontrol ediliyor…</span></p>
+    </main>
+    <footer>© {year} livn.tr</footer>
+    <script>
+      const el = document.getElementById('api')!;
+      fetch('/api/health')
+        .then((r) => r.json())
+        .then((b) => (el.textContent = b.ok ? 'çalışıyor' : 'hata'))
+        .catch(() => (el.textContent = 'ulaşılamıyor'));
+    </script>
+    <style is:global>
+      :root { color-scheme: dark; --bg: #0b1620; --fg: #e4eef2; --muted: #8aa3ad; --accent: #5fd3c4; }
+      body { margin: 0; min-height: 100dvh; display: grid; grid-template-rows: 1fr auto; background: var(--bg); color: var(--fg);
+        font: 16px/1.5 system-ui, sans-serif; }
+      main { padding: 2rem 1rem; max-width: 36rem; margin: auto; }
+      h1 { font-size: 2.2rem; margin: .25rem 0 1rem; }
+      .tag { color: var(--accent); letter-spacing: .08em; text-transform: uppercase; font-size: .8rem; margin: 0; }
+      .status { color: var(--muted); }
+      footer { padding: 1rem; color: var(--muted); font-size: .8rem; text-align: center; }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+# İstavrit (Trachurus spp.) — LRF, lamba altı. v1 kural tabanlı başlangıç ağırlıkları; kalibre edilecek.
+id: istavrit
+name: İstavrit
+version: 1
+weights:
+  gece_isik_penceresi: 25
+  ruzgar_dalga_kiyiya_gore: 20
+  su_sicakligi_ve_3g_trend: 15
+  basinc_trendi_3_6s: 10
+  ay_evresi: 10
+  akinti: 10
+  mevsim_katsayisi: 10
+params:
+  night_window: { start_after_sunset_h: 1, end_local: "00:00" }
+  wave_soft_limit_m: 0.6
+  sst_ideal_c: [14, 20]
+  current_ideal_ms: [0.05, 0.25]
+  current_max_ms: 0.6
+  dark_moon_preferred: true
+season:  # ay → katsayı
+  1: 0.6
+  2: 0.4
+  3: 0.4
+  4: 0.6
+  5: 0.8
+  6: 0.6
+  7: 0.6
+  8: 0.6
+  9: 0.8
+  10: 1.0
+  11: 1.0
+  12: 0.8
+safety:
+  gust_kmh_max: 40
+  wave_m_max: 1.2
+  cap: 30
