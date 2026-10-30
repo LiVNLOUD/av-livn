@@ -1,8 +1,8 @@
 import { env } from 'cloudflare:workers';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { CRON_SCORE, refreshWeather, runCron } from '../src/cron';
+import { CRON_FETCH, refreshWeather, runCron } from '../src/cron';
 import { app } from '../src/index';
-import { omFetch, resetAndSeed } from './helpers';
+import { omFetch, resetAndSeed, writeScores } from './helpers';
 
 const AUTH = { authorization: 'Bearer test-admin-token', 'content-type': 'application/json' };
 
@@ -10,7 +10,7 @@ beforeAll(async () => {
   await resetAndSeed();
   const now = new Date();
   await refreshWeather(env, now, omFetch(now));
-  for (const cron of CRON_SCORE) await runCron(cron, env, now);
+  expect(await writeScores(now)).toBe(3);
 });
 
 describe('GET /api/health', () => {
@@ -55,9 +55,7 @@ describe('GET /api/spots (reads precomputed scores)', () => {
     const detail = await (await app.request('/api/spots/osm-way-2?v=empty', {}, env)).json<{ scores: unknown[]; data: { computed_at: unknown } }>();
     expect(detail.scores).toEqual([]);
     expect(detail.data.computed_at).toBeNull();
-    await runCron(CRON_SCORE[0]!, env);
-    await runCron(CRON_SCORE[1]!, env);
-    await runCron(CRON_SCORE[2]!, env);
+    await writeScores();
   });
 
   it('rejects unknown and TODO species', async () => {
@@ -103,11 +101,8 @@ describe('cron routing', () => {
     await expect(runCron('0 0 * * *', env)).rejects.toThrow(/unknown cron/);
   });
 
-  it('splits spots over the scoring crons', async () => {
-    const counts = [];
-    for (const cron of CRON_SCORE) counts.push(((await runCron(cron, env)) as { spots: number }).spots);
-    expect(counts.reduce((a, b) => a + b, 0)).toBe(3);
-    expect(counts).toEqual([1, 1, 1]);
+  it('the only Worker cron is the :07 weather fetch (scoring runs in Actions)', () => {
+    expect(CRON_FETCH).toBe('7 * * * *');
   });
 });
 
@@ -117,13 +112,14 @@ describe('admin', () => {
     expect((await app.request('/api/admin/ping', {}, env)).status).toBe(401);
   });
 
-  it('re-scores a spot right after a lamp edit', async () => {
+  it('a lamp edit changes the night multiplier after the next scoring run', async () => {
     const night = async () => {
       const b = await (await app.request(`/api/spots/osm-way-1?v=${Math.random()}`, {}, env)).json<{ scores: { multipliers: { phase: string; value: number }[] }[] }>();
       return b.scores.map((s) => s.multipliers[0]!).find((m) => m.phase === 'full')!.value;
     };
     expect(await night()).toBe(0.75);
     await app.request('/api/admin/spots/osm-way-1', { method: 'PATCH', headers: AUTH, body: JSON.stringify({ has_light: true }) }, env);
+    await writeScores();
     expect(await night()).toBe(1);
   });
 
@@ -207,5 +203,30 @@ describe('edge cache', () => {
     expect(second.spot.name).toBe(first.spot.name);
     const fresh = await (await app.request(url + '&x=1', {}, env)).json<{ spot: { name: string } }>();
     expect(fresh.spot.name).toBe('Değişti');
+  });
+});
+
+describe('compact detail storage', () => {
+  it('pack/unpack round-trips and stays under D1 limits', async () => {
+    const { packDetail, unpackDetail, computeSpot } = await import('../src/precompute');
+    const { loadSnapshots } = await import('../src/lib/spots');
+    const { PROFILES } = await import('@av-livn/scoring');
+    const row = await env.DB.prepare("SELECT * FROM spots WHERE id = 'osm-way-1'").first();
+    const r = row as unknown as import('../src/lib/spots').SpotRow;
+    const snaps = await loadSnapshots(env.DB, [r.wx_cell, r.sea_cell!]);
+    const res = computeSpot(r, snaps.get(r.wx_cell), snaps.get(r.sea_cell!), PROFILES.istavrit!, new Date());
+    const packed = packDetail(res.detail);
+    const size = JSON.stringify(packed).length;
+    expect(size).toBeLessThan(90_000);
+    expect(size).toBeLessThan(JSON.stringify(res.detail).length * 0.7);
+    const back = unpackDetail(JSON.parse(JSON.stringify(packed)), 2, 3);
+    expect(back.hours.map((h) => h.ts)).toEqual(res.detail.hours.slice(2, 5).map((h) => h.ts));
+    const a = back.hours[0]!;
+    const b = res.detail.hours[2]!;
+    expect(a.components.map((c) => [c.key, c.weight, c.reason])).toEqual(b.components.map((c) => [c.key, c.weight, c.reason]));
+    expect(a.conditions.map((c) => [c.key, c.display, c.band])).toEqual(b.conditions.map((c) => [c.key, c.display, c.band]));
+    expect(a.multipliers[0]).toEqual(b.multipliers[0]);
+    expect(a.missing).toEqual(b.missing);
+    expect(unpackDetail({ ...packed, h: [[...packed.h[0]!.slice(0, 6), null, []] as never], meta: { ...packed.meta, mult: null } }).hours[0]!.multipliers).toEqual([]);
   });
 });

@@ -66,3 +66,18 @@ export function omFetch(now: Date, calls: string[] = []): typeof fetch {
     return Response.json(n === 1 ? shifted(kind, start, 1)[0] : shifted(kind, start, n));
   }) as typeof fetch;
 }
+
+/** Same writes as the hourly GitHub Actions scoring job (scripts/score-job.ts), via the D1 binding. */
+export async function writeScores(now = new Date()): Promise<number> {
+  const { scoreRecords, UPSERT_SCORE_SQL, DELETE_STALE_SCORES_SQL } = await import('../src/precompute');
+  const { loadSnapshots } = await import('../src/lib/spots');
+  const { results } = await env.DB.prepare("SELECT * FROM spots WHERE status != 'rejected' ORDER BY id").all();
+  const rows = results as unknown as import('../src/lib/spots').SpotRow[];
+  const snaps = await loadSnapshots(env.DB, rows.flatMap((r) => (r.sea_cell ? [r.wx_cell, r.sea_cell] : [r.wx_cell])));
+  const recs = scoreRecords(rows, snaps, now);
+  await env.DB.batch([
+    ...recs.map((r) => env.DB.prepare(UPSERT_SCORE_SQL).bind(r.spot_id, r.species, r.computed_at, r.start_hour, r.list_json, r.detail_json)),
+    env.DB.prepare(DELETE_STALE_SCORES_SQL),
+  ]);
+  return recs.length;
+}

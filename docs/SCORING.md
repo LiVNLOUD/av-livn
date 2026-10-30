@@ -66,7 +66,7 @@ Hamle > **40 km/sa** veya dalga > **1.2 m** → puan tavanı **30** ve uyarı (`
 
 ## Girdiler ve hesaplama yeri
 - **Girdiler:** saatlik seri (Open-Meteo Forecast + Marine, `sea_probe` noktasından), mera (`shore_normal_deg`, `has_light`, lat/lon), zaman ve tür profili. F3'ten itibaren SST eğilimi ve akıntı için CMEMS Marmara 500 m günlük verisi tercih edilecek.
-- **Hesaplama yeri:** puanlar ve koşullar saatlik cron'da önceden hesaplanır (`spot_scores` tablosu). API yalnız okur.
+- **Hesaplama yeri:** puanlar ve koşullar saatlik GitHub Actions işinde önceden hesaplanır (`score.yml`, `spot_scores` tablosu). API yalnız okur.
 
 ## Kalibrasyon (F5)
 ≥100 av kaydında bileşen değerleri ile "av oldu/olmadı" (veya adet) arasında lojistik regresyon kurulur ve kural tabanlı puanla AUC karşılaştırılır. Önerilen ağırlıklar rapor olarak sunulur, otomatik uygulanmaz.

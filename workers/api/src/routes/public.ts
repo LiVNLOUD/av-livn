@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { cachedJson } from '../lib/cache';
 import { publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
-import type { Detail } from '../precompute';
+import { unpackDetail, type PackedDetail } from '../precompute';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
@@ -60,14 +60,14 @@ publicRoutes.get('/spots/:id', (c) =>
       .bind(c.req.param('id'), profile.id)
       .first<SpotRow & { start_hour: number | null; detail_json: string | null }>();
     if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
-    const detail = r.detail_json ? (JSON.parse(r.detail_json) as Detail) : null;
     const from = r.start_hour === null ? 0 : Math.max(0, Math.floor(Date.now() / HOUR) - r.start_hour);
+    const detail = r.detail_json ? unpackDetail(JSON.parse(r.detail_json) as PackedDetail, from, hours) : null;
     return c.json({
       ok: true,
       species: { id: profile.id, name: profile.name, weights: profile.weights },
       spot: publicSpotDetail(r),
       data: detail?.meta ?? { computed_at: null, weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, conditions: [] },
-      scores: detail ? detail.hours.slice(from, from + hours) : [],
+      scores: detail ? detail.hours : [],
     });
   }),
 );

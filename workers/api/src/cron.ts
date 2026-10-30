@@ -1,7 +1,6 @@
 import { fetchSnapshots, type CellCoord } from './lib/openmeteo';
 import { valuesAt } from './lib/series';
 import type { Env } from './env';
-import { scoreGroup } from './precompute';
 
 const OBS_COLS: Record<string, string> = {
   pressure_msl: 'pressure', wind_speed_10m: 'wind_speed', wind_direction_10m: 'wind_dir', wind_gusts_10m: 'wind_gust',
@@ -54,14 +53,10 @@ export async function refreshWeather(env: Env, now = new Date(), fetcher: typeof
   return { ...counts, errors };
 }
 
-/** Cron schedule (must match wrangler.toml): weather at :07, then spot scoring split over minutes. */
+/** Cron schedule (must match wrangler.toml). Scoring runs hourly in GitHub Actions (score.yml), not here. */
 export const CRON_FETCH = '7 * * * *';
-export const CRON_SCORE = ['9 * * * *', '11 * * * *', '13 * * * *'];
 
 export async function runCron(cron: string, env: Env, now = new Date()): Promise<unknown> {
   if (cron === CRON_FETCH) return refreshWeather(env, now);
-  const group = CRON_SCORE.indexOf(cron);
-  if (group >= 0) return scoreGroup(env, now, group, CRON_SCORE.length);
   throw new Error(`unknown cron ${cron}`);
 }
-
