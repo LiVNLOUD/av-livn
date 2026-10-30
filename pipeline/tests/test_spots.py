@@ -37,9 +37,12 @@ def raw(normal, *structures, places=()):
     return {"elements": [way(1, {"natural": "coastline"}, COASTS[normal]), *structures, *places]}
 
 
+@pytest.mark.parametrize("kind", ["pier", "breakwater"])
 @pytest.mark.parametrize("normal", [0, 90, 180, 270])
-def test_shore_normal_and_probe_on_sea_side(normal):
-    fc = bs.build(raw(normal, pier(10, normal, 120)))
+def test_shore_normal_and_probe_on_sea_side(normal, kind):
+    structure = pier(10, normal, 120)
+    structure["tags"]["man_made"] = kind
+    fc = bs.build(raw(normal, structure))
     (f,) = fc["features"]
     p = f["properties"]
     assert p["shore_normal_deg"] == pytest.approx(normal % 360, abs=0.5) or p["shore_normal_deg"] == pytest.approx(360, abs=0.5)
@@ -69,19 +72,41 @@ def test_unnamed_structure_gets_kind_and_nearest_place():
         {"type": "node", "id": 5, "lat": LAT + 0.001, "lon": LON, "tags": {"place": "village", "name": "Kumyaka"}},
         {"type": "node", "id": 6, "lat": LAT + 0.05, "lon": LON + 0.05, "tags": {"place": "town", "name": "Uzak"}},
         {"type": "node", "id": 7, "lat": LAT, "lon": LON, "tags": {"place": "suburb"}},
+        {"type": "node", "id": 8, "lat": LAT + 0.0009, "lon": LON, "tags": {"place": "quarter", "name": "İskele"}},
     ]
     bw = pier(10, 0, 100)
     bw["tags"]["man_made"] = "breakwater"
     fc = bs.build(raw(0, bw, places=places))
-    assert fc["features"][0]["properties"]["name"] == "Mendirek · Kumyaka"
+    assert fc["features"][0]["properties"]["name"] == "Mendirek (Kumyaka)"
     assert fc["features"][0]["properties"]["place"] == "Kumyaka"
     fc2 = bs.build(raw(0, pier(10, 0, 100)))
     assert fc2["features"][0]["properties"]["name"] == "İskele"
 
 
+def test_pier_normal_follows_pier_not_jagged_harbour_coastline():
+    # Coastline with a sharp harbour notch at the root; a north-pointing pier must still give ~0°.
+    notch = [(LAT, LON + 0.05), (LAT, LON + 0.0005), (LAT - 0.0004, LON + 0.0004), (LAT, LON - 0.0005), (LAT, LON - 0.05)]
+    data = {"elements": [way(1, {"natural": "coastline"}, notch), pier(10, 0, 150)]}
+    p = bs.build(data)["features"][0]["properties"]
+    assert p["shore_normal_deg"] == pytest.approx(0, abs=1)
+
+
+def test_breakwater_normal_is_smoothed_over_the_coast():
+    notch = [(LAT, LON + 0.05), (LAT, LON + 0.0003), (LAT - 0.0002, LON), (LAT, LON - 0.0003), (LAT, LON - 0.05)]
+    bw = way(10, {"man_made": "breakwater"}, [(LAT + 20 * DLAT, LON - 60 * DLON), (LAT + 20 * DLAT, LON + 60 * DLON)])
+    p = bs.build({"elements": [way(1, {"natural": "coastline"}, notch), bw]})["features"][0]["properties"]
+    assert min(p["shore_normal_deg"], 360 - p["shore_normal_deg"]) < 10
+
+
+def test_smoothed_normal_of_westward_coast_points_north():
+    from shapely.geometry import LineString, Point
+    coast = bs.Coast([LineString([(0, 0), (-100, 0)])])
+    line = coast.lines[0]
+    assert coast.smoothed_normal(line, Point(-50, 0)) == pytest.approx(0)
+
+
 def test_probe_falls_back_when_sea_is_narrow():
-    # A second coastline 900 m offshore (land north of it) makes 750 m sea, 1000 m land: 750 must be chosen,
-    # and with the opposite shore at 600 m the 500 m fallback is used.
+    # Opposite shore 600 m away: 750/1000/1500 m land on it, the 500 m fallback is used.
     far = way(2, {"natural": "coastline"}, [(LAT + 600 * DLAT, LON - 0.05), (LAT + 600 * DLAT, LON + 0.05)])
     data = raw(0, pier(10, 0, 20))
     data["elements"].append(far)

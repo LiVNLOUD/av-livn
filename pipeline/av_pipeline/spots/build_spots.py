@@ -26,7 +26,9 @@ from av_pipeline.spots.geo import bearing, offset, to_lonlat, to_xy
 KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
 MIN_LENGTH_M = 15.0
 DEDUPE_M = 100.0
-PROBE_DISTANCES_M = (750.0, 1000.0, 500.0)
+PROBE_DISTANCES_M = (750.0, 1000.0, 1500.0, 500.0, 2000.0)
+SMOOTH_M = 300.0  # coastline length averaged on each side of the root for breakwater normals
+GENERIC_PLACES = {"İskele", "Liman"}
 ATTRIBUTION = "© OpenStreetMap contributors, ODbL"
 
 
@@ -43,6 +45,17 @@ class Coast:
         coords = list(line.coords)
         best_i = min(range(len(coords) - 1), key=lambda i: LineString(coords[i : i + 2]).distance(q))
         return bearing(coords[best_i], coords[best_i + 1])
+
+    def smoothed_normal(self, line: LineString, q: Point) -> float:
+        """Seaward normal from the length-weighted mean direction of coastline within SMOOTH_M of q."""
+        d0 = line.project(q)
+        a, b = max(0.0, d0 - SMOOTH_M), min(line.length, d0 + SMOOTH_M)
+        coords = [line.interpolate(a).coords[0]] + [c for c in line.coords if a < line.project(Point(c)) < b] + [line.interpolate(b).coords[0]]
+        sx = sum(c2[0] - c1[0] for c1, c2 in zip(coords, coords[1:]))
+        sy = sum(c2[1] - c1[1] for c1, c2 in zip(coords, coords[1:]))
+        if sx == 0 and sy == 0:
+            return (self.segment_bearing_at(line, q) + 90) % 360
+        return (math.degrees(math.atan2(sx, sy)) + 90) % 360
 
     def is_sea(self, p: Point) -> bool:
         """Sea is on the right-hand side of the nearest coastline segment."""
@@ -75,7 +88,7 @@ def parse(raw: dict) -> tuple[list[dict], Coast, list[dict]]:
 
 
 def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
-    named = [p for p in places if p["name"]]
+    named = [p for p in places if p["name"] and p["name"] not in GENERIC_PLACES]
     if not named:
         return None
     return min(named, key=lambda p: math.dist(p["xy"], xy))["name"]
@@ -88,17 +101,22 @@ def build_candidate(s: dict, coast: Coast, places: list[dict]) -> dict | None:
     pts = [Point(c) for c in s["xy"]]
     root = min(pts, key=lambda p: coast.nearest(p)[2])
     tip = max(pts, key=lambda p: coast.nearest(p)[2])
-    cl, q, _ = coast.nearest(root)
-    normal = (coast.segment_bearing_at(cl, q) + 90) % 360
+    kind = s["tags"]["man_made"]
+    if kind == "breakwater":
+        # Breakwaters often run parallel to the shore: use the smoothed coastline normal.
+        cl, q, _ = coast.nearest(root)
+        normal = coast.smoothed_normal(cl, q)
+    else:
+        # Piers and groynes run out to sea: their own root→tip direction is the most robust normal.
+        normal = bearing((root.x, root.y), (tip.x, tip.y))
     probe = None
     for d in PROBE_DISTANCES_M:
         cand = Point(offset((tip.x, tip.y), normal, d))
         if coast.is_sea(cand):
             probe = cand
             break
-    kind = s["tags"]["man_made"]
     place = nearest_place((tip.x, tip.y), places)
-    name = s["tags"].get("name") or (f"{KIND_TR[kind]} · {place}" if place else KIND_TR[kind])
+    name = s["tags"].get("name") or (f"{KIND_TR[kind]} ({place})" if place else KIND_TR[kind])
     lon, lat = to_lonlat(tip.x, tip.y)
     props = {
         "id": f"osm-way-{s['osm_id']}",
