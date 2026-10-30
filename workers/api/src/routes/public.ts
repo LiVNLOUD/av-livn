@@ -4,7 +4,6 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { cachedJson } from '../lib/cache';
 import { publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
-import { unpackDetail, type PackedDetail } from '../precompute';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
@@ -61,13 +60,9 @@ publicRoutes.get('/spots/:id', (c) =>
       .first<SpotRow & { start_hour: number | null; detail_json: string | null }>();
     if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
     const from = r.start_hour === null ? 0 : Math.max(0, Math.floor(Date.now() / HOUR) - r.start_hour);
-    const detail = r.detail_json ? unpackDetail(JSON.parse(r.detail_json) as PackedDetail, from, hours) : null;
-    return c.json({
-      ok: true,
-      species: { id: profile.id, name: profile.name, weights: profile.weights },
-      spot: publicSpotDetail(r),
-      data: detail?.meta ?? { computed_at: null, weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, conditions: [] },
-      scores: detail ? detail.hours : [],
-    });
+    // The stored packed detail is spliced in as a raw string: no parse/serialise of ~45 KB per request.
+    // Clients call unpackDetail(packed, from, hours).
+    const head = JSON.stringify({ ok: true, species: { id: profile.id, name: profile.name, weights: profile.weights }, spot: publicSpotDetail(r), from, hours });
+    return c.body(`${head.slice(0, -1)},"packed":${r.detail_json ?? 'null'}}`, 200, { 'content-type': 'application/json; charset=utf-8' });
   }),
 );

@@ -3,6 +3,15 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { CRON_FETCH, refreshWeather, runCron } from '../src/cron';
 import { app } from '../src/index';
 import { omFetch, resetAndSeed, writeScores } from './helpers';
+import { unpackDetail, type Detail, type DetailHour, type PackedDetail } from '@av-livn/scoring';
+
+/** Detail responses carry the packed hours; unpack like the web client does. */
+async function detail(path: string) {
+  const b = await (await app.request(path, {}, env)).json<{ spot: Record<string, unknown>; from: number; hours: number; packed: PackedDetail | null }>();
+  const empty = { meta: { computed_at: null, weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, conditions: [] }, hours: [] };
+  const d = (b.packed ? unpackDetail(b.packed, b.from, b.hours) : empty) as Omit<Detail, 'meta'> & { meta: Omit<Detail['meta'], 'computed_at'> & { computed_at: string | null } };
+  return { spot: b.spot as Record<string, any>, data: d.meta, scores: d.hours as DetailHour[] };
+}
 
 const AUTH = { authorization: 'Bearer test-admin-token', 'content-type': 'application/json' };
 
@@ -52,9 +61,9 @@ describe('GET /api/spots (reads precomputed scores)', () => {
     await env.DB.prepare("DELETE FROM spot_scores WHERE spot_id = 'osm-way-2'").run();
     const body = await (await app.request('/api/spots?v=empty', {}, env)).json<{ spots: { id: string; score: { total: unknown } }[] }>();
     expect(body.spots.at(-1)).toMatchObject({ id: 'osm-way-2', score: { total: null } });
-    const detail = await (await app.request('/api/spots/osm-way-2?v=empty', {}, env)).json<{ scores: unknown[]; data: { computed_at: unknown } }>();
-    expect(detail.scores).toEqual([]);
-    expect(detail.data.computed_at).toBeNull();
+    const d = await detail('/api/spots/osm-way-2?v=empty');
+    expect(d.scores).toEqual([]);
+    expect(d.data.computed_at).toBeNull();
     await writeScores();
   });
 
@@ -67,10 +76,7 @@ describe('GET /api/spots (reads precomputed scores)', () => {
 
 describe('GET /api/spots/:id', () => {
   it('returns 72 hours with components, night multiplier and coloured conditions', async () => {
-    const body = await (await app.request('/api/spots/osm-way-1', {}, env)).json<{
-      scores: { ts: string; total: number; components: { key: string }[]; multipliers: { key: string; value: number }[]; conditions: { key: string; band: string }[] }[];
-      data: { sea_grid: { distance_km: number } | null; conditions: { key: string; target: string }[] };
-    }>();
+    const body = await detail('/api/spots/osm-way-1');
     expect(body.scores).toHaveLength(72);
     expect(body.scores[0]!.components).toHaveLength(6);
     expect(body.scores[0]!.multipliers[0]!.key).toBe('gece_carpani');
@@ -80,15 +86,15 @@ describe('GET /api/spots/:id', () => {
   });
 
   it('includes DTM depth features and the 0–500 m profile', async () => {
-    const body = await (await app.request('/api/spots/osm-way-1?v=depth', {}, env)).json<{ spot: Record<string, unknown> }>();
+    const body = await detail('/api/spots/osm-way-1?v=depth');
     expect(body.spot).toMatchObject({ depth_200m: 8.5, slope_pct: 3.1, max_depth_100m: 5.2, probe_source: 'dtm', normal_source: 'dtm' });
     expect(body.spot.profile).toHaveLength(21);
-    const other = await (await app.request('/api/spots/osm-way-2?v=depth', {}, env)).json<{ spot: { profile: unknown } }>();
+    const other = await detail('/api/spots/osm-way-2?v=depth');
     expect(other.spot.profile).toBeNull();
   });
 
   it('starts at the current hour and honours the hours parameter; 404s unknown spots', async () => {
-    const body = await (await app.request('/api/spots/osm-way-3?hours=5', {}, env)).json<{ scores: { ts: string }[]; data: { sea_grid: unknown } }>();
+    const body = await detail('/api/spots/osm-way-3?hours=5');
     expect(body.scores).toHaveLength(5);
     expect(Date.parse(body.scores[0]!.ts)).toBe(Math.floor(Date.now() / 3_600_000) * 3_600_000);
     expect(body.data.sea_grid).toBeNull();
@@ -114,7 +120,7 @@ describe('admin', () => {
 
   it('a lamp edit changes the night multiplier after the next scoring run', async () => {
     const night = async () => {
-      const b = await (await app.request(`/api/spots/osm-way-1?v=${Math.random()}`, {}, env)).json<{ scores: { multipliers: { phase: string; value: number }[] }[] }>();
+      const b = await detail(`/api/spots/osm-way-1?v=${Math.random()}`);
       return b.scores.map((s) => s.multipliers[0]!).find((m) => m.phase === 'full')!.value;
     };
     expect(await night()).toBe(0.75);
@@ -196,6 +202,7 @@ describe('edge cache', () => {
   it('serves repeated GETs from cache until the TTL expires', async () => {
     const url = 'https://av.livn.tr/api/spots/osm-way-1?hours=3';
     const first = await (await app.request(url, {}, env)).json<{ spot: { name: string } }>();
+    expect(first.spot.name).toBeTruthy();
     await env.DB.prepare("UPDATE spots SET name = 'Değişti' WHERE id = 'osm-way-1'").run();
     const res2 = await app.request(url, {}, env);
     expect(res2.headers.get('cache-control')).toBe('no-cache');

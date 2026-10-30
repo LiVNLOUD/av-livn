@@ -43,7 +43,8 @@ await page.screenshot({ path: `${out}/f1-5-day-390.png`, fullPage: true });
 const spotId = new URL(page.url()).searchParams.get('id');
 const nightIdx = await page.evaluate(async (id) => {
   const b = await (await fetch(`/api/spots/${encodeURIComponent(id)}`)).json();
-  return b.scores.findIndex((s) => s.multipliers[0]?.phase === 'full');
+  // packed hours: [ts, total, raw, gated, warnings, comps, [mult value, phase, reason], conds]
+  return b.packed.h.slice(b.from).findIndex((h) => h[6]?.[1] === 'full');
 }, spotId);
 const box = await page.locator('#chart svg').boundingBox();
 const n = await page.evaluate(() => Number(document.querySelector('#chart svg').getAttribute('aria-valuemax')) + 1);

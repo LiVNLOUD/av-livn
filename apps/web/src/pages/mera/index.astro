@@ -84,7 +84,7 @@ import Base from '../../layouts/Base.astro';
 <script>
   import { compass, COMPONENT_TR, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lamp, STATUS_TR } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
-  import { bandOf, type Band } from '@av-livn/scoring';
+  import { bandOf, unpackDetail, type Band, type PackedDetail } from '@av-livn/scoring';
 
   type Comp = { key: string; weight: number; value: number | null; contribution: number | null; reason: string };
   type Mult = { key: string; value: number; phase: 'full' | 'twilight' | 'day'; reason: string };
@@ -276,7 +276,15 @@ import Base from '../../layouts/Base.astro';
   } else {
     fetch(`/api/spots/${encodeURIComponent(id)}`, { cache: 'no-cache' })
       .then((r) => (r.status === 404 ? Promise.reject(new Error('404')) : r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((b: Resp) => { data = b; render(); })
+      .then((b: Omit<Resp, 'data' | 'scores'> & { from: number; hours: number; packed: PackedDetail | null }) => {
+        const d = b.packed ? unpackDetail(b.packed, b.from, b.hours) : null;
+        data = {
+          spot: b.spot,
+          data: (d?.meta ?? { weather_fetched_at: null, sea_grid: null, conditions: [] }) as Resp['data'],
+          scores: (d?.hours ?? []) as unknown as Score[],
+        };
+        render();
+      })
       .catch((e: Error) => {
         $('name').textContent = e.message === '404' ? 'Bu mera bulunamadı' : 'Puanlar alınamadı';
         $('sub').textContent = e.message === '404' ? 'Mera kaldırılmış olabilir. Listeden başka bir mera seçin.' : 'Bağlantınızı kontrol edip sayfayı yenileyin.';

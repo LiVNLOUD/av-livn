@@ -10,3 +10,4 @@ export { conditionsAt, bandOf, gustValue, BAND_THRESHOLDS, type Band, type Condi
 export { DEFAULT_PARAMS, DEFAULT_NIGHT, paramsOf, nightOf } from './params';
 export { clamp01, angleDiff, hourKey, localParts, nextLocalMidnight, TZ_OFFSET_MIN } from './util';
 export { PROFILES, getProfile } from './profiles';
+export { packDetail, unpackDetail, type Detail, type DetailHour, type PackedDetail } from './packed';
