@@ -63,7 +63,7 @@ def test_short_structures_are_dropped_and_tags_name_used():
 
 
 def test_nearby_duplicates_keep_the_longer_structure():
-    fc = bs.build(raw(0, pier(10, 0, 60), pier(11, 0, 90, along_m=30)))
+    fc = bs.build(raw(0, pier(10, 0, 88), pier(11, 0, 90, along_m=10)))
     assert [f["properties"]["id"] for f in fc["features"]] == ["osm-way-11"]
 
 
@@ -213,3 +213,18 @@ def test_eusm_annotate_inside_nearest_and_unknown():
     feats2 = [{"geometry": {"coordinates": [28.905, 40.405]}, "properties": {}}]
     eusm.annotate(feats2, lambda u: {"features": []})
     assert feats2[0]["properties"]["substrate"] is None
+
+
+def test_shared_junction_node_is_not_the_tip_and_neighbours_are_kept():
+    # Ferry pier joined to a short mole at its far corner: the shared node is the farthest from land, but the
+    # pier's own tip is its berth end; both structures stay as separate spots.
+    land = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[
+        (LON - 0.05, LAT - 0.05), (LON + 0.05, LAT - 0.05), (LON + 0.05, LAT), (LON - 0.05, LAT), (LON - 0.05, LAT - 0.05)]]}}]}
+    junction = (LAT + 160 * DLAT, LON + 60 * DLON)
+    pier = way(10, {"man_made": "pier", "name": "Feribot"}, [(LAT, LON), (LAT + 150 * DLAT, LON), junction])
+    mole = way(11, {"man_made": "breakwater"}, [junction, (LAT + 100 * DLAT, LON + 120 * DLON)])
+    fc = bs.build({"elements": [way(1, {"natural": "coastline"}, COASTS[0]), pier, mole]}, land=bs.land_xy(land))
+    by = {f["properties"]["id"]: f for f in fc["features"]}
+    assert set(by) == {"osm-way-10", "osm-way-11"}
+    assert by["osm-way-10"]["geometry"]["coordinates"][1] == pytest.approx(LAT + 150 * DLAT, abs=2 * DLAT)
+    assert by["osm-way-11"]["geometry"]["coordinates"][1] == pytest.approx(junction[0], abs=2 * DLAT)

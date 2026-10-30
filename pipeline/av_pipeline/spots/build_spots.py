@@ -40,7 +40,7 @@ from av_pipeline.spots.geo import M_PER_DEG_LAT, M_PER_DEG_LON, bearing, offset,
 
 KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
 MIN_LENGTH_M = 15.0
-DEDUPE_M = 100.0
+DEDUPE_M = 25.0  # identical tips only: distinct structures are never merged (user decision, v2)
 PROBE_DISTANCES_M = (750.0, 1000.0, 1500.0, 500.0, 2000.0)
 SMOOTH_M = 300.0  # coastline length averaged on each side of the root for breakwater normals
 GENERIC_PLACES = {"İskele", "Liman"}
@@ -129,15 +129,20 @@ def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
     return min(named, key=lambda p: math.dist(p["xy"], xy))["name"]
 
 
-def build_candidate(s: dict, coast: Coast, places: list[dict], grid: Grid | None = None, land: Land | None = None) -> dict | None:
+def build_candidate(
+    s: dict, coast: Coast, places: list[dict], grid: Grid | None = None, land: Land | None = None, shared: frozenset = frozenset()
+) -> dict | None:
     line = LineString(s["xy"])
     if line.length < MIN_LENGTH_M:
         return None
     pts = [Point(c) for c in s["xy"]]
     coast_tip = max(pts, key=lambda p: coast.nearest(p)[2])
     if land is not None:
+        # A node shared with a shorter structure is a junction where that appendage (e.g. a mole joined to a
+        # ferry pier) ends: it is the appendage's tip, so the longer structure takes its own farthest node.
+        own = [p for p in pts if (p.x, p.y) not in shared] or pts
         root = min(pts, key=lambda p: land.mainland.distance(p))
-        tip = max(pts, key=lambda p: land.mainland.distance(p))
+        tip = max(own, key=lambda p: land.mainland.distance(p))
     else:
         root = min(pts, key=lambda p: coast.nearest(p)[2])
         tip = coast_tip
@@ -210,7 +215,7 @@ def in_bbox(f: dict) -> bool:
 
 
 def dedupe(features: list[dict]) -> list[dict]:
-    """Drop candidates whose tip is within DEDUPE_M of a longer one."""
+    """Drop candidates whose tip is within DEDUPE_M of a longer one (duplicate mapping of the same tip)."""
     kept: list[dict] = []
     for f in sorted(features, key=lambda f: -f["properties"]["length_m"]):
         xy = to_xy(*f["geometry"]["coordinates"])
@@ -223,7 +228,16 @@ def build(raw: dict, grid: Grid | None = None, land: Land | None = None) -> dict
     structures, coast, places = parse(raw)
     if not coast.lines:
         raise ValueError("no coastline in Overpass data")
-    feats = [c for s in structures if (c := build_candidate(s, coast, places, grid, land)) is not None and in_bbox(c)]
+    owners: dict[tuple[float, float], list[float]] = {}
+    for st in structures:
+        for xy in set(st["xy"]):
+            owners.setdefault(xy, []).append(LineString(st["xy"]).length)
+
+    def junctions(st: dict) -> frozenset:
+        length = LineString(st["xy"]).length
+        return frozenset(xy for xy in st["xy"] if any(other < length for other in owners[xy]))
+
+    feats = [c for s in structures if (c := build_candidate(s, coast, places, grid, land, junctions(s))) is not None and in_bbox(c)]
     return {"type": "FeatureCollection", "attribution": ATTRIBUTION, "features": dedupe(feats)}
 
 
