@@ -12,5 +12,4 @@ __pycache__/
 *.nc
 *.tif
 *.pmtiles
-workers/api/src/generated/
 *.egg-info/

@@ -1,0 +1,23 @@
+name: copernicus-check
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/copernicus-check.yml]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUSMARINE_SERVICE_USERNAME }}
+      COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUSMARINE_SERVICE_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e ./pipeline copernicusmarine xarray netCDF4
+      - run: copernicusmarine --version
+      - name: Describe + surface subset
+        run: python -m av_pipeline.ocean.check

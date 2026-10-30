@@ -14,15 +14,16 @@ Her faz sonunda: testler yeşil, deploy canlı, PROGRESS.md güncel, 5 satırlı
 npm install                 # Node 22
 npm test                    # web build + embed + scoring (%100 kapsam) + worker testleri
 npm run typecheck
-npm run deploy              # build + D1 migrations (remote) + wrangler deploy
 cd pipeline && python3 -m venv .venv && .venv/bin/pip install -e '.[dev]' && .venv/bin/pytest
 bash scripts/dns-inventory.sh   # her DNS işleminden önce, çıktıyı docs/dns-inventory.md'ye ekle
 ```
 
 ## Cloudflare (bulut oturumu)
 - Kimlik bilgisini proxy `api.cloudflare.com`'a ekliyor. wrangler için `export CLOUDFLARE_API_TOKEN=placeholder` yeterli; gerçek değer yok, aranmaz.
-- Hesap ID `workers/api/wrangler.toml` içinde (gizli değil).
-- Workers Assets upload'u proxy yüzünden 401 verir. Statik site `scripts/embed-assets.mjs` ile Worker'a gömülür, `[assets]` kullanılmaz.
+- **Oturumdan `wrangler deploy` YAPMA.** Deploy yalnız GitHub Actions'tan (`deploy.yml`, main'e push) yapılır. Oturumda wrangler sadece `d1 migrations apply/execute`, `d1 ... --command` okuma, `tail` ve lokal `wrangler dev` için kullanılır.
+- Deploy sonrası `bash scripts/smoke.sh` (av.livn.tr + livn.tr, www, /win).
+- R2 kullanılmaz: PMTiles static asset, oşinografi özetleri D1'de.
+- Copernicus kimliği yalnız Actions secrets'ta. Oturumda yok; F3 kodu mock veriyle test edilir.
 - Ücretsiz katman: cron hesap başına 5, cron başına CPU ~10 ms. netCDF/GDAL işleri yalnız GitHub Actions'ta (pipeline/) çalışır.
 - Overpass API'ye konteynerden erişilemiyor. OSM çekimi Actions'ta yapılır.
 

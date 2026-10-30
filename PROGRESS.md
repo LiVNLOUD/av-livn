@@ -8,4 +8,10 @@
 - Testler: scoring 2 (%100 kapsam), worker 5, pytest 1
 - Ortam eksikleri: `CLOUDFLARE_ACCOUNT_ID` ve `COPERNICUSMARINE_*` env'de yok; Overpass'a konteynerden erişilemiyor
 
-## Sonraki: F1 — MVP (onay bekliyor)
+## F0.1 — Deploy GitHub Actions'a taşındı
+- `deploy.yml`: test → typecheck → build → D1 migrations → deploy → smoke (av.livn.tr + livn.tr/www/`/win`)
+- Worker'a gömme geri alındı → Workers static assets (`run_worker_first: /api/*`)
+- Oturumdan deploy yok; R2 kullanılmıyor
+
+## F0.2 — Copernicus doğrulaması
+- `copernicus-check.yml` (describe + 1 günlük yüzey subset'i)
