@@ -195,7 +195,7 @@ def normal(d1: D1, now: dt.datetime) -> int:
         i, j, d = cell
         norm = short_normal(days, sst[:, i, j])
         years = sorted({x.year for x in days})
-        meta = {"from": days[0].isoformat(), "to": days[-1].isoformat(), "years": round(len(days) / 365.25, 1),  # covered span, not calendar years touched "window_days": WINDOW, "min_years": MIN_YEARS,
+        meta = {"from": days[0].isoformat(), "to": days[-1].isoformat(), "years": round(len(days) / 365.25, 1), "window_days": WINDOW, "min_years": MIN_YEARS,
                 "cell": {"lat": round(float(lats[i]), 5), "lon": round(float(lons[j]), 5), "distance_km": d}, "normal": norm}
         d1.query("INSERT INTO ocean_normal (spot_id, computed_at, json) VALUES (?1, ?2, ?3) ON CONFLICT(spot_id) DO UPDATE SET computed_at = excluded.computed_at, json = excluded.json",
                  [s["id"], now.strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps(meta)])

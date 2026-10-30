@@ -113,7 +113,8 @@ def test_forecast_and_normal_end_to_end(monkeypatch, tmp_path):
     d1 = FakeD1()
     assert m.normal(d1, now) == 2
     meta = json.loads(d1.calls[1][1][2])
-    assert meta["years"] == 4.0 and meta["normal"][100] == 15.0  # 1460 days ≈ 4 years of archive
+    assert meta["years"] == 4.0 and meta["normal"][100] == 15.0  # covered span: 1460 days ≈ 4 years
+    assert meta["window_days"] == m.WINDOW and meta["min_years"] == m.MIN_YEARS
 
 
 def test_forecast_drops_current_when_grids_differ(monkeypatch):
