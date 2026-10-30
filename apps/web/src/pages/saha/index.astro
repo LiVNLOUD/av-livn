@@ -1,0 +1,395 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Saha formu — av.livn" description="Merada ölçüm ve gözlem girişi.">
+  <div class="wrap field">
+    <h1>Saha formu</h1>
+
+    <form id="login" class="stack">
+      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
+      <button type="submit" class="primary">Giriş yap</button>
+    </form>
+
+    <form id="form" hidden novalidate>
+      <fieldset>
+        <legend>Mera</legend>
+        <select id="spot" aria-label="Mera"></select>
+        <button type="button" id="near" class="ghost">📍 En yakın merayı seç</button>
+        <p class="hint" id="spot-info"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Lamba</legend>
+        <div class="seg" data-name="has_light" role="radiogroup">
+          <button type="button" data-v="true">Var</button><button type="button" data-v="false">Yok</button><button type="button" data-v="null">Bilmiyorum</button>
+        </div>
+        <div class="seg small" data-name="light_color" role="radiogroup" id="colors" hidden>
+          <button type="button" data-v="beyaz">Beyaz</button><button type="button" data-v="sari">Sarı</button><button type="button" data-v="led">LED</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Yapı</legend>
+        <div class="seg" data-name="structure" role="radiogroup">
+          <button type="button" data-v="iskele">İskele ayağı</button><button type="button" data-v="mendirek">Mendirek taşı</button><button type="button" data-v="dogal_kaya">Doğal kaya</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Dip tipi <span class="hint">(birden çok seçilebilir)</span></legend>
+        <div class="chips" data-name="substrate">
+          <button type="button" data-v="kum">Kum</button><button type="button" data-v="cakil">Çakıl</button><button type="button" data-v="kaya">Kaya</button>
+          <button type="button" data-v="midyeli">Midyeli taş</button><button type="button" data-v="yosunlu">Yosunlu</button><button type="button" data-v="camur">Çamur</button>
+        </div>
+        <p class="sub">Jighead'e ne takıldı?</p>
+        <div class="seg small" data-name="snag" role="radiogroup">
+          <button type="button" data-v="yosun">Yosun</button><button type="button" data-v="midye">Midye kabuğu</button><button type="button" data-v="camur">Çamur</button><button type="button" data-v="hicbiri">Hiçbir şey</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Derinlik ölçümleri</legend>
+        <p class="hint">Mesafe: uçtan atış mesafesi. Kurşunla dikine ölçtüyseniz derinliği, jighead'le ölçtüyseniz suya değdiği andan misina gevşeyene kadar geçen süreyi girin. Aynı merada dikine ölçüm varsa süreler ona göre kalibre edilir.</p>
+        <div id="depths"></div>
+        <button type="button" id="add-depth" class="ghost">+ Ölçüm ekle</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Erişim</legend>
+        <div class="seg" data-name="access" role="radiogroup">
+          <button type="button" data-v="acik">Açık</button><button type="button" data-v="kisitli_feribot">Kısıtlı (feribot)</button><button type="button" data-v="belirsiz">Belirsiz</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Not ve fotoğraf</legend>
+        <textarea id="note" rows="3" maxlength="1000" placeholder="Örn. lamba saat 22'de söndü, iskele ucu kapalı"></textarea>
+        <label class="photo"><input type="file" id="photo" accept="image/*" capture="environment" /> <span id="photo-label">📷 Fotoğraf ekle (isteğe bağlı)</span></label>
+      </fieldset>
+
+      <div class="bar">
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <button type="submit" class="primary" id="save">Kaydet ve puanı güncelle</button>
+      </div>
+
+      <section id="history" class="history" hidden>
+        <h2>Bu merada önceki girişler</h2>
+        <ol id="obs"></ol>
+        <button type="button" id="rescore" class="ghost">Puanı şimdi yeniden hesapla</button>
+      </section>
+    </form>
+  </div>
+
+  <template id="depth-row">
+    <div class="depth">
+      <div class="seg small method" role="radiogroup">
+        <button type="button" data-v="plumb" aria-pressed="true">Kurşun dikine</button><button type="button" data-v="sink">Batma süresi</button>
+      </div>
+      <div class="nums">
+        <label>Mesafe (m)<input class="d-dist" inputmode="decimal" placeholder="20" /></label>
+        <label class="plumb-only">Derinlik (m)<input class="d-depth" inputmode="decimal" placeholder="4,5" /></label>
+        <label class="sink-only" hidden>Süre (sn)<input class="d-sink" inputmode="decimal" placeholder="12" /></label>
+        <label class="sink-only" hidden>Jighead (g)<input class="d-jig" inputmode="decimal" placeholder="2" /></label>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="ghost watch sink-only" hidden>⏱ Kronometre</button>
+        <button type="button" class="ghost del" aria-label="Ölçümü sil">Sil</button>
+      </div>
+    </div>
+  </template>
+</Base>
+
+<style>
+  /* Night field use: large type, 56 px targets, the sodium accent only on the save action. */
+  .field { padding-bottom: 120px; }
+  h1 { font-size: 1.7rem; font-weight: 740; font-stretch: 80%; margin: 14px 0 6px; }
+  h2 { font-size: 1rem; margin: 22px 0 8px; }
+  .stack { display: grid; gap: 14px; margin-top: 12px; }
+  fieldset { border: 0; border-top: 1px solid var(--swell); margin: 0; padding: 16px 0 6px; display: grid; gap: 10px; }
+  legend { font-size: 1.15rem; font-weight: 700; padding: 0; margin-bottom: 8px; }
+  .lbl, .nums label { display: grid; gap: 6px; font-size: 0.95rem; color: var(--mist); }
+  input, select, textarea {
+    font: inherit; font-size: 1.15rem; color: var(--foam); background: var(--deep); border: 1.5px solid var(--swell);
+    border-radius: var(--radius); min-height: 56px; padding: 10px 14px; width: 100%;
+  }
+  textarea { min-height: 96px; }
+  button { font: inherit; cursor: pointer; }
+  .primary, .ghost, .seg button, .chips button { min-height: 56px; border-radius: var(--radius); font-size: 1.05rem; font-weight: 650; }
+  .primary { width: 100%; border: 0; color: #1a1006; background: var(--sodium); }
+  .primary:disabled { opacity: 0.6; }
+  .ghost { border: 1.5px solid var(--swell); background: transparent; color: var(--foam); padding: 0 16px; }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+  .seg.small button { font-size: 0.95rem; }
+  .seg button, .chips button { border: 1.5px solid var(--swell); background: var(--deep); color: var(--foam); padding: 6px 8px; line-height: 1.15; }
+  .seg button[aria-pressed='true'], .chips button[aria-pressed='true'] { background: var(--foam); color: var(--sea); border-color: var(--foam); }
+  .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .hint { color: var(--mist); font-size: 0.88rem; margin: 0; }
+  .sub { margin: 8px 0 0; font-weight: 650; }
+  .depth { border: 1.5px solid var(--swell); border-radius: var(--radius); padding: 10px; display: grid; gap: 10px; margin-bottom: 10px; }
+  .nums { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .row-actions { display: flex; gap: 8px; justify-content: space-between; }
+  .watch.running { border-color: var(--sodium); color: var(--sodium); }
+  .photo { display: flex; align-items: center; min-height: 56px; border: 1.5px dashed var(--swell); border-radius: var(--radius); padding: 0 14px; color: var(--mist); }
+  .photo input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .bar { position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--sea) 24%); display: grid; gap: 8px; }
+  .msg { min-height: 1.4em; margin: 0; font-size: 1rem; }
+  .msg.err { color: var(--storm); }
+  .msg.ok { color: var(--good); }
+  .history ol { padding-left: 1.2em; display: grid; gap: 8px; }
+  .history li button { min-height: 40px; margin-left: 8px; }
+</style>
+
+<script>
+  type Spot = { id: string; name: string; lat: number; lon: number; has_light: boolean | null; access: string | null };
+  type Depth = { distance_m: number; method: 'plumb' | 'sink'; depth_m?: number; sink_s?: number; jig_g?: number };
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const KEY = 'av-livn-admin';
+  const QUEUE = 'av-livn-field-queue';
+  let token = '';
+  try { token = sessionStorage.getItem(KEY) ?? ''; } catch {}
+  let spots: Spot[] = [];
+  let photo: { mime: string; data_b64: string } | null = null;
+
+  function say(text: string, kind: 'ok' | 'err' | '' = '') {
+    const m = $('msg');
+    m.textContent = text;
+    m.className = `msg ${kind}`;
+  }
+
+  async function api(path: string, method: string, body?: unknown) {
+    const r = await fetch(path, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) throw Object.assign(new Error('Anahtar geçersiz. Tekrar giriş yapın.'), { fatal: true });
+    if (r.status === 503) throw Object.assign(new Error('Yönetim kapalı: sunucuda ADMIN_TOKEN tanımlı değil.'), { fatal: true });
+    if (!r.ok) throw Object.assign(new Error(`Kaydedilmedi (${j.error ?? r.status}).`), { fatal: true });
+    return j;
+  }
+
+  // ---- toggles: single-choice segments and multi-choice chips (aria-pressed is the state)
+  function single(name: string): string | null {
+    const b = document.querySelector<HTMLButtonElement>(`.seg[data-name="${name}"] button[aria-pressed="true"]`);
+    return b ? b.dataset.v! : null;
+  }
+  document.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    if (!b) return;
+    const seg = b.closest('.seg');
+    if (seg) {
+      const was = b.getAttribute('aria-pressed') === 'true';
+      seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+      if (!was || seg.classList.contains('method')) b.setAttribute('aria-pressed', 'true');
+      if (seg.getAttribute('data-name') === 'has_light') $('colors').hidden = single('has_light') !== 'true';
+      if (seg.classList.contains('method')) setMethod(b.closest('.depth')!, b.dataset.v as 'plumb' | 'sink');
+    } else if (b.closest('.chips')) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'));
+    }
+  });
+
+  // ---- depth rows
+  function setMethod(row: Element, m: 'plumb' | 'sink') {
+    row.querySelectorAll<HTMLElement>('.plumb-only').forEach((x) => (x.hidden = m !== 'plumb'));
+    row.querySelectorAll<HTMLElement>('.sink-only').forEach((x) => (x.hidden = m !== 'sink'));
+  }
+  function addDepth() {
+    const node = ($('depth-row') as HTMLTemplateElement).content.firstElementChild!.cloneNode(true) as HTMLElement;
+    node.querySelector('.del')!.addEventListener('click', () => node.remove());
+    const watch = node.querySelector<HTMLButtonElement>('.watch')!;
+    let t0 = 0;
+    watch.addEventListener('click', () => {
+      if (!t0) {
+        t0 = performance.now();
+        watch.classList.add('running');
+        watch.textContent = '⏹ Misina gevşedi';
+      } else {
+        node.querySelector<HTMLInputElement>('.d-sink')!.value = ((performance.now() - t0) / 1000).toFixed(1).replace('.', ',');
+        t0 = 0;
+        watch.classList.remove('running');
+        watch.textContent = '⏱ Kronometre';
+      }
+    });
+    $('depths').append(node);
+  }
+  $('add-depth').addEventListener('click', addDepth);
+
+  const num = (el: HTMLInputElement | null) => {
+    const v = el?.value.trim().replace(',', '.') ?? '';
+    return v === '' ? undefined : Number(v);
+  };
+  function depths(): Depth[] {
+    return [...document.querySelectorAll('#depths .depth')].flatMap((row) => {
+      const method = (row.querySelector<HTMLButtonElement>('.method button[aria-pressed="true"]')?.dataset.v ?? 'plumb') as 'plumb' | 'sink';
+      const distance_m = num(row.querySelector('.d-dist'));
+      if (distance_m === undefined) return [];
+      return method === 'plumb'
+        ? [{ distance_m, method, depth_m: num(row.querySelector('.d-depth')) }]
+        : [{ distance_m, method, sink_s: num(row.querySelector('.d-sink')), jig_g: num(row.querySelector('.d-jig')) }];
+    });
+  }
+
+  // ---- photo: downscale on the phone (≤ 1280 px, JPEG) so the upload stays small
+  $('photo').addEventListener('change', async () => {
+    const f = ($('photo') as HTMLInputElement).files?.[0];
+    if (!f) return;
+    const img = await createImageBitmap(f);
+    const s = Math.min(1, 1280 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * s);
+    c.height = Math.round(img.height * s);
+    c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+    for (const q of [0.7, 0.55, 0.4]) {
+      const b64 = c.toDataURL('image/jpeg', q).split(',')[1]!;
+      if (b64.length <= 540_000) {
+        photo = { mime: 'image/jpeg', data_b64: b64 };
+        $('photo-label').textContent = `📷 Fotoğraf hazır (${Math.round((b64.length * 0.75) / 1024)} KB)`;
+        return;
+      }
+    }
+    say('Fotoğraf çok büyük, eklenmedi.', 'err');
+  });
+
+  // ---- spots
+  async function loadSpots() {
+    const b = await (await fetch('/api/spots?model=v2')).json();
+    spots = b.spots;
+    $('spot').innerHTML = spots.map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
+    const want = new URLSearchParams(location.search).get('id');
+    if (want && spots.some((s) => s.id === want)) ($('spot') as HTMLSelectElement).value = want;
+    pickSpot();
+  }
+  function pickSpot() {
+    const s = spots.find((x) => x.id === ($('spot') as HTMLSelectElement).value);
+    if (!s) return;
+    $('spot-info').textContent = `Lamba şu an: ${s.has_light === null ? 'bilinmiyor' : s.has_light ? 'var' : 'yok'}`;
+    loadHistory(s.id);
+  }
+  $('spot').addEventListener('change', pickSpot);
+  $('near').addEventListener('click', () => {
+    navigator.geolocation?.getCurrentPosition(
+      (p) => {
+        const d = (s: Spot) => (s.lat - p.coords.latitude) ** 2 + ((s.lon - p.coords.longitude) * Math.cos((s.lat * Math.PI) / 180)) ** 2;
+        const best = [...spots].sort((a, b) => d(a) - d(b))[0];
+        if (best) {
+          ($('spot') as HTMLSelectElement).value = best.id;
+          pickSpot();
+          say(`En yakın: ${best.name} (${Math.round(Math.sqrt(d(best)) * 111_000)} m)`);
+        }
+      },
+      () => say('Konum alınamadı.', 'err'),
+      { enableHighAccuracy: true, timeout: 10_000 },
+    );
+  });
+
+  const ACCESS_TR: Record<string, string> = { acik: 'açık', kisitli_feribot: 'kısıtlı (feribot)', belirsiz: 'belirsiz' };
+  async function loadHistory(id: string) {
+    try {
+      const j = await api(`/api/admin/spots/${encodeURIComponent(id)}/field`, 'GET');
+      const obs = j.observations as { id: string; observed_at: string; note: string | null; access: string | null; depths: unknown[]; has_photo: number }[];
+      $('history').hidden = false;
+      $('obs').innerHTML = obs.length
+        ? obs.map((o) => `<li>${new Date(o.observed_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}: ${o.depths.length} ölçüm${o.has_photo ? ', foto' : ''}${o.access ? `, erişim ${ACCESS_TR[o.access]}` : ''}${o.note ? ` — ${o.note.replace(/</g, '&lt;')}` : ''}<button type="button" class="ghost" data-del="${o.id}">Sil</button></li>`).join('')
+        : '<li class="hint">Henüz giriş yok.</li>';
+    } catch {}
+  }
+  $('obs').addEventListener('click', async (e) => {
+    const id = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-del]')?.dataset.del;
+    if (!id || !confirm('Bu giriş silinsin mi?')) return;
+    await api(`/api/admin/field/${id}`, 'DELETE');
+    say('Giriş silindi, puan güncellendi.', 'ok');
+    pickSpot();
+  });
+
+  const fmtScore = (s: { total: number | null; p10: number | null; p90: number | null; rank: number }) =>
+    s.total === null ? 'puan yok (hava verisi bekleniyor)' : `puan ${Math.round(s.total)}${s.p10 !== null ? ` (bant ${Math.round(s.p10)}–${Math.round(s.p90!)})` : ''}, ${spots.length} mera içinde ${s.rank}.`;
+
+  $('rescore').addEventListener('click', async () => {
+    const id = ($('spot') as HTMLSelectElement).value;
+    const j = await api(`/api/admin/spots/${encodeURIComponent(id)}/rescore`, 'POST', {});
+    say(`Yeniden hesaplandı: ${fmtScore(j.score)}`, 'ok');
+  });
+
+  // ---- submit (with an offline queue: no signal on the breakwater is normal)
+  function payload() {
+    const light = single('has_light');
+    const sub = [...document.querySelectorAll<HTMLButtonElement>('.chips[data-name="substrate"] button[aria-pressed="true"]')].map((b) => b.dataset.v!);
+    return {
+      observed_at: new Date().toISOString(),
+      has_light: light === null ? undefined : light === 'null' ? null : light === 'true',
+      light_color: light === 'true' ? single('light_color') : null,
+      structure: single('structure'),
+      substrate: sub,
+      snag: single('snag'),
+      access: single('access'),
+      note: ($('note') as HTMLTextAreaElement).value.trim() || null,
+      depths: depths(),
+      photo,
+    };
+  }
+  function queued(): { id: string; body: unknown }[] {
+    try { return JSON.parse(localStorage.getItem(QUEUE) ?? '[]'); } catch { return []; }
+  }
+  function setQueue(q: { id: string; body: unknown }[]) {
+    try { localStorage.setItem(QUEUE, JSON.stringify(q)); } catch {}
+  }
+  async function flush() {
+    const q = queued();
+    if (!q.length || !token) return;
+    const left = [];
+    for (const item of q) {
+      try { await api(`/api/admin/spots/${encodeURIComponent(item.id)}/field`, 'POST', item.body); } catch (e) { if (!(e as { fatal?: boolean }).fatal) left.push(item); }
+    }
+    setQueue(left);
+    if (q.length !== left.length) say(`Bekleyen ${q.length - left.length} giriş gönderildi.`, 'ok');
+  }
+  window.addEventListener('online', flush);
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = ($('spot') as HTMLSelectElement).value;
+    const body = payload();
+    ($('save') as HTMLButtonElement).disabled = true;
+    say('Kaydediliyor…');
+    try {
+      const j = await api(`/api/admin/spots/${encodeURIComponent(id)}/field`, 'POST', body);
+      say(`Kaydedildi. ${j.score ? `Yeni ${fmtScore(j.score)}` : ''}`, 'ok');
+      reset();
+      loadSpots();
+    } catch (err) {
+      if ((err as { fatal?: boolean }).fatal) say((err as Error).message, 'err');
+      else {
+        setQueue([...queued(), { id, body }]);
+        say('Bağlantı yok: giriş telefona kaydedildi, bağlantı gelince gönderilecek.', 'err');
+        reset();
+      }
+    } finally {
+      ($('save') as HTMLButtonElement).disabled = false;
+    }
+  });
+  function reset() {
+    document.querySelectorAll('.seg:not(.method) button, .chips button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    $('colors').hidden = true;
+    $('depths').innerHTML = '';
+    ($('note') as HTMLTextAreaElement).value = '';
+    ($('photo') as HTMLInputElement).value = '';
+    photo = null;
+    $('photo-label').textContent = '📷 Fotoğraf ekle (isteğe bağlı)';
+  }
+
+  function open() {
+    $('login').hidden = true;
+    $('form').hidden = false;
+    loadSpots().catch(() => say('Meralar alınamadı.', 'err'));
+    flush();
+  }
+  $('login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    token = ($('token') as HTMLInputElement).value.trim();
+    try {
+      await api('/api/admin/ping', 'GET');
+      try { sessionStorage.setItem(KEY, token); } catch {}
+      open();
+    } catch (err) {
+      say((err as Error).message, 'err');
+    }
+  });
+  if (token) open();
+</script>

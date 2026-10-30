@@ -11,6 +11,7 @@ import Base from '../../layouts/Base.astro';
     <p class="msg" id="msg" role="status"></p>
 
     <section id="panel" hidden>
+      <p><a href="/saha/" class="go">Saha formu → ölçüm, dip tipi, lamba, fotoğraf</a></p>
       <h2>Mevcut meralar</h2>
       <label>Düzenlenecek mera<select id="pick"></select></label>
       <form id="edit" class="stack">
@@ -50,6 +51,7 @@ import Base from '../../layouts/Base.astro';
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .msg { min-height: 1.5em; font-size: 0.9rem; }
   .msg.err { color: var(--storm); }
+  .go { color: var(--sodium); font-weight: 650; }
 </style>
 
 <script>

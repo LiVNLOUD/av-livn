@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { CELL_DEG, cellKey } from '../lib/seed';
-import { publicSpot, STATUSES, type SpotRow } from '../lib/spots';
+import { loadSnapshots, publicSpot, STATUSES, type SpotRow } from '../lib/spots';
+import { fieldRecords, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
 
@@ -109,4 +110,166 @@ adminRoutes.post('/spots', async (c) => {
   ]);
   const row = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(id).first<SpotRow>();
   return c.json({ ok: true, spot: publicSpot(row!) }, 201);
+});
+
+// ---------------------------------------------------------------- field form (B5)
+
+const SUBSTRATES = ['kum', 'cakil', 'kaya', 'midyeli', 'yosunlu', 'camur'] as const;
+const SNAGS = ['yosun', 'midye', 'camur', 'hicbiri'] as const;
+const STRUCTURES = ['iskele', 'mendirek', 'dogal_kaya'] as const;
+const COLORS = ['beyaz', 'sari', 'led'] as const;
+const ACCESS = ['acik', 'kisitli_feribot', 'belirsiz'] as const;
+const MAX_PHOTO_B64 = 550_000; // ≈ 400 KB JPEG
+
+export interface FieldInput {
+  observed_at: string;
+  substrate: string[] | null;
+  snag: string | null;
+  structure: string | null;
+  /** undefined = not answered (spot unchanged); null = "bilinmiyor". */
+  has_light: boolean | null | undefined;
+  light_color: string | null;
+  access: string | null;
+  note: string | null;
+  depths: { distance_m: number; method: 'plumb' | 'sink'; depth_m: number | null; sink_s: number | null; jig_g: number | null }[];
+  photo: { mime: string; data_b64: string } | null;
+}
+
+const oneOf = <T extends string>(v: unknown, list: readonly T[]): v is T => typeof v === 'string' && (list as readonly string[]).includes(v);
+const opt = (v: unknown) => v === undefined || v === null || v === '';
+
+/** Pure validation of a field-form submission. */
+export function validateFieldInput(b: Record<string, unknown>, now: Date): { ok: true; value: FieldInput } | { ok: false; error: string } {
+  const at = b.observed_at === undefined ? now : new Date(String(b.observed_at));
+  if (Number.isNaN(at.getTime()) || at.getTime() > now.getTime() + 3_600_000) return { ok: false, error: 'invalid_observed_at' };
+  if (!opt(b.substrate) && (!Array.isArray(b.substrate) || !b.substrate.every((s) => oneOf(s, SUBSTRATES)))) return { ok: false, error: 'invalid_substrate' };
+  if (!opt(b.snag) && !oneOf(b.snag, SNAGS)) return { ok: false, error: 'invalid_snag' };
+  if (!opt(b.structure) && !oneOf(b.structure, STRUCTURES)) return { ok: false, error: 'invalid_structure' };
+  if (b.has_light !== undefined && b.has_light !== null && typeof b.has_light !== 'boolean') return { ok: false, error: 'invalid_has_light' };
+  if (!opt(b.light_color) && !oneOf(b.light_color, COLORS)) return { ok: false, error: 'invalid_light_color' };
+  if (!opt(b.access) && !oneOf(b.access, ACCESS)) return { ok: false, error: 'invalid_access' };
+  if (!opt(b.note) && (typeof b.note !== 'string' || b.note.length > 1000)) return { ok: false, error: 'invalid_note' };
+  const rawDepths = b.depths === undefined ? [] : b.depths;
+  if (!Array.isArray(rawDepths) || rawDepths.length > 20) return { ok: false, error: 'invalid_depths' };
+  const depths: FieldInput['depths'] = [];
+  for (const d of rawDepths as Record<string, unknown>[]) {
+    if (!d || !inRange(d.distance_m, 0, 300)) return { ok: false, error: 'invalid_distance' };
+    if (d.method === 'plumb') {
+      if (!inRange(d.depth_m, 0, 80)) return { ok: false, error: 'invalid_depth' };
+      depths.push({ distance_m: d.distance_m, method: 'plumb', depth_m: d.depth_m, sink_s: null, jig_g: null });
+    } else if (d.method === 'sink') {
+      if (!inRange(d.sink_s, 0.5, 120) || !inRange(d.jig_g, 0.3, 40)) return { ok: false, error: 'invalid_sink' };
+      depths.push({ distance_m: d.distance_m, method: 'sink', depth_m: null, sink_s: d.sink_s, jig_g: d.jig_g });
+    } else return { ok: false, error: 'invalid_method' };
+  }
+  let photo: FieldInput['photo'] = null;
+  if (!opt(b.photo)) {
+    const p = b.photo as Record<string, unknown>;
+    if (!oneOf(p?.mime, ['image/jpeg', 'image/webp'] as const) || typeof p.data_b64 !== 'string' || p.data_b64.length > MAX_PHOTO_B64 || !/^[A-Za-z0-9+/=]+$/.test(p.data_b64))
+      return { ok: false, error: 'invalid_photo' };
+    photo = { mime: p.mime as string, data_b64: p.data_b64 };
+  }
+  return {
+    ok: true,
+    value: {
+      observed_at: at.toISOString(),
+      substrate: opt(b.substrate) || (b.substrate as string[]).length === 0 ? null : [...new Set(b.substrate as string[])],
+      snag: opt(b.snag) ? null : (b.snag as string),
+      structure: opt(b.structure) ? null : (b.structure as string),
+      has_light: b.has_light as boolean | null | undefined,
+      light_color: opt(b.light_color) ? null : (b.light_color as string),
+      access: opt(b.access) ? null : (b.access as string),
+      note: opt(b.note) ? null : (b.note as string),
+      depths,
+      photo,
+    },
+  };
+}
+
+/** Recompute one spot's v2 score now (no Monte Carlo; band offsets reused) and store it as partial. */
+export async function rescoreNow(db: D1Database, id: string, now = new Date()): Promise<ListEntryV2 | null> {
+  const [spotRes, obsRes, depthRes, scoreRes] = await db.batch([
+    db.prepare('SELECT * FROM spots WHERE id = ?1').bind(id),
+    db.prepare('SELECT * FROM field_obs WHERE spot_id = ?1').bind(id),
+    db.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
+    db.prepare("SELECT v.spot_id, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.status != 'rejected'"),
+  ]);
+  const row = spotRes!.results[0] as SpotRow | undefined;
+  if (!row) return null;
+  const snaps = await loadSnapshots(db, row.sea_cell ? [row.wx_cell, row.sea_cell] : [row.wx_cell]);
+  const stored = (scoreRes!.results as { spot_id: string; start_hour: number; list_json: string }[]).map((r) => ({
+    id: r.spot_id,
+    start_hour: r.start_hour,
+    list: JSON.parse(r.list_json) as ListEntryV2[],
+  }));
+  const rec = rescoreSpot(
+    row,
+    snaps.get(row.wx_cell),
+    row.sea_cell ? snaps.get(row.sea_cell) : undefined,
+    now,
+    fieldRecords(obsRes!.results as FieldObsRow[], depthRes!.results as FieldDepthRow[]).get(id),
+    stored.find((s) => s.id === id) ?? null,
+    stored.filter((s) => s.id !== id),
+  );
+  await db.prepare(UPSERT_V2_SQL).bind(rec.spot_id, rec.model_version, rec.computed_at, rec.start_hour, rec.list_json, rec.detail_json, 1).run();
+  return (JSON.parse(rec.list_json) as ListEntryV2[])[0]!;
+}
+
+adminRoutes.post('/spots/:id/field', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<Record<string, unknown>>().catch(() => null);
+  if (!body || typeof body !== 'object') return c.json({ ok: false, error: 'invalid_json' }, 400);
+  const now = new Date();
+  const v = validateFieldInput(body, now);
+  if (!v.ok) return c.json(v, 400);
+  const f = v.value;
+  const exists = await c.env.DB.prepare('SELECT id FROM spots WHERE id = ?1').bind(id).first();
+  if (!exists) return c.json({ ok: false, error: 'not_found' }, 404);
+  const obsId = `obs-${crypto.randomUUID().slice(0, 12)}`;
+  const light = f.has_light === undefined ? null : f.has_light === null ? null : f.has_light ? 1 : 0;
+  const stmts = [
+    c.env.DB.prepare(
+      `INSERT INTO field_obs (id, spot_id, observed_at, substrate, snag, structure, has_light, light_color, access, note, created_at)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`,
+    ).bind(obsId, id, f.observed_at, f.substrate ? JSON.stringify(f.substrate) : null, f.snag, f.structure, light, f.light_color, f.access, f.note, now.toISOString()),
+    ...f.depths.map((d) =>
+      c.env.DB.prepare('INSERT INTO field_depth (obs_id, distance_m, method, depth_m, sink_s, jig_g) VALUES (?1, ?2, ?3, ?4, ?5, ?6)').bind(obsId, d.distance_m, d.method, d.depth_m, d.sink_s, d.jig_g),
+    ),
+  ];
+  if (f.photo) stmts.push(c.env.DB.prepare('INSERT INTO field_photo (obs_id, mime, data_b64) VALUES (?1, ?2, ?3)').bind(obsId, f.photo.mime, f.photo.data_b64));
+  // The spot's lamp state and access follow the latest field answer; admin_edited_at keeps the seed from overwriting them.
+  if (f.has_light !== undefined) stmts.push(c.env.DB.prepare('UPDATE spots SET has_light = ?1, admin_edited_at = ?2, updated_at = ?2 WHERE id = ?3').bind(light, now.toISOString(), id));
+  if (f.access) stmts.push(c.env.DB.prepare('UPDATE spots SET access = ?1, updated_at = ?2 WHERE id = ?3').bind(f.access, now.toISOString(), id));
+  await c.env.DB.batch(stmts);
+  const rescore = c.req.query('rescore') !== '0';
+  const score = rescore ? await rescoreNow(c.env.DB, id, now) : null;
+  return c.json({ ok: true, obs_id: obsId, rescored: rescore, score: score && { total: score[0], p10: score[1], p90: score[2], rank: score[3], gated: score[4] === 1 } }, 201);
+});
+
+adminRoutes.get('/spots/:id/field', async (c) => {
+  const id = c.req.param('id');
+  const [obs, depths] = await c.env.DB.batch([
+    c.env.DB.prepare('SELECT o.*, (SELECT count(*) FROM field_photo p WHERE p.obs_id = o.id) AS has_photo FROM field_obs o WHERE o.spot_id = ?1 ORDER BY observed_at DESC').bind(id),
+    c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
+  ]);
+  const ds = depths!.results as FieldDepthRow[];
+  return c.json({ ok: true, observations: (obs!.results as (FieldObsRow & { has_photo: number })[]).map((o) => ({ ...o, depths: ds.filter((d) => d.obs_id === o.id) })) });
+});
+
+adminRoutes.delete('/field/:obs', async (c) => {
+  const o = await c.env.DB.prepare('SELECT spot_id FROM field_obs WHERE id = ?1').bind(c.req.param('obs')).first<{ spot_id: string }>();
+  if (!o) return c.json({ ok: false, error: 'not_found' }, 404);
+  await c.env.DB.batch([
+    c.env.DB.prepare('DELETE FROM field_depth WHERE obs_id = ?1').bind(c.req.param('obs')),
+    c.env.DB.prepare('DELETE FROM field_photo WHERE obs_id = ?1').bind(c.req.param('obs')),
+    c.env.DB.prepare('DELETE FROM field_obs WHERE id = ?1').bind(c.req.param('obs')),
+  ]);
+  await rescoreNow(c.env.DB, o.spot_id);
+  return c.json({ ok: true });
+});
+
+adminRoutes.post('/spots/:id/rescore', async (c) => {
+  const score = await rescoreNow(c.env.DB, c.req.param('id'));
+  if (!score) return c.json({ ok: false, error: 'not_found' }, 404);
+  return c.json({ ok: true, score: { total: score[0], p10: score[1], p90: score[2], rank: score[3], gated: score[4] === 1 } });
 });
