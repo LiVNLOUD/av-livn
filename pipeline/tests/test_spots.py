@@ -147,6 +147,7 @@ def test_overpass_query_covers_bbox_and_kinds():
     assert "pier|breakwater|groyne" in q
     assert 'natural"="coastline' in q
     assert "40.3,28.7,40.56,29.2" in q
+    assert 'natural"="cape' in q and "40.25,28.5,40.65,29.3" in q
 
 
 def test_tip_uses_eroded_mainland_when_coastline_wraps_the_pier(tmp_path):

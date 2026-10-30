@@ -17,3 +17,4 @@ export { calibrate, R_IDEAL, R_WORST, SCALE, IDEAL_SPOT, IDEAL_WEATHER, WORST_SP
 export { PARAMS, DEFAULTS, SIGMA, drawParams, rng, type Evidence, type ParamKey, type Params } from './v2/params';
 export { skyAt, dayOfYear } from './v2/astro';
 export { sinkSpeed, calibrateSink, fieldDepths, PAIR_M, PRIOR_REL_SD, type SinkObs, type PlumbObs, type ConvertedDepth, type SinkCalibration } from './v2/sink';
+export { BANDS_V2, bandV2, RANK_FIRST_WIDTH, leadWithRank } from './v2/display';

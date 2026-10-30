@@ -13,7 +13,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from av_pipeline import BBOX
+from av_pipeline import BATHY_BBOX, BBOX
 
 ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
@@ -27,11 +27,16 @@ def build_query() -> str:
     s, w, n, e = BBOX["south"], BBOX["west"], BBOX["north"], BBOX["east"]
     bbox = f"{s},{w},{n},{e}"
     padded = f"{s - PAD},{w - PAD},{n + PAD},{e + PAD}"
+    b = BATHY_BBOX
+    wide = f"{b['south']},{b['west']},{b['north']},{b['east']}"
     return f"""[out:json][timeout:180];
 (
   way["man_made"~"^(pier|breakwater|groyne)$"]({bbox});
   way["natural"="coastline"]({padded});
   node["place"~"^(town|village|suburb|neighbourhood|quarter)$"]({bbox});
+  node["natural"="cape"]["name"]({wide});
+  nwr["harbour"="yes"]["name"]({wide});
+  nwr["leisure"="marina"]["name"]({wide});
 );
 out geom;"""
 

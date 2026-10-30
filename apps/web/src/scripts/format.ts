@@ -1,4 +1,4 @@
-import { bandOf } from '@av-livn/scoring';
+import { bandOf, bandV2 } from '@av-livn/scoring';
 
 export const KIND_TR: Record<string, string> = { pier: 'İskele', breakwater: 'Mendirek', groyne: 'Mahmuz', manual: 'Elle eklenen' };
 export const STATUS_TR: Record<string, string> = { candidate: 'Doğrulanmadı', verified: 'Sahada doğrulandı', rejected: 'Elendi' };
@@ -37,6 +37,13 @@ export function lamp(el: HTMLElement, total: number | null, gated: boolean): voi
   el.style.setProperty('--s', total === null ? '0' : String(Math.max(0, Math.min(1, total / 100))));
   el.textContent = total === null ? '–' : String(Math.round(total));
   el.setAttribute('aria-label', total === null ? 'Puan yok' : `Puan ${Math.round(total)} / 100${gated ? ', güvenlik uyarısı' : ''}`);
+}
+
+/** v2: same lamp, colour from the calibrated v2 bands (docs/MODEL.md §11). */
+export function lampV2(el: HTMLElement, total: number | null, gated: boolean): void {
+  lamp(el, total, gated);
+  el.classList.remove('good', 'warn', 'bad', 'neutral', 'none');
+  el.classList.add(total === null ? 'none' : bandV2(total));
 }
 
 export const compass = (deg: number | null): string =>

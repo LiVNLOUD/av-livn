@@ -31,9 +31,11 @@ jobs:
       - name: Copernicus Marmara 500 m static bathymetry (find ID, compare; never blocks)
         run: python -m av_pipeline.ocean.static_bathy data/bathy/dtm.nc
       - name: Contours → PMTiles
-        run: python -m av_pipeline.bathy.contours data/bathy/dtm.nc apps/web/public/tiles/bathy.pmtiles
+        run: python -m av_pipeline.bathy.contours data/bathy/dtm.nc apps/web/public/tiles/bathy.pmtiles --land data/osm/land_marmara.geojson
       - name: Fetch OSM (Overpass)
         run: python -m av_pipeline.spots.fetch_osm data/osm/raw.json
+      - name: Map labels (capes, harbours)
+        run: python -m av_pipeline.spots.labels data/osm/raw.json apps/web/public/tiles/labels.geojson
       - name: Build candidate spots with depth features
         # Tip from eroded OSM land, 16-direction fetch, EUSeaMap substrate (land file: analysis/audit/land_polygons.sh)
         run: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson --check-marine --dtm data/bathy/dtm.nc --land data/osm/land_marmara.geojson --habitat
@@ -42,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles
+          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles apps/web/public/tiles/labels.geojson
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else

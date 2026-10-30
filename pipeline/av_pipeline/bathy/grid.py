@@ -15,6 +15,7 @@ class Grid:
     lat: np.ndarray  # ascending, cell centres
     lon: np.ndarray  # ascending, cell centres
     elev: np.ndarray  # shape (len(lat), len(lon)); metres, negative below sea level, NaN on land
+    interp: np.ndarray | None = None  # same shape; 1 where the DTM cell is interpolated (no soundings)
 
     @classmethod
     def from_netcdf(cls, path: str) -> "Grid":
@@ -24,9 +25,11 @@ class Grid:
             lat = np.asarray(ds.variables["latitude"][:], dtype=float)
             lon = np.asarray(ds.variables["longitude"][:], dtype=float)
             z = np.ma.filled(ds.variables["elevation"][:].astype(float), np.nan)
+            f = np.ma.filled(ds.variables["interpolation_flag"][:].astype(float), np.nan) if "interpolation_flag" in ds.variables else None
         if lat[0] > lat[-1]:
             lat, z = lat[::-1], z[::-1, :]
-        return cls(lat, lon, z)
+            f = None if f is None else f[::-1, :]
+        return cls(lat, lon, z, f)
 
     def depth(self, lat: float, lon: float) -> float | None:
         """Bilinear depth in metres (positive down). NaN neighbours are dropped and weights renormalised;

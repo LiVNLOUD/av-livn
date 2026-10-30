@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
-interface Props { title: string; description?: string }
-const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.' } = Astro.props;
+interface Props { title: string; description?: string; fullscreen?: boolean }
+const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="tr" data-app="av-livn">
@@ -15,7 +15,7 @@ const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatl
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <title>{title}</title>
   </head>
-  <body>
+  <body class:list={{ fullscreen }}>
     <header class="site">
       <div class="wrap">
         <a class="brand" href="/">av<span>.</span>livn</a>

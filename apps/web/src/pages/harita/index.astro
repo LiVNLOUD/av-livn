@@ -1,70 +1,83 @@
 ---
 import Base from '../../layouts/Base.astro';
 ---
-<Base title="Dip haritası — av.livn" description="Gemlik–Mudanya kıyısı derinlik konturları ve meralar.">
+<Base title="Dip haritası — av.livn" description="Gemlik–Mudanya kıyısı derinlik konturları ve meralar." fullscreen>
   <section class="mapwrap">
     <div id="map" class="map" role="region" aria-label="Derinlik haritası ve meralar"></div>
     <aside class="card" id="card" hidden aria-live="polite"></aside>
-    <details class="legend" open>
-      <summary>Derinlik</summary>
+    <details class="legend" id="legend">
+      <summary>Lejant</summary>
       <ol class="scale" id="scale"></ol>
-      <p>Çizgiler 2, 5, 10, 15, 20, 30, 50, 75 ve 100 m konturları. Daireler meraların şu anki puanı.</p>
-      <p>EMODnet DTM yaklaşık 115 m çözünürlüktedir; atış mesafesindeki kaya, çukur gibi mikro yapıları ve kıyıya çok yakın derinliği göstermez.</p>
+      <p><span class="sw hatch"></span> Taralı alan: DTM enterpolasyonu (GEBCO dolgusu, yerinde ölçüm yok). Buradaki konturlar güvenilmez.</p>
+      <p><span class="sw dot"></span> Meralar v2 puan rengiyle: <b class="g">≥ 65</b>, <b class="w">40–65</b>, <b class="b">&lt; 40</b>. Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir.</p>
+      <p>Çizgiler 2, 5, 10, 15, 20, 30, 50, 75, 100 m. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki derinliği göstermez.</p>
     </details>
   </section>
 </Base>
 
 <style>
-  @import 'maplibre-gl/dist/maplibre-gl.css';
-  .mapwrap { position: relative; height: calc(100dvh - 64px); min-height: 420px; }
-  .map { position: absolute; inset: 0; background: #0a151e; }
+  .mapwrap { position: fixed; inset: 0; }
+  .map { position: absolute; inset: 0; background: #11293a; }
   .legend {
-    position: absolute; left: 10px; bottom: 26px; max-width: min(300px, calc(100% - 20px));
+    position: absolute; left: 10px; bottom: calc(30px + env(safe-area-inset-bottom)); max-width: min(310px, calc(100% - 20px));
     background: color-mix(in oklab, var(--sea) 92%, transparent); border: 1px solid var(--swell); border-radius: 10px;
     padding: 8px 12px; font-size: 0.78rem; color: var(--mist);
   }
-  .legend summary { cursor: pointer; color: var(--foam); font-weight: 620; font-size: 0.86rem; }
+  .legend summary { cursor: pointer; color: var(--foam); font-weight: 620; font-size: 0.86rem; min-height: 28px; display: flex; align-items: center; }
   .legend p { margin: 6px 0 0; line-height: 1.4; }
+  .legend b.g { color: var(--good); } .legend b.w { color: var(--warn); } .legend b.b { color: var(--bad); }
+  .sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+  .sw.hatch { background: repeating-linear-gradient(135deg, rgb(219 230 234 / .55) 0 1.5px, transparent 1.5px 5px), #2f78a6; }
+  .sw.dot { width: 10px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 2px var(--sea); }
   .scale { list-style: none; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 0; margin: 8px 0 0; }
   :global(.scale li) { height: 22px; display: grid; place-items: end start; padding: 0 3px; font-size: 0.7rem; color: var(--foam); border-radius: 2px; }
-  .card[hidden] { display: none; }
   .card {
-    position: absolute; left: 10px; right: 10px; top: 10px; max-width: 360px;
+    position: absolute; z-index: 4; left: 10px; right: 10px; top: 54px; max-width: 360px;
     background: var(--sea); border: 1px solid var(--swell); border-radius: 12px; padding: 12px 14px;
     display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; box-shadow: 0 8px 30px rgb(0 0 0 / .35);
   }
   :global(.card h2) { margin: 0; font-size: 1.02rem; line-height: 1.25; }
   :global(.card p) { margin: 2px 0 0; font-size: 0.82rem; color: var(--mist); }
   :global(.card a.go) { grid-column: 1 / -1; text-align: center; text-decoration: none; }
-  :global(.card button.x) { background: none; color: var(--mist); padding: 4px 8px; font-size: 1.2rem; line-height: 1; }
-  :global(.maplibregl-ctrl-attrib) { font-size: 10px; background: rgb(14 28 39 / .8) !important; color: var(--mist); }
+  :global(.card button.x) { background: none; border: 0; color: var(--mist); padding: 4px 8px; font-size: 1.3rem; line-height: 1; min-width: 44px; min-height: 44px; }
+  :global(.maplibregl-ctrl-attrib) { font-size: 10px; background: rgb(14 28 39 / .85) !important; color: var(--mist); }
   :global(.maplibregl-ctrl-attrib a) { color: var(--foam); }
   :global(.maplibregl-ctrl-group) { background: var(--sea); }
   :global(.maplibregl-ctrl-group button .maplibregl-ctrl-icon) { filter: invert(1); }
+  :global(.maplibregl-ctrl-scale) { background: rgb(14 28 39 / .8); color: var(--foam); border-color: var(--foam); font-size: 11px; }
+  :global(.maplibregl-ctrl-top-right) { top: 48px; }
 </style>
 
 <script>
+  import 'maplibre-gl/dist/maplibre-gl.css';
   import * as maplibregl from 'maplibre-gl';
   import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
   import { PMTiles, Protocol, type RangeResponse, type Source } from 'pmtiles';
-  import { esc, KIND_TR, lamp } from '../../scripts/format';
+  import { esc, KIND_TR, lampV2 } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
-  import { BAND_THRESHOLDS } from '@av-livn/scoring';
+  import { declutter } from '../../scripts/declutter';
+  import { BANDS_V2 } from '@av-livn/scoring';
 
   // Sequential depth scale: shallow = light, deep = dark (blue). Edges match bathy/contours.py BAND_EDGES_M.
   const DEPTH_STOPS: [number, string][] = [
     [0, '#9fd3e6'], [2, '#7cc0dc'], [5, '#5aa9cf'], [10, '#3f90bd'], [15, '#2f78a6'], [20, '#25648f'],
     [30, '#1d5279'], [50, '#164264'], [75, '#113551'], [100, '#0d2a41'], [150, '#0a2234'], [200, '#081b2a'],
   ];
+  // Water beyond the bathymetry: mid-depth tone, so the faded edge blends in. BATHY_BBOX mirrors pipeline av_pipeline/__init__.py.
+  const OPEN_WATER = '#11293a';
+  const BATHY_BBOX = { south: 40.25, west: 28.5, north: 40.65, east: 29.3 };
+  const LAND = '#22313a';
+  const OFM = 'https://tiles.openfreemap.org';
+  const NAME = ['coalesce', ['get', 'name:tr'], ['get', 'name']];
 
-  type Spot = { id: string; name: string; kind: string; place: string | null; lat: number; lon: number; depth_200m: number | null; slope_pct: number | null; score: { total: number | null; gated: boolean } };
+  type Spot = {
+    id: string; name: string; kind: string; place: string | null; lat: number; lon: number; alt: { lat: number; lon: number } | null;
+    access: string | null; score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean };
+  };
 
   maplibregl.setWorkerUrl(workerUrl);
 
-  /**
-   * The archive is small (~0.2 MB), so fetch it once and serve byte ranges from memory. This avoids relying
-   * on HTTP Range support of the static host and lets the service worker keep the map available offline.
-   */
+  /** The archive is small (~0.5 MB): fetched once, byte ranges served from memory (static assets ignore Range). */
   class WholeFileSource implements Source {
     private buf: Promise<ArrayBuffer>;
     constructor(private url: string) {
@@ -83,35 +96,52 @@ import Base from '../../layouts/Base.astro';
   protocol.add(new PMTiles(new WholeFileSource(TILES_URL)));
   maplibregl.addProtocol('pmtiles', protocol.tile);
 
-  const scale = document.getElementById('scale')!;
-  scale.innerHTML = DEPTH_STOPS.filter((_, i) => i % 2 === 0)
+  document.getElementById('scale')!.innerHTML = DEPTH_STOPS.filter((_, i) => i % 2 === 0)
     .map(([d, c], i) => `<li style="background:${c};color:${i < 2 ? '#0e1c27' : '#dbe6ea'}">${d}</li>`)
     .join('');
+  if (window.innerWidth >= 700) (document.getElementById('legend') as HTMLDetailsElement).open = true;
+
+  /** Soft edge: rings inside the bathymetry bbox, increasingly opaque open-water colour towards the edge, plus an
+   *  opaque frame just outside it (the contoured raster reaches half a DTM cell beyond the bbox). */
+  function fadeRings(n = 14, width = 0.05) {
+    const b = BATHY_BBOX;
+    const ring = (d: number) => [[b.west + d, b.south + d], [b.east - d, b.south + d], [b.east - d, b.north - d], [b.west + d, b.north - d], [b.west + d, b.south + d]];
+    const band = (d0: number, d1: number, a: number) => ({
+      type: 'Feature' as const,
+      properties: { a },
+      geometry: { type: 'Polygon' as const, coordinates: [ring(d0), ring(d1).reverse()] },
+    });
+    return {
+      type: 'FeatureCollection' as const,
+      features: [band(-0.02, 0, 1), ...Array.from({ length: n }, (_, k) => band((width * k) / n, (width * (k + 1)) / n, 1 - (k + 0.5) / n))],
+    };
+  }
 
   const map = new maplibregl.Map({
     container: 'map',
     attributionControl: false,
-    bounds: [[28.7, 40.3], [29.2, 40.56]],
-    fitBoundsOptions: { padding: 12 },
+    // Spots' extent: on a phone this keeps the coast in view instead of fitting the whole bathymetry box.
+    bounds: [[28.76, 40.33], [29.18, 40.54]],
+    fitBoundsOptions: { padding: { top: 50, bottom: 20, left: 10, right: 10 } },
     minZoom: 8,
     maxZoom: 16,
-    maxBounds: [[28.4, 40.15], [29.5, 40.75]],
+    maxBounds: [[28.3, 40.1], [29.6, 40.8]],
     style: {
       version: 8,
+      glyphs: `${OFM}/fonts/{fontstack}/{range}.pbf`,
       sources: {
-        bathy: {
-          type: 'vector',
-          url: `pmtiles://${TILES_URL}`,
-          attribution: '<a href="https://emodnet.ec.europa.eu/en/bathymetry">EMODnet Bathymetry</a> DTM 2024',
-        },
+        bathy: { type: 'vector', url: `pmtiles://${TILES_URL}`, attribution: '<a href="https://emodnet.ec.europa.eu/en/bathymetry">EMODnet Bathymetry</a> DTM 2024' },
+        ofm: { type: 'vector', url: `${OFM}/planet`, attribution: '<a href="https://openfreemap.org">OpenFreeMap</a> <a href="https://www.openmaptiles.org/">© OpenMapTiles</a>' },
+        fade: { type: 'geojson', data: fadeRings() },
+        labels: { type: 'geojson', data: '/tiles/labels.geojson' },
       },
       layers: [
-        { id: 'bg', type: 'background', paint: { 'background-color': '#24323b' } },
+        { id: 'bg', type: 'background', paint: { 'background-color': OPEN_WATER } },
         {
           id: 'bands', type: 'fill', source: 'bathy', 'source-layer': 'bands',
           paint: { 'fill-color': ['step', ['get', 'dmin'], DEPTH_STOPS[0]![1], ...DEPTH_STOPS.slice(1).flatMap(([d, c]) => [d, c])] as never, 'fill-antialias': false },
         },
-        { id: 'land', type: 'fill', source: 'bathy', 'source-layer': 'land', paint: { 'fill-color': '#24323b' } },
+        { id: 'interp', type: 'fill', source: 'bathy', 'source-layer': 'interp', paint: { 'fill-pattern': 'hatch', 'fill-opacity': 0.55 } },
         {
           id: 'contours', type: 'line', source: 'bathy', 'source-layer': 'contours',
           paint: {
@@ -120,48 +150,153 @@ import Base from '../../layouts/Base.astro';
             'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1.2],
           },
         },
+        { id: 'fade', type: 'fill', source: 'fade', paint: { 'fill-color': OPEN_WATER, 'fill-opacity': ['get', 'a'], 'fill-antialias': false } },
+        { id: 'land', type: 'fill', source: 'bathy', 'source-layer': 'land', paint: { 'fill-color': LAND } },
+        { id: 'lakes', type: 'fill', source: 'ofm', 'source-layer': 'water', filter: ['in', ['get', 'class'], ['literal', ['lake', 'river', 'pond']]], paint: { 'fill-color': '#1b3a4d' } },
+        {
+          id: 'roads', type: 'line', source: 'ofm', 'source-layer': 'transportation', minzoom: 9,
+          filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
+          paint: { 'line-color': '#55697a', 'line-width': ['interpolate', ['linear'], ['zoom'], 9, ['match', ['get', 'class'], ['motorway', 'trunk'], 1.2, 0.5], 14, ['match', ['get', 'class'], ['motorway', 'trunk'], 3, 1.6]] },
+        },
+        {
+          id: 'water-names', type: 'symbol', source: 'ofm', 'source-layer': 'water_name',
+          layout: { 'text-field': NAME as never, 'text-font': ['Noto Sans Italic'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 12, 13, 15], 'text-letter-spacing': 0.08, 'text-max-width': 8 },
+          paint: { 'text-color': '#9fc3d6', 'text-halo-color': OPEN_WATER, 'text-halo-width': 1.2 },
+        },
+        {
+          id: 'places', type: 'symbol', source: 'ofm', 'source-layer': 'place',
+          filter: ['in', ['get', 'class'], ['literal', ['city', 'town', 'village', 'suburb', 'hamlet', 'island']]],
+          layout: {
+            'text-field': NAME as never, 'text-font': ['Noto Sans Regular'], 'text-max-width': 8,
+            'text-size': ['match', ['get', 'class'], ['city', 'town'], 14, 11.5],
+            'symbol-sort-key': ['match', ['get', 'class'], 'city', 0, 'town', 1, 'village', 2, 3],
+          },
+          paint: { 'text-color': '#c9d6dc', 'text-halo-color': LAND, 'text-halo-width': 1.4 },
+        },
+        {
+          id: 'capes', type: 'symbol', source: 'labels', minzoom: 10,
+          layout: {
+            'text-field': ['get', 'name'], 'text-font': ['Noto Sans Italic'], 'text-size': 11, 'text-max-width': 7,
+            'text-variable-anchor': ['left', 'right', 'top', 'bottom'], 'text-radial-offset': 0.4,
+          },
+          paint: { 'text-color': ['match', ['get', 'kind'], 'cape', '#e7d7b0', '#9fc3d6'], 'text-halo-color': '#0e1c27', 'text-halo-width': 1.2 },
+        },
       ],
     },
   });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-  map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları' }), 'bottom-right');
+  map.addControl(new maplibregl.ScaleControl({ unit: 'metric', maxWidth: 110 }), 'bottom-right');
+  map.addControl(
+    new maplibregl.AttributionControl({ compact: true, customAttribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları · Copernicus Marine · Open-Meteo' }),
+    'bottom-right',
+  );
+
+  // Diagonal hatch for interpolated (GEBCO-filled) areas.
+  map.on('styleimagemissing', (e) => {
+    if (e.id !== 'hatch' || map.hasImage('hatch')) return;
+    const n = 8;
+    const c = document.createElement('canvas');
+    c.width = c.height = n;
+    const g = c.getContext('2d')!;
+    g.strokeStyle = 'rgba(219,230,234,0.9)';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(0, n);
+    g.lineTo(n, 0);
+    g.moveTo(-n / 2, n / 2);
+    g.lineTo(n / 2, -n / 2);
+    g.moveTo(n / 2, n + n / 2);
+    g.lineTo(n + n / 2, n / 2);
+    g.stroke();
+    map.addImage('hatch', g.getImageData(0, 0, n, n), { pixelRatio: 1 });
+  });
 
   const card = document.getElementById('card')!;
   function showCard(s: Spot) {
     card.hidden = false;
+    const sc = s.score;
+    const band = sc.p10 !== null && sc.p90 !== null ? `bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
     card.innerHTML = `<span class="lamp" id="card-lamp"></span>
       <div><h2>${esc(s.name)}</h2><p>${esc([KIND_TR[s.kind] ?? s.kind, s.place].filter(Boolean).join(', '))}</p>
-      <p>${s.depth_200m != null ? `200 m açıkta ${s.depth_200m.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} m` : 'Derinlik verisi yok'}${s.slope_pct != null ? `, eğim %${s.slope_pct.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}` : ''}</p></div>
+      <p>${sc.rank ? `Bu saatte ${spotCount} mera içinde <b>${sc.rank}.</b>` : 'Puan yok'}${band ? ` · ${band}` : ''}</p></div>
       <button class="x" type="button" aria-label="Kartı kapat">×</button>
       <a class="go button" href="/mera/?id=${encodeURIComponent(s.id)}">Ayrıntılar ve 72 saat</a>`;
-    lamp(card.querySelector<HTMLElement>('#card-lamp')!, s.score.total, s.score.gated);
+    lampV2(card.querySelector<HTMLElement>('#card-lamp')!, sc.total, sc.gated);
     card.querySelector('button.x')!.addEventListener('click', () => (card.hidden = true));
   }
 
+  let spotCount = 0;
   map.on('load', async () => {
-    const res = await fetch('/api/spots', { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] }));
+    const res = await fetch('/api/spots?model=v2', { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] }));
     const spots: Spot[] = res.spots ?? [];
+    spotCount = spots.length;
     const byId = new Map(spots.map((s) => [s.id, s]));
-    map.addSource('spots', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: spots.map((s) => ({
-          type: 'Feature',
-          geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-          properties: { id: s.id, total: s.score.total ?? -1 },
-        })),
+    const empty = { type: 'FeatureCollection' as const, features: [] };
+    map.addSource('spots', { type: 'geojson', data: empty });
+    map.addSource('leaders', { type: 'geojson', data: empty });
+    map.addLayer({ id: 'leaders', type: 'line', source: 'leaders', paint: { 'line-color': '#dbe6ea', 'line-opacity': 0.7, 'line-width': 1 } });
+    map.addLayer({ id: 'true-pos', type: 'circle', source: 'leaders', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 2.5, 'circle-color': '#dbe6ea' } });
+    const color = ['step', ['get', 'total'], PALETTE.neutral.color, 0, PALETTE.bad.color, BANDS_V2.warn, PALETTE.warn.color, BANDS_V2.good, PALETTE.good.color];
+    // Markers are symbols (an SDF disc) so they take part in collision: names are placed around them, never on them.
+    const R = 32;
+    const disc = new ImageData(2 * R, 2 * R);
+    for (let y = 0; y < 2 * R; y++)
+      for (let x = 0; x < 2 * R; x++) {
+        const d = Math.hypot(x + 0.5 - R, y + 0.5 - R);
+        disc.data[(y * 2 * R + x) * 4 + 3] = Math.max(0, Math.min(255, Math.round(192 - (d - R * 0.75) * 24)));
+      }
+    map.addImage('disc', disc, { sdf: true, pixelRatio: 2 });
+    // Names (below) are placed around the discs (above): symbols are placed top layer first, so every disc claims
+    // its space before any name; names are dropped where they do not fit (best ranks first). Score on top.
+    map.addLayer({
+      id: 'spot-labels', type: 'symbol', source: 'spots',
+      layout: {
+        'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 10.5, 14, 13],
+        'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'bottom-right', 'bottom-left', 'top-right'],
+        // Offset clears the disc's collision box (radius ≈ icon size × 16 px + 2 px padding).
+        'text-radial-offset': ['interpolate', ['linear'], ['zoom'], 9, 1.35, 14, 1.7], 'text-max-width': 9,
+        'symbol-sort-key': ['get', 'rank'],
       },
+      paint: { 'text-color': '#f3f6f7', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.6 },
     });
     map.addLayer({
-      id: 'spots', type: 'circle', source: 'spots',
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 5, 14, 10],
-        'circle-color': ['step', ['get', 'total'], PALETTE.neutral.color, 0, PALETTE.bad.color, BAND_THRESHOLDS.warn * 100, PALETTE.warn.color, BAND_THRESHOLDS.good * 100, PALETTE.good.color],
-        'circle-stroke-color': '#0e1c27',
-        'circle-stroke-width': 2,
-      },
+      id: 'spots', type: 'symbol', source: 'spots',
+      layout: { 'icon-image': 'disc', 'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.55, 14, 0.85], 'icon-allow-overlap': true },
+      paint: { 'icon-color': color as never, 'icon-halo-color': '#0e1c27', 'icon-halo-width': 2 },
     });
+    map.addLayer({
+      id: 'spot-score', type: 'symbol', source: 'spots', minzoom: 11,
+      layout: { 'text-field': ['to-string', ['get', 'score']], 'text-font': ['Noto Sans Bold'], 'text-size': 10, 'text-allow-overlap': true, 'text-ignore-placement': true },
+      paint: { 'text-color': '#0e1c27' },
+    });
+
+    /** Spread markers that overlap on screen at the current zoom; leader lines to their true positions. */
+    function layout() {
+      const px = spots.map((s) => map.project([s.lon, s.lat]));
+      const shown = declutter(px, 24);
+      const feats = spots.map((s, i) => {
+        const ll = map.unproject([shown[i]!.x, shown[i]!.y]);
+        return { s, ll, moved: Math.hypot(shown[i]!.x - px[i]!.x, shown[i]!.y - px[i]!.y) > 1 };
+      });
+      (map.getSource('spots') as maplibregl.GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: feats.map(({ s, ll }) => ({
+          type: 'Feature', geometry: { type: 'Point', coordinates: [ll.lng, ll.lat] },
+          properties: { id: s.id, name: s.name, total: s.score.total ?? -1, score: s.score.total === null ? '–' : Math.round(s.score.total), rank: s.score.rank ?? 99 },
+        })),
+      });
+      (map.getSource('leaders') as maplibregl.GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: feats.filter((f) => f.moved).flatMap(({ s, ll }) => [
+          { type: 'Feature' as const, properties: {}, geometry: { type: 'LineString' as const, coordinates: [[s.lon, s.lat], [ll.lng, ll.lat]] } },
+          { type: 'Feature' as const, properties: {}, geometry: { type: 'Point' as const, coordinates: [s.lon, s.lat] } },
+        ]),
+      });
+    }
+    layout();
+    map.on('zoomend', layout);
+    map.on('moveend', layout);
+
     map.on('click', 'spots', (e) => {
       const id = e.features?.[0]?.properties?.id as string | undefined;
       const s = id ? byId.get(id) : undefined;
@@ -172,9 +307,11 @@ import Base from '../../layouts/Base.astro';
     const focus = new URLSearchParams(location.search).get('id');
     const f = focus ? byId.get(focus) : undefined;
     if (f) {
-      map.jumpTo({ center: [f.lon, f.lat], zoom: 13.5 });
+      map.jumpTo({ center: [f.lon, f.lat], zoom: 14 });
       showCard(f);
     }
+    // Compact attribution starts collapsed (the ⓘ opens it) so it does not cover the legend on phones.
+    document.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
     document.getElementById('map')!.dataset.ready = String(spots.length);
   });
 </script>

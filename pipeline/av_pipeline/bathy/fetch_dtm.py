@@ -1,4 +1,5 @@
-"""Download the EMODnet Bathymetry DTM 2024 subset for the bbox from ERDDAP (netCDF, ~0.5 MB).
+"""Download the EMODnet Bathymetry DTM 2024 subset for BATHY_BBOX from ERDDAP (netCDF): elevation and
+interpolation_flag (1 = cell interpolated/extrapolated, e.g. GEBCO fill; drawn hatched on the map).
 
 Usage: python -m av_pipeline.bathy.fetch_dtm data/bathy/dtm.nc
 """
@@ -10,7 +11,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-from av_pipeline import BBOX
+from av_pipeline import BATHY_BBOX
 
 DATASET = "bathymetry_dtm_2024"
 ERDDAP = "https://erddap.emodnet.eu/erddap/griddap"
@@ -18,8 +19,9 @@ CITATION = "EMODnet Bathymetry Consortium (2024): EMODnet Digital Bathymetry (DT
 
 
 def url() -> str:
-    b = BBOX
-    q = f"elevation[({b['south']}):1:({b['north']})][({b['west']}):1:({b['east']})]"
+    b = BATHY_BBOX
+    sel = f"[({b['south']}):1:({b['north']})][({b['west']}):1:({b['east']})]"
+    q = f"elevation{sel},interpolation_flag{sel}"
     return f"{ERDDAP}/{DATASET}.nc?" + urllib.request.quote(q, safe="():,")
 
 
