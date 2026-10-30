@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { loadSnapshots, publicSpot, STATUSES, type SpotRow } from '../lib/spots';
-import { fieldRecords, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
+import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
 
@@ -188,11 +188,13 @@ export function validateFieldInput(b: Record<string, unknown>, now: Date): { ok:
 
 /** Recompute one spot's v2 score now (no Monte Carlo; band offsets reused) and store it as partial. */
 export async function rescoreNow(db: D1Database, id: string, now = new Date()): Promise<ListEntryV2 | null> {
-  const [spotRes, obsRes, depthRes, scoreRes] = await db.batch([
+  const [spotRes, obsRes, depthRes, scoreRes, oSeries, oNormal] = await db.batch([
     db.prepare('SELECT * FROM spots WHERE id = ?1').bind(id),
     db.prepare('SELECT * FROM field_obs WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
     db.prepare("SELECT v.spot_id, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.status != 'rejected'"),
+    db.prepare('SELECT * FROM ocean_series WHERE spot_id = ?1').bind(id),
+    db.prepare('SELECT * FROM ocean_normal WHERE spot_id = ?1').bind(id),
   ]);
   const row = spotRes!.results[0] as SpotRow | undefined;
   if (!row) return null;
@@ -210,6 +212,7 @@ export async function rescoreNow(db: D1Database, id: string, now = new Date()): 
     fieldRecords(obsRes!.results as FieldObsRow[], depthRes!.results as FieldDepthRow[]).get(id),
     stored.find((s) => s.id === id) ?? null,
     stored.filter((s) => s.id !== id),
+    oceanMap(oSeries!.results as never[], oNormal!.results as never[]).get(id),
   );
   await db.prepare(UPSERT_V2_SQL).bind(rec.spot_id, rec.model_version, rec.computed_at, rec.start_hour, rec.list_json, rec.detail_json, 1).run();
   return (JSON.parse(rec.list_json) as ListEntryV2[])[0]!;

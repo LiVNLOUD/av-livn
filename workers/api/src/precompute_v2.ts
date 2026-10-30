@@ -4,6 +4,7 @@ import {
   fieldDepths, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2,
   type ConvertedDepth, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour,
 } from '@av-livn/scoring';
+import type { HourlyPoint } from '@av-livn/scoring';
 import type { Snapshot } from './lib/openmeteo';
 import { mergeSnapshots } from './lib/series';
 import { haversineKm, type SpotRow } from './lib/spots';
@@ -102,6 +103,56 @@ export function spotV2(row: SpotRow, field?: FieldRecord): SpotV2 & { lat: numbe
   };
 }
 
+export interface OceanSeries {
+  t0: string;
+  cell: { lat: number; lon: number; distance_km: number };
+  sst: (number | null)[];
+  cur: (number | null)[] | null;
+}
+export interface OceanNormal {
+  from: string;
+  to: string;
+  years: number;
+  cell: { lat: number; lon: number; distance_km: number };
+  normal: (number | null)[];
+}
+export interface Ocean {
+  series?: { fetched_at: string; data: OceanSeries };
+  normal?: { computed_at: string; data: OceanNormal };
+}
+
+/**
+ * Overlay Copernicus on the Open-Meteo points: water temperature (1–20 m) and current (1–5 m) where the model
+ * has a value, marked sstSource 'copernicus'; the short normal for each point's day of year.
+ */
+export function applyOcean(points: HourlyPoint[], ocean: Ocean | undefined): HourlyPoint[] {
+  if (!ocean?.series && !ocean?.normal) return points;
+  const byTs = new Map(points.map((p) => [Date.parse(p.ts), { ...p }]));
+  const s = ocean.series?.data;
+  if (s) {
+    const t0 = Date.parse(s.t0);
+    s.sst.forEach((v, i) => {
+      if (v === null) return;
+      const t = t0 + i * HOUR;
+      const p = byTs.get(t) ?? { ts: new Date(t).toISOString() };
+      p.sst = v;
+      p.sstSource = 'copernicus';
+      const c = s.cur?.[i];
+      if (c !== undefined && c !== null) p.curVel = c;
+      byTs.set(t, p);
+    });
+  }
+  const n = ocean.normal?.data.normal;
+  if (n) {
+    for (const [t, p] of byTs) {
+      const d = new Date(t);
+      const doy = Math.floor((t - Date.UTC(d.getUTCFullYear(), 0, 1)) / 86_400_000);
+      p.sstNormal = n[doy] ?? null;
+    }
+  }
+  return [...byTs.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p);
+}
+
 /** Compact v2 detail: component metadata once, per-hour arrays. */
 export interface PackedV2 {
   v: 2;
@@ -114,6 +165,8 @@ export interface PackedV2 {
     field_at: string | null;
     depth_field_at: string | null;
     sink_calibration: SinkCalibration | null;
+    ocean: { fetched_at: string; cell: OceanSeries['cell'] } | null;
+    ocean_normal: { years: number; from: string; to: string } | null;
     comps: [string, string, string, number | null, string, string][];
   };
   /** [ts, total, raw, p10, p90, gated, warnings, wNight, lampP, values[], reasons[]] */
@@ -131,9 +184,9 @@ export function packV2(hours: V2Hour[], meta: Omit<PackedV2['meta'], 'comps' | '
   };
 }
 
-export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | undefined, now: Date, field?: FieldRecord, draws = DRAWS) {
+export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | undefined, now: Date, field?: FieldRecord, draws = DRAWS, ocean?: Ocean) {
   const spot = spotV2(row, field);
-  const points = mergeSnapshots(wx?.snap, sea?.snap);
+  const points = applyOcean(mergeSnapshots(wx?.snap, sea?.snap), ocean);
   const startHour = Math.floor(now.getTime() / HOUR);
   const hours = scoreSeriesV2({ spot, points, from: now, hours: HOURS_V2, profile: SAFETY, draws });
   const seaGrid =
@@ -148,6 +201,8 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
     field_at: field?.latestAt ?? null,
     depth_field_at: field?.lastDepthAt ?? null,
     sink_calibration: field?.calibration ?? null,
+    ocean: ocean?.series ? { fetched_at: ocean.series.fetched_at, cell: ocean.series.data.cell } : null,
+    ocean_normal: ocean?.normal ? { years: ocean.normal.data.years, from: ocean.normal.data.from, to: ocean.normal.data.to } : null,
   });
   return { startHour, hours, packed };
 }
@@ -165,8 +220,15 @@ export interface ScoreRecordV2 {
 export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null];
 
 /** All spots, ranks per hour across spots. */
-export function scoreRecordsV2(rows: SpotRow[], snaps: Map<string, Snap>, now: Date, fields: Map<string, FieldRecord>, draws = DRAWS): ScoreRecordV2[] {
-  const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fields.get(r.id), draws));
+export function scoreRecordsV2(
+  rows: SpotRow[],
+  snaps: Map<string, Snap>,
+  now: Date,
+  fields: Map<string, FieldRecord>,
+  draws = DRAWS,
+  oceans: Map<string, Ocean> = new Map(),
+): ScoreRecordV2[] {
+  const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fields.get(r.id), draws, oceans.get(r.id)));
   const rankAt = Array.from({ length: HOURS_V2 }, (_, i) => ranks(res.map((x) => x.hours[i]!.total)));
   return rows.map((r, k) => ({
     spot_id: r.id,
@@ -191,8 +253,9 @@ export function rescoreSpot(
   field: FieldRecord | undefined,
   prev: { start_hour: number; list: ListEntryV2[] } | null,
   others: { start_hour: number; list: ListEntryV2[] }[],
+  ocean?: Ocean,
 ): ScoreRecordV2 {
-  const r = computeSpotV2(row, wx, sea, now, field, 0);
+  const r = computeSpotV2(row, wx, sea, now, field, 0, ocean);
   const list = r.hours.map((h, i): ListEntryV2 => {
     const hour = r.startHour + i;
     const old = prev?.list[hour - prev.start_hour];
@@ -220,3 +283,11 @@ ON CONFLICT(spot_id) DO UPDATE SET model_version = excluded.model_version, compu
 list_json = excluded.list_json, detail_json = excluded.detail_json, partial = excluded.partial`;
 
 export const DELETE_STALE_V2_SQL = `DELETE FROM spot_scores_v2 WHERE spot_id NOT IN (SELECT id FROM spots WHERE status != 'rejected')`;
+
+/** D1 rows of ocean_series / ocean_normal → per-spot Ocean. */
+export function oceanMap(series: { spot_id: string; fetched_at: string; json: string }[], normals: { spot_id: string; computed_at: string; json: string }[]): Map<string, Ocean> {
+  const out = new Map<string, Ocean>();
+  for (const r of series) out.set(r.spot_id, { ...out.get(r.spot_id), series: { fetched_at: r.fetched_at, data: JSON.parse(r.json) as OceanSeries } });
+  for (const r of normals) out.set(r.spot_id, { ...out.get(r.spot_id), normal: { computed_at: r.computed_at, data: JSON.parse(r.json) as OceanNormal } });
+  return out;
+}

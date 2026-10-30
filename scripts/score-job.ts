@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
-import { DELETE_STALE_V2_SQL, fieldRecords, scoreRecordsV2, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
+import { DELETE_STALE_V2_SQL, fieldRecords, oceanMap, scoreRecordsV2, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import type { SpotRow } from '../workers/api/src/lib/spots';
 
 const dryRun = process.argv.includes('--dry-run');
@@ -45,11 +45,13 @@ const bytes = records.reduce((a, r) => a + r.detail_json.length + r.list_json.le
 console.log(`v1: spots ${rows.length}, snapshots ${snaps.size}, records ${records.length}, ${(bytes / 1024).toFixed(0)} KiB JSON, compute ${(t2 - t1).toFixed(0)} ms`);
 const obs = await query<FieldObsRow>('SELECT * FROM field_obs');
 const depths = await query<FieldDepthRow>('SELECT * FROM field_depth');
+const oSeries = await query<{ spot_id: string; fetched_at: string; json: string }>('SELECT * FROM ocean_series');
+const oNormal = await query<{ spot_id: string; computed_at: string; json: string }>('SELECT * FROM ocean_normal');
 const t3 = performance.now();
-const v2 = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths));
+const v2 = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), undefined, oceanMap(oSeries, oNormal));
 const t4 = performance.now();
 const maxDetail = Math.max(...v2.map((r) => r.detail_json.length));
-console.log(`v2: records ${v2.length}, field obs ${obs.length}, max detail ${(maxDetail / 1024).toFixed(0)} KiB, compute ${(t4 - t3).toFixed(0)} ms`);
+console.log(`v2: records ${v2.length}, field obs ${obs.length}, ocean series ${oSeries.length}, normals ${oNormal.length}, max detail ${(maxDetail / 1024).toFixed(0)} KiB, compute ${(t4 - t3).toFixed(0)} ms`);
 const now0 = Math.floor(now.getTime() / 3_600_000);
 for (const r of v2) {
   const e = (JSON.parse(r.list_json) as unknown[][])[now0 - r.start_hour];

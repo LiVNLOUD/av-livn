@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { refreshWeather } from '../src/cron';
 import { app } from '../src/index';
-import { fieldRecords, packV2, rescoreSpot, spotV2, type ListEntryV2, type PackedV2 } from '../src/precompute_v2';
+import { applyOcean, computeSpotV2, fieldRecords, oceanMap, packV2, rescoreSpot, spotV2, type ListEntryV2, type Ocean, type PackedV2 } from '../src/precompute_v2';
 import type { SpotRow } from '../src/lib/spots';
 import { omFetch, resetAndSeed, writeScoresV2 } from './helpers';
 
@@ -111,9 +111,54 @@ describe('single-spot rescore', () => {
   it('packV2 keeps component metadata once', () => {
     const p = packV2(
       [{ ts: 't', total: 1, raw: 0.1, p10: null, p90: null, gated: true, warnings: ['w'], lampP: null, wNight: 1, components: [{ key: 'k', label: 'K', group: 'statik', weight: null, value: null, source: 'saha', evidence: 'C', reason: 'r' }] }],
-      { computed_at: 'c', weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, field_at: null, depth_field_at: null, sink_calibration: null },
+      { computed_at: 'c', weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, field_at: null, depth_field_at: null, sink_calibration: null, ocean: null, ocean_normal: null },
     );
     expect(p.meta.comps).toEqual([['k', 'K', 'statik', null, 'saha', 'C']]);
     expect(p.h[0]).toEqual(['t', 1, 0.1, null, null, 1, ['w'], 1, null, [null], ['r']]);
+  });
+});
+
+describe('Copernicus overlay', () => {
+  it('replaces water temperature/current, marks the source and adds the short normal', () => {
+    const pts = [
+      { ts: '2026-11-01T00:00:00.000Z', sst: 18, curVel: 0.05, windSpeed: 5 },
+      { ts: '2026-11-01T01:00:00.000Z', sst: 18 },
+    ];
+    const normal = Array.from({ length: 366 }, (_, i) => (i === 304 ? 17.5 : null));
+    const ocean = oceanMap(
+      [{ spot_id: 's', fetched_at: 'f', json: JSON.stringify({ t0: '2026-11-01T00:00Z', cell: { lat: 1, lon: 2, distance_km: 0.3 }, sst: [16.5, null, 16.4], cur: [0.2, 0.1, null] }) }],
+      [{ spot_id: 's', computed_at: 'c', json: JSON.stringify({ from: '2021-11-01', to: '2026-10-31', years: 6, cell: { lat: 1, lon: 2, distance_km: 0.3 }, normal }) }],
+    ).get('s');
+    const out = applyOcean(pts, ocean);
+    expect(out).toHaveLength(3);
+    expect(out[0]).toMatchObject({ sst: 16.5, sstSource: 'copernicus', curVel: 0.2, windSpeed: 5, sstNormal: 17.5 });
+    expect(out[1]).toMatchObject({ sst: 18 });
+    expect(out[1]!.sstSource).toBeUndefined();
+    expect(out[2]).toMatchObject({ sst: 16.4, sstSource: 'copernicus' });
+    expect(out[2]!.curVel).toBeUndefined();
+    expect(applyOcean(pts, undefined)).toBe(pts);
+    const onlyNormal = applyOcean(pts, { normal: ocean!.normal });
+    expect(onlyNormal[0]!.sst).toBe(18);
+    const noCur = applyOcean([], { series: { fetched_at: 'f', data: { ...ocean!.series!.data, cur: null } } });
+    expect(noCur[0]!.curVel).toBeUndefined();
+  });
+
+  it('flows into sources, the deviation term and the packed meta', async () => {
+    const row = (await env.DB.prepare("SELECT * FROM spots WHERE id = 'osm-way-1'").first()) as unknown as SpotRow;
+    const { loadSnapshots } = await import('../src/lib/spots');
+    const snaps = await loadSnapshots(env.DB, [row.wx_cell, row.sea_cell!]);
+    const now = new Date();
+    const t0 = new Date(Math.floor(now.getTime() / 3_600_000) * 3_600_000 - 72 * 3_600_000);
+    const sst = Array.from({ length: 160 }, () => 15);
+    const ocean: Ocean = {
+      series: { fetched_at: 'f', data: { t0: t0.toISOString().slice(0, 13) + ':00Z', cell: { lat: 40.38, lon: 28.88, distance_km: 0.4 }, sst, cur: null } },
+      normal: { computed_at: 'c', data: { from: '2021-11-01', to: '2026-10-31', years: 5, cell: { lat: 40.38, lon: 28.88, distance_km: 0.4 }, normal: Array.from({ length: 366 }, () => 17) } },
+    };
+    const r = computeSpotV2(row, snaps.get(row.wx_cell), snaps.get(row.sea_cell!), now, undefined, 0, ocean);
+    expect(r.packed.meta.ocean).toEqual({ fetched_at: 'f', cell: { lat: 40.38, lon: 28.88, distance_km: 0.4 } });
+    expect(r.packed.meta.ocean_normal).toEqual({ years: 5, from: '2021-11-01', to: '2026-10-31' });
+    const c = Object.fromEntries(r.hours[0]!.components.map((x) => [x.key, x]));
+    expect(c.su_degisim!.source).toBe('Copernicus');
+    expect(c.su_sapma!.reason).toBe('−2.0 °C (5 yıllık kısa normal)');
   });
 });

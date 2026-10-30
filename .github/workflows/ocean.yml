@@ -1,0 +1,38 @@
+name: ocean
+# Copernicus Marmara 500 m → D1: hourly water temperature/current per spot (6-hourly) and the short
+# SST normal from the 2021+ daily archive (monthly). Credentials only here, never printed.
+on:
+  schedule:
+    - cron: '41 */6 * * *'   # forecast
+    - cron: '29 4 3 * *'     # normal, monthly
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: forecast | normal | both
+        default: both
+permissions:
+  contents: read
+concurrency:
+  group: ocean
+jobs:
+  ocean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUSMARINE_SERVICE_USERNAME }}
+      COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUSMARINE_SERVICE_PASSWORD }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e './pipeline[dev]' copernicusmarine
+      - run: pytest pipeline -q
+      - name: Hourly forecast series
+        if: github.event.schedule == '41 */6 * * *' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'normal')
+        run: python -m av_pipeline.ocean.marmara forecast
+      - name: Short normal (2021-11 → today)
+        if: github.event.schedule == '29 4 3 * *' || (github.event_name == 'workflow_dispatch' && inputs.mode != 'forecast')
+        run: python -m av_pipeline.ocean.marmara normal
