@@ -1,0 +1,303 @@
+{
+ "sources": {
+  "eunis2019": "EMODnet Seabed Habitats EUSeaMap 2025 (eusm2025_eunis2019_full, WFS)",
+  "confidence": "eusm2025_subs_conf (WMS GetFeatureInfo)",
+  "geology": "gtk:seabed_substrate_1m"
+ },
+ "eunis_polygons_in_bbox": 540,
+ "eunis_coverage_of_bbox_pct": 42.2,
+ "eunis_area_by_substrate_pct_of_bbox": {
+  "Fine mud": 25.98,
+  "Sandy mud": 15.46,
+  "Muddy sand": 0.46,
+  "Fine mud or Sandy mud or Muddy sand": 0.23,
+  "Seabed": 0.11
+ },
+ "biogenic_polygons_in_bbox": [
+  "Posidonia oceanica meadows",
+  "Posidonia beds",
+  "Biogenic substrate"
+ ],
+ "biogenic_polygon_sources": [
+  "EUSeaMap 2016 seabed substrate",
+  "Individual habitat maps from surveys - EUNIS classification system",
+  "Individual habitat maps from surveys - Habitats Directive Annex I"
+ ],
+ "biogenic_points_in_bbox": 0,
+ "seagrass_eov_polygons_in_bbox": 0,
+ "geology_polygons_in_bbox": 2,
+ "spots": [
+  {
+   "spot": "osm-way-1005837524",
+   "name": "İskele (Kapaklı)",
+   "eunis_substrate": "Fine mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.051,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1170373161",
+   "name": "İskele (Armutlu)",
+   "eunis_substrate": "Seabed",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "Na",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 0,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.119,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "eunis_substrate": "Fine mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.231,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "eunis_substrate": "Fine mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.204,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1364814104",
+   "name": "Mendirek (Armutlu)",
+   "eunis_substrate": "Seabed",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "Na",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.071,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1394208144",
+   "name": "Mendirek (Armutlu)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.071,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1413355181",
+   "name": "Mendirek (Armutlu)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.0,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1414984335",
+   "name": "İskele (Fıstıklı)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.127,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1422122108",
+   "name": "Mendirek (Armutlu)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.0,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "eunis_substrate": "Fine mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.045,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.402,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-252356832",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.053,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.41,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-252356833",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.009,
+   "confidence_at_class_point": 0,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.296,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "eunis_substrate": "Sandy mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.182,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-483965349",
+   "name": "İskele (Tirilye)",
+   "eunis_substrate": "Fine mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.188,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "eunis_substrate": "Seabed",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "Na",
+   "distance_km": 0.076,
+   "confidence_at_class_point": 0,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.409,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  },
+  {
+   "spot": "osm-way-77362926",
+   "name": "İskele (Demirsubaşı)",
+   "eunis_substrate": "Fine mud",
+   "eunis_biozone": "Infralittoral",
+   "eunis_code": "MB64",
+   "distance_km": 0.0,
+   "confidence_at_class_point": 2,
+   "geology_substrate": {
+    "folk_5cl_txt": "1. Mud to muddy Sand",
+    "folk_7cl_txt": "6. No data at this level",
+    "folk_16cl_txt": "6. No data at this level"
+   },
+   "geology_distance_km": 0.12,
+   "biogenic_within_2km": [],
+   "seagrass_eov_within_2km": 0
+  }
+ ]
+}

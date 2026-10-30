@@ -1,0 +1,337 @@
+spot,name,dist_m,lat,lon,cell,elevation,value_count,interpolation_flag,stdev,source
+osm-way-1005837524,İskele (Kapaklı),0,40.45773,28.9709,"171,404",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),25,40.45754,28.97073,"171,403",0.0,,,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),50,40.45736,28.97056,"171,403",0.0,,,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),75,40.45717,28.97039,"170,403",-1.29,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),100,40.45699,28.97022,"170,403",-1.29,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),125,40.4568,28.97005,"170,403",-1.29,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),150,40.45662,28.96988,"170,403",-1.29,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),175,40.45643,28.96971,"170,402",-1.59,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),200,40.45625,28.96954,"169,402",-5.92,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),225,40.45606,28.96937,"169,402",-5.92,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),250,40.45588,28.96921,"169,402",-5.92,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),275,40.45569,28.96904,"169,402",-5.92,3.0,1.0,,Coastal_heights_2024
+osm-way-1005837524,İskele (Kapaklı),300,40.4555,28.96887,"169,402",-5.92,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),325,40.45532,28.9687,"169,401",-7.77,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),350,40.45513,28.96853,"168,401",-11.76,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),375,40.45495,28.96836,"168,401",-11.76,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),400,40.45476,28.96819,"168,401",-11.76,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),425,40.45458,28.96802,"168,401",-11.76,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),450,40.45439,28.96785,"168,401",-11.76,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),475,40.45421,28.96768,"168,400",-14.03,3.0,1.0,,GEBCO2024
+osm-way-1005837524,İskele (Kapaklı),500,40.45402,28.96751,"167,400",-18.54,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),0,40.51731,28.78977,"228,230",,,,,none
+osm-way-1170373161,İskele (Armutlu),25,40.51709,28.78971,"228,230",,,,,none
+osm-way-1170373161,İskele (Armutlu),50,40.51687,28.78966,"228,230",,,,,none
+osm-way-1170373161,İskele (Armutlu),75,40.51664,28.78961,"227,230",0.03,1.0,1.0,,none
+osm-way-1170373161,İskele (Armutlu),100,40.51642,28.78956,"227,229",0.03,1.0,1.0,,none
+osm-way-1170373161,İskele (Armutlu),125,40.5162,28.78951,"227,229",0.03,1.0,1.0,,none
+osm-way-1170373161,İskele (Armutlu),150,40.51598,28.78946,"227,229",0.03,1.0,1.0,,none
+osm-way-1170373161,İskele (Armutlu),175,40.51575,28.78941,"227,229",0.03,1.0,1.0,,none
+osm-way-1170373161,İskele (Armutlu),200,40.51553,28.78936,"226,229",-7.09,1.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),225,40.51531,28.7893,"226,229",-7.09,1.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),250,40.51508,28.78925,"226,229",-7.09,1.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),275,40.51486,28.7892,"226,229",-7.09,1.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),300,40.51464,28.78915,"226,229",-7.09,1.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),325,40.51442,28.7891,"225,229",-6.85,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),350,40.51419,28.78905,"225,229",-6.85,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),375,40.51397,28.789,"225,229",-6.85,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),400,40.51375,28.78895,"225,229",-6.85,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),425,40.51353,28.78889,"224,229",-7.83,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),450,40.5133,28.78884,"224,229",-7.83,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),475,40.51308,28.78879,"224,229",-7.83,3.0,1.0,,GEBCO2024
+osm-way-1170373161,İskele (Armutlu),500,40.51286,28.78874,"224,229",-7.83,3.0,1.0,,GEBCO2024
+osm-way-1218507890,Küçükkumla İskelesi,0,40.46665,29.10188,"179,529",,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,25,40.46646,29.10172,"179,529",,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,50,40.46628,29.10155,"179,529",,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,75,40.46609,29.10138,"179,529",,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,100,40.46591,29.10121,"179,529",,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,125,40.46572,29.10104,"179,528",0.03,1.0,1.0,,none
+osm-way-1218507890,Küçükkumla İskelesi,150,40.46554,29.10087,"178,528",0.0,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,175,40.46535,29.1007,"178,528",0.0,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,200,40.46517,29.10053,"178,528",0.0,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,225,40.46498,29.10036,"178,528",0.0,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,250,40.4648,29.10019,"178,528",0.0,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,275,40.46461,29.10002,"178,528",0.0,,,,none
+osm-way-1218507890,Küçükkumla İskelesi,300,40.46442,29.09985,"177,527",-3.0,3.0,1.0,,none
+osm-way-1218507890,Küçükkumla İskelesi,325,40.46424,29.09968,"177,527",-3.0,3.0,1.0,,none
+osm-way-1218507890,Küçükkumla İskelesi,350,40.46405,29.09951,"177,527",-3.0,3.0,1.0,,none
+osm-way-1218507890,Küçükkumla İskelesi,375,40.46387,29.09935,"177,527",-3.0,3.0,1.0,,none
+osm-way-1218507890,Küçükkumla İskelesi,400,40.46368,29.09918,"177,527",-3.0,3.0,1.0,,none
+osm-way-1218507890,Küçükkumla İskelesi,425,40.4635,29.09901,"176,527",-5.82,3.0,1.0,,GEBCO2024
+osm-way-1218507890,Küçükkumla İskelesi,450,40.46331,29.09884,"176,526",-7.46,3.0,1.0,,GEBCO2024
+osm-way-1218507890,Küçükkumla İskelesi,475,40.46313,29.09867,"176,526",-7.46,3.0,1.0,,GEBCO2024
+osm-way-1218507890,Küçükkumla İskelesi,500,40.46294,29.0985,"176,526",-7.46,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,0,40.37511,28.88961,"92,326",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1233883494,Mudanya İskelesi,25,40.37527,28.88982,"92,326",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1233883494,Mudanya İskelesi,50,40.37543,28.89002,"92,326",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1233883494,Mudanya İskelesi,75,40.37559,28.89023,"92,326",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1233883494,Mudanya İskelesi,100,40.37575,28.89044,"92,326",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1233883494,Mudanya İskelesi,125,40.37591,28.89065,"92,327",0.0,,,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,150,40.37607,28.89086,"93,327",-1.96,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,175,40.37623,28.89107,"93,327",-1.96,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,200,40.37639,28.89127,"93,327",-1.96,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,225,40.37655,28.89148,"93,327",-1.96,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,250,40.37671,28.89169,"93,328",-5.47,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,275,40.37687,28.8919,"93,328",-5.47,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,300,40.37703,28.89211,"93,328",-5.47,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,325,40.37719,28.89232,"94,328",-9.67,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,350,40.37735,28.89253,"94,328",-9.67,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,375,40.37751,28.89273,"94,329",-12.48,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,400,40.37767,28.89294,"94,329",-12.48,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,425,40.37783,28.89315,"94,329",-12.48,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,450,40.37799,28.89336,"94,329",-12.48,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,475,40.37815,28.89357,"95,329",-15.69,3.0,1.0,,GEBCO2024
+osm-way-1233883494,Mudanya İskelesi,500,40.37831,28.89378,"95,330",-18.34,3.0,1.0,,GEBCO2024
+osm-way-1364814104,Mendirek (Armutlu),0,40.50604,28.84933,"217,287",,,,,none
+osm-way-1364814104,Mendirek (Armutlu),25,40.50582,28.84925,"217,287",,,,,none
+osm-way-1364814104,Mendirek (Armutlu),50,40.5056,28.84918,"217,287",,,,,none
+osm-way-1364814104,Mendirek (Armutlu),75,40.50538,28.8491,"217,287",,,,,none
+osm-way-1364814104,Mendirek (Armutlu),100,40.50517,28.84902,"216,287",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),125,40.50495,28.84895,"216,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),150,40.50473,28.84887,"216,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),175,40.50451,28.84879,"216,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),200,40.50429,28.84872,"216,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),225,40.50407,28.84864,"215,286",-1.12,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),250,40.50385,28.84857,"215,286",-1.12,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),275,40.50364,28.84849,"215,286",-1.12,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),300,40.50342,28.84841,"215,286",-1.12,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),325,40.5032,28.84834,"215,286",-1.12,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),350,40.50298,28.84826,"214,286",-4.58,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),375,40.50276,28.84818,"214,286",-4.58,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),400,40.50254,28.84811,"214,286",-4.58,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),425,40.50233,28.84803,"214,286",-4.58,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),450,40.50211,28.84795,"214,286",-4.58,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),475,40.50189,28.84788,"213,285",-7.91,3.0,1.0,,Coastal_heights_2024
+osm-way-1364814104,Mendirek (Armutlu),500,40.50167,28.8478,"213,285",-7.91,3.0,1.0,,Coastal_heights_2024
+osm-way-1394208144,Mendirek (Armutlu),0,40.50981,28.82821,"221,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),25,40.50959,28.82826,"221,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),50,40.50937,28.82832,"220,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),75,40.50915,28.82837,"220,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),100,40.50892,28.82842,"220,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),125,40.5087,28.82847,"220,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),150,40.50848,28.82852,"220,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),175,40.50825,28.82858,"219,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),200,40.50803,28.82863,"219,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),225,40.50781,28.82868,"219,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),250,40.50759,28.82873,"219,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),275,40.50736,28.82878,"219,267",,,,,none
+osm-way-1394208144,Mendirek (Armutlu),300,40.50714,28.82883,"218,267",0.03,1.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),325,40.50692,28.82889,"218,267",0.03,1.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),350,40.5067,28.82894,"218,267",0.03,1.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),375,40.50647,28.82899,"218,267",0.03,1.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),400,40.50625,28.82904,"218,267",0.03,1.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),425,40.50603,28.82909,"217,267",-1.1,3.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),450,40.50581,28.82915,"217,267",-1.1,3.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),475,40.50558,28.8292,"217,268",-1.09,3.0,1.0,,none
+osm-way-1394208144,Mendirek (Armutlu),500,40.50536,28.82925,"217,268",-1.09,3.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),0,40.50813,28.82864,"219,267",,,,,none
+osm-way-1413355181,Mendirek (Armutlu),25,40.5079,28.82864,"219,267",,,,,none
+osm-way-1413355181,Mendirek (Armutlu),50,40.50768,28.82864,"219,267",,,,,none
+osm-way-1413355181,Mendirek (Armutlu),75,40.50745,28.82864,"219,267",,,,,none
+osm-way-1413355181,Mendirek (Armutlu),100,40.50722,28.82864,"218,267",0.03,1.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),125,40.507,28.82864,"218,267",0.03,1.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),150,40.50677,28.82864,"218,267",0.03,1.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),175,40.50655,28.82864,"218,267",0.03,1.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),200,40.50632,28.82864,"218,267",0.03,1.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),225,40.50609,28.82864,"217,267",-1.1,3.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),250,40.50587,28.82864,"217,267",-1.1,3.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),275,40.50564,28.82864,"217,267",-1.1,3.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),300,40.50542,28.82864,"217,267",-1.1,3.0,1.0,,none
+osm-way-1413355181,Mendirek (Armutlu),325,40.50519,28.82864,"216,267",-4.22,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),350,40.50496,28.82864,"216,267",-4.22,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),375,40.50474,28.82864,"216,267",-4.22,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),400,40.50451,28.82864,"216,267",-4.22,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),425,40.50428,28.82864,"216,267",-4.22,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),450,40.50406,28.82864,"215,267",-7.24,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),475,40.50383,28.82864,"215,267",-7.24,3.0,1.0,,GEBCO2024
+osm-way-1413355181,Mendirek (Armutlu),500,40.50361,28.82864,"215,267",-7.24,3.0,1.0,,GEBCO2024
+osm-way-1414984335,İskele (Fıstıklı),0,40.48572,28.87729,"198,314",0.03,1.0,1.0,,none
+osm-way-1414984335,İskele (Fıstıklı),25,40.48558,28.87706,"198,313",0.03,1.0,1.0,,none
+osm-way-1414984335,İskele (Fıstıklı),50,40.48543,28.87684,"198,313",0.03,1.0,1.0,,none
+osm-way-1414984335,İskele (Fıstıklı),75,40.48529,28.87661,"197,313",-18.02,1.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),100,40.48514,28.87638,"197,313",-18.02,1.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),125,40.485,28.87616,"197,313",-18.02,1.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),150,40.48485,28.87593,"197,312",-7.5,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),175,40.48471,28.87571,"197,312",-7.5,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),200,40.48456,28.87548,"197,312",-7.5,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),225,40.48442,28.87525,"197,312",-7.5,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),250,40.48427,28.87503,"196,312",-10.02,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),275,40.48412,28.8748,"196,311",-10.23,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),300,40.48398,28.87457,"196,311",-10.23,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),325,40.48383,28.87435,"196,311",-10.23,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),350,40.48369,28.87412,"196,311",-10.23,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),375,40.48354,28.8739,"196,310",-16.79,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),400,40.4834,28.87367,"196,310",-16.79,3.0,1.0,,Coastal_heights_2024
+osm-way-1414984335,İskele (Fıstıklı),425,40.48325,28.87344,"195,310",-16.98,3.0,1.0,,GEBCO2024
+osm-way-1414984335,İskele (Fıstıklı),450,40.48311,28.87322,"195,310",-16.98,3.0,1.0,,GEBCO2024
+osm-way-1414984335,İskele (Fıstıklı),475,40.48296,28.87299,"195,310",-16.98,3.0,1.0,,GEBCO2024
+osm-way-1414984335,İskele (Fıstıklı),500,40.48282,28.87277,"195,309",-22.3,3.0,1.0,,GEBCO2024
+osm-way-1422122108,Mendirek (Armutlu),0,40.50907,28.82474,"220,263",,,,,none
+osm-way-1422122108,Mendirek (Armutlu),25,40.50889,28.82457,"220,263",,,,,none
+osm-way-1422122108,Mendirek (Armutlu),50,40.5087,28.82441,"220,263",,,,,none
+osm-way-1422122108,Mendirek (Armutlu),75,40.50852,28.82424,"220,263",,,,,none
+osm-way-1422122108,Mendirek (Armutlu),100,40.50833,28.82407,"219,263",0.03,1.0,1.0,,none
+osm-way-1422122108,Mendirek (Armutlu),125,40.50815,28.8239,"219,262",0.0,,,,none
+osm-way-1422122108,Mendirek (Armutlu),150,40.50796,28.82373,"219,262",0.0,,,,none
+osm-way-1422122108,Mendirek (Armutlu),175,40.50778,28.82356,"219,262",0.0,,,,none
+osm-way-1422122108,Mendirek (Armutlu),200,40.50759,28.82339,"219,262",0.0,,,,none
+osm-way-1422122108,Mendirek (Armutlu),225,40.5074,28.82322,"219,262",0.0,,,,none
+osm-way-1422122108,Mendirek (Armutlu),250,40.50722,28.82305,"218,262",-1.21,3.0,1.0,,none
+osm-way-1422122108,Mendirek (Armutlu),275,40.50703,28.82288,"218,261",-2.7,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),300,40.50685,28.82271,"218,261",-2.7,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),325,40.50666,28.82254,"218,261",-2.7,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),350,40.50648,28.82237,"218,261",-2.7,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),375,40.50629,28.8222,"218,261",-2.7,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),400,40.50611,28.82203,"217,261",-4.89,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),425,40.50592,28.82186,"217,260",-5.61,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),450,40.50574,28.82169,"217,260",-5.61,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),475,40.50555,28.82152,"217,260",-5.61,3.0,1.0,,Coastal_heights_2024
+osm-way-1422122108,Mendirek (Armutlu),500,40.50537,28.82136,"217,260",-5.61,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,0,40.38079,28.84796,"97,286",,,,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,25,40.38102,28.84801,"97,286",,,,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,50,40.38124,28.84806,"97,286",,,,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,75,40.38146,28.84811,"98,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,100,40.38168,28.84816,"98,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,125,40.38191,28.84822,"98,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,150,40.38213,28.84827,"98,286",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,175,40.38235,28.84832,"99,286",-31.85,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,200,40.38257,28.84837,"99,286",-31.85,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,225,40.3828,28.84842,"99,286",-31.85,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,250,40.38302,28.84847,"99,286",-31.85,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,275,40.38324,28.84852,"99,286",-31.85,1.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,300,40.38347,28.84857,"100,286",-27.62,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,325,40.38369,28.84863,"100,286",-27.62,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,350,40.38391,28.84868,"100,286",-27.62,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,375,40.38413,28.84873,"100,286",-27.62,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,400,40.38436,28.84878,"100,286",-27.62,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,425,40.38458,28.84883,"101,286",-26.07,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,450,40.3848,28.84888,"101,286",-26.07,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,475,40.38502,28.84893,"101,286",-26.07,3.0,1.0,,Coastal_heights_2024
+osm-way-1456975486,Petek Sitesi İskele,500,40.38525,28.84898,"101,287",-18.6,3.0,1.0,,Coastal_heights_2024
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),0,40.35583,28.93012,"73,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),25,40.35605,28.93012,"73,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),50,40.35628,28.93012,"74,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),75,40.3565,28.93012,"74,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),100,40.35673,28.93012,"74,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),125,40.35696,28.93012,"74,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),150,40.35718,28.93012,"74,364",,,,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),175,40.35741,28.93012,"75,364",0.03,1.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),200,40.35764,28.93012,"75,364",0.03,1.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),225,40.35786,28.93012,"75,364",0.03,1.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),250,40.35809,28.93012,"75,364",0.03,1.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),275,40.35831,28.93012,"75,364",0.03,1.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),300,40.35854,28.93012,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),325,40.35877,28.93012,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),350,40.35899,28.93012,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),375,40.35922,28.93012,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),400,40.35944,28.93012,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),425,40.35967,28.93012,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),450,40.3599,28.93012,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),475,40.36012,28.93012,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356832,Mendirek (Güzelyalı Burgaz),500,40.36035,28.93012,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),0,40.35678,28.92909,"74,363",,,,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),25,40.35701,28.92912,"74,363",,,,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),50,40.35723,28.92914,"74,363",,,,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),75,40.35746,28.92917,"75,364",0.03,1.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),100,40.35768,28.9292,"75,364",0.03,1.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),125,40.35791,28.92922,"75,364",0.03,1.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),150,40.35813,28.92925,"75,364",0.03,1.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),175,40.35836,28.92927,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),200,40.35858,28.9293,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),225,40.35881,28.92932,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),250,40.35903,28.92935,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),275,40.35926,28.92938,"76,364",-1.52,3.0,1.0,,none
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),300,40.35948,28.9294,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),325,40.35971,28.92943,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),350,40.35993,28.92945,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),375,40.36016,28.92948,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),400,40.36038,28.9295,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),425,40.36061,28.92953,"78,364",-11.09,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),450,40.36084,28.92956,"78,364",-11.09,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),475,40.36106,28.92958,"78,364",-11.09,3.0,1.0,,GEBCO2024
+osm-way-252356833,Mendirek (Güzelyalı Burgaz),500,40.36129,28.92961,"78,364",-11.09,3.0,1.0,,GEBCO2024
+osm-way-479047532,İskele (İslamköy),0,40.41717,29.09121,"132,519",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),25,40.41739,29.09126,"132,519",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),50,40.41761,29.09131,"132,519",0.03,1.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),75,40.41784,29.09136,"133,519",0.0,,,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),100,40.41806,29.09141,"133,519",0.0,,,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),125,40.41828,29.09147,"133,519",0.0,,,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),150,40.4185,29.09152,"133,519",0.0,,,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),175,40.41873,29.09157,"133,519",0.0,,,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),200,40.41895,29.09162,"134,519",-6.61,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),225,40.41917,29.09167,"134,520",-10.15,1.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),250,40.41939,29.09172,"134,520",-10.15,1.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),275,40.41962,29.09177,"134,520",-10.15,1.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),300,40.41984,29.09182,"135,520",-7.38,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),325,40.42006,29.09187,"135,520",-7.38,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),350,40.42029,29.09193,"135,520",-7.38,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),375,40.42051,29.09198,"135,520",-7.38,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),400,40.42073,29.09203,"135,520",-7.38,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),425,40.42095,29.09208,"136,520",-10.06,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),450,40.42118,29.09213,"136,520",-10.06,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),475,40.4214,29.09218,"136,520",-10.06,3.0,1.0,,Coastal_heights_2024
+osm-way-479047532,İskele (İslamköy),500,40.42162,29.09223,"136,520",-10.06,3.0,1.0,,Coastal_heights_2024
+osm-way-483965349,İskele (Tirilye),0,40.39375,28.79843,"109,238",,,,,none
+osm-way-483965349,İskele (Tirilye),25,40.39398,28.79843,"110,238",0.03,1.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),50,40.3942,28.79843,"110,238",0.03,1.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),75,40.39443,28.79843,"110,238",0.03,1.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),100,40.39465,28.79843,"110,238",0.03,1.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),125,40.39488,28.79843,"111,238",-1.25,3.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),150,40.39511,28.79843,"111,238",-1.25,3.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),175,40.39533,28.79843,"111,238",-1.25,3.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),200,40.39556,28.79843,"111,238",-1.25,3.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),225,40.39578,28.79843,"111,238",-1.25,3.0,1.0,,none
+osm-way-483965349,İskele (Tirilye),250,40.39601,28.79843,"112,238",-4.84,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),275,40.39624,28.79843,"112,238",-4.84,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),300,40.39646,28.79843,"112,238",-4.84,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),325,40.39669,28.79843,"112,238",-4.84,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),350,40.39692,28.79843,"113,238",-9.12,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),375,40.39714,28.79843,"113,238",-9.12,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),400,40.39737,28.79843,"113,238",-9.12,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),425,40.39759,28.79843,"113,238",-9.12,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),450,40.39782,28.79843,"113,238",-9.12,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),475,40.39805,28.79843,"114,238",-12.16,3.0,1.0,,GEBCO2024
+osm-way-483965349,İskele (Tirilye),500,40.39827,28.79843,"114,238",-12.16,3.0,1.0,,GEBCO2024
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,0,40.35573,28.92871,"73,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,25,40.35596,28.92874,"73,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,50,40.35618,28.92876,"73,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,75,40.35641,28.92879,"74,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,100,40.35663,28.92881,"74,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,125,40.35686,28.92884,"74,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,150,40.35708,28.92887,"74,363",,,,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,175,40.35731,28.92889,"75,363",0.03,1.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,200,40.35753,28.92892,"75,363",0.03,1.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,225,40.35776,28.92894,"75,363",0.03,1.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,250,40.35798,28.92897,"75,363",0.03,1.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,275,40.35821,28.92899,"75,363",0.03,1.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,300,40.35843,28.92902,"76,363",-1.52,3.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,325,40.35866,28.92904,"76,363",-1.52,3.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,350,40.35889,28.92907,"76,363",-1.52,3.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,375,40.35911,28.9291,"76,363",-1.52,3.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,400,40.35934,28.92912,"76,363",-1.52,3.0,1.0,,none
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,425,40.35956,28.92915,"77,363",-5.77,3.0,1.0,,GEBCO2024
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,450,40.35979,28.92917,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,475,40.36001,28.9292,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-503770078,İDO Güzelyalı Feribot İskelesi,500,40.36024,28.92922,"77,364",-6.0,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),0,40.43174,29.15126,"146,577",0.03,1.0,1.0,,none
+osm-way-77362926,İskele (Demirsubaşı),25,40.43168,29.15098,"146,576",-0.09,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),50,40.43162,29.15069,"146,576",-0.09,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),75,40.43157,29.15041,"146,576",-0.09,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),100,40.43151,29.15012,"146,576",-0.09,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),125,40.43145,29.14984,"146,575",-2.4,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),150,40.43139,29.14955,"146,575",-2.4,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),175,40.43133,29.14927,"146,575",-2.4,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),200,40.43127,29.14898,"146,575",-2.4,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),225,40.43122,29.1487,"145,574",-2.71,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),250,40.43116,29.14841,"145,574",-2.71,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),275,40.4311,29.14813,"145,574",-2.71,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),300,40.43104,29.14784,"145,573",-8.45,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),325,40.43098,29.14756,"145,573",-8.45,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),350,40.43092,29.14727,"145,573",-8.45,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),375,40.43086,29.14699,"145,573",-8.45,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),400,40.43081,29.1467,"145,572",-11.84,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),425,40.43075,29.14642,"145,572",-11.84,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),450,40.43069,29.14613,"145,572",-11.84,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),475,40.43063,29.14585,"145,572",-11.84,3.0,1.0,,GEBCO2024
+osm-way-77362926,İskele (Demirsubaşı),500,40.43057,29.14556,"145,571",-14.64,3.0,1.0,,GEBCO2024

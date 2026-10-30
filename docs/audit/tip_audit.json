@@ -1,0 +1,246 @@
+{
+ "method": "Tip = the way node farthest from the *mainland*: OSM land polygons eroded by ERODE_M, so piers, moles and",
+ "erode_m": 60.0,
+ "spots": [
+  {
+   "spot": "osm-way-1005837524",
+   "name": "İskele (Kapaklı)",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 284,
+   "tip_from_mainland_m": 162,
+   "tip": [
+    40.457728,
+    28.970898
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1170373161",
+   "name": "İskele (Armutlu)",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 42,
+   "tip_from_mainland_m": 73,
+   "tip": [
+    40.517313,
+    28.789766
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 47,
+   "tip_from_mainland_m": 67,
+   "tip": [
+    40.466648,
+    29.101885
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 93,
+   "tip_from_mainland_m": 137,
+   "tip": [
+    40.375108,
+    28.889607
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": true,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1364814104",
+   "name": "Mendirek (Armutlu)",
+   "kind": "breakwater",
+   "point_to_tip_m": 37,
+   "point_to_root_m": 0,
+   "tip_from_mainland_m": 56,
+   "tip": [
+    40.505719,
+    28.849437
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": true,
+   "verdict": "uçta değil"
+  },
+  {
+   "spot": "osm-way-1394208144",
+   "name": "Mendirek (Armutlu)",
+   "kind": "breakwater",
+   "point_to_tip_m": 113,
+   "point_to_root_m": 0,
+   "tip_from_mainland_m": 107,
+   "tip": [
+    40.5088,
+    28.828127
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta değil"
+  },
+  {
+   "spot": "osm-way-1413355181",
+   "name": "Mendirek (Armutlu)",
+   "kind": "breakwater",
+   "point_to_tip_m": 21,
+   "point_to_root_m": 324,
+   "tip_from_mainland_m": 219,
+   "tip": [
+    40.507961,
+    28.828748
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1414984335",
+   "name": "İskele (Fıstıklı)",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 86,
+   "tip_from_mainland_m": 130,
+   "tip": [
+    40.485724,
+    28.877289
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1422122108",
+   "name": "Mendirek (Armutlu)",
+   "kind": "breakwater",
+   "point_to_tip_m": 19,
+   "point_to_root_m": 87,
+   "tip_from_mainland_m": 105,
+   "tip": [
+    40.509116,
+    28.824524
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "kind": "pier",
+   "point_to_tip_m": 41,
+   "point_to_root_m": 0,
+   "tip_from_mainland_m": 65,
+   "tip": [
+    40.38116,
+    28.847984
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta değil"
+  },
+  {
+   "spot": "osm-way-252356832",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "kind": "breakwater",
+   "point_to_tip_m": 175,
+   "point_to_root_m": 28,
+   "tip_from_mainland_m": 177,
+   "tip": [
+    40.35703,
+    28.93145
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": true,
+   "verdict": "uçta değil"
+  },
+  {
+   "spot": "osm-way-252356833",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "kind": "breakwater",
+   "point_to_tip_m": 91,
+   "point_to_root_m": 0,
+   "tip_from_mainland_m": 123,
+   "tip": [
+    40.357563,
+    28.929392
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta değil"
+  },
+  {
+   "spot": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 16,
+   "tip_from_mainland_m": 47,
+   "tip": [
+    40.417167,
+    29.091209
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-483965349",
+   "name": "İskele (Tirilye)",
+   "kind": "pier",
+   "point_to_tip_m": 6,
+   "point_to_root_m": 52,
+   "tip_from_mainland_m": 83,
+   "tip": [
+    40.393774,
+    28.798357
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  },
+  {
+   "spot": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "kind": "pier",
+   "point_to_tip_m": 219,
+   "point_to_root_m": 0,
+   "tip_from_mainland_m": 124,
+   "tip": [
+    40.35769,
+    28.92847
+   ],
+   "point_inside_osm_land": true,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta değil"
+  },
+  {
+   "spot": "osm-way-77362926",
+   "name": "İskele (Demirsubaşı)",
+   "kind": "pier",
+   "point_to_tip_m": 0,
+   "point_to_root_m": 163,
+   "tip_from_mainland_m": 181,
+   "tip": [
+    40.431742,
+    29.151263
+   ],
+   "point_inside_osm_land": false,
+   "tip_inside_osm_land": false,
+   "verdict": "uçta"
+  }
+ ]
+}

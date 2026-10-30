@@ -1,0 +1,430 @@
+{
+ "snapshot": "2026-10-30T17:10Z",
+ "mock": "Copernicus mocked by Open-Meteo Marine SST/current at sea probe",
+ "v1": {
+  "between_spot_std_mean": 0.06,
+  "between_spot_std_min": 0.0,
+  "hours_std_gt8_pct": 0.0,
+  "by_phase": {
+   "night": {
+    "mean": 70.0,
+    "std_between_spots": 0.13,
+    "range": [
+     66.4,
+     70.1
+    ]
+   },
+   "twilight": {
+    "mean": 56.1,
+    "std_between_spots": 0.0,
+    "range": [
+     49.1,
+     70.1
+    ]
+   },
+   "day": {
+    "mean": 23.4,
+    "std_between_spots": 0.0,
+    "range": [
+     23.4,
+     23.4
+    ]
+   }
+  },
+  "plateau_share_mean": 0.809,
+  "distinct_values": 12
+ },
+ "v2": {
+  "between_spot_std_mean": 11.62,
+  "between_spot_std_min": 8.73,
+  "hours_std_gt8_pct": 100.0,
+  "by_phase": {
+   "night": {
+    "mean": 45.5,
+    "std_between_spots": 9.12,
+    "range": [
+     28.4,
+     67.4
+    ]
+   },
+   "twilight": {
+    "mean": 49.2,
+    "std_between_spots": 10.07,
+    "range": [
+     27.5,
+     73.8
+    ]
+   },
+   "day": {
+    "mean": 39.5,
+    "std_between_spots": 14.84,
+    "range": [
+     12.1,
+     71.6
+    ]
+   }
+  },
+  "plateau_share_mean": 0.136,
+  "distinct_values": 418
+ },
+ "band_width_mean": 47.7,
+ "acceptance": {
+  "between_spot_std_gt8": true,
+  "day_scores_vary_by_spot": true,
+  "no_plateau": true
+ },
+ "tests": [
+  {
+   "id": 1,
+   "test": "aynı mera (lamba var): gece > alacakaranlık > gündüz",
+   "values": [
+    64.5,
+    59.3,
+    51.5
+   ],
+   "pass": true
+  },
+  {
+   "id": 2,
+   "test": "gündüz: derin+yapılı (osm-way-252356832) > sığ kumsal (sentetik 15 m iskele, 1 m)",
+   "values": [
+    66.8,
+    12.6
+   ],
+   "pass": true
+  },
+  {
+   "id": 3,
+   "test": "GB 35 km/sa + 1 m dalga: maruz (osm-way-1170373161, fetch 23.15 km) < korunaklı (osm-way-479047532, 0.03 km); habitat eşitlendi",
+   "values": [
+    35.1,
+    45.6
+   ],
+   "pass": true
+  },
+  {
+   "id": 4,
+   "test": "lamba bilinmiyor: puan var/yok arasında, %10–90 bandı ikisinden geniş",
+   "values": {
+    "night_unknown_yes_no": [
+     45.9,
+     64.5,
+     27.3
+    ],
+    "band_width_unknown_yes_no": [
+     55.8,
+     52.1,
+     45.2
+    ]
+   },
+   "pass": true
+  },
+  {
+   "id": 5,
+   "test": "mevsim: Eylül (üreme sonrası beslenme) > Temmuz (üreme zirvesi), R3/R1",
+   "values": [
+    55.1,
+    52.1
+   ],
+   "pass": true
+  }
+ ],
+ "ablation": {
+  "full": 11.62,
+  "lamp_prior_equal_0_5": 9.4,
+  "structure_equal": 4.91,
+  "depth_equal": 2.46,
+  "fetch_equal": 11.64,
+  "all_static_equal": 0.21
+ },
+ "per_spot": [
+  {
+   "spot": "osm-way-1005837524",
+   "name": "İskele (Kapaklı)",
+   "struct": 0.682,
+   "substrate": 0.72,
+   "depth": 0.392,
+   "depth_m": 2.809,
+   "hsi_s": 0.691,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.9,
+   "v2_mean": 45.6,
+   "v2_day": 39.9,
+   "v2_night": 49.0,
+   "band_10_90_mean": [
+    19.7,
+    71.7
+   ]
+  },
+  {
+   "spot": "osm-way-1170373161",
+   "name": "İskele (Armutlu)",
+   "struct": 0.508,
+   "substrate": 0.75,
+   "depth": 0.213,
+   "depth_m": 1.609,
+   "hsi_s": 0.56,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.8,
+   "v2_mean": 32.7,
+   "v2_day": 23.1,
+   "v2_night": 39.3,
+   "band_10_90_mean": [
+    14.4,
+    57.1
+   ]
+  },
+  {
+   "spot": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "struct": 0.558,
+   "substrate": 0.72,
+   "depth": 0.238,
+   "depth_m": 1.822,
+   "hsi_s": 0.595,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.9,
+   "v2_mean": 35.5,
+   "v2_day": 25.9,
+   "v2_night": 42.0,
+   "band_10_90_mean": [
+    15.4,
+    60.4
+   ]
+  },
+  {
+   "spot": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "struct": 0.707,
+   "substrate": 0.72,
+   "depth": 0.534,
+   "depth_m": 3.543,
+   "hsi_s": 0.71,
+   "lamp_prior": 0.85,
+   "v1_mean": 48.9,
+   "v2_mean": 56.6,
+   "v2_day": 48.7,
+   "v2_night": 62.4,
+   "band_10_90_mean": [
+    24.7,
+    76.2
+   ]
+  },
+  {
+   "spot": "osm-way-1364814104",
+   "name": "Mendirek (Armutlu)",
+   "struct": 0.517,
+   "substrate": 0.75,
+   "depth": 0.237,
+   "depth_m": 1.814,
+   "hsi_s": 0.568,
+   "lamp_prior": 0.3,
+   "v1_mean": 48.9,
+   "v2_mean": 30.8,
+   "v2_day": 24.8,
+   "v2_night": 34.2,
+   "band_10_90_mean": [
+    15.8,
+    57.7
+   ]
+  },
+  {
+   "spot": "osm-way-1394208144",
+   "name": "Mendirek (Armutlu)",
+   "struct": 0.608,
+   "substrate": 0.75,
+   "depth": 0.423,
+   "depth_m": 2.977,
+   "hsi_s": 0.641,
+   "lamp_prior": 0.3,
+   "v1_mean": 48.9,
+   "v2_mean": 39.4,
+   "v2_day": 38.6,
+   "v2_night": 38.8,
+   "band_10_90_mean": [
+    19.6,
+    68.4
+   ]
+  },
+  {
+   "spot": "osm-way-1413355181",
+   "name": "Mendirek (Armutlu)",
+   "struct": 0.849,
+   "substrate": 0.75,
+   "depth": 0.608,
+   "depth_m": 3.926,
+   "hsi_s": 0.823,
+   "lamp_prior": 0.3,
+   "v1_mean": 48.9,
+   "v2_mean": 55.6,
+   "v2_day": 60.7,
+   "v2_night": 50.0,
+   "band_10_90_mean": [
+    26.8,
+    79.9
+   ]
+  },
+  {
+   "spot": "osm-way-1414984335",
+   "name": "İskele (Fıstıklı)",
+   "struct": 0.618,
+   "substrate": 0.75,
+   "depth": 0.716,
+   "depth_m": 4.52,
+   "hsi_s": 0.649,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.9,
+   "v2_mean": 49.3,
+   "v2_day": 52.4,
+   "v2_night": 45.9,
+   "band_10_90_mean": [
+    21.2,
+    74.8
+   ]
+  },
+  {
+   "spot": "osm-way-1422122108",
+   "name": "Mendirek (Armutlu)",
+   "struct": 0.777,
+   "substrate": 0.75,
+   "depth": 0.4,
+   "depth_m": 2.851,
+   "hsi_s": 0.77,
+   "lamp_prior": 0.3,
+   "v1_mean": 48.8,
+   "v2_mean": 46.7,
+   "v2_day": 44.9,
+   "v2_night": 46.6,
+   "band_10_90_mean": [
+    23.0,
+    72.6
+   ]
+  },
+  {
+   "spot": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "struct": 0.517,
+   "substrate": 0.72,
+   "depth": 0.276,
+   "depth_m": 2.102,
+   "hsi_s": 0.562,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.9,
+   "v2_mean": 34.4,
+   "v2_day": 26.8,
+   "v2_night": 39.4,
+   "band_10_90_mean": [
+    15.0,
+    58.6
+   ]
+  },
+  {
+   "spot": "osm-way-252356832",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "struct": 0.85,
+   "substrate": 0.75,
+   "depth": 0.743,
+   "depth_m": 4.692,
+   "hsi_s": 0.824,
+   "lamp_prior": 0.3,
+   "v1_mean": 48.9,
+   "v2_mean": 58.8,
+   "v2_day": 67.9,
+   "v2_night": 50.0,
+   "band_10_90_mean": [
+    28.8,
+    82.0
+   ]
+  },
+  {
+   "spot": "osm-way-252356833",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "struct": 0.719,
+   "substrate": 0.75,
+   "depth": 0.344,
+   "depth_m": 2.537,
+   "hsi_s": 0.727,
+   "lamp_prior": 0.3,
+   "v1_mean": 48.9,
+   "v2_mean": 42.6,
+   "v2_day": 39.1,
+   "v2_night": 43.8,
+   "band_10_90_mean": [
+    20.9,
+    69.6
+   ]
+  },
+  {
+   "spot": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "struct": 0.346,
+   "substrate": 0.75,
+   "depth": 0.152,
+   "depth_m": 0.964,
+   "hsi_s": 0.419,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.9,
+   "v2_mean": 23.3,
+   "v2_day": 14.3,
+   "v2_night": 29.5,
+   "band_10_90_mean": [
+    10.7,
+    41.6
+   ]
+  },
+  {
+   "spot": "osm-way-483965349",
+   "name": "İskele (Tirilye)",
+   "struct": 0.542,
+   "substrate": 0.72,
+   "depth": 0.238,
+   "depth_m": 1.822,
+   "hsi_s": 0.582,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.7,
+   "v2_mean": 34.4,
+   "v2_day": 25.5,
+   "v2_night": 40.4,
+   "band_10_90_mean": [
+    14.9,
+    58.0
+   ]
+  },
+  {
+   "spot": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "struct": 0.749,
+   "substrate": 0.75,
+   "depth": 0.641,
+   "depth_m": 4.1,
+   "hsi_s": 0.749,
+   "lamp_prior": 0.85,
+   "v1_mean": 48.9,
+   "v2_mean": 62.2,
+   "v2_day": 56.9,
+   "v2_night": 65.9,
+   "band_10_90_mean": [
+    27.3,
+    81.1
+   ]
+  },
+  {
+   "spot": "osm-way-77362926",
+   "name": "İskele (Demirsubaşı)",
+   "struct": 0.707,
+   "substrate": 0.72,
+   "depth": 0.433,
+   "depth_m": 3.031,
+   "hsi_s": 0.71,
+   "lamp_prior": 0.5,
+   "v1_mean": 48.9,
+   "v2_mean": 47.7,
+   "v2_day": 43.1,
+   "v2_night": 50.2,
+   "band_10_90_mean": [
+    20.4,
+    72.6
+   ]
+  }
+ ]
+}

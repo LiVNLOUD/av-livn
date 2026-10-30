@@ -1,0 +1,2568 @@
+{
+ "method": "Fetch (exposure) rose per spot: OSM land polygons (vector) vs the EMODnet DTM land/no-data mask.",
+ "max_km": 100.0,
+ "summary": [
+  {
+   "spot": "osm-way-1005837524",
+   "name": "İskele (Kapaklı)",
+   "open_dirs_osm_gt5km": 7,
+   "max_osm_km": 75.59,
+   "median_abs_diff_km": 1.21,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 6
+  },
+  {
+   "spot": "osm-way-1170373161",
+   "name": "İskele (Armutlu)",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 35.65,
+   "median_abs_diff_km": 0.16,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 10
+  },
+  {
+   "spot": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 24.3,
+   "median_abs_diff_km": 0.51,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 8
+  },
+  {
+   "spot": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "open_dirs_osm_gt5km": 8,
+   "max_osm_km": 99.65,
+   "median_abs_diff_km": 0.27,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 8
+  },
+  {
+   "spot": "osm-way-1364814104",
+   "name": "Mendirek (Armutlu)",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 78.12,
+   "median_abs_diff_km": 0.22,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 9
+  },
+  {
+   "spot": "osm-way-1394208144",
+   "name": "Mendirek (Armutlu)",
+   "open_dirs_osm_gt5km": 1,
+   "max_osm_km": 23.18,
+   "median_abs_diff_km": 13.7,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 10
+  },
+  {
+   "spot": "osm-way-1413355181",
+   "name": "Mendirek (Armutlu)",
+   "open_dirs_osm_gt5km": 7,
+   "max_osm_km": 76.83,
+   "median_abs_diff_km": 0.24,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 10
+  },
+  {
+   "spot": "osm-way-1414984335",
+   "name": "İskele (Fıstıklı)",
+   "open_dirs_osm_gt5km": 7,
+   "max_osm_km": 99.67,
+   "median_abs_diff_km": 2.73,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 7
+  },
+  {
+   "spot": "osm-way-1422122108",
+   "name": "Mendirek (Armutlu)",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 33.02,
+   "median_abs_diff_km": 0.24,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 10
+  },
+  {
+   "spot": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 99.65,
+   "median_abs_diff_km": 0.34,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 9
+  },
+  {
+   "spot": "osm-way-252356832",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 99.65,
+   "median_abs_diff_km": 0.25,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 10
+  },
+  {
+   "spot": "osm-way-252356833",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 99.65,
+   "median_abs_diff_km": 0.2,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 8
+  },
+  {
+   "spot": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "open_dirs_osm_gt5km": 3,
+   "max_osm_km": 8.75,
+   "median_abs_diff_km": 0.71,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 6
+  },
+  {
+   "spot": "osm-way-483965349",
+   "name": "İskele (Tirilye)",
+   "open_dirs_osm_gt5km": 8,
+   "max_osm_km": 99.67,
+   "median_abs_diff_km": 0.26,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 11
+  },
+  {
+   "spot": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "open_dirs_osm_gt5km": 6,
+   "max_osm_km": 99.65,
+   "median_abs_diff_km": 0.24,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 8
+  },
+  {
+   "spot": "osm-way-77362926",
+   "name": "İskele (Demirsubaşı)",
+   "open_dirs_osm_gt5km": 2,
+   "max_osm_km": 98.47,
+   "median_abs_diff_km": 0.52,
+   "dirs_dtm_sea_but_osm_land": 0,
+   "dirs_truncated": 9
+  }
+ ],
+ "spots": [
+  {
+   "spot": "osm-way-1005837524",
+   "name": "İskele (Kapaklı)",
+   "shore_normal_deg": 215.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.2,
+     "osm_start_on_land": false,
+     "dtm_km": 18.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.13,
+     "osm_start_on_land": false,
+     "dtm_km": 19.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.12,
+     "osm_start_on_land": false,
+     "dtm_km": 25.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.12,
+     "osm_start_on_land": false,
+     "dtm_km": 1.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1080.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.14,
+     "osm_start_on_land": false,
+     "dtm_km": 11.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 880.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.22,
+     "osm_start_on_land": false,
+     "dtm_km": 11.18,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 780.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 11.89,
+     "osm_start_on_land": false,
+     "dtm_km": 11.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 580.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 11.57,
+     "osm_start_on_land": false,
+     "dtm_km": 0.23,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 11.25,
+     "osm_start_on_land": false,
+     "dtm_km": 11.08,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 11.86,
+     "osm_start_on_land": false,
+     "dtm_km": 11.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 11.66,
+     "osm_start_on_land": false,
+     "dtm_km": 11.58,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 19.73,
+     "osm_start_on_land": false,
+     "dtm_km": 18.33,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 75.59,
+     "osm_start_on_land": false,
+     "dtm_km": 35.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 1.4,
+     "osm_start_on_land": false,
+     "dtm_km": 8.98,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 8930.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.54,
+     "osm_start_on_land": false,
+     "dtm_km": 25.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 17180.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.29,
+     "osm_start_on_land": false,
+     "dtm_km": 19.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 15780.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1170373161",
+   "name": "İskele (Armutlu)",
+   "shore_normal_deg": 190.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 11.53,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 3430.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 12.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 5830.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.06,
+     "osm_start_on_land": false,
+     "dtm_km": 16.33,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 9580.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 30.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.18,
+     "osm_start_on_land": false,
+     "dtm_km": 39.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.46,
+     "osm_start_on_land": false,
+     "dtm_km": 1.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1730.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 24.93,
+     "osm_start_on_land": false,
+     "dtm_km": 0.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 630.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 15.96,
+     "osm_start_on_land": false,
+     "dtm_km": 15.93,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 13.73,
+     "osm_start_on_land": false,
+     "dtm_km": 13.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 16.93,
+     "osm_start_on_land": false,
+     "dtm_km": 16.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 23.15,
+     "osm_start_on_land": false,
+     "dtm_km": 22.98,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 35.65,
+     "osm_start_on_land": false,
+     "dtm_km": 21.98,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 530.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 20.33,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 830.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 21.98,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 980.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.06,
+     "osm_start_on_land": false,
+     "dtm_km": 16.33,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 1430.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 12.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 2230.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "shore_normal_deg": 215.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 17.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 18.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 17.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 13.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 12.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.14,
+     "osm_start_on_land": false,
+     "dtm_km": 13.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.4,
+     "osm_start_on_land": false,
+     "dtm_km": 2.28,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1980.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 5.63,
+     "osm_start_on_land": false,
+     "dtm_km": 0.53,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 380.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 5.63,
+     "osm_start_on_land": false,
+     "dtm_km": 5.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 12.47,
+     "osm_start_on_land": false,
+     "dtm_km": 12.33,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 16.92,
+     "osm_start_on_land": false,
+     "dtm_km": 16.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 24.3,
+     "osm_start_on_land": false,
+     "dtm_km": 23.98,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 9.08,
+     "osm_start_on_land": false,
+     "dtm_km": 8.38,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 3.51,
+     "osm_start_on_land": false,
+     "dtm_km": 0.63,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 580.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 24.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 21030.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 18.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "shore_normal_deg": 45.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 11.43,
+     "osm_start_on_land": true,
+     "dtm_km": 11.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 10.61,
+     "osm_start_on_land": true,
+     "dtm_km": 10.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 15.07,
+     "osm_start_on_land": true,
+     "dtm_km": 14.58,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 21.77,
+     "osm_start_on_land": true,
+     "dtm_km": 21.63,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 15.17,
+     "osm_start_on_land": true,
+     "dtm_km": 15.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 5.33,
+     "osm_start_on_land": true,
+     "dtm_km": 0.38,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.68,
+     "osm_start_on_land": true,
+     "dtm_km": 15.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.26,
+     "osm_start_on_land": true,
+     "dtm_km": 11.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.17,
+     "osm_start_on_land": true,
+     "dtm_km": 10.73,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.09,
+     "osm_start_on_land": true,
+     "dtm_km": 11.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.1,
+     "osm_start_on_land": true,
+     "dtm_km": 15.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.11,
+     "osm_start_on_land": true,
+     "dtm_km": 27.93,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.15,
+     "osm_start_on_land": true,
+     "dtm_km": 26.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 18330.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.25,
+     "osm_start_on_land": true,
+     "dtm_km": 31.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 2880.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 99.65,
+     "osm_start_on_land": true,
+     "dtm_km": 38.73,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 1330.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 16.43,
+     "osm_start_on_land": true,
+     "dtm_km": 16.18,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 380.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1364814104",
+   "name": "Mendirek (Armutlu)",
+   "shore_normal_deg": 195.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.03,
+     "osm_start_on_land": true,
+     "dtm_km": 12.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 7630.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.03,
+     "osm_start_on_land": true,
+     "dtm_km": 9.58,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 9480.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.06,
+     "osm_start_on_land": true,
+     "dtm_km": 18.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.14,
+     "osm_start_on_land": true,
+     "dtm_km": 33.53,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.47,
+     "osm_start_on_land": true,
+     "dtm_km": 34.03,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.82,
+     "osm_start_on_land": true,
+     "dtm_km": 24.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 12580.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 3.89,
+     "osm_start_on_land": true,
+     "dtm_km": 1.23,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 17.93,
+     "osm_start_on_land": true,
+     "dtm_km": 17.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 13.84,
+     "osm_start_on_land": true,
+     "dtm_km": 13.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 13.48,
+     "osm_start_on_land": true,
+     "dtm_km": 13.38,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 20.65,
+     "osm_start_on_land": true,
+     "dtm_km": 20.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 32.21,
+     "osm_start_on_land": true,
+     "dtm_km": 27.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 78.12,
+     "osm_start_on_land": true,
+     "dtm_km": 25.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.09,
+     "osm_start_on_land": true,
+     "dtm_km": 27.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 6580.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.07,
+     "osm_start_on_land": true,
+     "dtm_km": 18.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 6980.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.0,
+     "osm_start_on_land": true,
+     "dtm_km": 13.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 7230.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1394208144",
+   "name": "Mendirek (Armutlu)",
+   "shore_normal_deg": 169.9,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 12.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 6480.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 13.53,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 8230.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 17.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.2,
+     "osm_start_on_land": false,
+     "dtm_km": 32.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.34,
+     "osm_start_on_land": false,
+     "dtm_km": 35.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 3.4,
+     "osm_start_on_land": false,
+     "dtm_km": 2.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 780.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 23.18,
+     "osm_start_on_land": false,
+     "dtm_km": 23.08,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.07,
+     "osm_start_on_land": false,
+     "dtm_km": 16.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 13.53,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 14.03,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 22.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 380.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 25.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 480.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 23.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 480.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 25.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 4630.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 17.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 5030.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 13.53,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 5780.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1413355181",
+   "name": "Mendirek (Armutlu)",
+   "shore_normal_deg": 180.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.21,
+     "osm_start_on_land": false,
+     "dtm_km": 12.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 6580.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.19,
+     "osm_start_on_land": false,
+     "dtm_km": 13.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 8330.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.2,
+     "osm_start_on_land": false,
+     "dtm_km": 17.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.31,
+     "osm_start_on_land": false,
+     "dtm_km": 32.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 1.36,
+     "osm_start_on_land": false,
+     "dtm_km": 35.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 3.47,
+     "osm_start_on_land": false,
+     "dtm_km": 2.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 530.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 23.07,
+     "osm_start_on_land": false,
+     "dtm_km": 22.93,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 17.11,
+     "osm_start_on_land": false,
+     "dtm_km": 16.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 13.63,
+     "osm_start_on_land": false,
+     "dtm_km": 13.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 13.96,
+     "osm_start_on_land": false,
+     "dtm_km": 13.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 22.82,
+     "osm_start_on_land": false,
+     "dtm_km": 22.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 32.66,
+     "osm_start_on_land": false,
+     "dtm_km": 25.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 380.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 76.83,
+     "osm_start_on_land": false,
+     "dtm_km": 23.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 530.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.27,
+     "osm_start_on_land": false,
+     "dtm_km": 25.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 4580.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.22,
+     "osm_start_on_land": false,
+     "dtm_km": 17.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 5080.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.12,
+     "osm_start_on_land": false,
+     "dtm_km": 13.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 5930.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1414984335",
+   "name": "İskele (Fıstıklı)",
+   "shore_normal_deg": 230.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 15.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 10530.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.11,
+     "osm_start_on_land": false,
+     "dtm_km": 16.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 15180.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.09,
+     "osm_start_on_land": false,
+     "dtm_km": 21.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 34.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 31.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.14,
+     "osm_start_on_land": false,
+     "dtm_km": 8.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 7380.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.44,
+     "osm_start_on_land": false,
+     "dtm_km": 18.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1730.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 15.53,
+     "osm_start_on_land": false,
+     "dtm_km": 0.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 580.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 11.52,
+     "osm_start_on_land": false,
+     "dtm_km": 11.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 280.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 11.87,
+     "osm_start_on_land": false,
+     "dtm_km": 11.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 15.23,
+     "osm_start_on_land": false,
+     "dtm_km": 14.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 30.0,
+     "osm_start_on_land": false,
+     "dtm_km": 29.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 72.22,
+     "osm_start_on_land": false,
+     "dtm_km": 27.73,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 99.67,
+     "osm_start_on_land": false,
+     "dtm_km": 8.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 3.21,
+     "osm_start_on_land": false,
+     "dtm_km": 0.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.3,
+     "osm_start_on_land": false,
+     "dtm_km": 16.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 9780.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1422122108",
+   "name": "Mendirek (Armutlu)",
+   "shore_normal_deg": 215.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.02,
+     "osm_start_on_land": false,
+     "dtm_km": 12.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 6430.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.01,
+     "osm_start_on_land": false,
+     "dtm_km": 13.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 8080.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.01,
+     "osm_start_on_land": false,
+     "dtm_km": 17.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 32.53,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.06,
+     "osm_start_on_land": false,
+     "dtm_km": 36.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.07,
+     "osm_start_on_land": false,
+     "dtm_km": 3.23,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 880.0
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.11,
+     "osm_start_on_land": false,
+     "dtm_km": 23.28,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 480.0
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 16.9,
+     "osm_start_on_land": false,
+     "dtm_km": 16.58,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 380.0
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 13.59,
+     "osm_start_on_land": false,
+     "dtm_km": 13.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 14.27,
+     "osm_start_on_land": false,
+     "dtm_km": 14.18,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 22.69,
+     "osm_start_on_land": false,
+     "dtm_km": 22.53,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 33.02,
+     "osm_start_on_land": false,
+     "dtm_km": 25.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 25.38,
+     "osm_start_on_land": false,
+     "dtm_km": 23.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.72,
+     "osm_start_on_land": false,
+     "dtm_km": 25.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 4180.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 0.43,
+     "osm_start_on_land": false,
+     "dtm_km": 17.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 4830.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 13.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 5680.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "shore_normal_deg": 10.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 13.95,
+     "osm_start_on_land": false,
+     "dtm_km": 13.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 11.24,
+     "osm_start_on_land": false,
+     "dtm_km": 11.08,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 12.82,
+     "osm_start_on_land": false,
+     "dtm_km": 12.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 23.67,
+     "osm_start_on_land": false,
+     "dtm_km": 0.58,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 18.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 3030.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 29.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 16.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.04,
+     "osm_start_on_land": false,
+     "dtm_km": 12.33,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.03,
+     "osm_start_on_land": false,
+     "dtm_km": 11.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.01,
+     "osm_start_on_land": false,
+     "dtm_km": 12.33,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 16.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 27.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.06,
+     "osm_start_on_land": false,
+     "dtm_km": 24.33,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 10530.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 0.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 99.65,
+     "osm_start_on_land": false,
+     "dtm_km": 35.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 74.12,
+     "osm_start_on_land": false,
+     "dtm_km": 28.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 180.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-252356832",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "shore_normal_deg": 0.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 11.93,
+     "osm_start_on_land": false,
+     "dtm_km": 11.63,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 13.21,
+     "osm_start_on_land": false,
+     "dtm_km": 12.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 18.6,
+     "osm_start_on_land": false,
+     "dtm_km": 18.43,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 13.36,
+     "osm_start_on_land": false,
+     "dtm_km": 13.28,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 380.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 1.42,
+     "osm_start_on_land": false,
+     "dtm_km": 27.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.24,
+     "osm_start_on_land": false,
+     "dtm_km": 22.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.21,
+     "osm_start_on_land": false,
+     "dtm_km": 12.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 9.43,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.15,
+     "osm_start_on_land": false,
+     "dtm_km": 8.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.14,
+     "osm_start_on_land": false,
+     "dtm_km": 9.43,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.07,
+     "osm_start_on_land": false,
+     "dtm_km": 12.28,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 22.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.19,
+     "osm_start_on_land": false,
+     "dtm_km": 32.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 2.12,
+     "osm_start_on_land": false,
+     "dtm_km": 0.98,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 380.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 99.65,
+     "osm_start_on_land": false,
+     "dtm_km": 41.58,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 17.94,
+     "osm_start_on_land": false,
+     "dtm_km": 17.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-252356833",
+   "name": "Mendirek (Güzelyalı Burgaz)",
+   "shore_normal_deg": 5.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 12.01,
+     "osm_start_on_land": false,
+     "dtm_km": 11.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 12.87,
+     "osm_start_on_land": false,
+     "dtm_km": 12.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 18.63,
+     "osm_start_on_land": false,
+     "dtm_km": 18.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 13.61,
+     "osm_start_on_land": false,
+     "dtm_km": 13.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 1.64,
+     "osm_start_on_land": false,
+     "dtm_km": 0.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 730.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 22.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.13,
+     "osm_start_on_land": false,
+     "dtm_km": 12.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 9.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 8.73,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.0,
+     "osm_start_on_land": false,
+     "dtm_km": 9.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.12,
+     "osm_start_on_land": false,
+     "dtm_km": 12.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.11,
+     "osm_start_on_land": false,
+     "dtm_km": 22.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 0.38,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 1.93,
+     "osm_start_on_land": false,
+     "dtm_km": 0.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 99.65,
+     "osm_start_on_land": false,
+     "dtm_km": 41.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 17.89,
+     "osm_start_on_land": false,
+     "dtm_km": 17.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "shore_normal_deg": 10.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 6.4,
+     "osm_start_on_land": false,
+     "dtm_km": 6.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 4.97,
+     "osm_start_on_land": false,
+     "dtm_km": 4.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 4.78,
+     "osm_start_on_land": false,
+     "dtm_km": 4.58,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.07,
+     "osm_start_on_land": false,
+     "dtm_km": 5.23,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 730.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.03,
+     "osm_start_on_land": false,
+     "dtm_km": 1.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1030.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.02,
+     "osm_start_on_land": false,
+     "dtm_km": 14.68,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.02,
+     "osm_start_on_land": false,
+     "dtm_km": 19.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.02,
+     "osm_start_on_land": false,
+     "dtm_km": 16.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.02,
+     "osm_start_on_land": false,
+     "dtm_km": 15.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.02,
+     "osm_start_on_land": false,
+     "dtm_km": 16.63,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.03,
+     "osm_start_on_land": false,
+     "dtm_km": 8.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1730.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.09,
+     "osm_start_on_land": false,
+     "dtm_km": 16.03,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 1530.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.13,
+     "osm_start_on_land": false,
+     "dtm_km": 45.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 1030.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 0.31,
+     "osm_start_on_land": false,
+     "dtm_km": 10.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 630.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 8.75,
+     "osm_start_on_land": false,
+     "dtm_km": 8.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 430.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 7.3,
+     "osm_start_on_land": false,
+     "dtm_km": 6.98,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-483965349",
+   "name": "İskele (Tirilye)",
+   "shore_normal_deg": 0.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 13.39,
+     "osm_start_on_land": false,
+     "dtm_km": 13.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 13.19,
+     "osm_start_on_land": false,
+     "dtm_km": 12.93,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 12.42,
+     "osm_start_on_land": false,
+     "dtm_km": 12.18,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 24.55,
+     "osm_start_on_land": false,
+     "dtm_km": 23.88,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 23.13,
+     "osm_start_on_land": false,
+     "dtm_km": 23.13,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 530.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.15,
+     "osm_start_on_land": false,
+     "dtm_km": 33.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.13,
+     "osm_start_on_land": false,
+     "dtm_km": 18.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.07,
+     "osm_start_on_land": false,
+     "dtm_km": 13.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.06,
+     "osm_start_on_land": false,
+     "dtm_km": 12.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 13.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.05,
+     "osm_start_on_land": false,
+     "dtm_km": 18.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.06,
+     "osm_start_on_land": false,
+     "dtm_km": 22.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.09,
+     "osm_start_on_land": false,
+     "dtm_km": 21.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 2730.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 99.67,
+     "osm_start_on_land": false,
+     "dtm_km": 22.83,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 330.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 97.02,
+     "osm_start_on_land": false,
+     "dtm_km": 29.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 76.55,
+     "osm_start_on_land": false,
+     "dtm_km": 27.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 130.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "shore_normal_deg": 5.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 11.99,
+     "osm_start_on_land": false,
+     "dtm_km": 11.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 12.86,
+     "osm_start_on_land": false,
+     "dtm_km": 12.63,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 18.69,
+     "osm_start_on_land": false,
+     "dtm_km": 18.48,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 13.71,
+     "osm_start_on_land": false,
+     "dtm_km": 13.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 1.74,
+     "osm_start_on_land": false,
+     "dtm_km": 0.88,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 780.0
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 22.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.08,
+     "osm_start_on_land": false,
+     "dtm_km": 12.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 9.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 8.78,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.09,
+     "osm_start_on_land": false,
+     "dtm_km": 9.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 0.1,
+     "osm_start_on_land": false,
+     "dtm_km": 12.38,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 0.38,
+     "osm_start_on_land": false,
+     "dtm_km": 22.88,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 0.58,
+     "osm_start_on_land": false,
+     "dtm_km": 0.33,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 1.83,
+     "osm_start_on_land": false,
+     "dtm_km": 0.73,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 230.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 99.65,
+     "osm_start_on_land": false,
+     "dtm_km": 41.43,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 130.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 17.99,
+     "osm_start_on_land": false,
+     "dtm_km": 17.68,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    }
+   ]
+  },
+  {
+   "spot": "osm-way-77362926",
+   "name": "İskele (Demirsubaşı)",
+   "shore_normal_deg": 255.0,
+   "rose": [
+    {
+     "dir": 0.0,
+     "compass": "K",
+     "osm_km": 0.5,
+     "osm_start_on_land": false,
+     "dtm_km": 21.08,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 22.5,
+     "compass": "KKD",
+     "osm_km": 0.17,
+     "osm_start_on_land": false,
+     "dtm_km": 22.13,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 45.0,
+     "compass": "KD",
+     "osm_km": 0.13,
+     "osm_start_on_land": false,
+     "dtm_km": 11.98,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 67.5,
+     "compass": "DKD",
+     "osm_km": 0.13,
+     "osm_start_on_land": false,
+     "dtm_km": 9.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 90.0,
+     "compass": "D",
+     "osm_km": 0.14,
+     "osm_start_on_land": false,
+     "dtm_km": 8.48,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 112.5,
+     "compass": "DGD",
+     "osm_km": 0.16,
+     "osm_start_on_land": false,
+     "dtm_km": 9.18,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 135.0,
+     "compass": "GD",
+     "osm_km": 0.24,
+     "osm_start_on_land": false,
+     "dtm_km": 11.98,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 157.5,
+     "compass": "GGD",
+     "osm_km": 0.73,
+     "osm_start_on_land": false,
+     "dtm_km": 18.43,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": null
+    },
+    {
+     "dir": 180.0,
+     "compass": "G",
+     "osm_km": 1.06,
+     "osm_start_on_land": false,
+     "dtm_km": 0.53,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 180.0
+    },
+    {
+     "dir": 202.5,
+     "compass": "GGB",
+     "osm_km": 0.99,
+     "osm_start_on_land": false,
+     "dtm_km": 0.83,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    },
+    {
+     "dir": 225.0,
+     "compass": "GB",
+     "osm_km": 1.46,
+     "osm_start_on_land": false,
+     "dtm_km": 1.28,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 30.0
+    },
+    {
+     "dir": 247.5,
+     "compass": "BGB",
+     "osm_km": 4.54,
+     "osm_start_on_land": false,
+     "dtm_km": 3.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 30.0
+    },
+    {
+     "dir": 270.0,
+     "compass": "B",
+     "osm_km": 98.47,
+     "osm_start_on_land": false,
+     "dtm_km": 50.98,
+     "dtm_truncated": true,
+     "dtm_first_sea_m": 30.0
+    },
+    {
+     "dir": 292.5,
+     "compass": "BKB",
+     "osm_km": 12.1,
+     "osm_start_on_land": false,
+     "dtm_km": 11.98,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 30.0
+    },
+    {
+     "dir": 315.0,
+     "compass": "KB",
+     "osm_km": 1.48,
+     "osm_start_on_land": false,
+     "dtm_km": 0.78,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 30.0
+    },
+    {
+     "dir": 337.5,
+     "compass": "KKB",
+     "osm_km": 0.75,
+     "osm_start_on_land": false,
+     "dtm_km": 0.23,
+     "dtm_truncated": false,
+     "dtm_first_sea_m": 80.0
+    }
+   ]
+  }
+ ]
+}

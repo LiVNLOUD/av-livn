@@ -52,3 +52,22 @@
 - **Sınır:** DTM kıyıya yakın hücreleri sığa doğru yumuşatıyor; 200 m açıktaki derinlikler çoğu merada 0–9 m görünüyor, gerçekte daha derin olabilir. Lejantta ve listede belirtildi.
 - **Web:** `/harita/` (MapLibre, bundle'lanmış worker), mera kartı, lejant; mera sayfasında derinlik profili. 390 px ekran görüntüleri `docs/screenshots/` ve `docs/screenshots/live/`.
 - **Testler:** scoring 195 (%100), worker 39, web 6, pytest 35.
+
+## v2 Bölüm A — Araştırma, veri denetimi, model tasarımı (2026-10-30) ⏸ onay bekliyor
+- **Kapsam:** uygulama kodu değişmedi; canlı v1.1 aynı. v1 arşivi `docs/archive/SCORING-v1.md`.
+- **RESEARCH.md:** 18 kaynak (A 11, B 3 + 1 aday, C 2, fizik 1); içeriği okunan 8. Bulunamayanlar açıkça yazıldı: GB Karadeniz ve Romanya diyeti, kışlama göçü birincil kaynağı, ALAN, basınç, sıcaklık tercih bandı.
+- **DATA-AUDIT.md:**
+  - DTM: 16/16 transekt %100 enterpolasyonlu; bbox'ın %74'ü GEBCO dolgusu, kontur halkaları bundan geliyor.
+  - 6/16 mera noktası uçta değil (İDO 219 m kökte).
+  - Copernicus mrm-500m Gemlik Körfezi'nde 379 ıslak hücre, saatlik, 1–25 m. BS multiyear ve SST L4 Gemlik'te 0 hücre, bu yüzden SST yalnız değişim hızı.
+  - EUSeaMap yalnız çamur sınıfları; biyojenik veri yok.
+  - Fetch OSM land polygons ile hesaplandı; DTM maskesi kesik ve kullanılamaz.
+  - Kaynak: `audit.yml` [run 41093963924](https://github.com/LiVNLOUD/av-livn/actions/runs/41093963924).
+- **MODEL.md:** HSI = 100 · HSI_s · HSI_d, ağırlıklı geometrik ortalama; diel iki kol + ışık indeksi (bulut dahil); lamba üç durum karışımı; 42 parametre (A 3, B 1, C 38); Monte Carlo %10–90; kalibrasyon planı; saha formu; referans repo incelemesi.
+- **Duyarlılık (16 × 72 sa, mock Copernicus):**
+  - Meralar arası std v1 0.06 → v2 11.6 (en düşük saat 8.7).
+  - Gündüz std 0 → 14.8.
+  - Plato %81 → %14.
+  - 5/5 yön testi geçti.
+  - Yayılımın çoğu C-düzeyi önsellerden (yapı uzunluğu, lamba); saha doğrulaması gerekli.
+- **Sıradaki:** Bölüm B (B1 motor … B6), kullanıcı onayından sonra.
