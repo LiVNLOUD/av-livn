@@ -1,6 +1,9 @@
 """Turn raw Overpass output into candidate spots (data/spots.geojson).
 
-For each pier/breakwater/groyne: the fishing point is the vertex farthest from the coastline (the tip).
+For each pier/breakwater/groyne: the fishing point is the vertex farthest from the mainland (the tip). With
+--land (OSM land polygons), the mainland is the land eroded by ERODE_M, so harbour piers and moles that the
+coastline traces around do not count as land; the coastline-based vertex is kept as `alt_lat/alt_lon` when
+it differs by more than ALT_MIN_M. Without --land the distance to the coastline lines is used.
 The shore normal comes from the nearest coastline segment: OSM coastlines have land on the left, so the
 seaward normal is the segment bearing + 90°. A `sea_probe` point is placed 750 m along the normal
 (fallback 1000 m, then 500 m) and must lie on the sea side of the coastline.
@@ -10,6 +13,9 @@ With --dtm, depth features come from the EMODnet DTM (profile 0–500 m along th
 along the normal that is ≥ 5 m deep.
 
 Usage: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson [--check-marine] [--dtm data/bathy/dtm.nc]
+       [--land data/osm/land_marmara.geojson] [--habitat]
+
+--land also adds `fetch_km` (16-direction exposure rose); --habitat adds the EUSeaMap substrate class + confidence.
 """
 
 from __future__ import annotations
@@ -21,13 +27,16 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-from shapely.geometry import LineString, Point
-from shapely.ops import nearest_points
+import shapely
+from shapely.geometry import LineString, Point, box, shape
+from shapely.ops import nearest_points, unary_union
 
 from av_pipeline import BBOX
 from av_pipeline.bathy.grid import Grid
 from av_pipeline.bathy.sample import dtm_normal, dtm_probe, features, sea_probe
-from av_pipeline.spots.geo import bearing, offset, to_lonlat, to_xy
+from av_pipeline.habitat import eusm
+from av_pipeline.spots.fetch_rose import rose_km
+from av_pipeline.spots.geo import M_PER_DEG_LAT, M_PER_DEG_LON, bearing, offset, to_lonlat, to_xy
 
 KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
 MIN_LENGTH_M = 15.0
@@ -36,6 +45,8 @@ PROBE_DISTANCES_M = (750.0, 1000.0, 1500.0, 500.0, 2000.0)
 SMOOTH_M = 300.0  # coastline length averaged on each side of the root for breakwater normals
 GENERIC_PLACES = {"İskele", "Liman"}
 ATTRIBUTION = "© OpenStreetMap contributors, ODbL"
+ERODE_M = 60.0  # wider than any pier/mole in the bbox, narrower than headlands
+ALT_MIN_M = 25.0
 
 
 @dataclass
@@ -93,6 +104,24 @@ def parse(raw: dict) -> tuple[list[dict], Coast, list[dict]]:
     return structures, Coast(coast), places
 
 
+@dataclass
+class Land:
+    """OSM land polygons in planar xy: `full` for fetch rays (whole Marmara), `mainland` eroded for tip choice."""
+
+    full: object
+    mainland: object
+
+
+def land_xy(land_fc: dict) -> Land:
+    land = unary_union([shape(f["geometry"]) for f in land_fc["features"]])
+    full = shapely.transform(land, lambda c: c * [M_PER_DEG_LON, M_PER_DEG_LAT])  # same projection as to_xy
+    pad = 0.06
+    w, s = to_xy(BBOX["west"] - pad, BBOX["south"] - pad)
+    e, n = to_xy(BBOX["east"] + pad, BBOX["north"] + pad)
+    near = full.intersection(box(w, s, e, n))
+    return Land(full=full, mainland=near.buffer(-ERODE_M).buffer(ERODE_M / 2))
+
+
 def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
     named = [p for p in places if p["name"] and p["name"] not in GENERIC_PLACES]
     if not named:
@@ -100,13 +129,18 @@ def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
     return min(named, key=lambda p: math.dist(p["xy"], xy))["name"]
 
 
-def build_candidate(s: dict, coast: Coast, places: list[dict], grid: Grid | None = None) -> dict | None:
+def build_candidate(s: dict, coast: Coast, places: list[dict], grid: Grid | None = None, land: Land | None = None) -> dict | None:
     line = LineString(s["xy"])
     if line.length < MIN_LENGTH_M:
         return None
     pts = [Point(c) for c in s["xy"]]
-    root = min(pts, key=lambda p: coast.nearest(p)[2])
-    tip = max(pts, key=lambda p: coast.nearest(p)[2])
+    coast_tip = max(pts, key=lambda p: coast.nearest(p)[2])
+    if land is not None:
+        root = min(pts, key=lambda p: land.mainland.distance(p))
+        tip = max(pts, key=lambda p: land.mainland.distance(p))
+    else:
+        root = min(pts, key=lambda p: coast.nearest(p)[2])
+        tip = coast_tip
     kind = s["tags"]["man_made"]
     if kind == "breakwater":
         # Breakwaters often run parallel to the shore: use the smoothed coastline normal.
@@ -142,10 +176,17 @@ def build_candidate(s: dict, coast: Coast, places: list[dict], grid: Grid | None
         "max_depth_100m": None,
         "profile": None,
         "has_light": None,
+        "tip_source": "land" if land is not None else "coastline",
+        "fetch_km": rose_km(land.full, tip.x, tip.y) if land is not None else None,
+        "alt_lat": None,
+        "alt_lon": None,
         "status": "candidate",
         "place": place,
         "source": ATTRIBUTION,
     }
+    if coast_tip.distance(tip) > ALT_MIN_M:
+        alon, alat = to_lonlat(coast_tip.x, coast_tip.y)
+        props.update(alt_lat=round(alat, 6), alt_lon=round(alon, 6))
     if probe is not None:
         plon, plat = to_lonlat(probe.x, probe.y)
         props.update(probe_lat=round(plat, 5), probe_lon=round(plon, 5), probe_source="normal")
@@ -178,11 +219,11 @@ def dedupe(features: list[dict]) -> list[dict]:
     return sorted(kept, key=lambda f: f["properties"]["id"])
 
 
-def build(raw: dict, grid: Grid | None = None) -> dict:
+def build(raw: dict, grid: Grid | None = None, land: Land | None = None) -> dict:
     structures, coast, places = parse(raw)
     if not coast.lines:
         raise ValueError("no coastline in Overpass data")
-    feats = [c for s in structures if (c := build_candidate(s, coast, places, grid)) is not None and in_bbox(c)]
+    feats = [c for s in structures if (c := build_candidate(s, coast, places, grid, land)) is not None and in_bbox(c)]
     return {"type": "FeatureCollection", "attribution": ATTRIBUTION, "features": dedupe(feats)}
 
 
@@ -205,14 +246,18 @@ def main(argv: list[str]) -> int:
     src = Path(argv[1] if len(argv) > 1 else "data/osm/raw.json")
     dst = Path(argv[2] if len(argv) > 2 else "data/spots.geojson")
     grid = Grid.from_netcdf(argv[argv.index("--dtm") + 1]) if "--dtm" in argv else None
-    fc = build(json.loads(src.read_text()), grid)
+    land = land_xy(json.loads(Path(argv[argv.index("--land") + 1]).read_text())) if "--land" in argv else None
+    fc = build(json.loads(src.read_text()), grid, land)
+    if "--habitat" in argv:
+        eusm.annotate(fc["features"])
     if "--check-marine" in argv:
         check_marine(fc)
     dst.write_text(json.dumps(fc, ensure_ascii=False, indent=1) + "\n")
     ok = sum(1 for f in fc["features"] if f["properties"]["probe_ok"])
     dtm = sum(1 for f in fc["features"] if f["properties"]["probe_source"] == "dtm")
     none = sum(1 for f in fc["features"] if f["properties"]["probe_lat"] is None)
-    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe, {dtm} probes from DTM, {none} without probe")
+    moved = sum(1 for f in fc["features"] if f["properties"]["alt_lat"] is not None)
+    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe, {dtm} probes from DTM, {none} without probe, {moved} tips moved off the coastline vertex")
     return 0
 
 

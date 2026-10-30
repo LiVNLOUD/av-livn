@@ -25,7 +25,7 @@ beforeAll(async () => {
 describe('GET /api/health', () => {
   it('reports the current schema', async () => {
     const body = await (await app.request('/api/health', {}, env)).json<{ ok: boolean; schema: string }>();
-    expect(body).toMatchObject({ ok: true, schema: 'f2' });
+    expect(body).toMatchObject({ ok: true, schema: 'v2.0' });
   });
 
   it('JSON 404 for unknown routes', async () => {
@@ -89,8 +89,12 @@ describe('GET /api/spots/:id', () => {
     const body = await detail('/api/spots/osm-way-1?v=depth');
     expect(body.spot).toMatchObject({ depth_200m: 8.5, slope_pct: 3.1, max_depth_100m: 5.2, probe_source: 'dtm', normal_source: 'dtm' });
     expect(body.spot.profile).toHaveLength(21);
+    expect(body.spot.alt).toEqual({ lat: 40.375, lon: 28.883 });
+    expect(body.spot.fetch_km).toHaveLength(16);
+    expect(body.spot.substrate).toEqual({ class: 'Sandy mud', biozone: 'Infralittoral', distance_m: 0, confidence: 2 });
     const other = await detail('/api/spots/osm-way-2?v=depth');
     expect(other.spot.profile).toBeNull();
+    expect(other.spot).toMatchObject({ alt: null, fetch_km: null, substrate: null });
   });
 
   it('starts at the current hour and honours the hours parameter; 404s unknown spots', async () => {

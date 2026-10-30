@@ -10,6 +10,7 @@ export const SPOTS: SpotFeature[] = [
     properties: {
       id: 'osm-way-1', name: 'Mudanya İskelesi', kind: 'pier', shore_normal_deg: 0, probe_lat: 40.383, probe_lon: 28.883,
       probe_ok: true, length_m: 120, depth_200m: 8.5, slope_pct: 3.1, max_depth_100m: 5.2, profile: [1, 2.5, 4, 5.5, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.4, 11, 11.5, 12, 12.5, 13, 13.4, 14, 14.5], probe_source: 'dtm', normal_source: 'dtm', osm_normal_deg: 52, has_light: null, status: 'candidate', place: 'Mudanya',
+      alt_lat: 40.375, alt_lon: 28.883, tip_source: 'land', fetch_km: [12, 12, 8, 3, 1, 0, 0, 0, 0, 0, 0, 0, 1, 3, 8, 12], substrate: 'Sandy mud', substrate_biozone: 'Infralittoral', substrate_dist_m: 0, substrate_conf: 2,
     },
   },
   {

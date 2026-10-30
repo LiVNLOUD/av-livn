@@ -35,7 +35,8 @@ jobs:
       - name: Fetch OSM (Overpass)
         run: python -m av_pipeline.spots.fetch_osm data/osm/raw.json
       - name: Build candidate spots with depth features
-        run: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson --check-marine --dtm data/bathy/dtm.nc
+        # Tip from eroded OSM land, 16-direction fetch, EUSeaMap substrate (land file: analysis/audit/land_polygons.sh)
+        run: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson --check-marine --dtm data/bathy/dtm.nc --land data/osm/land_marmara.geojson --habitat
       - name: Commit to main if changed
         id: commit
         run: |

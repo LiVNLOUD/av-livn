@@ -20,6 +20,14 @@ export interface SpotRow {
   probe_source?: string | null;
   normal_source?: string | null;
   osm_normal_deg?: number | null;
+  alt_lat?: number | null;
+  alt_lon?: number | null;
+  tip_source?: string | null;
+  fetch_json?: string | null;
+  substrate?: string | null;
+  substrate_biozone?: string | null;
+  substrate_dist_m?: number | null;
+  substrate_conf?: number | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -47,6 +55,8 @@ export function publicSpot(r: SpotRow) {
     lat: r.lat,
     lon: r.lon,
     probe: r.probe_lat === null || r.probe_lon === null ? null : { lat: r.probe_lat, lon: r.probe_lon },
+    /** Former (coastline-based) point when the spot was moved to the structure tip. */
+    alt: r.alt_lat == null || r.alt_lon == null ? null : { lat: r.alt_lat, lon: r.alt_lon },
     shore_normal_deg: r.shore_normal_deg,
     length_m: r.length_m,
     depth_200m: r.depth_200m,
@@ -82,5 +92,10 @@ export async function loadSnapshots(db: D1Database, ids: string[]): Promise<Map<
 
 /** Spot with its 0–500 m depth profile (detail endpoint only; the list stays small). */
 export function publicSpotDetail(r: SpotRow) {
-  return { ...publicSpot(r), profile: r.profile_json ? (JSON.parse(r.profile_json) as (number | null)[]) : null };
+  return {
+    ...publicSpot(r),
+    profile: r.profile_json ? (JSON.parse(r.profile_json) as (number | null)[]) : null,
+    fetch_km: r.fetch_json ? (JSON.parse(r.fetch_json) as number[]) : null,
+    substrate: r.substrate == null ? null : { class: r.substrate, biozone: r.substrate_biozone ?? null, distance_m: r.substrate_dist_m ?? null, confidence: r.substrate_conf ?? null },
+  };
 }

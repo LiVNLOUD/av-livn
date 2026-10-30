@@ -147,3 +147,69 @@ def test_overpass_query_covers_bbox_and_kinds():
     assert "pier|breakwater|groyne" in q
     assert 'natural"="coastline' in q
     assert "40.3,28.7,40.56,29.2" in q
+
+
+def test_tip_uses_eroded_mainland_when_coastline_wraps_the_pier(tmp_path):
+    # Harbour pier mapped inside the coastline: the coastline runs out along the pier and touches its tip,
+    # so "farthest from the coastline" picks the root (the İDO Güzelyalı case). The eroded land fixes it.
+    w = 3 * DLON
+    root, tip = (LAT + 5 * DLAT, LON), (LAT + 200 * DLAT, LON)
+    coast = [(LAT, LON + 0.05), (LAT, LON + w), (tip[0], LON + w), tip, (tip[0], LON - w), (LAT, LON - w), (LAT, LON - 0.05)]
+    structure = way(10, {"man_made": "pier", "name": "Feribot İskelesi"}, [root, (LAT + 100 * DLAT, LON), tip])
+    data = {"elements": [way(1, {"natural": "coastline"}, coast), structure]}
+    land = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {}, "geometry": {"type": "Polygon", "coordinates": [[
+        (LON - 0.05, LAT - 0.05), (LON + 0.05, LAT - 0.05), (LON + 0.05, LAT), (LON + w, LAT), (LON + w, tip[0]),
+        (LON - w, tip[0]), (LON - w, LAT), (LON - 0.05, LAT), (LON - 0.05, LAT - 0.05)]]}}]}
+    old = bs.build(data)["features"][0]
+    assert old["geometry"]["coordinates"][1] == pytest.approx(root[0], abs=2 * DLAT)
+    (f,) = bs.build(data, land=bs.land_xy(land))["features"]
+    lon, lat = f["geometry"]["coordinates"]
+    assert lat == pytest.approx(tip[0], abs=2 * DLAT)
+    p = f["properties"]
+    assert p["tip_source"] == "land"
+    assert p["alt_lat"] == pytest.approx(root[0], abs=2 * DLAT)
+    assert len(p["fetch_km"]) == 16
+    assert p["fetch_km"][0] > 5 and p["fetch_km"][8] == 0  # open sea north, land south
+    src, dst, lp = tmp_path / "raw.json", tmp_path / "out.geojson", tmp_path / "land.geojson"
+    src.write_text(json.dumps(data))
+    lp.write_text(json.dumps(land))
+    assert bs.main(["x", str(src), str(dst), "--land", str(lp)]) == 0
+    assert json.loads(dst.read_text())["features"][0]["properties"]["alt_lat"] is not None
+
+
+def test_tip_without_land_keeps_coastline_method_and_no_alt():
+    (f,) = bs.build(raw(0, pier(10, 0, 120)))["features"]
+    assert f["properties"]["tip_source"] == "coastline"
+    assert f["properties"]["alt_lat"] is None
+    assert f["properties"]["fetch_km"] is None
+
+
+def test_fetch_rose_skips_structure_land_at_the_tip_and_caps():
+    from shapely.geometry import box
+
+    from av_pipeline.spots.fetch_rose import MAX_M, fetch_m, rose_km
+
+    land = box(-1000, -50_000, 1000, 0).union(box(-200, 0, 200, 300)).union(box(-5000, 4000, 5000, 6000))  # coast, mole, island
+    assert fetch_m(land, 0, 290, 0) == pytest.approx(3710, abs=1)  # tip on the mole: water beyond it up to the island at y = 4000
+    assert fetch_m(land, 0, 290, 180) == 0.0
+    r = rose_km(land, 1500, 10)
+    assert r[4] == pytest.approx(MAX_M / 1000, abs=0.01)  # due east: open to the cap
+
+
+def test_eusm_annotate_inside_nearest_and_unknown():
+    from av_pipeline.habitat import eusm
+
+    poly = {"type": "Polygon", "coordinates": [[[28.9, 40.4], [28.91, 40.4], [28.91, 40.41], [28.9, 40.41], [28.9, 40.4]]]}
+
+    def get(url):
+        if "GetFeature&" in url or "GetFeature" in url and "WFS" in url:
+            return {"features": [{"properties": {"substrate": "Sandy mud", "biozone": "Infralittoral"}, "geometry": poly}]}
+        return {"features": [{"properties": {"GRAY_INDEX": 2}}]}
+
+    feats = [{"geometry": {"coordinates": [28.905, 40.405]}, "properties": {}}, {"geometry": {"coordinates": [28.912, 40.405]}, "properties": {}}]
+    eusm.annotate(feats, get)
+    assert feats[0]["properties"] == {"substrate": "Sandy mud", "substrate_biozone": "Infralittoral", "substrate_dist_m": 0, "substrate_conf": 2}
+    assert 150 < feats[1]["properties"]["substrate_dist_m"] < 200
+    feats2 = [{"geometry": {"coordinates": [28.905, 40.405]}, "properties": {}}]
+    eusm.annotate(feats2, lambda u: {"features": []})
+    assert feats2[0]["properties"]["substrate"] is None
