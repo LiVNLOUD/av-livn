@@ -8,7 +8,7 @@ export const PALETTE: Record<Band, { color: string; icon: string; label: string 
   good: { color: '#5fd08a', icon: '✓', label: 'uygun' },
   warn: { color: '#f0a35e', icon: '~', label: 'sınırda' },
   bad: { color: '#ff7a6b', icon: '✕', label: 'uygun değil' },
-  neutral: { color: '#8ba2ad', icon: '·', label: 'puanı etkilemez' },
+  neutral: { color: '#8ba2ad', icon: '·', label: 'değerlendirilemedi' },
 };
 
 function luminance(hex: string): number {

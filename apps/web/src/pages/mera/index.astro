@@ -8,23 +8,21 @@ import Base from '../../layouts/Base.astro';
     <p class="sub muted" id="sub"></p>
 
     <section class="now" aria-live="polite">
-      <span class="lamp big" id="lamp"></span>
+      <div class="lead" id="lead"></div>
       <div>
         <p class="when" id="when"></p>
+        <p class="second" id="second"></p>
         <p class="best" id="best"></p>
         <p class="warn" id="warn"></p>
       </div>
     </section>
+    <p class="flag" id="dayflag" hidden></p>
+    <p class="flag" id="partial" hidden>Saha girişinden sonra hızlı hesap: puan güncel, belirsizlik bandı bir sonraki saatlik çalışmada yenilenecek.</p>
 
     <section class="chart-block">
       <h2 class="sr-only">72 saatlik puan</h2>
       <div class="chart" id="chart"></div>
-      <p class="hint muted">Bir saate dokunun ya da sürükleyin. Koyu bantlar gece, açık bantlar alacakaranlık, kırmızı çizgiler güvenlik uyarısı olan saatler.</p>
-    </section>
-
-    <section>
-      <h2>Puanın dökümü</h2>
-      <ul class="parts" id="parts"></ul>
+      <p class="hint muted">Bir saate dokunun ya da sürükleyin. Gölge: %10–90 belirsizlik bandı. Koyu bantlar gece, açık bantlar alacakaranlık, kırmızı çizgiler güvenlik uyarısı.</p>
     </section>
 
     <section>
@@ -33,11 +31,18 @@ import Base from '../../layouts/Base.astro';
       <p class="note muted" id="note"></p>
     </section>
 
-    <section id="depth" hidden>
+    <section>
+      <h2>Puanın dökümü</h2>
+      <p class="hint muted">Her satır: bileşen değeri (0–1), kanıt düzeyi (A Marmara/Karadeniz yayını, B aynı tür başka bölge, C sezgisel) ve verinin kaynağı.</p>
+      <ul class="parts" id="parts"></ul>
+    </section>
+
+    <section id="depth">
       <h2>Derinlik profili</h2>
+      <p class="depth-src" id="depth-src"></p>
       <div class="profile" id="profile"></div>
       <p class="note muted" id="depth-note"></p>
-      <p class="note"><a id="maplink" href="/harita/">Haritada gör</a></p>
+      <p class="note"><a id="maplink" href="/harita/">Haritada gör</a> · <a id="fieldlink" href="/saha/">Saha ölçümü gir</a></p>
     </section>
   </article>
 </Base>
@@ -48,28 +53,38 @@ import Base from '../../layouts/Base.astro';
   .sub { margin: 4px 0 0; font-size: 0.9rem; }
   h2 { font-size: 1rem; font-weight: 650; margin: 26px 0 8px; }
   .now { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; margin-top: 18px; }
-  .lamp.big { --size: 92px; }
+  :global(.lamp.big) { --size: 92px; }
+  :global(.rank) { width: 92px; aspect-ratio: 1; border-radius: 50%; display: grid; place-content: center; text-align: center; box-shadow: inset 0 0 0 1.5px currentColor; }
+  :global(.rank b) { font-size: 2.3rem; font-weight: 740; font-stretch: 80%; line-height: 1; }
+  :global(.rank span) { font-size: 0.68rem; color: var(--mist); line-height: 1.2; padding: 0 8px; }
   .now p { margin: 0; }
   .when { font-weight: 600; font-size: 1.05rem; }
+  .second { font-size: 0.95rem; margin-top: 2px !important; }
   .best { color: var(--mist); font-size: 0.9rem; margin-top: 2px !important; }
   .warn:empty { display: none; }
   .warn { font-size: 0.9rem; margin-top: 4px !important; color: var(--storm); }
+  .flag { margin: 12px 0 0; font-size: 0.85rem; padding: 8px 10px; border-left: 3px solid var(--warn); background: color-mix(in oklab, var(--warn) 8%, transparent); }
   .chart-block { margin-top: 18px; }
   .chart, .profile { margin: 0 calc(var(--gutter) * -1); background: var(--deep); border-block: 1px solid var(--swell); }
   .chart { touch-action: pan-y; }
   .chart :global(svg), .profile :global(svg) { display: block; width: 100%; height: auto; }
   .chart :global(svg) { cursor: crosshair; }
   .hint { font-size: 0.78rem; margin: 6px 0 0; }
-  .parts { list-style: none; padding: 0; margin: 0; }
+  .parts { list-style: none; padding: 0; margin: 8px 0 0; }
   :global(.part) { padding: 10px 0; border-top: 1px solid var(--swell); }
-  :global(.part .row) { display: flex; justify-content: space-between; gap: 12px; font-size: 0.95rem; }
-  :global(.part .pts) { color: var(--mist); white-space: nowrap; }
-  :global(.part .pts b) { font-weight: 650; }
+  :global(.part .row) { display: flex; justify-content: space-between; gap: 10px; font-size: 0.95rem; align-items: baseline; }
+  :global(.part .tags) { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  :global(.tag) { font-size: 0.7rem; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--swell); color: var(--mist); white-space: nowrap; }
+  :global(.tag.ev) { font-weight: 700; color: var(--foam); }
+  :global(.tag.ev-A) { border-color: var(--good); color: var(--good); }
+  :global(.tag.ev-B) { border-color: var(--warn); color: var(--warn); }
+  :global(.tag.src-saha) { border-color: var(--good); color: var(--good); }
+  :global(.tag.src-est) { border-color: var(--warn); color: var(--warn); }
   :global(.part .bar) { position: relative; height: 6px; margin: 6px 0 4px; border-radius: 3px; background: var(--deep); overflow: hidden; }
   :global(.part .bar i) { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: currentColor; }
   :global(.part.na .bar i) { display: none; }
   :global(.part .reason) { margin: 0; font-size: 0.82rem; color: var(--mist); }
-  :global(.part.mult) { border-top: 1px dashed var(--swell); }
+  :global(.part .w) { color: var(--mist); font-size: 0.8rem; white-space: nowrap; }
   .cond { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 0; }
   :global(.cond > div) { padding: 8px 0; border-top: 1px solid var(--swell); min-width: 0; }
   :global(.cond dt) { font-size: 0.8rem; color: var(--mist); }
@@ -77,67 +92,77 @@ import Base from '../../layouts/Base.astro';
   :global(.cond .val) { font-size: 1.02rem; font-weight: 620; line-height: 1.3; display: flex; gap: 6px; align-items: baseline; }
   :global(.cond .ico) { flex: none; width: 1.1em; text-align: center; font-weight: 700; }
   :global(.cond .state) { margin: 2px 0 0; font-size: 0.78rem; font-weight: 600; }
-  :global(.cond .target) { margin: 1px 0 0; font-size: 0.76rem; color: var(--mist); line-height: 1.35; }
+  .depth-src { margin: 0 0 8px; font-size: 0.9rem; }
   .note { font-size: 0.8rem; margin-top: 12px; }
 </style>
 
 <script>
-  import { compass, COMPONENT_TR, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lamp, STATUS_TR } from '../../scripts/format';
+  import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
-  import { bandOf, unpackDetail, type Band, type PackedDetail } from '@av-livn/scoring';
+  import { bandOf, bandV2, leadWithRank, RANK_FIRST_WIDTH, type Band } from '@av-livn/scoring';
 
-  type Comp = { key: string; weight: number; value: number | null; contribution: number | null; reason: string };
-  type Mult = { key: string; value: number; phase: 'full' | 'twilight' | 'day'; reason: string };
-  type Cond = { key: string; display: string | null; suitability: number | null; band: Band };
-  type Score = { ts: string; total: number | null; raw: number | null; gated: boolean; warnings: string[]; components: Comp[]; multipliers: Mult[]; conditions: Cond[] };
+  type Hour = [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]];
+  type Meta = {
+    model_version: string; computed_at: string; weather_fetched_at: string | null; sea_grid: { distance_km: number } | null;
+    field_at: string | null; depth_field_at: string | null; sink_calibration: { k: number; relSd: number; pairs: number } | null;
+    ocean: { fetched_at: string; cell: { distance_km: number } } | null; ocean_normal: { years: number; from: string; to: string } | null;
+    comps: [string, string, string, number | null, string, string][];
+  };
+  type FieldDepth = { distance_m: number; depth_m: number; sd_m: number; quality: 'plumb' | 'sink_cal' | 'sink' };
   type Resp = {
     spot: {
-      id: string; name: string; kind: string; status: string; place: string | null; lat: number; lon: number; has_light: boolean | null;
-      shore_normal_deg: number | null; depth_200m: number | null; slope_pct?: number | null; max_depth_100m?: number | null; profile?: (number | null)[] | null;
+      id: string; name: string; kind: string; status: string; place: string | null; has_light: boolean | null; access: string | null;
+      shore_normal_deg: number | null; length_m: number | null; profile: (number | null)[] | null; alt: { lat: number; lon: number } | null;
     };
-    data: { weather_fetched_at: string | null; sea_grid: { distance_km: number } | null; conditions: { key: string; label: string; target: string; affects: boolean }[] };
-    scores: Score[];
+    field: { depths: FieldDepth[]; observations: number; latestAt: string; last_note: string | null } | null;
+    spot_count: number; partial: boolean; from: number; hours: number; ranks: number[];
+    packed: { meta: Meta; h: Hour[] } | null;
   };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const id = new URLSearchParams(location.search).get('id');
-  let data: Resp;
+  let d: Resp;
+  let H: Hour[] = [];
   let sel = 0;
+  const ACCESS_TR: Record<string, string> = { acik: 'erişim açık', kisitli_feribot: 'erişim kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
+  const SRC_TR: Record<string, string> = { 'yapı-uzunluğu-tahmini': 'tahmin', 'DTM-interpolasyon': 'DTM enterp.', 'DTM-ölçüm': 'DTM ölçüm' };
+  const ci = (key: string) => d.packed!.meta.comps.findIndex((c) => c[0] === key);
+  const val = (h: Hour, key: string) => h[9][ci(key)] ?? null;
+  const why = (h: Hour, key: string) => h[10][ci(key)] ?? '';
 
-  const W = 432, H = 190, TOP = 20, BASE = 152;
-  const x = (i: number) => (i + 0.5) * (W / data.scores.length);
+  const W = 432, CH = 190, TOP = 20, BASE = 152;
+  const x = (i: number) => (i + 0.5) * (W / H.length);
   const y = (v: number) => BASE - (v / 100) * (BASE - TOP);
 
   function chart(): void {
-    const n = data.scores.length;
+    const n = H.length;
     const step = W / n;
     const bands: string[] = [];
     const days: string[] = [];
-    data.scores.forEach((s, i) => {
-      const phase = s.multipliers[0]?.phase;
-      if (phase === 'full') bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#14283a"/>`);
-      if (phase === 'twilight') bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#11212e"/>`);
-      if (fmtTime(s.ts) === '00:00') days.push(`<line x1="${(i * step).toFixed(1)}" x2="${(i * step).toFixed(1)}" y1="0" y2="${H}" stroke="#25404f" stroke-dasharray="2 3"/><text x="${(i * step + 4).toFixed(1)}" y="${H - 8}" fill="#8ba2ad" font-size="12.5">${esc(fmtWeekday(s.ts))}</text>`);
-      if (s.gated) bands.push(`<rect x="${(i * step + 1).toFixed(1)}" y="${BASE + 4}" width="${(step - 2).toFixed(1)}" height="5" fill="#ff7a6b"/>`);
+    H.forEach((h, i) => {
+      if (h[7] > 0.9) bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#14283a"/>`);
+      else if (h[7] > 0.1) bands.push(`<rect x="${(i * step).toFixed(1)}" y="0" width="${(step + 0.3).toFixed(1)}" height="${BASE}" fill="#11212e"/>`);
+      if (fmtTime(h[0]) === '00:00') days.push(`<line x1="${(i * step).toFixed(1)}" x2="${(i * step).toFixed(1)}" y1="0" y2="${CH}" stroke="#25404f" stroke-dasharray="2 3"/><text x="${(i * step + 4).toFixed(1)}" y="${CH - 8}" fill="#8ba2ad" font-size="12.5">${esc(fmtWeekday(h[0]))}</text>`);
+      if (h[5]) bands.push(`<rect x="${(i * step + 1).toFixed(1)}" y="${BASE + 4}" width="${(step - 2).toFixed(1)}" height="5" fill="#ff7a6b"/>`);
     });
-    const pts = data.scores.map((s, i) => [x(i), s.total === null ? null : y(s.total)] as const);
     let line = '';
     let pen = false;
-    for (const [px, py] of pts) {
-      if (py === null) { pen = false; continue; }
-      line += `${pen ? 'L' : 'M'}${px.toFixed(1)},${py.toFixed(1)}`;
+    H.forEach((h, i) => {
+      if (h[1] === null) { pen = false; return; }
+      line += `${pen ? 'L' : 'M'}${x(i).toFixed(1)},${y(h[1]).toFixed(1)}`;
       pen = true;
-    }
-    const valid = pts.filter((p) => p[1] !== null) as [number, number][];
-    const area = valid.length ? `M${valid[0]![0]},${BASE}` + valid.map(([px, py]) => `L${px.toFixed(1)},${py.toFixed(1)}`).join('') + `L${valid.at(-1)![0]},${BASE}Z` : '';
+    });
+    const withBand = H.map((h, i) => [i, h[3], h[4]] as const).filter((b): b is readonly [number, number, number] => b[1] !== null && b[2] !== null);
+    const band = withBand.length
+      ? `M${withBand.map(([i, lo]) => `${x(i).toFixed(1)},${y(lo).toFixed(1)}`).join('L')}L${[...withBand].reverse().map(([i, , hi]) => `${x(i).toFixed(1)},${y(hi).toFixed(1)}`).join('L')}Z`
+      : '';
     const grid = [25, 50, 75].map((v) => `<line x1="0" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#1b2e3b"/><text x="${W - 4}" y="${y(v) - 3}" fill="#6f8793" font-size="11" text-anchor="end">${v}</text>`).join('');
-    $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="slider" tabindex="0" aria-label="Saat seçimi" aria-valuemin="0" aria-valuemax="${n - 1}" aria-valuenow="0">
-      <defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dbe6ea" stop-opacity=".28"/><stop offset="1" stop-color="#dbe6ea" stop-opacity="0"/></linearGradient></defs>
+    $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${CH}" role="slider" tabindex="0" aria-label="Saat seçimi" aria-valuemin="0" aria-valuemax="${n - 1}" aria-valuenow="0">
       ${bands.join('')}${grid}${days.join('')}
-      <path d="${area}" fill="url(#g)"/>
+      <path d="${band}" fill="#dbe6ea" fill-opacity=".16"/>
       <path d="${line}" fill="none" stroke="#dbe6ea" stroke-width="2" stroke-linejoin="round"/>
       <line id="cur" x1="${x(0)}" x2="${x(0)}" y1="0" y2="${BASE}" stroke="#dbe6ea" stroke-width="1" stroke-opacity=".6"/>
-      <circle id="dot" cx="${x(0)}" cy="${pts[0]?.[1] ?? BASE}" r="5.5" fill="#0e1c27" stroke-width="2.5"/>
+      <circle id="dot" cx="${x(0)}" cy="${H[0]?.[1] == null ? BASE : y(H[0][1])}" r="5.5" fill="#0e1c27" stroke-width="2.5"/>
       <text x="${x(0) + 4}" y="12" fill="#8ba2ad" font-size="12">şimdi</text>
     </svg>`;
     const svg = $('chart').querySelector('svg')!;
@@ -148,121 +173,162 @@ import Base from '../../layouts/Base.astro';
     svg.addEventListener('pointerdown', (ev) => { svg.setPointerCapture(ev.pointerId); pick(ev); });
     svg.addEventListener('pointermove', (ev) => { if (svg.hasPointerCapture(ev.pointerId)) pick(ev); });
     svg.addEventListener('keydown', (ev) => {
-      const d = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
-      if (d) { ev.preventDefault(); select(Math.max(0, Math.min(n - 1, sel + d))); }
+      const k = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+      if (k) { ev.preventDefault(); select(Math.max(0, Math.min(n - 1, sel + k))); }
     });
   }
 
-  const pts = (v: number) => (Math.round(v * 10) / 10).toLocaleString('tr-TR', { minimumFractionDigits: 1 });
+  const n1 = (v: number) => v.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
+  const isEstimate = (src: string) => src === 'yapı-uzunluğu-tahmini' || src === 'önsel' || src === 'DTM-interpolasyon';
 
   function select(i: number): void {
     sel = i;
-    const s = data.scores[i]!;
-    lamp($('lamp'), s.total, s.gated);
-    $('when').textContent = i === 0 ? `Şimdi, ${fmtTime(s.ts)}` : `${fmtDay(s.ts)}, ${fmtTime(s.ts)}`;
-    $('warn').textContent = s.warnings.join(' ');
+    const h = H[i]!;
+    const [ts, total, , p10, p90, gated, warnings, wNight] = h;
+    const rank = d.ranks[i] ?? null;
+    const count = d.spot_count;
+    const bandTxt = p10 !== null && p90 !== null ? `bant ${Math.round(p10)}–${Math.round(p90)}` : 'bant hesaplanıyor';
+    const lead = $('lead');
+    // Wide band: the number is not trustworthy on its own, the order among spots is (docs/MODEL.md §11).
+    if (leadWithRank(p10, p90) && rank !== null && total !== null) {
+      lead.innerHTML = `<div class="rank" style="color:${PALETTE[bandV2(total)].color}"><b>${rank}.</b><span>${count} mera içinde</span></div>`;
+      $('second').innerHTML = `Puan <b>${Math.round(total)}</b>, ${bandTxt} (bant ${RANK_FIRST_WIDTH} puandan geniş, sıra öne çıkarıldı)`;
+    } else {
+      lead.innerHTML = '<span class="lamp big" id="lamp"></span>';
+      lampV2($('lamp'), total, gated === 1);
+      $('second').textContent = total === null ? '' : `${count} mera içinde ${rank ?? '–'}. · ${bandTxt}`;
+    }
+    $('when').textContent = i === 0 ? `Şimdi, ${fmtTime(ts)}` : `${fmtDay(ts)}, ${fmtTime(ts)}`;
+    $('warn').textContent = warnings.join(' ');
+    const depthSrc = d.packed!.meta.comps[ci('derinlik')]![4];
+    const dayFlag = $('dayflag');
+    dayFlag.hidden = !(wNight < 0.5 && depthSrc !== 'saha');
+    dayFlag.textContent = 'Gündüz puanı doğrulanmamış derinliğe dayanıyor (yapı uzunluğundan tahmin). Saha ölçümü girildiğinde netleşir.';
+
     const svg = $('chart').querySelector('svg');
     if (svg) {
-      const py = s.total === null ? BASE : y(s.total);
       for (const a of ['x1', 'x2']) svg.querySelector('#cur')!.setAttribute(a, String(x(i)));
       const dot = svg.querySelector('#dot')!;
       dot.setAttribute('cx', String(x(i)));
-      dot.setAttribute('cy', String(py));
-      dot.setAttribute('stroke', s.total === null ? PALETTE.neutral.color : PALETTE[bandOf(s.total / 100)].color);
+      dot.setAttribute('cy', String(total === null ? BASE : y(total)));
+      dot.setAttribute('stroke', PALETTE[bandV2(total)].color);
       svg.setAttribute('aria-valuenow', String(i));
-      svg.setAttribute('aria-valuetext', `${fmtDay(s.ts)} ${fmtTime(s.ts)}, puan ${s.total === null ? 'yok' : Math.round(s.total)}`);
+      svg.setAttribute('aria-valuetext', `${fmtDay(ts)} ${fmtTime(ts)}, puan ${total === null ? 'yok' : Math.round(total)}`);
     }
 
-    const m = s.multipliers[0];
-    const multRow = m
-      ? `<li class="part mult band-${bandOf(m.value)}"><div class="row"><span>Gece çarpanı</span><span class="pts"><b>×${m.value.toLocaleString('tr-TR', { maximumFractionDigits: 3 })}</b></span></div>
-          <div class="bar" aria-hidden="true"><i style="width:${(m.value * 100).toFixed(0)}%"></i></div>
-          <p class="reason">${esc(m.reason)}${s.raw !== null ? `. Çarpandan önce ${pts(s.raw)} puan.` : ''}</p></li>`
-      : '';
-    $('parts').innerHTML =
-      multRow +
-      [...s.components]
-        .sort((a, b) => b.weight - a.weight)
-        .map((p) => {
-          const band: Band = bandOf(p.value);
-          const score = p.contribution === null ? 'veri yok' : `<b>${pts(p.contribution)}</b> / ${p.weight}`;
-          return `<li class="part band-${band}${p.value === null ? ' na' : ''}"><div class="row"><span style="color:var(--foam)">${esc(COMPONENT_TR[p.key] ?? p.key)}</span><span class="pts">${score}</span></div>
-            <div class="bar" aria-hidden="true"><i style="width:${((p.value ?? 0) * 100).toFixed(0)}%"></i></div>
-            <p class="reason">${esc(p.reason)}</p></li>`;
-        })
-        .join('');
+    const meta = d.packed!.meta;
+    $('parts').innerHTML = meta.comps
+      .map(([key, label, group, weight, source, ev], k) => {
+        const v = h[9][k] ?? null;
+        const band: Band = bandOf(v);
+        const srcCls = source === 'saha' ? 'src-saha' : isEstimate(source) ? 'src-est' : '';
+        const w = weight === null ? (key === 'derinlik' ? 'gündüz kolunda' : 'gece kolunda') : `ağırlık ${weight}`;
+        return `<li class="part band-${band}${v === null ? ' na' : ''}"><div class="row"><span style="color:var(--foam)">${esc(label)} <span class="w">· ${group}, ${w}</span></span>
+            <span class="tags"><span class="tag ev ev-${ev.charAt(0)}" title="Kanıt düzeyi">${ev}</span><span class="tag ${srcCls}" title="Veri kaynağı">${esc(SRC_TR[source] ?? source)}</span></span></div>
+          <div class="bar" aria-hidden="true"><i style="width:${((v ?? 0) * 100).toFixed(0)}%"></i></div>
+          <p class="reason">${v === null ? '' : `${v.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} · `}${esc(h[10][k] ?? '')}</p></li>`;
+      })
+      .join('');
 
-    const meta = new Map(data.data.conditions.map((c) => [c.key, c]));
-    $('cond').innerHTML = s.conditions
-      .map((c) => {
-        const info = meta.get(c.key)!;
-        const band: Band = c.display === null ? 'neutral' : c.band;
+    // Conditions: what the dynamic terms see this hour, coloured by their own value; cloud now affects the score.
+    const cloud = /bulut (\d+|–) %/.exec(why(h, 'diel'))?.[1];
+    const lampP = h[8];
+    const lampLine = d.spot.has_light === true ? 'Var' : d.spot.has_light === false ? 'Yok' : `Bilinmiyor (olasılık %${Math.round((lampP ?? 0) * 100)})`;
+    const conds: [string, string, number | null, string][] = [
+      ['Rüzgar × maruziyet', why(h, 'ruzgar_dalga'), val(h, 'ruzgar_dalga'), 'kıyıya vuran rüzgar açık yönlerde puanı düşürür'],
+      ['Bulut', cloud === undefined || cloud === '–' ? '–' : `%${cloud}`, val(h, 'diel'), 'ışığı değiştirir: gündüz yumuşatır, gece lamba kontrastını artırır'],
+      ['Lamba', lampLine, d.spot.has_light === null ? null : val(h, 'diel'), d.spot.has_light === null ? 'var/yok karışımı; saha formundan girin' : 'saha bilgisi'],
+      ['Su sıcaklığı (48 sa)', why(h, 'su_degisim'), val(h, 'su_degisim'), 'ani soğuma cezalandırılır'],
+      ['Kısa normalden sapma', why(h, 'su_sapma'), val(h, 'su_sapma'), meta.ocean_normal ? `${meta.ocean_normal.years} yıllık kısa normal (kanıt C)` : 'normal yok'],
+      ['Bulanıklık', why(h, 'bulaniklik'), val(h, 'bulaniklik'), 'yağış ve dalgadan'],
+      ['Basınç', why(h, 'basinc'), val(h, 'basinc'), 'düşük ağırlık (kanıt zayıf)'],
+      ['Akıntı', why(h, 'akinti'), val(h, 'akinti'), 'düşük ağırlık'],
+    ];
+    $('cond').innerHTML = conds
+      .map(([label, display, v, note]) => {
+        const band: Band = v === null || display === 'veri yok' || display === 'normal yok' ? 'neutral' : bandOf(v);
         const p = PALETTE[band];
-        const state = c.display === null ? 'veri yok' : !info.affects ? 'puanı etkilemez' : band === 'neutral' ? 'değerlendirilemedi' : p.label;
-        return `<div class="band-${band}" data-key="${esc(c.key)}" data-band="${band}"><dt>${esc(info.label)}</dt><dd>
-          <span class="val"><span class="ico" aria-hidden="true">${p.icon}</span><span>${esc(c.display ?? '–')}</span></span>
-          <p class="state">${esc(state.charAt(0).toUpperCase() + state.slice(1))}</p>
-          ${!info.affects && info.target === 'Puanı etkilemez' ? '' : `<p class="target">${esc(info.affects ? `Hedef: ${info.target}` : info.target)}</p>`}</dd></div>`;
+        const state = band === 'neutral' ? (display === 'veri yok' ? 'veri yok' : 'değerlendirilemedi') : p.label;
+        return `<div class="band-${band}"><dt>${esc(label)}</dt><dd>
+          <span class="val"><span class="ico" aria-hidden="true">${p.icon}</span><span>${esc(display || '–')}</span></span>
+          <p class="state">${esc(state.charAt(0).toUpperCase() + state.slice(1))}</p><p class="hint muted" style="margin:1px 0 0">${esc(note)}</p></dd></div>`;
       })
       .join('');
   }
 
   function profileChart(): void {
-    const prof = data.spot.profile;
-    if (!prof || prof.every((d) => d === null)) return;
-    const PW = 432, PH = 170, L = 34, R = 10, T = 14, B = 26;
-    const maxD = Math.max(5, ...prof.filter((d): d is number => d !== null)) * 1.1;
-    const px = (i: number) => L + (i / (prof.length - 1)) * (PW - L - R);
-    const py = (d: number) => T + (d / maxD) * (PH - T - B);
-    let path = '';
-    let pen = false;
-    prof.forEach((d, i) => {
-      if (d === null) { pen = false; return; }
-      path += `${pen ? 'L' : 'M'}${px(i).toFixed(1)},${py(d).toFixed(1)}`;
-      pen = true;
-    });
-    const valid = prof.map((d, i) => [i, d] as const).filter((p): p is readonly [number, number] => p[1] !== null);
-    const fill = valid.length ? `M${px(valid[0]![0])},${T}` + valid.map(([i, d]) => `L${px(i).toFixed(1)},${py(d).toFixed(1)}`).join('') + `L${px(valid.at(-1)![0])},${T}Z` : '';
-    const ticksD = [0, maxD / 2, maxD].map((d) => `<text x="${L - 6}" y="${py(d) + 4}" fill="#8ba2ad" font-size="11" text-anchor="end">${Math.round(d)} m</text><line x1="${L}" x2="${PW - R}" y1="${py(d)}" y2="${py(d)}" stroke="#1b2e3b"/>`).join('');
-    const ticksX = [0, 100, 200, 300, 400, 500].map((m) => `<text x="${px(m / 25)}" y="${PH - 8}" fill="#8ba2ad" font-size="11" text-anchor="middle">${m}</text>`).join('');
-    const mark200 = data.spot.depth_200m !== null && data.spot.depth_200m !== undefined
-      ? `<line x1="${px(8)}" x2="${px(8)}" y1="${T}" y2="${py(data.spot.depth_200m)}" stroke="#dbe6ea" stroke-dasharray="3 3" stroke-opacity=".6"/><circle cx="${px(8)}" cy="${py(data.spot.depth_200m)}" r="4" fill="#dbe6ea"/>`
-      : '';
-    $('profile').innerHTML = `<svg viewBox="0 0 ${PW} ${PH}" role="img" aria-label="Kıyı normali boyunca 0–500 m derinlik profili">
-      <rect x="${L}" y="${T}" width="${PW - L - R}" height="${PH - T - B}" fill="#0c1a24"/>${ticksD}
-      <path d="${fill}" fill="#1d4a63" fill-opacity=".55"/><path d="${path}" fill="none" stroke="#7cc4e4" stroke-width="2"/>${mark200}${ticksX}
+    const prof = d.spot.profile ?? [];
+    const field = d.field?.depths ?? [];
+    const depthSrc = d.packed?.meta.comps[ci('derinlik')]?.[4];
+    $('depth-src').innerHTML = depthSrc === 'saha'
+      ? `Derinlik: <b class="band-good">saha ölçümü</b> (${d.packed!.meta.depth_field_at ? fmtDay(d.packed!.meta.depth_field_at) : '–'})${d.packed!.meta.sink_calibration ? `, batma süreleri ${d.packed!.meta.sink_calibration.pairs} dikine ölçümle kalibre` : ''}`
+      : `Derinlik: <b class="band-warn">tahmini — yapı uzunluğundan, saha ölçümü yok</b>. DTM bu kıyıda tamamen enterpolasyon (kesikli çizgi).`;
+    const valid = prof.map((v, i) => [i * 25, v] as const).filter((p): p is readonly [number, number] => p[1] !== null);
+    if (!valid.length && !field.length) {
+      $('profile').innerHTML = '';
+      $('depth-note').textContent = 'Bu mera için derinlik verisi yok.';
+      return;
+    }
+    const PW = 432, PH = 180, L = 36, R = 10, T = 14, B = 26, XMAX = 300;
+    const maxD = Math.max(5, ...valid.filter(([m]) => m <= XMAX).map(([, v]) => v), ...field.map((f) => f.depth_m + f.sd_m)) * 1.1;
+    const px = (m: number) => L + (Math.min(m, XMAX) / XMAX) * (PW - L - R);
+    const py = (v: number) => T + (v / maxD) * (PH - T - B);
+    const pts = valid.filter(([m]) => m <= XMAX);
+    const path = pts.map(([m, v], k) => `${k ? 'L' : 'M'}${px(m).toFixed(1)},${py(v).toFixed(1)}`).join('');
+    // Interpolated DTM: grey uncertainty band (±50 %) around a dashed line.
+    const band = pts.length ? `M${pts.map(([m, v]) => `${px(m).toFixed(1)},${py(v * 0.5).toFixed(1)}`).join('L')}L${[...pts].reverse().map(([m, v]) => `${px(m).toFixed(1)},${py(Math.min(maxD, v * 1.5)).toFixed(1)}`).join('L')}Z` : '';
+    const ticksD = [0, maxD / 2, maxD].map((v) => `<text x="${L - 6}" y="${py(v) + 4}" fill="#8ba2ad" font-size="11" text-anchor="end">${Math.round(v)} m</text><line x1="${L}" x2="${PW - R}" y1="${py(v)}" y2="${py(v)}" stroke="#1b2e3b"/>`).join('');
+    const ticksX = [0, 50, 100, 150, 200, 250, 300].map((m) => `<text x="${px(m)}" y="${PH - 8}" fill="#8ba2ad" font-size="11" text-anchor="middle">${m}</text>`).join('');
+    const cast = `<rect x="${px(0)}" y="${T}" width="${px(150) - px(0)}" height="${PH - T - B}" fill="#f5a83c" fill-opacity=".06"/><text x="${px(75)}" y="${T + 12}" fill="#c9a36a" font-size="10.5" text-anchor="middle">atış mesafesi</text>`;
+    const SHAPE = { plumb: 'circle', sink_cal: 'rect', sink: 'diamond' } as const;
+    const dots = field
+      .filter((f) => f.distance_m <= XMAX)
+      .map((f) => {
+        const cx = px(f.distance_m);
+        const cy = py(f.depth_m);
+        const err = `<line x1="${cx}" x2="${cx}" y1="${py(Math.max(0, f.depth_m - f.sd_m))}" y2="${py(f.depth_m + f.sd_m)}" stroke="#5fd08a" stroke-width="1.5"/>`;
+        const s = SHAPE[f.quality];
+        const mark = s === 'circle' ? `<circle cx="${cx}" cy="${cy}" r="4.5" fill="#5fd08a"/>` : s === 'rect' ? `<rect x="${cx - 4}" y="${cy - 4}" width="8" height="8" fill="#5fd08a"/>` : `<path d="M${cx},${cy - 5}L${cx + 5},${cy}L${cx},${cy + 5}L${cx - 5},${cy}Z" fill="none" stroke="#5fd08a" stroke-width="1.6"/>`;
+        return err + mark;
+      })
+      .join('');
+    $('profile').innerHTML = `<svg viewBox="0 0 ${PW} ${PH}" role="img" aria-label="Meranın ucundan denize 0–300 m derinlik profili">
+      <rect x="${L}" y="${T}" width="${PW - L - R}" height="${PH - T - B}" fill="#0c1a24"/>${cast}${ticksD}
+      <path d="${band}" fill="#8ba2ad" fill-opacity=".14"/>
+      <path d="${path}" fill="none" stroke="#7cc4e4" stroke-width="2" stroke-dasharray="6 4"/>${dots}${ticksX}
     </svg>`;
-    const sp = data.spot;
-    const bits = [
-      sp.depth_200m != null ? `200 m açıkta ${sp.depth_200m.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} m` : null,
-      sp.max_depth_100m != null ? `uçtan 100 m içinde en fazla ${sp.max_depth_100m.toLocaleString('tr-TR', { maximumFractionDigits: 1 })} m` : null,
-      sp.slope_pct != null ? `0–300 m eğim %${sp.slope_pct.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}` : null,
-    ].filter(Boolean);
-    $('depth-note').textContent = `${bits.join(', ')}. Yatay eksen: meranın ucundan denize doğru metre. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki kaya, çukur gibi mikro yapıları göstermez.`;
-    $<HTMLAnchorElement>('maplink').href = `/harita/?id=${encodeURIComponent(data.spot.id)}`;
-    $('depth').hidden = false;
+    const fieldTxt = field.length
+      ? ` Yeşil: saha ölçümleri (● kurşunla dikine, ■ kalibre batma süresi, ◇ kalibresiz batma süresi; çizgi ± belirsizlik).`
+      : '';
+    $('depth-note').textContent = `Yatay eksen: meranın ucundan denize metre (profil uçtan başlar). Kesikli çizgi ve gri bant: EMODnet DTM, bu kıyıda yerinde ölçüm yok (enterpolasyon), belirsizlik büyük.${fieldTxt}`;
   }
 
   function render(): void {
-    const { spot } = data;
+    const { spot } = d;
     document.title = `${spot.name} — av.livn`;
     $('name').textContent = spot.name;
     const lampTxt = spot.has_light === null ? 'lamba bilinmiyor' : spot.has_light ? 'lamba var' : 'lamba yok';
     const facing = spot.shore_normal_deg === null ? null : `denize bakış ${compass(spot.shore_normal_deg)}`;
-    $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt, facing].filter(Boolean).join(', ');
-    if (data.scores.length === 0) {
+    $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt, spot.access ? ACCESS_TR[spot.access] : null, facing]
+      .filter(Boolean)
+      .join(', ');
+    $<HTMLAnchorElement>('maplink').href = `/harita/?id=${encodeURIComponent(spot.id)}`;
+    $<HTMLAnchorElement>('fieldlink').href = `/saha/?id=${encodeURIComponent(spot.id)}`;
+    $('partial').hidden = !d.partial;
+    if (!d.packed || H.length === 0) {
       $('when').textContent = 'Puan henüz hesaplanmadı';
       $('best').textContent = 'Saatlik güncelleme birkaç dakika içinde çalışacak.';
-      profileChart();
       $('spot').setAttribute('aria-busy', 'false');
       return;
     }
-    const best = data.scores.reduce<{ i: number; v: number }>((b, s, i) => (!s.gated && (s.total ?? -1) > b.v ? { i, v: s.total ?? -1 } : b), { i: -1, v: -1 });
-    $('best').textContent = best.i >= 0 ? `72 saatin en iyisi: ${fmtDay(data.scores[best.i]!.ts)} ${fmtTime(data.scores[best.i]!.ts)}, ${Math.round(best.v)} puan` : '';
-    const notes = [fmtAgo(data.data.weather_fetched_at) + '.'];
-    if (data.data.sea_grid && data.data.sea_grid.distance_km > 2)
-      notes.push(`Dalga, su sıcaklığı ve akıntı ${data.data.sea_grid.distance_km.toLocaleString('tr-TR')} km uzaktaki en yakın deniz modeli noktasından geliyor; körfez içinde gerçek değer farklı olabilir.`);
-    if (!data.data.sea_grid) notes.push('Bu mera için deniz verisi yok; puan kalan bileşenlerden hesaplandı.');
+    const best = H.reduce<{ i: number; v: number }>((b, h, i) => (!h[5] && (h[1] ?? -1) > b.v ? { i, v: h[1] ?? -1 } : b), { i: -1, v: -1 });
+    $('best').textContent = best.i >= 0 ? `72 saatin en iyisi: ${fmtDay(H[best.i]![0])} ${fmtTime(H[best.i]![0])}, ${Math.round(best.v)} puan` : '';
+    const m = d.packed.meta;
+    const notes = [fmtAgo(m.weather_fetched_at) + '.'];
+    if (m.ocean) notes.push(`Su sıcaklığı ve akıntı Copernicus Marmara 500 m modelinden (en yakın deniz hücresi ${n1(m.ocean.cell.distance_km)} km).`);
+    else if (m.sea_grid && m.sea_grid.distance_km > 2) notes.push(`Dalga ve su verisi ${n1(m.sea_grid.distance_km)} km uzaktaki model noktasından.`);
+    if (m.ocean_normal) notes.push(`Sapma, ${m.ocean_normal.from.slice(0, 4)}–${m.ocean_normal.to.slice(0, 4)} günlük analiz arşivinden kurulan ${m.ocean_normal.years} yıllık kısa normale göre: uzun dönem klimatoloji değil, kanıt C.`);
+    if (d.field) notes.push(`${d.field.observations} saha girişi, sonuncusu ${fmtDay(d.field.latestAt)}.${d.field.last_note ? ` Not: “${d.field.last_note}”` : ''}`);
     $('note').textContent = notes.join(' ');
     chart();
     select(0);
@@ -274,15 +340,11 @@ import Base from '../../layouts/Base.astro';
     $('name').textContent = 'Mera seçilmedi';
     $('sub').innerHTML = '<a href="/">Mera listesine dönün</a>.';
   } else {
-    fetch(`/api/spots/${encodeURIComponent(id)}`, { cache: 'no-cache' })
+    fetch(`/api/spots/${encodeURIComponent(id)}?model=v2`, { cache: 'no-cache' })
       .then((r) => (r.status === 404 ? Promise.reject(new Error('404')) : r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((b: Omit<Resp, 'data' | 'scores'> & { from: number; hours: number; packed: PackedDetail | null }) => {
-        const d = b.packed ? unpackDetail(b.packed, b.from, b.hours) : null;
-        data = {
-          spot: b.spot,
-          data: (d?.meta ?? { weather_fetched_at: null, sea_grid: null, conditions: [] }) as Resp['data'],
-          scores: (d?.hours ?? []) as unknown as Score[],
-        };
+      .then((b: Resp) => {
+        d = b;
+        H = b.packed ? b.packed.h.slice(b.from, b.from + b.hours) : [];
         render();
       })
       .catch((e: Error) => {

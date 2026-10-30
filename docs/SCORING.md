@@ -1,5 +1,7 @@
 # Puanlama v1.1 (kural tabanlı)
 
+> **Arayüz v2 kullanıyor** (B4/B6). Güncel model: [`docs/MODEL.md`](MODEL.md). v1.1 hâlâ hesaplanıyor ve `/api/spots` (model parametresi olmadan) üzerinden okunabilir; arşiv: [`docs/archive/SCORING-v1.md`](archive/SCORING-v1.md).
+
 Motor: `packages/scoring` (saf TypeScript, yan etkisiz, %100 birim test kapsamı zorunlu).
 Tür profilleri: `data/species/*.yaml` → `npm run species -w packages/scoring`. Saat dilimi: Europe/Istanbul (sabit UTC+3).
 

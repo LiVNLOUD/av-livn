@@ -25,15 +25,17 @@ import Base from '../layouts/Base.astro';
   :global(.spot h2) { margin: 0; font-size: 1.06rem; font-weight: 620; line-height: 1.25; }
   :global(.spot .sub) { margin: 2px 0 0; font-size: 0.84rem; color: var(--mist); }
   :global(.spot .why) { margin: 3px 0 0; font-size: 0.84rem; }
+  :global(.spot .rk) { color: var(--foam); font-weight: 700; }
   .empty { padding: 24px 0; }
 </style>
 
 <script>
-  import { esc, fmtAgo, KIND_TR, lamp } from '../scripts/format';
+  import { esc, fmtAgo, KIND_TR, lampV2 } from '../scripts/format';
+  import { leadWithRank } from '@av-livn/scoring';
 
   type Spot = {
     id: string; name: string; kind: string; status: string; place: string | null; has_light: boolean | null;
-    score: { total: number | null; gated: boolean; warnings: string[]; missing_count: number };
+    score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean };
   };
 
   const list = document.getElementById('spots')!;
@@ -41,7 +43,7 @@ import Base from '../layouts/Base.astro';
   const empty = document.getElementById('empty')!;
 
   function render(spots: Spot[], fetchedAt: string | null) {
-    meta.textContent = `${spots.length} mera, şu anki puana göre sıralı. ${fmtAgo(fetchedAt)}.`;
+    meta.textContent = `${spots.length} mera, bu saatteki sıraya göre. ${fmtAgo(fetchedAt)}. Puan v2 (HSI); bant geniş olduğunda sıra puandan daha anlamlıdır.`;
     if (spots.length === 0) {
       empty.hidden = false;
       empty.textContent = 'Henüz mera yok. Aday meralar OpenStreetMap verisinden ayda bir eklenir.';
@@ -50,24 +52,24 @@ import Base from '../layouts/Base.astro';
     list.innerHTML = spots
       .map((s) => {
         const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
-        const why = s.score.gated
-          ? `<p class="why warn">${esc(s.score.warnings[0])}</p>`
-          : s.score.total === null
+        const sc = s.score;
+        const band = sc.p10 !== null && sc.p90 !== null ? `bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
+        const why = sc.gated
+          ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
+          : sc.total === null
             ? '<p class="why muted">Puan henüz hesaplanmadı</p>'
-            : s.score.missing_count
-              ? `<p class="why muted">Eksik veri: ${s.score.missing_count} bileşen</p>`
-              : '';
+            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${spots.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.has_light === null ? ' · lamba bilinmiyor' : ''}</p>`;
         return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}">
           <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
           <span><h2>${esc(s.name)}</h2><p class="sub">${esc(sub)}</p>${why}</span></a></li>`;
       })
       .join('');
     list.querySelectorAll<HTMLElement>('.lamp').forEach((el) =>
-      lamp(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'),
+      lampV2(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'),
     );
   }
 
-  fetch('/api/spots', { cache: 'no-cache' })
+  fetch('/api/spots?model=v2', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: { spots: Spot[]; data_fetched_at: string | null }) => render(b.spots, b.data_fetched_at))
     .catch(() => {

@@ -71,3 +71,11 @@
   - 5/5 yön testi geçti.
   - Yayılımın çoğu C-düzeyi önsellerden (yapı uzunluğu, lamba); saha doğrulaması gerekli.
 - **Sıradaki:** Bölüm B (B1 motor … B6), kullanıcı onayından sonra.
+
+## v2 Bölüm B — uygulama (2026-10-30/31)
+- **B0:** 6 mera noktası OSM yapısının ana karaya en uzak düğümüne taşındı (eski nokta `alt`); paylaşılan düğüm kısa yapıya verilir, birleştirme yok (16 mera). Open-Meteo: tür başına tek çoklu-koordinat isteği, 429/5xx'te üstel geri çekilme, son iyi veri korunur, çağrı sayısı `meta.om_last_run`.
+- **B1:** `packages/scoring/src/v2` HSI motoru; log-doğrusal ölçek (ideal 92, en kötü 8; birim testli), 5 yön testi, bileşen başına kaynak + kanıt, Monte Carlo %10–90, saatlik `score.yml` ile `spot_scores_v2`.
+- **B5:** `/saha/` formu (lamba üç durum + renk, yapı, dip tipi, "jighead'e ne takıldı", dikine/batma süresi derinlik + kronometre, erişim, not, fotoğraf, çevrimdışı kuyruk); kayıt anında tek mera yeniden puanlanır.
+- **B2:** Copernicus Marmara 500 m saatlik su sıcaklığı (1–20 m) ve akıntı (1–5 m), `ocean.yml` 6 saatte bir; 2021-11+ günlük arşivden kısa normal (kanıt C, ağırlık 0.03).
+- **B3:** tam ekran harita: OpenFreeMap altlık, Türkçe adlar, ölçek, OSM vektör kıyı, geniş ve kenarı soldurulmuş batimetri, taralı enterpolasyon alanı, burun/liman etiketleri, çakışmasız v2 işaretleri.
+- **B4/B6:** kart ve liste v2: bant > 30 ise sıra öne, derinlik kaynağı metni, kanıt rozeti + kaynak etiketi, %10–90 bantlı grafik, uçtan profil + saha noktaları; v2 renk bantları (65/40), bulut ve lamba üç durumu koşullar panelinde.

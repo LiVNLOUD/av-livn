@@ -399,3 +399,25 @@ CREATE TABLE catch_log (id TEXT PRIMARY KEY, spot_id TEXT NOT NULL, start_at TEX
 | [sjwasko/fishin](https://github.com/sjwasko/fishin) | MIT | `astro.py`: skyfield + JPL DE421 efemeris; solunar major ±1.5 sa (ay transit), minor ±1 sa (ay doğuş/batış); `phase_score = |cos(faz)|` | Fikir: güneş ve ay konumunu gerçek efemerisle hesaplamak (v2 zaten suncalc kullanıyor; taslak düşük hassasiyetli formül). | Solunar pencereleri ve yeni/dolunay = iyi skoru: istavrit için kaynak yok (RESEARCH). v2'de ay yalnız ışık kaynağı olarak girer. |
 | [akt/SGFishing](https://github.com/akt/SGFishing) | **Lisans dosyası yok** (tüm hakları saklı varsayılır) | `FishingScoreService.calculateScore`: solunar 25 + gelgit 15 + basınç trendi 15 + hava 15 + rüzgar 10 + dalga 10 + PSI 10 = 100; basamaklı eşikler; API yedek zinciri | Yalnız mimari fikir: bileşen dökümü ve veri kaynağı yedek zinciri (v1'de zaten var). | Kod ve eşikler: lisans yok; ayrıca doğrusal toplam + basamak, v1'in kusurunun aynısı. Düşen basınç = iyi varsayımı kaynaksız. |
 | [TheWillMiller/tide-wise](https://github.com/TheWillMiller/tide-wise) | MIT | `tidewise-card.js`: güvenlik riskini (rip current) mevcut saatin puanına **tavan** olarak uyguluyor, gelecek pencereleri global olarak düzleştirmiyor; bileşen dökümü ve "neden" metni | İlke: güvenlik kapısı yalnız etkilenen saatlere tavan uygular, gelecek saatleri düzleştirmez (v2 güvenlik kapısı saat bazlı kalır). "Neden" metni fikri kart v2'de. | Kod; tür modları (flounder, redfish) ABD kıyı türleri. |
+
+## 11. Gösterim kuralları (B3/B4/B6)
+
+**Renk bantları** (kalibre 0–100 ölçeği; `packages/scoring/src/v2/display.ts`):
+
+| Bant | Puan | Renk |
+|---|---|---|
+| iyi | ≥ 65 | yeşil |
+| orta | 40–65 | turuncu |
+| zayıf | < 40 | kırmızı |
+| veri yok | – | gri |
+
+- Bileşen çubukları ve koşullar paneli 0–1 bileşen değerini kullanır (≥ 0.75 iyi, ≥ 0.40 orta).
+- Harita işaretleri, liste ve kart aynı `bandV2` fonksiyonunu kullanır.
+
+**Sıra mı puan mı:** %10–90 bandı **30 puandan genişse** (`RANK_FIRST_WIDTH`) kartta büyük gösterim sıradır ("Bu saatte 16 mera içinde 3."); puan ve bant ikincil satırda. Band daraldıkça puan öne çıkar. Gerekçe: model C ağırlıklı; mutlak puanın belirsizliği büyük, meralar arası sıralama ise ortak hava girdileri nedeniyle daha kararlı.
+
+**Derinlik kaynağı metni:** saha ölçümü varsa "saha ölçümü (tarih)", yoksa "tahmini — yapı uzunluğundan, saha ölçümü yok". Kaynak saha değilse ve gece kolu ağırlığı < 0.5 ise (gündüz) kartta "gündüz puanı doğrulanmamış derinliğe dayanıyor" notu.
+
+**Koşullar paneli:** v2 dinamik bileşenleri; bulut artık puanı etkiler (ışık indeksi). Lamba üç durumlu: var / yok / bilinmiyor (önsel olasılık %).
+
+**Harita:** OpenFreeMap altlık (Türkçe ad), OSM kara poligonu (vektör kıyı), EMODnet DTM bantları kenarda soldurulur, enterpolasyonlu (GEBCO dolgusu) alan taralı. Yakın işaretler zoom'a göre halka üzerine yayılır, ince çizgi gerçek konuma gider; kümeleme/birleştirme yok.
