@@ -198,18 +198,10 @@ describe('admin', () => {
   });
 });
 
-describe('edge cache', () => {
-  it('serves repeated GETs from cache until the TTL expires', async () => {
-    const url = 'https://av.livn.tr/api/spots/osm-way-1?hours=3';
-    const first = await (await app.request(url, {}, env)).json<{ spot: { name: string } }>();
-    expect(first.spot.name).toBeTruthy();
-    await env.DB.prepare("UPDATE spots SET name = 'Değişti' WHERE id = 'osm-way-1'").run();
-    const res2 = await app.request(url, {}, env);
-    expect(res2.headers.get('cache-control')).toBe('no-cache');
-    const second = await res2.json<{ spot: { name: string } }>();
-    expect(second.spot.name).toBe(first.spot.name);
-    const fresh = await (await app.request(url + '&x=1', {}, env)).json<{ spot: { name: string } }>();
-    expect(fresh.spot.name).toBe('Değişti');
+describe('caching', () => {
+  it('API responses are never cached by browsers or the edge', async () => {
+    expect((await app.request('/api/spots', {}, env)).headers.get('cache-control')).toBe('no-cache');
+    expect((await app.request('/api/spots/osm-way-1', {}, env)).headers.get('cache-control')).toBe('no-cache');
   });
 });
 

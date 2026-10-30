@@ -2,12 +2,14 @@
 import { getProfile, type SpeciesProfile } from '@av-livn/scoring';
 import { Hono } from 'hono';
 import type { Env } from '../env';
-import { cachedJson } from '../lib/cache';
 import { publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
 const HOUR = 3_600_000;
+// No edge cache: handlers only read precomputed rows, and measured Cache API put/clone cost (~4 ms CPU per miss)
+// exceeded the work it saved. `no-cache` because the livn.tr zone rewrites max-age to 4 h for browsers.
+const NO_CACHE = { 'cache-control': 'no-cache' };
 
 function profileFor(id: string | undefined): SpeciesProfile | { error: string } {
   const p = getProfile(id ?? 'istavrit');
@@ -18,8 +20,7 @@ function profileFor(id: string | undefined): SpeciesProfile | { error: string } 
 
 type ListEntry = [number | null, 0 | 1, string | null, number];
 
-publicRoutes.get('/spots', (c) =>
-  cachedJson(c, 600, async () => {
+publicRoutes.get('/spots', async (c) => {
     const profile = profileFor(c.req.query('species'));
     if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
     const [rows, fetched] = await c.env.DB.batch([
@@ -42,12 +43,10 @@ publicRoutes.get('/spots', (c) =>
     });
     spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
     const at = (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null;
-    return c.json({ ok: true, species: { id: profile.id, name: profile.name }, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, spots });
-  }),
-);
+    return c.json({ ok: true, species: { id: profile.id, name: profile.name }, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, spots }, 200, NO_CACHE);
+});
 
-publicRoutes.get('/spots/:id', (c) =>
-  cachedJson(c, 600, async () => {
+publicRoutes.get('/spots/:id', async (c) => {
     const profile = profileFor(c.req.query('species'));
     if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
     const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
@@ -63,6 +62,5 @@ publicRoutes.get('/spots/:id', (c) =>
     // The stored packed detail is spliced in as a raw string: no parse/serialise of ~45 KB per request.
     // Clients call unpackDetail(packed, from, hours).
     const head = JSON.stringify({ ok: true, species: { id: profile.id, name: profile.name, weights: profile.weights }, spot: publicSpotDetail(r), from, hours });
-    return c.body(`${head.slice(0, -1)},"packed":${r.detail_json ?? 'null'}}`, 200, { 'content-type': 'application/json; charset=utf-8' });
-  }),
-);
+    return c.body(`${head.slice(0, -1)},"packed":${r.detail_json ?? 'null'}}`, 200, { 'content-type': 'application/json; charset=utf-8', ...NO_CACHE });
+});

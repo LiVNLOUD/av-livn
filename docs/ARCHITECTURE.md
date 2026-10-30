@@ -26,7 +26,7 @@
 - Puanlar ve koşul uygunlukları istek anında hesaplanmaz. Mera başına 75 saatlik hazır JSON `spot_scores` tablosunda tutulur:
   - `list_json`: liste için `[puan, kapı, uyarı, eksik]`
   - `detail_json`: grafik, döküm ve koşullar
-- `/api/spots` ve `/api/spots/:id` yalnız okur ve mevcut saate göre dilimler. Edge cache 10 dk tutulur, istemciye `no-cache` gider.
+- `/api/spots` ve `/api/spots/:id` yalnız okur ve mevcut saate göre dilimler. Detay, paketli JSON (`packDetail`) olarak ayrıştırılmadan döner; istemci `unpackDetail` ile açar. Edge cache yok (Cache API put/clone maliyeti işten fazlaydı); istemciye `no-cache`.
 - **Hesaplama GitHub Actions'ta yapılır** (`score.yml`, saatlik :23 ve her deploy sonrası). Önce Worker cron'unu 3 dakikaya bölmeyi denedim; canlı ölçümde tek bir puanlama grubu (5 mera) soğuk isolate'te **99 ms** CPU harcadı (sınır ~10 ms).
 - Actions işi (`scripts/score-job.ts`, esbuild ile paketlenir) aynı saf motoru (`workers/api/src/precompute.ts` → `scoreRecords`) Node'da çalıştırır:
   - D1'den REST API ile okur, parametreli sorgularla yazar. Kayıt başına JSON ~125 KB olduğundan D1'in 100 KB SQL metni sınırı nedeniyle `.sql` dosyası kullanılamaz.

@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { publicSpot, STATUSES, type SpotRow } from '../lib/spots';
-import { purgeSpot } from '../lib/cache';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
 
@@ -69,7 +68,6 @@ adminRoutes.patch('/spots/:id', async (c) => {
   if (!res.meta.changes) return c.json({ ok: false, error: 'not_found' }, 404);
   const row = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(c.req.param('id')).first<SpotRow>();
   // Scores reflect the edit after the next hourly scoring run (GitHub Actions, score.yml).
-  await purgeSpot(new URL(c.req.url).origin, row!.id);
   return c.json({ ok: true, spot: publicSpot(row!) });
 });
 
@@ -110,6 +108,5 @@ adminRoutes.post('/spots', async (c) => {
     ).bind(id, v.set.name, b.lat, b.lon, probe?.lat ?? null, probe?.lon ?? null, b.shore_normal_deg, v.set.has_light ?? null, v.set.notes ?? null, wx, sea, now),
   ]);
   const row = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(id).first<SpotRow>();
-  await purgeSpot(new URL(c.req.url).origin, row!.id);
   return c.json({ ok: true, spot: publicSpot(row!) }, 201);
 });
