@@ -30,7 +30,7 @@ for (const f of fc.features) {
   const [lon, lat] = f.geometry.coordinates;
   const l = await live(p.id);
   const hasLight = l?.spot?.has_light ?? p.has_light;
-  const grid = l?.data?.sea_grid;
+  const grid = l?.packed?.meta?.sea_grid ?? l?.data?.sea_grid;
   const probe = p.probe_lat == null ? null : { lat: p.probe_lat, lon: p.probe_lon };
   const shift = probe && grid ? km(probe.lat, probe.lon, grid.lat, grid.lon) : null;
   rows.push({
