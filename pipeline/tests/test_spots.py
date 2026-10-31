@@ -245,6 +245,7 @@ def test_duplicate_generated_names_become_unique_and_descriptive():
     assert names[0] == "Armutlu Devlet Limanı – batı mendireği"
     assert names[1] == "Armutlu Devlet Limanı – doğu mendireği"
     assert names[2] == "Armutlu Devlet Limanı – kuzey mendireği"
+    assert names[3] == "Armutlu Devlet Limanı – güney mendireği"
     assert len(set(names[:4])) == 4
     assert names[4] == "Mudanya İskelesi" and names[5] == "İskele (Kapaklı)"
     # no harbour nearby → place prefix; same direction → dış/iç; identical tips → numbered
@@ -254,3 +255,10 @@ def test_duplicate_generated_names_become_unique_and_descriptive():
     same = [f("p", 28.9, 40.4, name="Z", length=50), f("q", 28.9, 40.4, name="Z", length=90), f("r", 28.91, 40.4, name="Z")]
     unique_names(same, [])
     assert len({p["properties"]["name"] for p in same}) == 3
+    # three on the same side (real Armutlu case): long / middle / short, nobody else numbered
+    west = [f("w1", 28.8247, 40.5091, length=292), f("w2", 28.8281, 40.5088, length=112), f("w3", 28.8287, 40.5080, length=930), f("e", 28.8494, 40.5057, length=64)]
+    unique_names(west, harbours)
+    n = {p["properties"]["id"]: p["properties"]["name"] for p in west}
+    assert n["e"] == "Armutlu Devlet Limanı – doğu mendireği"
+    assert sorted(n[k] for k in ("w1", "w2", "w3")) == sorted(f"Armutlu Devlet Limanı – {q} batı mendireği" for q in ("uzun", "orta", "kısa"))
+    assert n["w3"].endswith("uzun batı mendireği")

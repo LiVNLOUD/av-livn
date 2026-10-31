@@ -22,16 +22,25 @@ def centre(el: dict) -> tuple[float, float] | None:
 
 
 def labels(raw: dict) -> dict:
-    feats, seen = [], set()
+    feats: list[dict] = []
+    seen: dict[tuple[str, str], dict] = {}
     for el in raw.get("elements", []):
         t = el.get("tags", {})
         kind = "cape" if t.get("natural") == "cape" else "harbour" if t.get("harbour") == "yes" or t.get("leisure") == "marina" else None
         name = t.get("name:tr") or t.get("name")
         xy = centre(el)
-        if not kind or not name or xy is None or (kind, name) in seen:
+        if not kind or not name or xy is None:
             continue
-        seen.add((kind, name))
-        feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(xy[0], 5), round(xy[1], 5)]}, "properties": {"kind": kind, "name": name}})
+        # Same name typed with/without Turkish letters (Limani / Limanı): keep the variant with more of them.
+        key = (kind, name.lower().replace("ı", "i").replace("İ", "i").replace("i̇", "i"))
+        if key in seen:
+            prev = seen[key]
+            if sum(c in "çğıöşüÇĞİÖŞÜ" for c in name) > sum(c in "çğıöşüÇĞİÖŞÜ" for c in prev["properties"]["name"]):
+                prev["properties"]["name"] = name
+            continue
+        feat = {"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(xy[0], 5), round(xy[1], 5)]}, "properties": {"kind": kind, "name": name}}
+        seen[key] = feat
+        feats.append(feat)
     return {"type": "FeatureCollection", "attribution": "© OpenStreetMap contributors, ODbL", "features": sorted(feats, key=lambda f: f["properties"]["name"])}
 
 

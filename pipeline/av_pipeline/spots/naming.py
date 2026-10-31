@@ -41,14 +41,20 @@ def unique_names(features: list[dict], harbours: list[dict]) -> int:
         labels = [_dir(x - cx, y - cy) for x, y in xy]
         for lab in set(labels):
             idx = [i for i, v in enumerate(labels) if v == lab]
-            if len(idx) > 1:
+            if len(idx) == 2:  # outer / inner by distance from the group centre
                 far = max(idx, key=lambda i: math.dist(xy[i], (cx, cy)))
                 for i in idx:
-                    labels[i] = f"{lab} {'dış' if i == far else 'iç'}"
-        if len(set(labels)) < len(labels):  # identical tips: fall back to length order
-            order = sorted(range(len(members)), key=lambda i: -members[i]["properties"].get("length_m", 0))
-            for rank, i in enumerate(order, 1):
-                labels[i] = f"{labels[i]} {rank}"
+                    labels[i] = f"{'dış' if i == far else 'iç'} {lab}"
+            elif len(idx) > 2:  # by structure length
+                order = sorted(idx, key=lambda i: -(members[i]["properties"].get("length_m") or 0))
+                quals = ["uzun", "orta", "kısa"] if len(idx) == 3 else [f"{k}." for k in range(1, len(idx) + 1)]
+                for q, i in zip(quals, order):
+                    labels[i] = f"{q} {lab}"
+        seen: dict[str, int] = {}
+        for i, lab in enumerate(labels):  # identical tips: number only the clashing ones
+            if labels.count(lab) > 1:
+                seen[lab] = seen.get(lab, 0) + 1
+                labels[i] = f"{lab} {seen[lab]}"
         for f, lab in zip(members, labels):
             noun = NOUN.get(f["properties"]["kind"], "yapısı")
             f["properties"]["name"] = f"{prefix} – {lab} {noun}"
