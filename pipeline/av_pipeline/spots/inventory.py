@@ -34,6 +34,8 @@ COAST_NEAR_M = 30.0
 SEG_M = 400.0  # target segment; parts are split into n = round(L / SEG_M) pieces of 300–500 m
 MIN_SEG_M = 120.0
 MOUTH_M = 60.0
+CAPE_M = 200.0
+KNOWN_NEAR_M = 1500.0
 NEAR_EXISTING_M = 150.0
 NEAR_STRUCT_M = 40.0
 FORBIDDEN_NAMES = re.compile(r"gemport|borusan|roda|limak|marport|gemlik liman|tüpraş|aygaz|petrol ofisi|opet|shell", re.I)
@@ -57,6 +59,7 @@ def build_query() -> str:
   nwr["seamark:type"~"^harbour"]({b});
   nwr["amenity"="ferry_terminal"]({b});
   nwr["natural"~"^(beach|bare_rock|cliff)$"]({b});
+  node["natural"="cape"]({b});
   way["waterway"~"^(river|stream)$"]({b});
   nwr["landuse"="port"]({b});
   nwr["industrial"="port"]({b});
@@ -104,7 +107,7 @@ def classify(tags: dict) -> str | None:
         return "structure"
     if "harbour" in tags or tags.get("leisure") in ("marina", "slipway") or str(tags.get("seamark:type", "")).startswith("harbour") or tags.get("amenity") == "ferry_terminal":
         return "harbour"
-    if tags.get("natural") in ("bare_rock", "cliff"):
+    if tags.get("natural") in ("bare_rock", "cliff", "cape"):
         return "rocky"
     if tags.get("natural") == "beach":
         return "beach"
@@ -154,13 +157,15 @@ def nearest_place(xy: tuple[float, float], places: list[dict], max_m: float = 40
     return (p["name"], round(d)) if d <= max_m else (None, None)
 
 
-COMPASS = ["kuzey", "kuzeydoğu", "doğu", "güneydoğu", "güney", "güneybatı", "batı", "kuzeybatı"]
+COMPASS = ["kuzeyi", "kuzeydoğusu", "doğusu", "güneydoğusu", "güneyi", "güneybatısı", "batısı", "kuzeybatısı"]
 
 
 def access_estimate(typ: str, tags: dict, place_m: float | None) -> tuple[str, str]:
     """(access value, reason). The user's field knowledge always overrides (seed keeps an existing value)."""
-    if tags.get("access") in ("private", "no") or tags.get("leisure") == "marina":
-        return "belirsiz", "OSM access=private ya da özel marina"
+    if tags.get("access") in ("private", "no"):
+        return "belirsiz", "OSM access=private"
+    if tags.get("leisure") == "marina" and not re.search(r"iskele", tags.get("name", ""), re.I):
+        return "belirsiz", "marina: giriş kısıtlı olabilir"
     if tags.get("amenity") == "ferry_terminal":
         return "kisitli_feribot", "feribot iskelesi: sefer saatlerinde kısıtlı olabilir"
     if typ in ("rocky",):
@@ -229,7 +234,9 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
                     pts.append((q, None, None))
                     break
         else:
-            pts = [(seg.interpolate(0.5, normalized=True), round(seg.length), seg) for seg in segments(coast, g)]
+            # capes: the coastline within CAPE_M of the point (the headland itself), others: within COAST_NEAR_M
+            near = CAPE_M if t.get("natural") == "cape" else COAST_NEAR_M
+            pts = [(seg.interpolate(0.5, normalized=True), round(seg.length), seg) for seg in segments(coast, g, near)]
         for k, (pt, length, seg) in enumerate(pts):
             line, q, _ = coast.nearest(pt)
             normal = coast.smoothed_normal(line, q)
@@ -260,6 +267,22 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
             continue
         kept.append(pr)
 
+    known_missing = []
+    for name in KNOWN:
+        pl = [p for p in places if norm(p["name"]) == norm(name)]
+        if not pl:
+            known_missing.append(f"{name}: OSM'de yerleşim noktası yok")
+            continue
+        xy = pl[0]["xy"]
+        if any(math.dist(xy, k["_xy"]) <= KNOWN_NEAR_M for k in kept) or any(math.dist(xy, e) <= KNOWN_NEAR_M for e in existing_xy.values()):
+            continue
+        line, q, _ = coast.nearest(Point(xy))
+        kept.append({
+            "_xy": (q.x, q.y), "_typ": "harbour", "_inside_forbidden": False, "id": f"known-{norm(name)}", "osm_name": None, "kind": "harbour", "type": "harbour",
+            "type_tr": "bilinen yer (kullanıcı listesi)", "length_m": None, "shore_normal_deg": round(coast.smoothed_normal(line, q), 1), "place": pl[0]["name"],
+            "place_m": round(math.dist(xy, (q.x, q.y))), "access": "acik", "access_note": "kullanıcı listesi; konum yerleşime en yakın kıyı noktası, sahada düzeltin",
+            "osm": [], "osm_tags": {},
+        })
     name_props(kept, places)
     feats = []
     for pr in sorted(kept, key=lambda p: p["id"]):
@@ -276,6 +299,7 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
             forb.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]}, "properties": {"name": f["name"], "osm": f["ref"], **f["tags"]}})
     diag = diagnostics(raw, places, feats, existing)
     diag["dropped"] = dropped
+    diag["known_missing"] = known_missing
     return feats, forb, diag
 
 
@@ -284,17 +308,21 @@ def name_props(kept: list[dict], places: list[dict]) -> None:
     taken: dict[str, int] = {}
     for pr in sorted(kept, key=lambda p: p["id"]):
         typ = pr["_typ"]
-        if pr["osm_name"] and typ in ("structure", "harbour"):
+        if pr["id"].startswith("known-"):
+            base = f"{pr['place']} kıyısı (konum tahmini)"
+        elif pr["osm_name"] and typ in ("structure", "harbour"):
             base = pr["osm_name"]
+        elif typ == "rocky" and pr["osm_name"]:
+            base = pr["osm_name"]  # a named cape
         elif typ == "river_mouth" and pr["osm_name"]:
             base = f"{pr['osm_name']} ağzı"
         else:
             what = STRUCT_TR.get(pr["kind"], "Yapı") if typ == "structure" else {"harbour": "Liman", "rocky": "Kayalık kıyı", "beach": "Kumsal", "river_mouth": "Dere ağzı"}[typ]
             base = f"{what} ({pr['place']})" if pr["place"] else what
-            if pr["place"] and typ in ("rocky", "beach"):
+            if pr["place"] and typ in ("rocky", "beach") and not pr["id"].startswith("known-"):
                 pxy = next(p["xy"] for p in places if p["name"] == pr["place"])
                 b = bearing(pxy, pr["_xy"])
-                base = f"{what} ({pr['place']} {COMPASS[round(b / 45) % 8]}su)"
+                base = f"{what} ({pr['place']} {COMPASS[round(b / 45) % 8]})"
         taken[base] = taken.get(base, 0) + 1
         pr["name"] = base if taken[base] == 1 else f"{base} {taken[base]}"
 
@@ -378,9 +406,15 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
         p = f["properties"]
         lines.append(f"| {p['name']} | {p['type_tr']} | {p['place'] or '—'} | {p['access']} ({p['access_note']}) | {', '.join(p['osm'])} |")
     lines += ["", "## Erişim yasak (ticari liman / sanayi)", "", "| Ad | OSM |", "|---|---|", *[f"| {f['properties']['name']} | {f['properties']['osm']} |" for f in forb]]
-    lines += ["", "## Bilinen yerler (kullanıcı listesi)", ""]
+    lines += ["", "## Neden Karacaali ve Büyükkumla iskeleleri listede yoktu?", "",
+              "İkisi de OpenStreetMap'te iskele *yolu* (`man_made=pier`) olarak değil, adı \"… İskelesi\" olan tek bir **nokta**",
+              "(`leisure=marina`) olarak çizilmiş. Harita etiket katmanı adlı liman/marina noktalarını gösterdiği için haritada",
+              "göründüler; mera listesi ise yalnız `man_made=pier|breakwater|groyne` **yollarından** üretiliyordu (uç noktası ve",
+              "uzunluk için çizgi gerekir). D1 envanteri nokta ve alan nesnelerini de alır; ikisi artık aday.", ""]
+    lines += ["## Bilinen yerler (kullanıcı listesi)", ""]
+    lines += [f"- {m}" for m in diag.get("known_missing", [])]
     for k, v in diag.items():
-        if k == "dropped":
+        if k in ("dropped", "known_missing"):
             continue
         if not v.get("place"):
             lines.append(f"- **{k}:** OSM'de yerleşim noktası yok.")

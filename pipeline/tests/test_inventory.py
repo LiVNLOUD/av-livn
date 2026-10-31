@@ -34,6 +34,8 @@ RAW = {"elements": [
     node(17, (2000, -100), man_made="pier"),                               # inside the port: never a candidate
     node(18, (0, -110), leisure="fishing"),                                  # on the new pier: no extra point
     node(19, (-1000, -5), leisure="fishing"),                                # elsewhere: rocky shore
+    node(21, (-200, 900), place="village", name="Kurşunlu"),                 # known place with no object nearby…
+    node(22, (2800, -10), natural="cape", name="Ayı Burnu"),                # named cape → rocky segments
     way(20, [(5, 0), (5, -2)], man_made="groyne"),                          # too short
 ]}
 EXISTING = [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [ll(300, -60)["lon"], ll(300, -60)["lat"]]}, "properties": {"id": "osm-way-11", "name": "İskele (Narlı)"}}]
@@ -48,17 +50,26 @@ def test_inventory_types_dedupe_forbidden_and_names():
     assert by["osm-node-12"]["access"] == "acik"
     beach = [p for p in by.values() if p["type"] == "beach"]
     assert len(beach) == 3 and all(300 <= p["length_m"] <= 500 for p in beach)
-    assert beach[0]["name"].startswith("Kumsal (Narlı")
+    assert beach[0]["name"].startswith("Kumsal (Kurşunlu") or beach[0]["name"].startswith("Kumsal (Narlı")
+    assert any(p["name"].startswith("Ayı Burnu") and p["kind"] == "rocky" for p in by.values())
     assert any(p["type"] == "rocky" and p["access"] == "belirsiz" for p in by.values())
     mouth = [p for p in by.values() if p["type"] == "river_mouth"]
     assert mouth and mouth[0]["name"] == "Kocadere ağzı"
     assert all(p["status"] == "proposed" for p in by.values())
     assert not any("node-17" in i for i in by) and forb[0]["properties"]["name"] == "Gemport"
-    assert diag["Karacaali"]["proposals"] and diag["Kurşunlu"] == {"place": None}
+    assert diag["Karacaali"]["proposals"] and diag["Eşkel"] == {"place": None}
+    assert "Eşkel: OSM'de yerleşim noktası yok" in diag["known_missing"]
     assert any(o["ref"] == "node/12" for o in diag["Karacaali"]["osm_within_1km"])
     assert diag["dropped"]["near_existing"] >= 0
     md = inv.report_md(feats, forb, diag)
-    assert "Toplam" in md and "Gemport" in md and "Kurşunlu:** OSM'de" in md
+    assert "Toplam" in md and "Gemport" in md and "Eşkel:** OSM'de" in md
+
+
+def test_known_place_without_objects_gets_a_flagged_proposal():
+    raw = {"elements": [RAW["elements"][0], node(30, (0, 600), place="village", name="Narlı")]}
+    feats, _, _ = inv.build_inventory(raw, [])
+    assert [f["properties"]["name"] for f in feats] == ["Narlı kıyısı (konum tahmini)"]
+    assert feats[0]["properties"]["type_tr"].startswith("bilinen yer")
 
 
 def test_helpers():
@@ -68,7 +79,9 @@ def test_helpers():
     assert inv.classify({"highway": "x"}) is None
     assert inv.is_forbidden({"operator": "Borusan Lojistik"}) and inv.is_forbidden({"industrial": "port"})
     assert inv.access_estimate("harbour", {"amenity": "ferry_terminal"}, 100)[0] == "kisitli_feribot"
-    assert inv.access_estimate("harbour", {"leisure": "marina"}, 100)[0] == "belirsiz"
+    assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Setur Marina"}, 100)[0] == "belirsiz"
+    assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Karacaali İskelesi"}, 100)[0] == "acik"
+    assert inv.access_estimate("harbour", {"access": "private"}, 100)[0] == "belirsiz"
     assert inv.access_estimate("beach", {}, 3000)[0] == "belirsiz"
     assert inv.norm("Eşkel") == "eskel"
     rel = {"type": "relation", "id": 5, "members": [{"geometry": [ll(0, 0), ll(100, 0), ll(100, 100)]}]}
