@@ -1,0 +1,115 @@
+---
+import Base from '../../../layouts/Base.astro';
+---
+<Base title="Tahmin ve gerçek — av.livn" description="Av günlüğüne göre model kontrolü.">
+  <div class="wrap tv">
+    <h1>Tahmin ve gerçek</h1>
+    <p class="hint">Her seansın kayıt anında dondurulan puanı, sırası ve bandı ile gerçek verim (istavrit / saat / kamış). Her grafikte örnek sayısı (n) ve %95 aralık var. n &lt; 5 olan yerde istatistiksel çıkarım yapılmaz.</p>
+    <form id="login" class="stack" hidden>
+      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
+      <button type="submit" class="primary">Giriş yap</button>
+    </form>
+    <p class="msg" id="msg" role="status"></p>
+    <section id="panel" hidden>
+      <p class="sum" id="sum"></p>
+      <h2>Puan aralığına göre ortalama verim</h2>
+      <figure class="chart" id="c-cpue" role="img"></figure>
+      <h2>Sıfır av oranı</h2>
+      <figure class="chart" id="c-zero" role="img"></figure>
+      <h2>Sıra isabeti <span class="muted">(aynı akşam iki mera)</span></h2>
+      <p id="rank"></p>
+      <ol class="pairs" id="pairs"></ol>
+      <h2>Seanslar</h2>
+      <div class="tbl"><table id="tbl"></table></div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .tv h1 { font-size: 1.8rem; font-weight: 740; font-stretch: 80%; margin: 16px 0 6px; }
+  .tv h2 { font-size: 1rem; margin: 24px 0 8px; }
+  .tv h2 .muted { font-weight: 400; font-size: 0.82rem; }
+  .hint { font-size: 0.86rem; color: var(--mist); }
+  .stack { display: grid; gap: 12px; }
+  .lbl { display: grid; gap: 4px; font-size: 0.86rem; color: var(--mist); }
+  .primary { background: var(--sodium); color: #1a1205; border: 0; border-radius: 12px; font-weight: 750; min-height: 52px; font: inherit; }
+  .msg { min-height: 1.4em; font-size: 0.9rem; }
+  .msg.err { color: var(--storm); }
+  .sum { font-size: 0.95rem; }
+  .chart { margin: 0; }
+  .chart :global(svg) { width: 100%; height: auto; display: block; }
+  .chart :global(.ax) { stroke: var(--swell); }
+  .chart :global(text) { fill: var(--mist); font-size: 11px; font-family: inherit; }
+  .chart :global(.v) { fill: var(--foam); font-weight: 650; }
+  .chart :global(.ci) { stroke: var(--sodium); stroke-width: 2; }
+  .chart :global(.pt) { fill: var(--sodium); }
+  .chart :global(.pt.few) { fill: var(--sea); stroke: var(--sodium); stroke-width: 2; }
+  .pairs { font-size: 0.84rem; color: var(--mist); padding-left: 18px; }
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; font-size: 0.82rem; min-width: 560px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--swell); white-space: nowrap; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+</style>
+
+<script>
+  import { getToken, setToken } from '../../../scripts/admin';
+  import { byBin, MIN_N, rankPairs, rows, type BinStat, type Session } from '../../../scripts/verify';
+  import { fmtDay, fmtTime } from '../../../scripts/format';
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  let token = getToken();
+  const f1 = (x: number | null) => (x === null ? '–' : x.toFixed(1).replace('.', ','));
+  const pct = (x: number | null) => (x === null ? '–' : `%${Math.round(x * 100)}`);
+  const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+  /** Point + 95 % whisker per bin; hollow point when n < MIN_N. */
+  function chart(el: HTMLElement, bins: BinStat[], get: (b: BinStat) => { n: number; v: number | null; lo: number | null; hi: number | null }, unit: string, fmt: (x: number | null) => string, yMaxMin: number, cap?: number) {
+    const W = 360, H = 214, L = 40, B = 58, T = 14;
+    const data = bins.map(get);
+    const ymax = cap ?? Math.max(yMaxMin, ...data.map((d) => d.hi ?? d.v ?? 0)) * 1.1;
+    const x = (i: number) => L + ((i + 0.5) * (W - L - 8)) / bins.length;
+    const y = (v: number) => T + (H - T - B) * (1 - v / ymax);
+    const ticks = [0, ymax / 2, ymax].map((t) => `<line class="ax" x1="${L}" x2="${W - 4}" y1="${y(t)}" y2="${y(t)}"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${fmt(t)}</text>`).join('');
+    const marks = data
+      .map((d, i) => {
+        const lab = `<text x="${x(i)}" y="${H - B + 16}" text-anchor="middle">${bins[i]!.lo}–${bins[i]!.hi}</text><text x="${x(i)}" y="${H - B + 30}" text-anchor="middle">n=${d.n}</text>`;
+        if (d.v === null) return lab + `<text x="${x(i)}" y="${y(0) - 6}" text-anchor="middle">veri yok</text>`;
+        const ci = d.lo !== null && d.hi !== null ? `<line class="ci" x1="${x(i)}" x2="${x(i)}" y1="${y(d.lo)}" y2="${y(d.hi)}"/>` : '';
+        return lab + ci + `<circle class="pt${d.n < MIN_N ? ' few' : ''}" cx="${x(i)}" cy="${y(d.v)}" r="5"/><text class="v" x="${x(i) + 9}" y="${y(d.v) + 4}">${fmt(d.v)}</text>`;
+      })
+      .join('');
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${ticks}${marks}<text x="${L}" y="${H - 4}">puan aralığı (seans ortalaması) · y: ${unit}</text></svg>`;
+    el.setAttribute('aria-label', data.map((d, i) => `${bins[i]!.lo}–${bins[i]!.hi}: ${fmt(d.v)} (n=${d.n})`).join('; '));
+  }
+
+  async function load() {
+    const r = await fetch('/api/admin/catch', { headers: { authorization: `Bearer ${token}` }, cache: 'no-cache' });
+    if (r.status === 401) { $('login').hidden = false; return; }
+    const b = (await r.json()) as { sessions: Session[] };
+    $('login').hidden = true;
+    $('panel').hidden = false;
+    const rs = rows(b.sessions);
+    const withModel = rs.filter((x) => x.total !== null);
+    $('sum').textContent = `${rs.length} seans, ${withModel.length} tanesinde dondurulmuş model çıktısı. ${withModel.length < MIN_N ? 'Veri az: aşağıdaki değerler yalnız kayıt amaçlı, eğilim çıkarmayın.' : ''}`;
+    const bins = byBin(withModel);
+    chart($('c-cpue'), bins, (x) => ({ n: x.cpue.n, v: x.cpue.mean, lo: x.cpue.lo, hi: x.cpue.hi }), 'adet/sa/kamış', f1, 1);
+    chart($('c-zero'), bins, (x) => ({ n: x.zero.n, v: x.zero.p, lo: x.zero.lo, hi: x.zero.hi }), 'sıfır av oranı', pct, 1, 1);
+    const rp = rankPairs(withModel);
+    $('rank').textContent = rp.acc.n === 0
+      ? 'Aynı akşam iki farklı merada seans yok: sıra isabeti ölçülemiyor.'
+      : `${rp.pairs.filter((p) => p.hit).length}/${rp.acc.n} çiftte daha iyi sıradaki mera daha çok verdi (${pct(rp.acc.p)}, %95 aralık ${pct(rp.acc.lo)}–${pct(rp.acc.hi)}; şans düzeyi %50).${rp.acc.n < MIN_N ? ' n < 5: çıkarım yapılmaz.' : ''}`;
+    $('pairs').innerHTML = rp.pairs.slice(0, 20).map((p) => `<li>${esc(p.a.day)}: ${esc(p.a.spot)} (#${f1(p.a.rank)}, ${f1(p.a.cpue)}) vs ${esc(p.b.spot)} (#${f1(p.b.rank)}, ${f1(p.b.cpue)}) — ${p.hit ? 'isabet' : 'ıska'}</li>`).join('');
+    $('tbl').innerHTML = `<thead><tr><th>Başlangıç</th><th>Mera</th><th>Puan</th><th>Bant</th><th>Sıra</th><th>Verim</th><th>Saat</th></tr></thead><tbody>${rs
+      .map((x) => `<tr><td>${x.start ? `${fmtDay(x.start)} ${fmtTime(x.start)}` : ''}</td><td>${esc(x.spot)}</td><td class="n">${f1(x.total)}</td><td class="n">${f1(x.p10)}–${f1(x.p90)}</td><td class="n">${f1(x.rank)}</td><td class="n">${x.zero ? '0 (sıfır av)' : f1(x.cpue)}</td><td class="n">${x.hours}</td></tr>`)
+      .join('')}</tbody>`;
+  }
+
+  $('login').addEventListener('submit', (e) => {
+    e.preventDefault();
+    token = $<HTMLInputElement>('token').value.trim();
+    setToken(token);
+    load().catch(() => $('msg').textContent = 'Yüklenemedi.');
+  });
+  if (!token) $('login').hidden = false;
+  else load().catch(() => ($('msg').textContent = 'Yüklenemedi.'));
+</script>
