@@ -4,7 +4,7 @@ Otomatik üretilir: `python -m av_pipeline.spots.inventory build` (geodata.yml).
 puanlanmaz ve listede görünmez; haritada gri "aday" katmanında durur. `/admin/` sayfasında **Onayla** ile
 mevcut meralara katılır (sonraki saatlik puanlamada), **Reddet** ile elenir. Kaynak © OpenStreetMap katkıcıları (ODbL).
 
-**Toplam 41 aday.** Ticari liman/sanayi alanı (erişim yasak katmanı): 2.
+**Toplam 41 aday.** Ticari liman/sanayi alanı (erişim yasak katmanı): 4.
 
 | Tip | Aday |
 |---|---|
@@ -98,8 +98,10 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 
 | Ad | OSM |
 |---|---|
-| Borusan Port | node/825452158 |
-| Borusan Port | way/588510511 |
+| Borusan Port | node/825452158, way/588510511 |
+| Roda Anadolu İmam Hatip Lisesi | way/1378074361 |
+| Borusan İlköğretim Okulu | way/1378074369 |
+| Gemport Gemlik Anadolu Lisesi | way/1378074376 |
 
 ## Neden Karacaali ve Büyükkumla iskeleleri listede yoktu?
 

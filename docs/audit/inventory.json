@@ -43,6 +43,13 @@
      "name": "Karsak Çayı",
      "waterway": "stream"
     }
+   },
+   {
+    "ref": "way/1378074376",
+    "tags": {
+     "amenity": "school",
+     "name": "Gemport Gemlik Anadolu Lisesi"
+    }
    }
   ]
  },
