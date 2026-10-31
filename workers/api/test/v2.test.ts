@@ -58,6 +58,7 @@ describe('GET /api/spots/:id?model=v2', () => {
     expect(b.packed!.meta.comps.map((c) => c[0])).toContain('derinlik');
     expect(b.packed!.meta.comps.find((c) => c[0] === 'taban')![4]).toBe('EUSeaMap');
     expect(b.ranks).toHaveLength(6);
+    expect((b as unknown as { reasons: (string | null)[] }).reasons[0]).toMatch(/^(Öne çıkaran|Geri bırakan): /);
     expect(b.spot_count).toBe(3);
     expect(b.field).toBeNull();
     expect((await app.request('/api/spots/nope?model=v2', {}, env)).status).toBe(404);

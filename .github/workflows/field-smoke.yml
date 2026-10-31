@@ -1,0 +1,43 @@
+name: field-smoke
+# Live check of the field form API with the real ADMIN_TOKEN (never printed): create a test entry on one spot,
+# verify the public endpoints do not leak it, edit it, delete it. Prints status codes and response times only.
+on:
+  workflow_dispatch:
+    inputs:
+      spot:
+        description: spot id for the test entry
+        default: osm-way-479047532
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      SPOT: ${{ inputs.spot }}
+      BASE: https://av.livn.tr
+    steps:
+      - name: create → public leak check → edit → delete
+        run: |
+          set -euo pipefail
+          H=(-H "authorization: Bearer $ADMIN_TOKEN" -H 'content-type: application/json')
+          MARK="field-smoke-$(date +%s)"
+          body=$(jq -nc --arg m "$MARK" '{note:$m, substrate:["kaya"], structure:"iskele", depths:[{distance_m:20,method:"plumb",depth_m:6.66},{distance_m:30,method:"sink",sink_s:12,jig_g:2}]}')
+          r=$(curl -s -w '\n%{http_code} %{time_total}' -X POST "${H[@]}" -d "$body" "$BASE/api/admin/spots/$SPOT/field")
+          echo "POST    $(tail -1 <<<"$r") rescore=$(head -1 <<<"$r" | jq -r .rescore) score=$(head -1 <<<"$r" | jq -c .score)"
+          obs=$(head -1 <<<"$r" | jq -r .obs_id)
+          for u in "/api/spots?x=$MARK" "/api/spots/$SPOT?x=$MARK"; do
+            pub=$(curl -s "$BASE$u")
+            for secret in "$MARK" 6.66 '"has_light"' '"notes"' observed_at; do
+              if grep -q -- "$secret" <<<"$pub"; then echo "::error::public $u leaks $secret"; exit 1; fi
+            done
+          done
+          echo "public  no field values in list/detail"
+          echo "badges  $(curl -s "$BASE/api/spots/$SPOT" | jq -c .field)"
+          r=$(curl -s -w '\n%{http_code} %{time_total}' -X PATCH "${H[@]}" -d "$(jq -nc --arg m "$MARK-edit" '{note:$m, substrate:["kum"]}')" "$BASE/api/admin/field/$obs")
+          echo "PATCH   $(tail -1 <<<"$r") rescore=$(head -1 <<<"$r" | jq -r .rescore)"
+          r=$(curl -s -w '\n%{http_code} %{time_total}' -X DELETE "${H[@]}" "$BASE/api/admin/field/$obs")
+          echo "DELETE  $(tail -1 <<<"$r") rescore=$(head -1 <<<"$r" | jq -r .rescore)"
+          left=$(curl -s "${H[@]}" "$BASE/api/admin/spots/$SPOT/field" | jq '[.observations[] | select(.note != null and (.note | startswith("field-smoke")))] | length')
+          echo "left    $left test entries"
+          [ "$left" = 0 ]

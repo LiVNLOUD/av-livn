@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
   <section class="wrap intro">
     <h1>Bu gece nereye?</h1>
     <p class="muted" id="meta">Meralar yükleniyor…</p>
+    <label class="toggle"><input type="checkbox" id="hide-access" /> Erişimi belirsiz/kısıtlı olanları gizle</label>
   </section>
   <section class="wrap">
     <ol class="spots" id="spots" aria-live="polite"></ol>
@@ -26,6 +27,10 @@ import Base from '../layouts/Base.astro';
   :global(.spot .sub) { margin: 2px 0 0; font-size: 0.84rem; color: var(--mist); }
   :global(.spot .why) { margin: 3px 0 0; font-size: 0.84rem; }
   :global(.spot .rk) { color: var(--foam); font-weight: 700; }
+  :global(.spot .reason) { margin: 3px 0 0; font-size: 0.8rem; color: var(--mist); }
+  :global(.badge) { display: inline-block; vertical-align: 2px; margin-left: 6px; font-size: 0.68rem; font-weight: 650; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--warn); color: var(--warn); }
+  .toggle { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 0.9rem; color: var(--mist); min-height: 44px; }
+  .toggle input { width: 20px; height: 20px; }
   .empty { padding: 24px 0; }
 </style>
 
@@ -35,15 +40,29 @@ import Base from '../layouts/Base.astro';
 
   type Spot = {
     id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean;
-    score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean };
+    access: string | null;
+    score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
 
   const list = document.getElementById('spots')!;
   const meta = document.getElementById('meta')!;
   const empty = document.getElementById('empty')!;
 
-  function render(spots: Spot[], fetchedAt: string | null) {
-    meta.textContent = `${spots.length} mera, bu saatteki sıraya göre. ${fmtAgo(fetchedAt)}. Puan v2 (HSI); bant geniş olduğunda sıra puandan daha anlamlıdır.`;
+  const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
+  const HIDE = 'av-livn-hide-access';
+  let all: Spot[] = [];
+  let fetched: string | null = null;
+  const box = document.getElementById('hide-access') as HTMLInputElement;
+  try { box.checked = localStorage.getItem(HIDE) === '1'; } catch {}
+  box.addEventListener('change', () => {
+    try { localStorage.setItem(HIDE, box.checked ? '1' : '0'); } catch {}
+    render(all, fetched);
+  });
+
+  function render(source: Spot[], fetchedAt: string | null) {
+    // Access does not change the score; the filter only hides spots from this list.
+    const spots = box.checked ? source.filter((s) => !s.access || s.access === 'acik') : source;
+    meta.textContent = `${spots.length}${spots.length !== source.length ? ` / ${source.length}` : ''} mera, bu saatteki sıraya göre. ${fmtAgo(fetchedAt)}. Puan v2 (HSI); bant geniş olduğunda sıra puandan daha anlamlıdır.`;
     if (spots.length === 0) {
       empty.hidden = false;
       empty.textContent = 'Henüz mera yok. Aday meralar OpenStreetMap verisinden ayda bir eklenir.';
@@ -58,10 +77,12 @@ import Base from '../layouts/Base.astro';
           ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
           : sc.total === null
             ? '<p class="why muted">Puan henüz hesaplanmadı</p>'
-            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${spots.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · lamba bilinmiyor'}</p>`;
+            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${source.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · lamba bilinmiyor'}</p>`;
+        const badge = s.access && ACCESS_BADGE[s.access] ? ` <span class="badge">${ACCESS_BADGE[s.access]}</span>` : '';
+        const reason = sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : '';
         return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}">
           <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
-          <span><h2>${esc(s.name)}</h2><p class="sub">${esc(sub)}</p>${why}</span></a></li>`;
+          <span><h2>${esc(s.name)}${badge}</h2><p class="sub">${esc(sub)}</p>${why}${reason}</span></a></li>`;
       })
       .join('');
     list.querySelectorAll<HTMLElement>('.lamp').forEach((el) =>
@@ -71,7 +92,11 @@ import Base from '../layouts/Base.astro';
 
   fetch('/api/spots?model=v2', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-    .then((b: { spots: Spot[]; data_fetched_at: string | null }) => render(b.spots, b.data_fetched_at))
+    .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
+      all = b.spots;
+      fetched = b.data_fetched_at;
+      render(all, fetched);
+    })
     .catch(() => {
       meta.textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.';
     });

@@ -19,6 +19,15 @@ import Base from '../../layouts/Base.astro';
       </fieldset>
 
       <fieldset>
+        <legend>Bu bilgi nereden?</legend>
+        <div class="seg small source" data-name="source_kind" role="radiogroup">
+          <button type="button" data-v="saha" aria-pressed="true">Saha ölçümü</button><button type="button" data-v="uzaktan">Uzaktan gözlem</button><button type="button" data-v="masabasi">Masa başı veri</button>
+        </div>
+        <p class="hint">Saha ölçümü &gt; uzaktan gözlem (fotoğraf, sokak görünümü) &gt; masa başı veri &gt; DTM &gt; varsayım. Batma süresi yalnız saha ölçümünde girilebilir.</p>
+        <p class="editing" id="editing" hidden>Düzenleniyor: <span id="editing-what"></span> <button type="button" class="ghost small-btn" id="cancel-edit">Vazgeç</button></p>
+      </fieldset>
+
+      <fieldset>
         <legend>Lamba</legend>
         <div class="seg" data-name="has_light" role="radiogroup">
           <button type="button" data-v="true">Var</button><button type="button" data-v="false">Yok</button><button type="button" data-v="null">Bilmiyorum</button>
@@ -137,7 +146,11 @@ import Base from '../../layouts/Base.astro';
   .msg.err { color: var(--storm); }
   .msg.ok { color: var(--good); }
   .history ol { padding-left: 1.2em; display: grid; gap: 8px; }
-  .history li button { min-height: 40px; margin-left: 8px; }
+  .history li { line-height: 1.5; }
+  .history .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .history li button { min-height: 44px; }
+  .editing { margin: 0; color: var(--sodium); font-weight: 650; }
+  .small-btn { min-height: 40px; font-size: 0.9rem; margin-left: 6px; }
 </style>
 
 <script>
@@ -177,7 +190,7 @@ import Base from '../../layouts/Base.astro';
     if (seg) {
       const was = b.getAttribute('aria-pressed') === 'true';
       seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', 'false'));
-      if (!was || seg.classList.contains('method')) b.setAttribute('aria-pressed', 'true');
+      if (!was || seg.classList.contains('method') || seg.classList.contains('source')) b.setAttribute('aria-pressed', 'true');
       if (seg.getAttribute('data-name') === 'has_light') $('colors').hidden = single('has_light') !== 'true';
       if (seg.classList.contains('method')) setMethod(b.closest('.depth')!, b.dataset.v as 'plumb' | 'sink');
     } else if (b.closest('.chips')) {
@@ -259,7 +272,7 @@ import Base from '../../layouts/Base.astro';
   function pickSpot() {
     const s = spots.find((x) => x.id === ($('spot') as HTMLSelectElement).value);
     if (!s) return;
-    $('spot-info').textContent = `Lamba şu an: ${s.has_light === null ? 'bilinmiyor' : s.has_light ? 'var' : 'yok'}`;
+    $('spot-info').textContent = `Lamba şu an: ${s.has_light === null ? 'bilinmiyor' : s.has_light ? 'var' : 'yok'}${s.access ? ` · erişim ${ACCESS_TR[s.access]}` : ''}`;
     loadHistory(s.id);
   }
   $('spot').addEventListener('change', pickSpot);
@@ -280,39 +293,106 @@ import Base from '../../layouts/Base.astro';
   });
 
   const ACCESS_TR: Record<string, string> = { acik: 'açık', kisitli_feribot: 'kısıtlı (feribot)', belirsiz: 'belirsiz' };
+  type Obs = {
+    id: string; observed_at: string; note: string | null; access: string | null; has_photo: number; substrate: string | null; snag: string | null; structure: string | null;
+    has_light: number | null; light_color: string | null; source_kind: string; status: string; light_prob: number | null; evidence_json: string | null;
+    depths: { distance_m: number; method: 'plumb' | 'sink'; depth_m: number | null; sink_s: number | null; jig_g: number | null }[];
+  };
+  const KIND_TR: Record<string, string> = { saha: 'saha', uzaktan: 'uzaktan gözlem', masabasi: 'masa başı' };
+  const STATUS_TR: Record<string, string> = { onaysiz: 'onay bekliyor', onayli: 'onaylı', reddedildi: 'reddedildi' };
+  let history: Obs[] = [];
+  let editing: string | null = null;
   async function loadHistory(id: string) {
     try {
       const j = await api(`/api/admin/spots/${encodeURIComponent(id)}/field`, 'GET');
-      const obs = j.observations as { id: string; observed_at: string; note: string | null; access: string | null; depths: unknown[]; has_photo: number }[];
+      history = j.observations as Obs[];
       $('history').hidden = false;
-      $('obs').innerHTML = obs.length
-        ? obs.map((o) => `<li>${new Date(o.observed_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}: ${o.depths.length} ölçüm${o.has_photo ? ', foto' : ''}${o.access ? `, erişim ${ACCESS_TR[o.access]}` : ''}${o.note ? ` — ${o.note.replace(/</g, '&lt;')}` : ''}<button type="button" class="ghost" data-del="${o.id}">Sil</button></li>`).join('')
+      $('obs').innerHTML = history.length
+        ? history
+            .map((o) => {
+              const ev = o.evidence_json ? (JSON.parse(o.evidence_json) as { source?: string; confidence?: string }) : null;
+              const review = o.source_kind === 'masabasi' && o.status === 'onaysiz'
+                ? `<button type="button" class="ghost" data-ok="${o.id}">Onayla</button><button type="button" class="ghost" data-no="${o.id}">Reddet</button>`
+                : '';
+              return `<li><b>${KIND_TR[o.source_kind] ?? o.source_kind}</b> · ${STATUS_TR[o.status] ?? o.status} · ${new Date(o.observed_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}: ${o.depths.length} ölçüm${o.has_photo ? ', foto' : ''}${o.light_prob !== null ? `, lamba olasılığı ${o.light_prob}` : ''}${o.access ? `, erişim ${ACCESS_TR[o.access]}` : ''}${ev?.source ? ` [${ev.source.replace(/</g, '&lt;')}${ev.confidence ? `, güven ${ev.confidence}` : ''}]` : ''}${o.note ? ` — ${o.note.replace(/</g, '&lt;')}` : ''}
+                <span class="acts">${review}<button type="button" class="ghost" data-edit="${o.id}">Düzenle</button><button type="button" class="ghost" data-del="${o.id}">Sil</button></span></li>`;
+            })
+            .join('')
         : '<li class="hint">Henüz giriş yok.</li>';
     } catch {}
   }
+
+  function press(name: string, v: string | null) {
+    document.querySelectorAll<HTMLButtonElement>(`.seg[data-name="${name}"] button`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  }
+  function startEdit(o: Obs) {
+    reset();
+    editing = o.id;
+    press('source_kind', o.source_kind);
+    press('has_light', o.has_light === null ? null : String(o.has_light === 1));
+    $('colors').hidden = o.has_light !== 1;
+    press('light_color', o.light_color);
+    press('structure', o.structure);
+    press('snag', o.snag);
+    press('access', o.access);
+    const sub = o.substrate ? (JSON.parse(o.substrate) as string[]) : [];
+    document.querySelectorAll<HTMLButtonElement>('.chips[data-name="substrate"] button').forEach((b) => b.setAttribute('aria-pressed', String(sub.includes(b.dataset.v!))));
+    ($('note') as HTMLTextAreaElement).value = o.note ?? '';
+    for (const dpt of o.depths) {
+      addDepth();
+      const row = $('depths').lastElementChild!;
+      row.querySelectorAll<HTMLButtonElement>('.method button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === dpt.method)));
+      setMethod(row, dpt.method);
+      const put = (sel: string, v: number | null) => { if (v !== null) row.querySelector<HTMLInputElement>(sel)!.value = String(v).replace('.', ','); };
+      put('.d-dist', dpt.distance_m); put('.d-depth', dpt.depth_m); put('.d-sink', dpt.sink_s); put('.d-jig', dpt.jig_g);
+    }
+    $('editing').hidden = false;
+    $('editing-what').textContent = new Date(o.observed_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
+    ($('save') as HTMLButtonElement).textContent = 'Değişikliği kaydet ve puanı güncelle';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  $('cancel-edit').addEventListener('click', () => reset());
   $('obs').addEventListener('click', async (e) => {
-    const id = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-del]')?.dataset.del;
-    if (!id || !confirm('Bu giriş silinsin mi?')) return;
-    await api(`/api/admin/field/${id}`, 'DELETE');
-    say('Giriş silindi, puan güncellendi.', 'ok');
+    const t = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!t) return;
+    const { del, edit, ok, no } = t.dataset;
+    if (edit) return startEdit(history.find((o) => o.id === edit)!);
+    if (ok || no) {
+      const j = await api(`/api/admin/field/${ok ?? no}`, 'PATCH', { status: ok ? 'onayli' : 'reddedildi' });
+      say(`${ok ? 'Onaylandı' : 'Reddedildi'}. ${status(j)}`, 'ok');
+      return pickSpot();
+    }
+    if (!del || !confirm('Bu giriş silinsin mi?')) return;
+    const j = await api(`/api/admin/field/${del}`, 'DELETE');
+    say(`Giriş silindi. ${status(j)}`, 'ok');
     pickSpot();
   });
 
   const fmtScore = (s: { total: number | null; p10: number | null; p90: number | null; rank: number }) =>
-    s.total === null ? 'puan yok (hava verisi bekleniyor)' : `puan ${Math.round(s.total)}${s.p10 !== null ? ` (bant ${Math.round(s.p10)}–${Math.round(s.p90!)})` : ''}, ${spots.length} mera içinde ${s.rank}.`;
+    s.total === null ? 'puan yok (hava verisi bekleniyor)' : `puan ${Math.round(s.total)}, ${spots.length} mera içinde ${s.rank}.`;
+  /** What happened to the score after an edit (immediate point score or the 15-minute run). */
+  const status = (j: { rescore?: string; score?: Parameters<typeof fmtScore>[0] | null }) =>
+    j.rescore === 'immediate' && j.score
+      ? `Puan güncellendi: ${fmtScore(j.score)} Belirsizlik bandı birkaç dakika içinde gelecek.`
+      : j.rescore === 'deferred'
+        ? 'Puan en geç 20 dakika içinde güncellenecek.'
+        : '';
 
   $('rescore').addEventListener('click', async () => {
     const id = ($('spot') as HTMLSelectElement).value;
     const j = await api(`/api/admin/spots/${encodeURIComponent(id)}/rescore`, 'POST', {});
-    say(`Yeniden hesaplandı: ${fmtScore(j.score)}`, 'ok');
+    say(status(j) || 'İstek alındı.', 'ok');
   });
 
   // ---- submit (with an offline queue: no signal on the breakwater is normal)
   function payload() {
     const light = single('has_light');
     const sub = [...document.querySelectorAll<HTMLButtonElement>('.chips[data-name="substrate"] button[aria-pressed="true"]')].map((b) => b.dataset.v!);
+    const prev = editing ? history.find((o) => o.id === editing) : null;
     return {
-      observed_at: new Date().toISOString(),
+      observed_at: prev?.observed_at ?? new Date().toISOString(),
+      source_kind: single('source_kind') ?? 'saha',
+      ...(prev?.source_kind === 'masabasi' && prev.evidence_json ? { evidence: JSON.parse(prev.evidence_json), light_prob: prev.light_prob } : {}),
       has_light: light === null ? undefined : light === 'null' ? null : light === 'true',
       light_color: light === 'true' ? single('light_color') : null,
       structure: single('structure'),
@@ -349,8 +429,8 @@ import Base from '../../layouts/Base.astro';
     ($('save') as HTMLButtonElement).disabled = true;
     say('Kaydediliyor…');
     try {
-      const j = await api(`/api/admin/spots/${encodeURIComponent(id)}/field`, 'POST', body);
-      say(`Kaydedildi. ${j.score ? `Yeni ${fmtScore(j.score)}` : ''}`, 'ok');
+      const j = editing ? await api(`/api/admin/field/${editing}`, 'PATCH', body) : await api(`/api/admin/spots/${encodeURIComponent(id)}/field`, 'POST', body);
+      say(`${editing ? 'Değişiklik kaydedildi' : 'Kaydedildi'}. ${status(j)}`, 'ok');
       reset();
       loadSpots();
     } catch (err) {
@@ -365,7 +445,11 @@ import Base from '../../layouts/Base.astro';
     }
   });
   function reset() {
-    document.querySelectorAll('.seg:not(.method) button, .chips button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    editing = null;
+    $('editing').hidden = true;
+    ($('save') as HTMLButtonElement).textContent = 'Kaydet ve puanı güncelle';
+    document.querySelectorAll('.seg:not(.method):not(.source) button, .chips button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    press('source_kind', 'saha');
     $('colors').hidden = true;
     $('depths').innerHTML = '';
     ($('note') as HTMLTextAreaElement).value = '';

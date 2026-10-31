@@ -35,8 +35,8 @@ async function listV2(c: Ctx) {
     return {
       ...publicSpot(r),
       score: e
-        ? { total: e[0], p10: e[1], p90: e[2], rank: e[3], gated: e[4] === 1, warnings: e[5] ? [e[5]] : [], partial: r.partial === 1 }
-        : { total: null, p10: null, p90: null, rank: null, gated: false, warnings: [], partial: false },
+        ? { total: e[0], p10: e[1], p90: e[2], rank: e[3], gated: e[4] === 1, warnings: e[5] ? [e[5]] : [], partial: r.partial === 1, reason: e[6]?.[2] ?? null }
+        : { total: null, p10: null, p90: null, rank: null, gated: false, warnings: [], partial: false, reason: null },
     };
   });
   spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
@@ -60,7 +60,9 @@ async function detailV2(c: Ctx) {
   const obs = obsRes!.results as FieldObsRow[];
   const rec = fieldRecords(obs, depthRes!.results as FieldDepthRow[]).get(id) ?? null;
   const from = r.start_hour === null ? 0 : Math.max(0, Math.floor(Date.now() / HOUR) - r.start_hour);
-  const ranks = r.list_json ? (JSON.parse(r.list_json) as ListEntryV2[]).slice(from, from + hours).map((e) => e[3]) : [];
+  const entries = r.list_json ? (JSON.parse(r.list_json) as ListEntryV2[]).slice(from, from + hours) : [];
+  const ranks = entries.map((e) => e[3]);
+  const reasons = entries.map((e) => e[6]?.[2] ?? null);
   const head = JSON.stringify({
     ok: true,
     spot: publicSpotDetail(r),
@@ -75,6 +77,7 @@ async function detailV2(c: Ctx) {
     from,
     hours,
     ranks,
+    reasons,
   });
   return c.body(`${head.slice(0, -1)},"packed":${r.detail_json ?? 'null'}}`, 200, { 'content-type': 'application/json; charset=utf-8', ...NO_CACHE });
 }
