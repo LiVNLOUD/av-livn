@@ -116,3 +116,21 @@
 - **Tasarım:** TACKLE.md (iki takım profili, jighead/iğne/silikon kuralları, kart), SPECIES-ROADMAP.md, ABUNDANCE-MUCILAGE.md (D7, D8), REGULATION.md.
   - Mevzuat: 6/2 Tebliğ md. 8/8 cezbetme amaçlı ışığı yasaklıyor. Altbilgide "lamba = mevcut aydınlatma" notu var.
   - Çizelge 7 boyları okunamadı; 13 cm doğrulanacak.
+
+## Faz E — arayüz, harita kalitesi, D'den kalanlar (2026-10-31) — E9 ayrı faza bırakıldı
+- **Giriş hatası (öncelikli):**
+  - Tek `AdminLogin` bileşeni + `mountLogin`: anahtar kırpılır; 401 "Anahtar hatalı", ağ hatası "Bağlantı yok", 503 "yönetici anahtarı yapılandırılmamış"; buton yükleniyor durumunda.
+  - Kayıtlı anahtar açılışta doğrulanır.
+  - 7 yönetici sayfası bu bileşeni kullanıyor. Canlı yanlış anahtar testi: `docs/screenshots/e/sonra-saha-yanlis-anahtar-390.png`.
+  - Yenilenen ADMIN_TOKEN deploy 41209992493'te yüklendi ("Successfully created secret for key: ADMIN_TOKEN", admin ping 200).
+- **E0:** DESIGN.md; 6 tip boyutu (12/14/16/20/28/40, rem), 4–48 px boşluk ölçeği; buton/ikincil/bağlantı/rozet/kart tek tanım; kart eylemleri aynı satır, 32 px.
+- **E1:** dört bölge (≥1920), üç (1200–1919, harita/ısı haritası sekmesi), iki (768–1199), tek sütun + alt sekme çubuğu (<768); tam üst menü, admin oturumunda Adaylar/Panel.
+- **E2:** mera × saat ısı haritası (`/api/hours`): sürekli puan rengi, geniş bantta tarama, gece/alacakaranlık şeridi, gün ayracı, "şimdi" çizgisi; hücre → kart o saatte.
+- **E3:** pencere = zirve ± kesintisiz saatler ≥ max(65, zirve − 8), ≤ 4 sa; mera başına gün başına bir, listede her mera bir kez; sade neden + "varsayıma dayanıyor".
+- **E4:** aday elmas işaretler, noktanın yanında açılır kutu (yönetici: Onayla/Reddet/Düzenle); `/admin/adaylar` filtre, toplu işlem, mini harita, OSM/Mapillary; haritaya dokunarak mera ekleme.
+  - Gemport/Roda: okullar artık yasak katmanında değil. Ancak OSM'de bu limanlar adla etiketli liman nesnesi olarak yok; katmanda yalnız Borusan Port var.
+- **E5:** harita modülü, yükleme göstergesi, işaretler seçili saate göre. DTM ölçüm bloğu–GEBCO dikişi yalnız görüntü için σ = 1 hücre düzleştirme; daha belirgin tarama (lejantla aynı desen). Kara zaten OSM poligonu.
+- **E6:** jenerik adlar "Fıstıklı İskelesi" biçimine geçti (köyden ≥ 700 m ise yönü ekleniyor). Tür sırası levrek → lüfer/çinekop → mırmır/karagöz → kolyoz; kalamar ve sarpan kapsam dışı (kullanıcı kararı).
+- **E7:** Çizelge 7 RG görüntüsünden okundu: istavrit 13 cm doğru; levrek 25, lüfer 18, kolyoz 18, karagöz 18; mırmır sınırsız. md. 16(5) birebir ve kumsal rozeti; md. 8(8): arayüzde "lamba" → "iskelenin mevcut aydınlatması".
+- **E8:** watchdog (saatlik + puanlama hatasında) → PWA push, ntfy yalnız tanımlıysa, arıza başına 6 saatte bir; 2 saati geçen veride site üstünde uyarı; yedek artifact'ları 7 gün.
+- **E9 (takım kutusu):** uygulanmadı, ayrı faz (TACKLE.md kuralları hazır).
