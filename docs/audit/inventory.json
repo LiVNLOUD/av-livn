@@ -1,0 +1,170 @@
+{
+ "Kurşunlu": {
+  "place": [
+   29.02352,
+   40.36037
+  ],
+  "proposals": [
+   "osm-way-1165497962 Kurşunlu Yat Limanı (liman / balıkçı barınağı)"
+  ],
+  "existing": [],
+  "osm_within_1km": [
+   {
+    "ref": "way/1165497962",
+    "tags": {
+     "leisure": "marina",
+     "name": "Kurşunlu Yat Limanı",
+     "seamark:type": "harbour"
+    }
+   }
+  ]
+ },
+ "Gemlik": {
+  "place": [
+   29.15707,
+   40.43017
+  ],
+  "proposals": [
+   "osm-way-700323582 Karsak Çayı ağzı (dere ağzı)"
+  ],
+  "existing": [
+   "osm-way-77362926 İskele (Demirsubaşı)"
+  ],
+  "osm_within_1km": [
+   {
+    "ref": "way/77362926",
+    "tags": {
+     "man_made": "pier"
+    }
+   },
+   {
+    "ref": "way/700323582",
+    "tags": {
+     "name": "Karsak Çayı",
+     "waterway": "stream"
+    }
+   }
+  ]
+ },
+ "Karacaali": {
+  "place": [
+   29.06739,
+   40.47953
+  ],
+  "proposals": [
+   "osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı)",
+   "osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı)",
+   "osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)"
+  ],
+  "existing": [],
+  "osm_within_1km": [
+   {
+    "ref": "node/13872728204",
+    "tags": {
+     "leisure": "marina",
+     "name": "Karacaali İskelesi"
+    }
+   }
+  ]
+ },
+ "Büyükkumla": {
+  "place": [
+   29.08345,
+   40.47899
+  ],
+  "proposals": [
+   "osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı)",
+   "osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı)",
+   "osm-way-1218508014 Kumla Deresi ağzı (dere ağzı)",
+   "osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)"
+  ],
+  "existing": [
+   "osm-way-1218507890 Küçükkumla İskelesi"
+  ],
+  "osm_within_1km": [
+   {
+    "ref": "node/2794622004",
+    "tags": {
+     "leisure": "marina",
+     "name": "Büyükkumla İskelesi"
+    }
+   },
+   {
+    "ref": "way/483398949",
+    "tags": {
+     "waterway": "stream"
+    }
+   },
+   {
+    "ref": "way/681112515",
+    "tags": {
+     "name": "Büyükkumla Deresi",
+     "waterway": "stream"
+    }
+   }
+  ]
+ },
+ "Narlı": {
+  "place": [
+   29.03196,
+   40.48081
+  ],
+  "proposals": [],
+  "existing": [],
+  "osm_within_1km": []
+ },
+ "Mudanya": {
+  "place": [
+   28.88379,
+   40.37526
+  ],
+  "proposals": [],
+  "existing": [
+   "osm-way-1233883494 Mudanya İskelesi"
+  ],
+  "osm_within_1km": [
+   {
+    "ref": "node/5069596322",
+    "tags": {
+     "amenity": "ferry_terminal",
+     "name": "Mudanya İskelesi"
+    }
+   },
+   {
+    "ref": "way/862153219",
+    "tags": {
+     "amenity": "ferry_terminal",
+     "name": "Bursa Deniz Otobüsleri/BUDO"
+    }
+   },
+   {
+    "ref": "way/1233883494",
+    "tags": {
+     "man_made": "pier",
+     "name": "Mudanya İskelesi"
+    }
+   }
+  ]
+ },
+ "Kumyaka": {
+  "place": [
+   28.82583,
+   40.38506
+  ],
+  "proposals": [
+   "osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)"
+  ],
+  "existing": [
+   "osm-way-1456975486 Petek Sitesi İskele"
+  ],
+  "osm_within_1km": []
+ },
+ "Eşkel": {
+  "place": null
+ },
+ "dropped": {
+  "near_existing": 8,
+  "near_other": 6,
+  "forbidden": 1
+ }
+}
