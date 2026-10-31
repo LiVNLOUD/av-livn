@@ -1,7 +1,16 @@
 ---
 import '../styles/global.css';
-interface Props { title: string; description?: string; fullscreen?: boolean }
-const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false } = Astro.props;
+interface Props { title: string; description?: string; fullscreen?: boolean; app?: boolean }
+const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false, app = false } = Astro.props;
+const path = Astro.url.pathname;
+const cur = (p: string) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined;
+const NAV: [string, string][] = [['/', 'Liste'], ['/harita/', 'Harita'], ['/sahadayim/', 'Sahadayım'], ['/gunluk/', 'Günlük'], ['/ayarlar/', 'Ayarlar']];
+const TABS: [string, string, string][] = [
+  ['/', 'Liste', 'M4 6h16M4 12h16M4 18h10'],
+  ['/harita/', 'Harita', 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zm0 0v14m6-12v14'],
+  ['/sahadayim/', 'Sahadayım', 'M12 5v14M5 12h14'],
+  ['/gunluk/', 'Günlük', 'M6 4h12v16H6zM9 8h6M9 12h6M9 16h4'],
+];
 ---
 <!doctype html>
 <html lang="tr" data-app="av-livn">
@@ -14,17 +23,21 @@ const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatl
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <title>{title}</title>
+    <script is:inline>if (/[?&]embed=1/.test(location.search)) document.documentElement.classList.add('embed');</script>
   </head>
-  <body class:list={{ fullscreen }}>
+  <body class:list={{ fullscreen, app }}>
     <header class="site">
       <div class="wrap">
         <a class="brand" href="/">av<span>.</span>livn</a>
         <nav aria-label="Ana menü">
-          <a href="/" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>Liste</a>
-          <a href="/harita/" aria-current={Astro.url.pathname.startsWith('/harita') ? 'page' : undefined}>Harita</a>
+          {NAV.map(([href, label]) => <a href={href} aria-current={cur(href)}>{label}</a>)}
+          <span class="sep admin-only" hidden></span>
+          <a class="admin-only" href="/admin/adaylar/" aria-current={cur('/admin/adaylar')} hidden>Adaylar</a>
+          <a class="admin-only" href="/admin/" aria-current={path === '/admin/' ? 'page' : undefined} hidden>Panel</a>
         </nav>
       </div>
     </header>
+    <p class="stale" id="stale" role="status"></p>
     <main><slot /></main>
     <footer class="site">
       <div class="wrap">
@@ -32,7 +45,29 @@ const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatl
         <p>Tür: istavrit, LRF. Veri: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ve DWD ICON, <a href="https://marine.copernicus.eu/">Copernicus Marine Service</a> (Karadeniz/Marmara 500 m), <a href="https://emodnet.ec.europa.eu/en/bathymetry">EMODnet Bathymetry Consortium (2024): EMODnet Digital Bathymetry (DTM 2024)</a>, EMODnet Seabed Habitats (EUSeaMap 2025), © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları, <a href="https://openfreemap.org">OpenFreeMap</a>.</p>
       </div>
     </footer>
+    <nav class="tabbar" aria-label="Sekmeler">
+      {TABS.map(([href, label, d]) => (
+        <a href={href} aria-current={cur(href)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={d} /></svg>{label}</a>
+      ))}
+    </nav>
     <script>
+      // Admin links only when the owner key is on this device (the pages themselves still ask for it).
+      try { if (localStorage.getItem('av-livn-admin')) document.querySelectorAll<HTMLElement>('.admin-only').forEach((e) => (e.hidden = false)); } catch {}
+      // E8: data freshness. Scores are recomputed hourly; after 2 h the banner is shown on every page.
+      fetch('/api/spots', { cache: 'no-cache' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((b: { scored_at?: string | null } | null) => {
+          const t = b?.scored_at ? Date.parse(b.scored_at) : NaN;
+          if (Number.isNaN(t)) return;
+          const h = (Date.now() - t) / 3_600_000;
+          (document.documentElement as HTMLElement).dataset.scoredAt = String(t);
+          if (h > 2) {
+            const el = document.getElementById('stale')!;
+            el.textContent = `Veriler ${Math.floor(h)} saat önce güncellendi. Puanlar eski olabilir; hava ve güvenliği ayrıca kontrol edin.`;
+            el.classList.add('on');
+          }
+        })
+        .catch(() => {});
       if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
         // A new deploy installs a new worker that claims the page; reload once so HTML and assets match.
         const hadController = !!navigator.serviceWorker.controller;

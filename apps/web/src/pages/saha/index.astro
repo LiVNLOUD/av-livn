@@ -1,14 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
 ---
 <Base title="Saha formu — av.livn" description="Merada ölçüm ve gözlem girişi.">
   <div class="wrap field">
     <h1>Saha formu</h1>
 
-    <form id="login" class="stack">
-      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
-      <button type="submit" class="primary">Giriş yap</button>
-    </form>
+    <AdminLogin />
 
     <form id="form" hidden novalidate>
       <fieldset>
@@ -112,28 +110,28 @@ import Base from '../../layouts/Base.astro';
 <style>
   /* Night field use: large type, 56 px targets, the sodium accent only on the save action. */
   .field { padding-bottom: 120px; }
-  h1 { font-size: 1.7rem; font-weight: 740; font-stretch: 80%; margin: 14px 0 6px; }
-  h2 { font-size: 1rem; margin: 22px 0 8px; }
+  h1 { font-size: var(--fs-5); font-weight: 740; font-stretch: 80%; margin: 14px 0 6px; }
+  h2 { font-size: var(--fs-3); margin: 22px 0 8px; }
   .stack { display: grid; gap: 14px; margin-top: 12px; }
   fieldset { border: 0; border-top: 1px solid var(--swell); margin: 0; padding: 16px 0 6px; display: grid; gap: 10px; }
-  legend { font-size: 1.15rem; font-weight: 700; padding: 0; margin-bottom: 8px; }
-  .lbl, .nums label { display: grid; gap: 6px; font-size: 0.95rem; color: var(--mist); }
+  legend { font-size: var(--fs-4); font-weight: 700; padding: 0; margin-bottom: 8px; }
+  .lbl, .nums label { display: grid; gap: 6px; font-size: var(--fs-3); color: var(--mist); }
   input, select, textarea {
-    font: inherit; font-size: 1.15rem; color: var(--foam); background: var(--deep); border: 1.5px solid var(--swell);
+    font: inherit; font-size: var(--fs-4); color: var(--foam); background: var(--deep); border: 1.5px solid var(--swell);
     border-radius: var(--radius); min-height: 56px; padding: 10px 14px; width: 100%;
   }
   textarea { min-height: 96px; }
   button { font: inherit; cursor: pointer; }
-  .primary, .ghost, .seg button, .chips button { min-height: 56px; border-radius: var(--radius); font-size: 1.05rem; font-weight: 650; }
+  .primary, .ghost, .seg button, .chips button { min-height: 56px; border-radius: var(--radius); font-size: var(--fs-3); font-weight: 650; }
   .primary { width: 100%; border: 0; color: #1a1006; background: var(--sodium); }
   .primary:disabled { opacity: 0.6; }
   .ghost { border: 1.5px solid var(--swell); background: transparent; color: var(--foam); padding: 0 16px; }
   .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
-  .seg.small button { font-size: 0.95rem; }
+  .seg.small button { font-size: var(--fs-3); }
   .seg button, .chips button { border: 1.5px solid var(--swell); background: var(--deep); color: var(--foam); padding: 6px 8px; line-height: 1.15; }
   .seg button[aria-pressed='true'], .chips button[aria-pressed='true'] { background: var(--foam); color: var(--sea); border-color: var(--foam); }
   .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .hint { color: var(--mist); font-size: 0.88rem; margin: 0; }
+  .hint { color: var(--mist); font-size: var(--fs-2); margin: 0; }
   .sub { margin: 8px 0 0; font-weight: 650; }
   .depth { border: 1.5px solid var(--swell); border-radius: var(--radius); padding: 10px; display: grid; gap: 10px; margin-bottom: 10px; }
   .nums { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -142,7 +140,7 @@ import Base from '../../layouts/Base.astro';
   .photo { display: flex; align-items: center; min-height: 56px; border: 1.5px dashed var(--swell); border-radius: var(--radius); padding: 0 14px; color: var(--mist); }
   .photo input { position: absolute; opacity: 0; width: 1px; height: 1px; }
   .bar { position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--sea) 24%); display: grid; gap: 8px; }
-  .msg { min-height: 1.4em; margin: 0; font-size: 1rem; }
+  .msg { min-height: 1.4em; margin: 0; font-size: var(--fs-3); }
   .msg.err { color: var(--storm); }
   .msg.ok { color: var(--good); }
   .history ol { padding-left: 1.2em; display: grid; gap: 8px; }
@@ -150,11 +148,11 @@ import Base from '../../layouts/Base.astro';
   .history .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .history li button { min-height: 44px; }
   .editing { margin: 0; color: var(--sodium); font-weight: 650; }
-  .small-btn { min-height: 40px; font-size: 0.9rem; margin-left: 6px; }
+  .small-btn { min-height: 40px; font-size: var(--fs-2); margin-left: 6px; }
 </style>
 
 <script>
-  import { getToken, logout, setToken } from '../../scripts/admin';
+  import { getToken, logout, mountLogin } from '../../scripts/admin';
   type Spot = { id: string; name: string; lat: number; lon: number; has_light: boolean | null; access: string | null };
   type Depth = { distance_m: number; method: 'plumb' | 'sink'; depth_m?: number; sink_s?: number; jig_g?: number };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -464,17 +462,9 @@ import Base from '../../layouts/Base.astro';
     loadSpots().catch(() => say('Meralar alınamadı.', 'err'));
     flush();
   }
-  $('login').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    token = ($('token') as HTMLInputElement).value.trim();
-    try {
-      await api('/api/admin/ping', 'GET');
-      setToken(token);
-      open();
-    } catch (err) {
-      say((err as Error).message, 'err');
-    }
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    await open();
   });
   $('logout').addEventListener('click', () => { logout(); location.reload(); });
-  if (token) open();
 </script>

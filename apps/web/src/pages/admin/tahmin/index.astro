@@ -1,14 +1,12 @@
 ---
 import Base from '../../../layouts/Base.astro';
+import AdminLogin from '../../../components/AdminLogin.astro';
 ---
 <Base title="Tahmin ve gerçek — av.livn" description="Av günlüğüne göre model kontrolü.">
   <div class="wrap tv">
     <h1>Tahmin ve gerçek</h1>
     <p class="hint">Her seansın kayıt anında dondurulan puanı, sırası ve bandı ile gerçek verim (istavrit / saat / kamış). Her grafikte örnek sayısı (n) ve %95 aralık var. n &lt; 5 olan yerde istatistiksel çıkarım yapılmaz.</p>
-    <form id="login" class="stack" hidden>
-      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
-      <button type="submit" class="primary">Giriş yap</button>
-    </form>
+    <AdminLogin />
     <p class="msg" id="msg" role="status"></p>
     <section id="panel" hidden>
       <p class="sum" id="sum"></p>
@@ -26,33 +24,33 @@ import Base from '../../../layouts/Base.astro';
 </Base>
 
 <style>
-  .tv h1 { font-size: 1.8rem; font-weight: 740; font-stretch: 80%; margin: 16px 0 6px; }
-  .tv h2 { font-size: 1rem; margin: 24px 0 8px; }
-  .tv h2 .muted { font-weight: 400; font-size: 0.82rem; }
-  .hint { font-size: 0.86rem; color: var(--mist); }
+  .tv h1 { font-size: var(--fs-5); font-weight: 740; font-stretch: 80%; margin: 16px 0 6px; }
+  .tv h2 { font-size: var(--fs-3); margin: 24px 0 8px; }
+  .tv h2 .muted { font-weight: 400; font-size: var(--fs-2); }
+  .hint { font-size: var(--fs-2); color: var(--mist); }
   .stack { display: grid; gap: 12px; }
-  .lbl { display: grid; gap: 4px; font-size: 0.86rem; color: var(--mist); }
+  .lbl { display: grid; gap: 4px; font-size: var(--fs-2); color: var(--mist); }
   .primary { background: var(--sodium); color: #1a1205; border: 0; border-radius: 12px; font-weight: 750; min-height: 52px; font: inherit; }
-  .msg { min-height: 1.4em; font-size: 0.9rem; }
+  .msg { min-height: 1.4em; font-size: var(--fs-2); }
   .msg.err { color: var(--storm); }
-  .sum { font-size: 0.95rem; }
+  .sum { font-size: var(--fs-3); }
   .chart { margin: 0; }
   .chart :global(svg) { width: 100%; height: auto; display: block; }
   .chart :global(.ax) { stroke: var(--swell); }
-  .chart :global(text) { fill: var(--mist); font-size: 11px; font-family: inherit; }
+  .chart :global(text) { fill: var(--mist); font-size: var(--fs-1); font-family: inherit; }
   .chart :global(.v) { fill: var(--foam); font-weight: 650; }
   .chart :global(.ci) { stroke: var(--sodium); stroke-width: 2; }
   .chart :global(.pt) { fill: var(--sodium); }
   .chart :global(.pt.few) { fill: var(--sea); stroke: var(--sodium); stroke-width: 2; }
-  .pairs { font-size: 0.84rem; color: var(--mist); padding-left: 18px; }
+  .pairs { font-size: var(--fs-2); color: var(--mist); padding-left: 18px; }
   .tbl { overflow-x: auto; }
-  table { border-collapse: collapse; font-size: 0.82rem; min-width: 560px; }
+  table { border-collapse: collapse; font-size: var(--fs-2); min-width: 560px; }
   th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--swell); white-space: nowrap; }
   td.n { text-align: right; font-variant-numeric: tabular-nums; }
 </style>
 
 <script>
-  import { getToken, setToken } from '../../../scripts/admin';
+  import { getToken, mountLogin, showLogin } from '../../../scripts/admin';
   import { byBin, MIN_N, rankPairs, rows, type BinStat, type Session } from '../../../scripts/verify';
   import { fmtDay, fmtTime } from '../../../scripts/format';
 
@@ -84,7 +82,7 @@ import Base from '../../../layouts/Base.astro';
 
   async function load() {
     const r = await fetch('/api/admin/catch', { headers: { authorization: `Bearer ${token}` }, cache: 'no-cache' });
-    if (r.status === 401) { $('login').hidden = false; return; }
+    if (r.status === 401) { showLogin('Anahtar artık geçerli değil; yeniden girin.'); return; }
     const b = (await r.json()) as { sessions: Session[] };
     $('login').hidden = true;
     $('panel').hidden = false;
@@ -104,12 +102,8 @@ import Base from '../../../layouts/Base.astro';
       .join('')}</tbody>`;
   }
 
-  $('login').addEventListener('submit', (e) => {
-    e.preventDefault();
-    token = $<HTMLInputElement>('token').value.trim();
-    setToken(token);
-    load().catch(() => $('msg').textContent = 'Yüklenemedi.');
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    await load();
   });
-  if (!token) $('login').hidden = false;
-  else load().catch(() => ($('msg').textContent = 'Yüklenemedi.'));
 </script>

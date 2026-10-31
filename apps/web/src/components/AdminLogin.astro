@@ -1,0 +1,19 @@
+---
+// One sign-in form for every owner page (/saha/, /gunluk/, /sahadayim/, /ayarlar/, /admin/*). Wire it with
+// mountLogin(document.getElementById('login'), onSuccess) from scripts/admin.ts.
+interface Props { hint?: string }
+const { hint = 'Bu sayfa yalnız yönetici anahtarıyla açılır. Anahtar bu cihazda kalır; "Çıkış" ile silinir.' } = Astro.props;
+---
+<form id="login" class="admin-login" hidden novalidate>
+  <p class="fs-2 muted">{hint}</p>
+  <label>Yönetici anahtarı<input type="password" name="token" autocomplete="current-password" autocapitalize="off" spellcheck="false" required /></label>
+  <button type="submit" class="btn touch">Giriş yap</button>
+  <p class="login-msg fs-2" role="status" aria-live="polite"></p>
+</form>
+<style>
+  .admin-login { display: grid; gap: var(--s3); max-width: 420px; margin: var(--s4) 0; }
+  .admin-login p { margin: 0; }
+  .login-msg { min-height: 1.45em; }
+  .login-msg[data-kind='err'] { color: var(--storm); }
+  .login-msg[data-kind='ok'] { color: var(--good); }
+</style>

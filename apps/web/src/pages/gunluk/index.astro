@@ -1,15 +1,13 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
 ---
 <Base title="Av günlüğü — av.livn" description="Seans ve av kaydı.">
   <div class="wrap field">
     <h1>Av günlüğü</h1>
     <p class="hint">Kayıt anında seans saatlerindeki model çıktısı (puan, bant, sıra, bileşenler) dondurulur. Sıfır av da bir sonuçtur: açıkça seçin.</p>
 
-    <form id="login" class="stack">
-      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
-      <button type="submit" class="primary">Giriş yap</button>
-    </form>
+    <AdminLogin />
 
     <form id="form" hidden novalidate>
       <fieldset>
@@ -85,28 +83,28 @@ import Base from '../../layouts/Base.astro';
 
 <style>
   .field { padding-bottom: 120px; }
-  h1 { font-size: 1.7rem; font-weight: 740; font-stretch: 80%; margin: 14px 0 6px; }
-  h2 { font-size: 1rem; margin: 22px 0 8px; }
+  h1 { font-size: var(--fs-5); font-weight: 740; font-stretch: 80%; margin: 14px 0 6px; }
+  h2 { font-size: var(--fs-3); margin: 22px 0 8px; }
   .stack { display: grid; gap: 14px; margin-top: 12px; }
   fieldset { border: 0; border-top: 1px solid var(--swell); margin: 0; padding: 16px 0 6px; display: grid; gap: 10px; }
-  legend { font-size: 1.15rem; font-weight: 700; padding: 0; margin-bottom: 8px; }
-  .lbl { display: grid; gap: 6px; font-size: 0.95rem; color: var(--mist); }
+  legend { font-size: var(--fs-4); font-weight: 700; padding: 0; margin-bottom: 8px; }
+  .lbl { display: grid; gap: 6px; font-size: var(--fs-3); color: var(--mist); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  input, select, textarea { font: inherit; font-size: 1.1rem; color: var(--foam); background: var(--deep); border: 1.5px solid var(--swell); border-radius: var(--radius); min-height: 56px; padding: 10px 12px; width: 100%; }
+  input, select, textarea { font: inherit; font-size: var(--fs-3); color: var(--foam); background: var(--deep); border: 1.5px solid var(--swell); border-radius: var(--radius); min-height: 56px; padding: 10px 12px; width: 100%; }
   button { font: inherit; cursor: pointer; }
-  .primary, .ghost, .seg button { min-height: 56px; border-radius: var(--radius); font-size: 1.05rem; font-weight: 650; }
+  .primary, .ghost, .seg button { min-height: 56px; border-radius: var(--radius); font-size: var(--fs-3); font-weight: 650; }
   .primary { width: 100%; border: 0; color: #1a1006; background: var(--sodium); }
   .ghost { border: 1.5px solid var(--swell); background: transparent; color: var(--foam); padding: 0 16px; }
   .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
   .seg button { border: 1.5px solid var(--swell); background: var(--deep); color: var(--foam); }
   .seg button[aria-pressed='true'] { background: var(--foam); color: var(--sea); border-color: var(--foam); }
-  .hint { color: var(--mist); font-size: 0.88rem; margin: 0; }
+  .hint { color: var(--mist); font-size: var(--fs-2); margin: 0; }
   .sub { margin: 6px 0 0; font-weight: 650; }
   .item { border: 1.5px solid var(--swell); border-radius: var(--radius); padding: 10px; display: grid; gap: 8px; margin-bottom: 10px; }
   .count { display: grid; grid-template-columns: 64px 1fr 64px; gap: 8px; }
-  .count input { text-align: center; font-size: 1.4rem; font-weight: 700; }
-  .count button { font-size: 1.6rem; padding: 0; }
-  .zero { display: flex; gap: 10px; align-items: center; min-height: 56px; font-size: 1.05rem; font-weight: 650; }
+  .count input { text-align: center; font-size: var(--fs-4); font-weight: 700; }
+  .count button { font-size: var(--fs-5); padding: 0; }
+  .zero { display: flex; gap: 10px; align-items: center; min-height: 56px; font-size: var(--fs-3); font-weight: 650; }
   .zero input { width: 28px; height: 28px; min-height: 0; }
   .warn { color: var(--storm); margin: 0; font-weight: 650; }
   .bar { position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--sea) 24%); display: grid; gap: 8px; }
@@ -119,7 +117,7 @@ import Base from '../../layouts/Base.astro';
 </style>
 
 <script>
-  import { getToken, logout, setToken } from '../../scripts/admin';
+  import { getToken, logout, mountLogin } from '../../scripts/admin';
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const QUEUE = 'av-livn-catch-queue';
   const LEGAL: Record<string, number> = { istavrit: 13 };
@@ -287,10 +285,8 @@ import Base from '../../layouts/Base.astro';
     history();
     flush();
   }
-  $('login').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    token = ($('token') as HTMLInputElement).value.trim();
-    try { await api('/api/admin/ping', 'GET'); setToken(token); open(); } catch (err) { say((err as Error).message, 'err'); }
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    await open();
   });
-  if (token) open().catch(() => say('Yüklenemedi.', 'err'));
 </script>

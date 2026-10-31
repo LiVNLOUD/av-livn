@@ -39,7 +39,7 @@ describe('notify decisions', () => {
     const m = decide({ nowHour: H17, settings: { ...DEFAULT_SETTINGS, opportunity: false }, spots, sent: [] });
     expect(m.map((x) => x.kind)).toEqual(['daily']);
     expect(m[0]!.body.split('\n')).toHaveLength(3);
-    expect(m[0]!.body.split('\n')[0]).toMatch(/^Pzt 17:00–05:00 Mera c · 90 \(1\.\)$/);
+    expect(m[0]!.body.split('\n')[0]).toMatch(/^Pzt 17:00–21:00 Mera c · 90 \(1\.\)$/);
     expect(m[0]!.url).toContain('/mera/?id=c&t=2026-11-02T');
     const sent: SentRow[] = [{ key: 'daily:2026-11-02', kind: 'daily', spot_id: null, start_hour: null, end_hour: null }];
     expect(decide({ nowHour: H17, settings: { ...DEFAULT_SETTINGS, opportunity: false }, spots, sent })).toEqual([]);

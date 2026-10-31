@@ -22,6 +22,7 @@ from av_pipeline.bathy.grid import Grid
 LEVELS_M = [2, 5, 10, 15, 20, 30, 50, 75, 100]
 BAND_EDGES_M = [0, 2, 5, 10, 15, 20, 30, 50, 75, 100, 150, 200, 400]
 MIN_ZOOM, MAX_ZOOM = 8, 14
+SMOOTH_SIGMA = 1.0  # DTM cells (~115 m); display only, depth features for scoring use the raw grid
 MAX_BYTES = 25 * 1024 * 1024  # Workers static asset limit per file
 
 
@@ -44,12 +45,32 @@ def write_asc(path: Path, grid: Grid, values: np.ndarray, nodata: float = -9999.
         np.savetxt(f, data, fmt="%.2f")
 
 
+def smooth(values: np.ndarray, sigma: float = SMOOTH_SIGMA) -> np.ndarray:
+    """NaN-aware separable Gaussian (display only): softens the seam between the surveyed EMODnet block and the
+    GEBCO fill, which otherwise shows as straight north–south edges in the depth bands. NaN (land) stays NaN."""
+    if sigma <= 0:
+        return values
+    r = int(np.ceil(3 * sigma))
+    k = np.exp(-0.5 * (np.arange(-r, r + 1) / sigma) ** 2)
+    k /= k.sum()
+    ok = ~np.isnan(values)
+    v = np.where(ok, values, 0.0)
+    w = ok.astype(float)
+    conv = lambda a: np.convolve(np.pad(a, r), k, mode="valid")  # noqa: E731 - zero padding, same length
+    for axis in (0, 1):
+        v = np.apply_along_axis(conv, axis, v)
+        w = np.apply_along_axis(conv, axis, w)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        out = v / w
+    return np.where(ok, out, np.nan)
+
+
 def build(dtm: Path, out: Path, max_zoom: int = MAX_ZOOM, land: Path | None = None) -> int:
     grid = Grid.from_netcdf(str(dtm))
     with tempfile.TemporaryDirectory() as tmp:
         t = Path(tmp)
         # Positive depth (metres) so attributes read naturally; land stays nodata for the contour lines.
-        depth = np.where(np.isnan(grid.elev), np.nan, np.maximum(0.0, -grid.elev))
+        depth = smooth(np.where(np.isnan(grid.elev), np.nan, np.maximum(0.0, -grid.elev)))
         write_asc(t / "depth.asc", grid, depth)
         # Bands: DTM land/no-data counts as 0 m, so the shallowest band runs under the land layer and the
         # visible water edge is the vector OSM coastline drawn on top, not the DTM's staircase.
@@ -59,7 +80,8 @@ def build(dtm: Path, out: Path, max_zoom: int = MAX_ZOOM, land: Path | None = No
         names = ["depth", "bandsrc", "land"]
         if grid.interp is not None:
             sea = ~np.isnan(grid.elev)
-            write_asc(t / "interp.asc", grid, np.where(sea, (grid.interp >= 0.5).astype(float), 0.0))
+            # Smoothed mask contoured at 0.5: rounded hatch edges instead of the DTM cell staircase.
+            write_asc(t / "interp.asc", grid, np.where(sea, smooth((grid.interp >= 0.5).astype(float), 1.5), 0.0))
             names.append("interp")
         for name in names:
             run("gdal_translate", "-q", "-a_srs", "EPSG:4326", str(t / f"{name}.asc"), str(t / f"{name}.tif"))

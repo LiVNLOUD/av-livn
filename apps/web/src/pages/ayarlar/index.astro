@@ -1,14 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
 ---
 <Base title="Bildirim ayarları — av.livn" description="Bildirimler: günlük özet, fırsat, güvenlik.">
   <div class="wrap st">
     <h1>Bildirimler</h1>
-    <form id="login" class="stack" hidden>
-      <p class="hint">Bildirimler yalnız yönetici anahtarıyla açılır. Anahtar bu cihazda kalır.</p>
-      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
-      <button type="submit" class="primary">Giriş yap</button>
-    </form>
+    <AdminLogin />
     <p class="msg" id="msg" role="status"></p>
 
     <section id="panel" hidden>
@@ -56,12 +53,12 @@ import Base from '../../layouts/Base.astro';
 </Base>
 
 <style>
-  .st h1 { font-size: 1.8rem; font-weight: 740; font-stretch: 80%; margin: 16px 0 6px; }
-  .st h2 { font-size: 1rem; margin: 24px 0 8px; }
-  .st h2 .muted { font-weight: 400; font-size: 0.82rem; }
-  .hint { font-size: 0.84rem; color: var(--mist); }
+  .st h1 { font-size: var(--fs-5); font-weight: 740; font-stretch: 80%; margin: 16px 0 6px; }
+  .st h2 { font-size: var(--fs-3); margin: 24px 0 8px; }
+  .st h2 .muted { font-weight: 400; font-size: var(--fs-2); }
+  .hint { font-size: var(--fs-2); color: var(--mist); }
   .stack { display: grid; gap: 12px; }
-  .lbl { display: grid; gap: 4px; font-size: 0.86rem; color: var(--mist); }
+  .lbl { display: grid; gap: 4px; font-size: var(--fs-2); color: var(--mist); }
   .lbl.inl { grid-template-columns: 1fr 110px; align-items: center; margin: 4px 0 8px 30px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   input, select { min-height: 48px; }
@@ -71,19 +68,19 @@ import Base from '../../layouts/Base.astro';
   .primary { background: var(--sodium); color: #1a1205; border: 0; border-radius: 12px; font-weight: 750; min-height: 52px; font: inherit; }
   .ghost { background: transparent; color: var(--foam); border: 1px solid var(--swell); border-radius: 12px; min-height: 52px; font: inherit; font-weight: 650; }
   .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .seg label { display: flex; gap: 6px; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--swell); border-radius: 10px; font-size: 0.88rem; }
+  .seg label { display: flex; gap: 6px; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--swell); border-radius: 10px; font-size: var(--fs-2); }
   .seg label:has(input:checked) { border-color: var(--sodium); color: var(--sodium); }
   .favs, .sent { list-style: none; padding: 0; margin: 0; }
   .favs :global(label) { display: flex; gap: 10px; align-items: center; min-height: 44px; border-bottom: 1px solid var(--swell); }
   .favs :global(input) { width: 20px; height: 20px; }
-  .sent :global(li) { font-size: 0.82rem; color: var(--mist); padding: 4px 0; border-bottom: 1px solid var(--swell); }
+  .sent :global(li) { font-size: var(--fs-2); color: var(--mist); padding: 4px 0; border-bottom: 1px solid var(--swell); }
   .state { font-weight: 650; }
-  .msg { min-height: 1.4em; font-size: 0.9rem; }
+  .msg { min-height: 1.4em; font-size: var(--fs-2); }
   .msg.err { color: var(--storm); }
 </style>
 
 <script>
-  import { getToken, setToken } from '../../scripts/admin';
+  import { getToken, mountLogin, showLogin } from '../../scripts/admin';
 
   type Settings = { daily: boolean; opportunity: boolean; safety: boolean; threshold: number; quiet: [number, number]; favourites: string[]; channels: 'push' | 'ntfy' | 'both' };
   type Status = {
@@ -100,7 +97,7 @@ import Base from '../../layouts/Base.astro';
   async function api(path: string, method = 'GET', body?: unknown) {
     const r = await fetch(`/api/admin/notify${path}`, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-cache' });
     const j = await r.json().catch(() => ({}));
-    if (r.status === 401) { $('login').hidden = false; $('panel').hidden = true; throw new Error('Anahtar geçersiz.'); }
+    if (r.status === 401) { $('panel').hidden = true; showLogin('Anahtar artık geçerli değil; yeniden girin.'); throw new Error('Anahtar hatalı.'); }
     if (!r.ok) throw new Error(j.error ?? String(r.status));
     return j;
   }
@@ -203,12 +200,8 @@ import Base from '../../layouts/Base.astro';
     say('Test istendi: puanlama işinin 15 dakikalık çalışmasında gönderilir.');
     await load();
   });
-  $('login').addEventListener('submit', (e) => {
-    e.preventDefault();
-    token = $<HTMLInputElement>('token').value.trim();
-    setToken(token);
-    load().catch((err) => say((err as Error).message, true));
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    await load();
   });
-  if (!token) $('login').hidden = false;
-  else load().catch((err) => say((err as Error).message, true));
 </script>

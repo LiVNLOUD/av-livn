@@ -1,0 +1,166 @@
+---
+import Base from '../../../layouts/Base.astro';
+import AdminLogin from '../../../components/AdminLogin.astro';
+---
+<Base title="Adaylar — av.livn" description="OSM'den önerilen meraları onayla ya da reddet.">
+  <div class="wrap wide ad">
+    <h1>Aday meralar</h1>
+    <p class="muted fs-2 prose">OpenStreetMap envanterinden önerilen yerler. Onaylanan aday bir sonraki saatlik puanlamada listeye girer; reddedilen haritadan kalkar. Ad değişikliği mera kimliğini değiştirmez. Haritada eksik bir yeri (ör. Mudanya balıkçı barınağı) <a class="link" href="/harita/">haritada ＋ düğmesiyle</a> ekleyin.</p>
+    <AdminLogin />
+    <p class="msg fs-2" id="msg" role="status"></p>
+    <section id="panel" hidden>
+      <div class="filters">
+        <label>Tip<select id="f-type"><option value="">Tümü</option></select></label>
+        <label>Yerleşim<select id="f-place"><option value="">Tümü</option></select></label>
+        <label class="grow">Ara<input id="f-q" placeholder="ad, yerleşim" /></label>
+      </div>
+      <div class="bulk actions">
+        <label class="chk"><input type="checkbox" id="all" /> Görünenlerin tümü</label>
+        <span class="fs-2 muted" id="count"></span>
+        <button type="button" class="btn small" id="b-ok" disabled>Seçilenleri onayla</button>
+        <button type="button" class="btn small secondary" id="b-no" disabled>Seçilenleri reddet</button>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th scope="col"><span class="sr-only">Seç</span></th><th scope="col">Konum</th><th scope="col">Ad</th><th scope="col">Tip</th><th scope="col">Yerleşim</th><th scope="col">Erişim tahmini</th><th scope="col">Kaynak</th><th scope="col"><span class="sr-only">Eylem</span></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="fs-1 muted">Mini harita © OpenStreetMap katkıcıları. Fotoğraflar: Mapillary (CC BY-SA).</p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .ad { padding-top: var(--s5); padding-bottom: var(--s6); }
+  .ad > p { margin: var(--s2) 0 var(--s4); }
+  .stack { display: grid; gap: var(--s3); max-width: 420px; }
+  .msg { min-height: 1.5em; }
+  .filters { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: end; margin-bottom: var(--s3); }
+  .filters label { min-width: 160px; }
+  .filters .grow { flex: 1 1 220px; }
+  .bulk { margin-bottom: var(--s3); }
+  .chk { display: flex; grid-auto-flow: column; align-items: center; gap: var(--s2); margin-right: var(--s3); color: var(--foam); }
+  .chk input, td input[type='checkbox'] { width: 20px; height: 20px; }
+  .tbl { overflow-x: auto; border: 1px solid var(--swell); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 880px; font-size: var(--fs-2); line-height: var(--lh-2); }
+  th { text-align: left; font-weight: 600; color: var(--mist); background: var(--deep); position: sticky; top: 0; }
+  th, td { padding: var(--s2) var(--s3); border-bottom: 1px solid var(--swell); vertical-align: middle; }
+  :global(tr.hl) { background: color-mix(in oklab, var(--sodium) 12%, transparent); }
+  :global(.mini) { position: relative; width: 112px; height: 72px; overflow: hidden; border-radius: 8px; background: var(--deep); }
+  :global(.mini img) { position: absolute; width: 256px; height: 256px; }
+  :global(.mini i) { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; transform: rotate(45deg); border: 2px solid #1a1205; background: var(--sodium); }
+  :global(td input.nm) { min-width: 220px; height: 36px; }
+  :global(td .links) { display: flex; gap: var(--s3); }
+</style>
+
+<script>
+  import { getToken, mountLogin, showLogin } from '../../../scripts/admin';
+  import { esc, KIND_TR } from '../../../scripts/format';
+
+  type Spot = { id: string; name: string; kind: string; place: string | null; access: string | null; status: string; lat: number; lon: number };
+  type Cand = { id: string; type_tr: string; osm: string[] };
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  let token = getToken();
+  let rows: (Spot & { type_tr: string; osm: string[] })[] = [];
+  const ACCESS: Record<string, string> = { acik: 'açık', belirsiz: 'belirsiz', kisitli_feribot: 'kısıtlı olabilir' };
+  const focus = new URLSearchParams(location.search).get('id');
+  function say(t: string, err = false) { $('msg').textContent = t; $('msg').style.color = err ? 'var(--storm)' : ''; }
+
+  async function api(path: string, method: string, body?: unknown) {
+    const r = await fetch(path, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-cache' });
+    if (r.status === 401) { $('panel').hidden = true; showLogin('Anahtar artık geçerli değil; yeniden girin.'); throw new Error('Anahtar hatalı.'); }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }
+
+  /** One OSM tile (z16) positioned so the point sits in the middle of the frame. */
+  function mini(lat: number, lon: number): string {
+    const z = 16;
+    const n = 2 ** z;
+    const xf = ((lon + 180) / 360) * n;
+    const yf = ((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * n;
+    const tx = Math.floor(xf), ty = Math.floor(yf);
+    const ox = Math.round((xf - tx) * 256), oy = Math.round((yf - ty) * 256);
+    return `<div class="mini"><img loading="lazy" alt="" src="https://tile.openstreetmap.org/${z}/${tx}/${ty}.png" style="left:${56 - ox}px;top:${36 - oy}px" /><i></i></div>`;
+  }
+
+  function shown() {
+    const t = $<HTMLSelectElement>('f-type').value;
+    const p = $<HTMLSelectElement>('f-place').value;
+    const q = $<HTMLInputElement>('f-q').value.trim().toLocaleLowerCase('tr');
+    return rows.filter((r) => (!t || r.type_tr === t) && (!p || (r.place ?? '—') === p) && (!q || `${r.name} ${r.place ?? ''}`.toLocaleLowerCase('tr').includes(q)));
+  }
+  function draw() {
+    const list = shown();
+    $('count').textContent = `${list.length} / ${rows.length} aday`;
+    $('rows').innerHTML = list.length
+      ? list.map((r) => {
+          const osm = r.osm[0];
+          return `<tr data-id="${esc(r.id)}"${r.id === focus ? ' class="hl"' : ''}>
+            <td><input type="checkbox" class="pick" aria-label="${esc(r.name)} seç" /></td>
+            <td>${mini(r.lat, r.lon)}</td>
+            <td><input class="nm" value="${esc(r.name)}" aria-label="Ad" /></td>
+            <td>${esc(r.type_tr || KIND_TR[r.kind] || r.kind)}</td>
+            <td>${esc(r.place ?? '—')}</td>
+            <td>${esc(ACCESS[r.access ?? ''] ?? '—')}</td>
+            <td><span class="links">${osm ? `<a class="link" target="_blank" rel="noopener" href="https://www.openstreetmap.org/${esc(osm)}">OSM</a>` : ''}<a class="link" target="_blank" rel="noopener" href="https://www.mapillary.com/app/?lat=${r.lat}&lng=${r.lon}&z=17">Mapillary</a></span></td>
+            <td><span class="actions"><button type="button" class="btn small" data-act="candidate">Onayla</button><button type="button" class="btn small secondary" data-act="rejected">Reddet</button></span></td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="8" class="muted">Filtreye uyan aday yok.</td></tr>';
+    sync();
+    if (focus) document.querySelector('tr.hl')?.scrollIntoView({ block: 'center' });
+  }
+  function picked() { return [...document.querySelectorAll<HTMLInputElement>('.pick:checked')].map((c) => c.closest('tr')!.dataset.id!); }
+  function sync() {
+    const n = picked().length;
+    $<HTMLButtonElement>('b-ok').disabled = $<HTMLButtonElement>('b-no').disabled = n === 0;
+    $<HTMLButtonElement>('b-ok').textContent = n ? `${n} adayı onayla` : 'Seçilenleri onayla';
+    $<HTMLButtonElement>('b-no').textContent = n ? `${n} adayı reddet` : 'Seçilenleri reddet';
+  }
+  async function setStatus(ids: string[], status: string) {
+    let ok = 0;
+    for (const id of ids) { try { await api(`/api/admin/spots/${encodeURIComponent(id)}`, 'PATCH', { status }); ok++; } catch {} }
+    rows = rows.filter((r) => !(ids.includes(r.id) && ok));
+    say(`${ok}/${ids.length} aday ${status === 'candidate' ? 'onaylandı (sonraki saatlik puanlamada listeye girer)' : 'reddedildi'}.`, ok !== ids.length);
+    await load();
+  }
+
+  async function load() {
+    const [b, c] = await Promise.all([api('/api/admin/spots', 'GET'), fetch('/tiles/candidates.geojson').then((r) => r.json()).catch(() => ({ features: [] }))]);
+    const meta = new Map<string, Cand>((c.features as { properties: Cand }[]).map((f) => [f.properties.id, f.properties]));
+    rows = (b.spots as Spot[]).filter((s) => s.status === 'proposed').map((s) => ({ ...s, type_tr: meta.get(s.id)?.type_tr ?? KIND_TR[s.kind] ?? s.kind, osm: meta.get(s.id)?.osm ?? [] }));
+    rows.sort((a, z) => (a.place ?? '~').localeCompare(z.place ?? '~', 'tr') || a.name.localeCompare(z.name, 'tr'));
+    const opts = (vals: string[]) => '<option value="">Tümü</option>' + [...new Set(vals)].sort((a, z) => a.localeCompare(z, 'tr')).map((v) => `<option>${esc(v)}</option>`).join('');
+    const ft = $<HTMLSelectElement>('f-type').value, fp = $<HTMLSelectElement>('f-place').value;
+    $('f-type').innerHTML = opts(rows.map((r) => r.type_tr));
+    $('f-place').innerHTML = opts(rows.map((r) => r.place ?? '—'));
+    $<HTMLSelectElement>('f-type').value = ft;
+    $<HTMLSelectElement>('f-place').value = fp;
+    $('login').hidden = true;
+    $('panel').hidden = false;
+    draw();
+  }
+
+  ['f-type', 'f-place', 'f-q'].forEach((id) => $(id).addEventListener('input', draw));
+  $('all').addEventListener('change', () => { document.querySelectorAll<HTMLInputElement>('.pick').forEach((c) => (c.checked = $<HTMLInputElement>('all').checked)); sync(); });
+  $('rows').addEventListener('change', (e) => {
+    const t = e.target as HTMLInputElement;
+    if (t.classList.contains('pick')) sync();
+    if (t.classList.contains('nm')) {
+      const id = t.closest('tr')!.dataset.id!;
+      api(`/api/admin/spots/${encodeURIComponent(id)}`, 'PATCH', { name: t.value.trim() }).then(() => say('Ad kaydedildi.')).catch((err) => say((err as Error).message, true));
+    }
+  });
+  $('rows').addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-act]');
+    if (b) setStatus([b.closest('tr')!.dataset.id!], b.dataset.act!);
+  });
+  $('b-ok').addEventListener('click', () => setStatus(picked(), 'candidate'));
+  $('b-no').addEventListener('click', () => setStatus(picked(), 'rejected'));
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    await load();
+  });
+</script>

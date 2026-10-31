@@ -21,9 +21,9 @@ async function safeEqual(a: string, b: string): Promise<boolean> {
 
 adminRoutes.use('*', async (c, next) => {
   const token = c.env.ADMIN_TOKEN;
-  if (!token) return c.json({ ok: false, error: 'admin_disabled' }, 503);
+  if (!token) return c.json({ ok: false, error: 'admin_disabled', message: 'yönetici anahtarı yapılandırılmamış' }, 503);
   const auth = c.req.header('authorization') ?? '';
-  const given = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const given = (auth.startsWith('Bearer ') ? auth.slice(7) : '').trim();
   if (!given || !(await safeEqual(given, token))) return c.json({ ok: false, error: 'unauthorized' }, 401);
   await next();
 });

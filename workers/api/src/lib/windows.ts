@@ -1,5 +1,6 @@
-// Best fishing windows: contiguous hours per spot where the v2 score stays high. Pure; used by the public
-// /api/windows endpoint (D2 home page) and by the notification job (D9).
+// Best fishing windows (E3). Per spot and local calendar day: the peak hour, widened to the contiguous hours
+// whose score stays above max(floor, peak − DROP), at most MAX_LEN hours. The list shows each spot once.
+// Pure; used by /api/windows (home page) and the notification job.
 import type { ListEntryV2 } from '../precompute_v2';
 
 export interface SpotHours {
@@ -20,62 +21,91 @@ export interface Window {
   p90: number | null;
   rank: number;
   reason: string | null;
+  /** Plain-language part of the reason (source/evidence stripped). */
+  why: string | null;
+  /** The main reason rests on a C-level assumption. */
+  assumed: boolean;
 }
 
 export const WINDOW_GOOD = 65;
+export const DROP = 8;
+export const MAX_LEN = 4;
+const TZ = 3; // Europe/Istanbul
+
+const ok = (e: ListEntryV2 | undefined): e is ListEntryV2 => !!e && e[0] !== null && e[4] === 0;
+const localDay = (h: number) => Math.floor((h + TZ) / 24);
+
+export function plainReason(reason: string | null): { why: string | null; assumed: boolean } {
+  if (!reason) return { why: null, assumed: false };
+  const assumed = /varsayım|kanıt C|\(C\)/.test(reason);
+  const why = reason.split(' — ')[0]!.replace(/^Öne çıkaran: /, '').replace(/^Geri çeken: /, 'zayıf yanı: ');
+  return { why: why.charAt(0).toLocaleUpperCase('tr') + why.slice(1), assumed };
+}
+
+/** Window around the peak of one spot within [a, b): grow towards the better neighbour while ≥ floor. */
+function around(s: SpotHours, a: number, b: number, floor: number): Window | null {
+  const at = (h: number) => s.list[h - s.start_hour];
+  let peak = -1;
+  for (let h = a; h < b; h++) {
+    const e = at(h);
+    if (ok(e) && (peak < 0 || e[0]! > at(peak)![0]!)) peak = h;
+  }
+  if (peak < 0) return null;
+  const pe = at(peak)!;
+  const cut = Math.max(floor, pe[0]! - DROP);
+  if (pe[0]! < cut) return null;
+  let start = peak;
+  let end = peak + 1;
+  const good = (h: number) => h >= a && h < b && ok(at(h)) && at(h)![0]! >= cut;
+  while (end - start < MAX_LEN) {
+    const l = good(start - 1) ? at(start - 1)![0]! : -1;
+    const r = good(end) ? at(end)![0]! : -1;
+    if (l < 0 && r < 0) break;
+    if (r >= l) end++;
+    else start--;
+  }
+  const reason = pe[6]?.[2] ?? null;
+  return { spot_id: s.id, name: s.name, start, end, peak, total: pe[0]!, p10: pe[1], p90: pe[2], rank: pe[3], reason, ...plainReason(reason) };
+}
 
 /**
- * Runs of minLen–maxLen hours with score ≥ threshold (not gated) in [from, from + hours). When fewer than `n` runs
- * reach WINDOW_GOOD the threshold falls to the 85th percentile of all hours, so the page always has something
- * to compare. Sorted by peak score, at most `perSpot` windows per spot, `n` in total.
+ * Candidate windows: one per spot per local day in [from, from + hours), peak ≥ floor. Sorted by peak score,
+ * then earlier start; `perSpot` windows per spot at most (1 = each spot once), `n` in total. When fewer than
+ * `n` reach WINDOW_GOOD the floor falls to the 85th percentile of all hours (the page always compares).
  */
-export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number; minLen?: number; maxLen?: number } = {}): { threshold: number; windows: Window[] } {
+export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number } = {}): { threshold: number; windows: Window[] } {
   const n = opts.n ?? 5;
-  const perSpot = opts.perSpot ?? 2;
-  const minLen = opts.minLen ?? 1;
-  const maxLen = opts.maxLen ?? 12; // a long good stretch is split: a window is one outing, not a weekend
-  const at = (s: SpotHours, h: number) => s.list[h - s.start_hour];
-  const ok = (e: ListEntryV2 | undefined): e is ListEntryV2 => !!e && e[0] !== null && e[4] === 0;
-  const runs = (thr: number) => {
+  const perSpot = opts.perSpot ?? 1;
+  const end = from + hours;
+  const build = (floor: number) => {
     const out: Window[] = [];
     for (const s of spots) {
-      let cur: Window | null = null;
-      for (let h = from; h <= from + hours; h++) {
-        const e = h < from + hours ? at(s, h) : undefined;
-        if (cur && cur.end - cur.start >= maxLen) {
-          out.push(cur);
-          cur = null;
-        }
-        if (ok(e) && e[0]! >= thr) {
-          if (!cur) cur = { spot_id: s.id, name: s.name, start: h, end: h + 1, peak: h, total: e[0]!, p10: e[1], p90: e[2], rank: e[3], reason: e[6]?.[2] ?? null };
-          else {
-            cur.end = h + 1;
-            if (e[0]! > cur.total) Object.assign(cur, { peak: h, total: e[0]!, p10: e[1], p90: e[2], rank: e[3], reason: e[6]?.[2] ?? null });
-          }
-        } else if (cur) {
-          if (cur.end - cur.start >= minLen) out.push(cur);
-          cur = null;
-        }
+      for (let d = localDay(from); d <= localDay(end - 1); d++) {
+        const a = Math.max(from, d * 24 - TZ);
+        const b = Math.min(end, (d + 1) * 24 - TZ);
+        const w = around(s, a, b, floor);
+        if (w && w.total >= floor) out.push(w);
       }
     }
-    return out;
+    out.sort((x, y) => y.total - x.total || x.start - y.start);
+    const count = new Map<string, number>();
+    return out.filter((w) => {
+      const c = count.get(w.spot_id) ?? 0;
+      if (c >= perSpot) return false;
+      count.set(w.spot_id, c + 1);
+      return true;
+    });
   };
   let threshold = opts.threshold ?? WINDOW_GOOD;
-  let all = runs(threshold);
+  let all = build(threshold);
   if (opts.threshold === undefined && all.length < n) {
-    const vals = spots.flatMap((s) => Array.from({ length: hours }, (_, i) => at(s, from + i)).filter(ok).map((e) => e[0]!)).sort((a, b) => a - b);
+    const vals = spots
+      .flatMap((s) => Array.from({ length: hours }, (_, i) => s.list[from + i - s.start_hour]).filter(ok).map((e) => e[0]!))
+      .sort((a, b) => a - b);
     if (vals.length) {
       threshold = Math.min(threshold, vals[Math.floor(vals.length * 0.85)]!);
-      all = runs(threshold);
+      all = build(threshold);
     }
   }
-  all.sort((a, b) => b.total - a.total || a.start - b.start);
-  const count = new Map<string, number>();
-  const windows = all.filter((w) => {
-    const c = count.get(w.spot_id) ?? 0;
-    if (c >= perSpot) return false;
-    count.set(w.spot_id, c + 1);
-    return true;
-  });
-  return { threshold, windows: windows.slice(0, n) };
+  return { threshold, windows: all.slice(0, n) };
 }

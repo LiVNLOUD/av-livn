@@ -1,187 +1,291 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="av.livn — Nereye, ne zaman?">
-  <section class="wrap intro">
-    <h1>Nereye, ne zaman?</h1>
-    <div class="species" role="radiogroup" aria-label="Tür">
-      <button type="button" role="radio" aria-checked="true" class="sp on">İstavrit</button>
-      <button type="button" role="radio" aria-checked="false" class="sp" disabled>Lüfer <small>yakında</small></button>
-      <button type="button" role="radio" aria-checked="false" class="sp" disabled>Kolyoz <small>yakında</small></button>
-      <button type="button" role="radio" aria-checked="false" class="sp" disabled>Mırmır <small>yakında</small></button>
-    </div>
+<Base title="av.livn — Nereye, ne zaman?" app>
+  <div class="app" id="app" data-tab="map">
+    <section class="r-win" aria-labelledby="t-main">
+      <h1 id="t-main">Nereye, ne zaman?</h1>
+      <div class="species" role="radiogroup" aria-label="Tür">
+        <button type="button" role="radio" aria-checked="true" class="sp on">İstavrit</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Levrek</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Kalamar</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Lüfer / çinekop</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Mırmır / karagöz</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Kolyoz</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Sarpan</button>
+      </div>
+      <p class="fs-1 muted sp-note">Diğer türler araştırma aşamasında.</p>
 
-    <h2 class="sec">En iyi pencereler <span class="muted">önümüzdeki 72 saat</span></h2>
-    <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
-    <p class="muted fine" id="win-note"></p>
+      <h2 class="sec">En iyi pencereler <span class="muted fs-2">önümüzdeki 72 saat</span></h2>
+      <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
+      <p class="muted fs-1" id="win-note"></p>
+    </section>
 
-    <h2 class="sec">Meralar</h2>
-    <div class="when" role="group" aria-label="Saat seçimi">
-      <button type="button" id="now" class="chip on">Şimdi</button>
-      <select id="day" aria-label="Gün"></select>
-      <select id="hour" aria-label="Saat"></select>
-    </div>
-    <p class="muted" id="meta">Meralar yükleniyor…</p>
-    <label class="toggle"><input type="checkbox" id="hide-access" /> Erişimi belirsiz/kısıtlı olanları gizle</label>
-  </section>
-  <section class="wrap">
-    <ol class="spots" id="spots" aria-live="polite"></ol>
-    <p class="empty muted" id="empty" hidden></p>
-  </section>
+    <section class="r-heat" aria-labelledby="t-heat">
+      <div class="heat-head">
+        <h2 id="t-heat">Mera × saat</h2>
+        <p class="fs-1 muted legend-line"><span class="ramp" aria-hidden="true"></span> düşük → yüksek puan · <span class="hatchsw" aria-hidden="true"></span> belirsizlik geniş · üst şerit: gece / alacakaranlık / gündüz</p>
+      </div>
+      <div class="heat" id="heat"><p class="muted fs-2">Yükleniyor…</p></div>
+    </section>
+
+    <section class="r-spots" aria-labelledby="t-spots">
+      <h2 class="sec" id="t-spots">Meralar</h2>
+      <div class="when" role="group" aria-label="Saat seçimi">
+        <button type="button" id="now" class="btn secondary on">Şimdi</button>
+        <select id="day" aria-label="Gün"></select>
+        <select id="hour" aria-label="Saat"></select>
+      </div>
+      <p class="muted fs-2" id="meta">Meralar yükleniyor…</p>
+      <label class="toggle"><input type="checkbox" id="hide-access" /> Erişimi belirsiz/kısıtlı olanları gizle</label>
+      <ol class="spots" id="spots" aria-live="polite"></ol>
+      <p class="empty muted" id="empty" hidden></p>
+    </section>
+
+    <section class="r-map" aria-label="Harita">
+      <div class="tabs" role="tablist" aria-label="Görünüm">
+        <button type="button" role="tab" id="tab-map" aria-selected="true">Harita</button>
+        <button type="button" role="tab" id="tab-heat" aria-selected="false">Isı haritası</button>
+      </div>
+      <div class="mapbox" id="map"></div>
+    </section>
+
+    <aside class="r-card" id="drawer" hidden aria-label="Mera kartı">
+      <div class="drawer-head">
+        <span class="fs-2 muted" id="drawer-title">Mera kartı</span>
+        <div class="actions">
+          <a class="btn small secondary" id="drawer-open" href="/mera/">Tam sayfa</a>
+          <button type="button" class="btn small secondary" id="drawer-close" aria-label="Kartı kapat">Kapat</button>
+        </div>
+      </div>
+      <iframe id="drawer-frame" title="Mera kartı" loading="lazy"></iframe>
+    </aside>
+  </div>
 </Base>
 
 <style>
-  .intro { padding-top: 18px; padding-bottom: 10px; }
-  h1 { margin: 0; font-size: clamp(2rem, 9vw, 2.9rem); line-height: 1.02; font-weight: 750; font-stretch: 78%; letter-spacing: -0.02em; }
-  .intro p { margin: 8px 0 0; font-size: 0.92rem; }
-  .sec { margin: 22px 0 8px; font-size: 1.02rem; font-weight: 680; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
-  .sec .muted { font-weight: 450; font-size: 0.84rem; }
-  .species { display: flex; gap: 8px; overflow-x: auto; margin-top: 14px; padding-bottom: 2px; }
-  .sp { flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font: inherit; font-size: 0.9rem; }
-  .sp.on { background: var(--sodium); border-color: var(--sodium); color: #1a1205; font-weight: 700; }
-  .sp:disabled { opacity: 0.55; }
-  .sp small { font-size: 0.72rem; margin-left: 4px; }
-  .windows { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-  :global(.win) { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 12px; border: 1px solid var(--swell); border-radius: 12px; text-decoration: none; }
-  :global(.win .t) { font-weight: 720; font-size: 0.98rem; }
-  :global(.win .n) { grid-column: 1; font-size: 0.92rem; }
-  :global(.win .s) { grid-row: 1 / span 2; grid-column: 2; align-self: center; text-align: right; font-size: 1.4rem; font-weight: 760; font-variant-numeric: tabular-nums; }
-  :global(.win .s small) { display: block; font-size: 0.72rem; font-weight: 500; color: var(--mist); }
-  :global(.win .r) { grid-column: 1 / -1; font-size: 0.8rem; color: var(--mist); }
-  :global(.win .act) { grid-column: 1 / -1; display: flex; gap: 14px; font-size: 0.82rem; }
-  :global(.win .act button) { background: none; border: 0; padding: 6px 0; color: var(--sodium); font: inherit; font-weight: 650; cursor: pointer; min-height: 36px; }
-  .fine { font-size: 0.8rem; }
-  .when { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .when select { min-height: 44px; flex: 1 1 120px; }
-  .chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--foam); font: inherit; font-weight: 650; }
-  .chip.on { background: var(--foam); color: #0e1c27; border-color: var(--foam); }
-  .spots { list-style: none; margin: 8px 0 0; padding: 0; }
-  :global(.spot) {
-    display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: center;
-    padding: 12px 0; border-top: 1px solid var(--swell); text-decoration: none;
+  /* One grid; areas change per breakpoint (docs/DESIGN.md). */
+  .app { display: grid; gap: var(--s5); padding: var(--s4); grid-template-columns: minmax(0, 1fr); grid-template-areas: 'win' 'heat' 'spots'; }
+  .r-win { grid-area: win; } .r-heat { grid-area: heat; min-width: 0; } .r-spots { grid-area: spots; } .r-map { grid-area: map; display: none; } .r-card { grid-area: card; }
+  @media (min-width: 768px) {
+    .app { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'win map' 'heat map' 'spots map'; }
+    .r-map { display: block; position: sticky; top: var(--s4); height: calc(100dvh - var(--header-h) - var(--s6)); }
+    .r-card:not([hidden]) { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; height: 62dvh; }
   }
-  :global(.spot:last-child) { border-bottom: 1px solid var(--swell); }
-  :global(.spot h2) { margin: 0; font-size: 1.06rem; font-weight: 620; line-height: 1.25; }
-  :global(.spot .sub) { margin: 2px 0 0; font-size: 0.84rem; color: var(--mist); }
-  :global(.spot .why) { margin: 3px 0 0; font-size: 0.84rem; }
-  :global(.spot .rk) { color: var(--foam); font-weight: 700; }
-  :global(.spot .reason) { margin: 3px 0 0; font-size: 0.8rem; color: var(--mist); }
-  :global(.badge) { display: inline-block; vertical-align: 2px; margin-left: 6px; font-size: 0.68rem; font-weight: 650; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--warn); color: var(--warn); }
-  .toggle { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 0.9rem; color: var(--mist); min-height: 44px; }
+  @media (min-width: 1200px) {
+    :global(body.app) { height: 100dvh; overflow: hidden; }
+    :global(body.app main) { min-height: 0; }
+    :global(body.app footer.site) { display: none; }
+    .app { height: 100%; padding: 0; gap: 0; grid-template-columns: 400px minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: 'win center card' 'spots center card'; }
+    .r-win, .r-spots { padding: var(--s5); border-right: 1px solid var(--swell); overflow: auto; }
+    .r-win { padding-bottom: 0; }
+    .r-spots { padding-top: var(--s4); }
+    .r-heat, .r-map { grid-area: center; position: relative; top: 0; height: auto; min-height: 0; }
+    .r-heat { overflow: auto; padding: var(--s5); padding-top: 64px; }
+    .app[data-tab='map'] .r-heat, .app[data-tab='heat'] .mapbox { display: none; }
+    .r-map { display: block; pointer-events: none; }
+    .r-map > * { pointer-events: auto; }
+    .app[data-tab='heat'] .r-map { z-index: 2; height: 56px; }
+    .tabs { display: flex; }
+    .r-card:not([hidden]) { position: static; height: auto; width: 420px; border-left: 1px solid var(--swell); }
+  }
+  @media (min-width: 1920px) {
+    .app { grid-template-columns: 360px minmax(0, 1.1fr) minmax(0, 1fr) auto; grid-template-areas: 'win heat map card' 'spots heat map card'; }
+    .r-heat { grid-area: heat; padding-top: var(--s5); border-right: 1px solid var(--swell); }
+    .r-map { grid-area: map; }
+    .app[data-tab] .r-heat, .app[data-tab] .mapbox { display: block; }
+    .app[data-tab] .r-map { height: auto; }
+    .tabs { display: none !important; }
+  }
+
+  .r-win h1 { margin-top: var(--s1); }
+  .sec { margin: var(--s5) 0 var(--s3); display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
+  .species { display: flex; gap: var(--s2); overflow-x: auto; margin-top: var(--s4); padding-bottom: 2px; }
+  .sp { flex: none; height: 32px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font-size: var(--fs-2); font-weight: 600; }
+  .sp.on { background: var(--sodium); border-color: var(--sodium); color: #1a1205; }
+  .sp:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sp-note { margin: var(--s2) 0 0; }
+  .windows { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s2); }
+  :global(.win) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s1) var(--s3); }
+  :global(.win .t) { font-weight: 700; font-size: var(--fs-3); line-height: var(--lh-3); }
+  :global(.win .n) { grid-column: 1; font-size: var(--fs-2); line-height: var(--lh-2); }
+  :global(.win .s) { grid-row: 1 / span 2; grid-column: 2; align-self: center; text-align: right; font-size: var(--fs-5); line-height: var(--lh-5); font-weight: 760; }
+  :global(.win .s small) { display: block; font-size: var(--fs-1); font-weight: 500; color: var(--mist); }
+  :global(.win .r) { grid-column: 1 / -1; font-size: var(--fs-2); line-height: var(--lh-2); color: var(--mist); }
+  :global(.win .actions) { grid-column: 1 / -1; margin-top: var(--s2); }
+  .heat-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2); margin-bottom: var(--s3); }
+  .legend-line { margin: 0; display: flex; align-items: center; gap: var(--s1); flex-wrap: wrap; }
+  .ramp { display: inline-block; width: 56px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(57 50 52), rgb(185 126 80), rgb(71 157 109)); }
+  .hatchsw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #0e1c27 0 1.5px, #5d9a76 1.5px 4px); }
+  .heat { overflow-x: auto; }
+  :global(.heatmap) { display: block; font-family: inherit; }
+  :global(.heatmap text) { fill: var(--foam); font-size: var(--fs-1); }
+  :global(.heatmap .hm-day) { font-weight: 650; }
+  :global(.heatmap .hm-tick), :global(.heatmap .hm-nowl) { fill: var(--mist); font-size: var(--fs-1); }
+  :global(.heatmap .hm-sep) { stroke: var(--mist); stroke-width: 1; opacity: 0.5; }
+  :global(.heatmap .hm-now) { stroke: var(--sodium); stroke-width: 2; }
+  :global(.heatmap .hm-nowl) { fill: var(--sodium); }
+  :global(.heatmap .hm-sel) { fill: none; stroke: var(--foam); stroke-width: 1.5; }
+  :global(.heatmap .hm-cell) { cursor: pointer; }
+  :global(.heatmap .hm-cell:hover) { stroke: var(--foam); stroke-width: 1; }
+  :global(.heatmap .hm-name text) { cursor: pointer; }
+  :global(.heatmap .hm-name:hover text) { fill: var(--sodium); }
+  :global(.heatmap .hm-b) { fill: var(--warn); font-size: var(--fs-1); }
+  :global(.heatmap .hm-b.legal) { fill: var(--storm); }
+  .when { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; margin-bottom: var(--s2); }
+  .when select { flex: 1 1 120px; height: 40px; padding-top: 0; padding-bottom: 0; }
+  #now.on { background: var(--foam); color: var(--sea); border-color: var(--foam); }
+  .toggle { display: flex; gap: var(--s2); align-items: center; grid-auto-flow: column; justify-content: start; min-height: 44px; }
   .toggle input { width: 20px; height: 20px; }
-  .empty { padding: 24px 0; }
+  .spots { list-style: none; margin: var(--s2) 0 0; padding: 0; }
+  :global(.spot) { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s3) 0; border-top: 1px solid var(--swell); text-decoration: none; cursor: pointer; }
+  :global(.spot h3) { font-size: var(--fs-3); line-height: var(--lh-3); font-weight: 620; }
+  :global(.spot .sub), :global(.spot .why), :global(.spot .reason) { margin: 2px 0 0; font-size: var(--fs-2); line-height: var(--lh-2); color: var(--mist); }
+  :global(.spot .rk) { color: var(--foam); font-weight: 700; }
+  :global(.spot .badge) { margin-left: var(--s1); }
+  .empty { padding: var(--s5) 0; }
+  .mapbox { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
+  @media (min-width: 1200px) { .mapbox { border-radius: 0; } }
+  .tabs { display: none; position: absolute; z-index: 3; top: var(--s3); left: var(--s3); gap: 2px; padding: 2px; border-radius: 999px; background: var(--deep); border: 1px solid var(--swell); }
+  .tabs button { height: 32px; padding: 0 var(--s3); border-radius: 999px; background: transparent; color: var(--mist); font-size: var(--fs-2); }
+  .tabs button[aria-selected='true'] { background: var(--swell); color: var(--foam); }
+  .r-card { background: var(--deep); display: flex; flex-direction: column; min-height: 0; border-top: 1px solid var(--swell); }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: var(--s2) var(--s3); border-bottom: 1px solid var(--swell); }
+  .r-card iframe { flex: 1; width: 100%; border: 0; background: var(--sea); }
 </style>
 
 <script>
-  import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2 } from '../scripts/format';
+  import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { leadWithRank } from '@av-livn/scoring';
+  import { renderHeatmap, type HoursData, type HourSpot } from '../scripts/heatmap';
+  import type { MapApi } from '../scripts/map';
 
   type Spot = {
-    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean;
-    access: string | null;
+    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
-  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; reason: string | null };
+  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-  const list = $('spots');
-  const meta = $('meta');
-  const empty = $('empty');
+  const app = $('app');
   const HOUR = 3_600_000;
-  const TZ_OFF = 3; // Europe/Istanbul is UTC+3 all year (no DST since 2016)
-
+  const TZ_OFF = 3;
   const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
   const HIDE = 'av-livn-hide-access';
+  const nowHour = Math.floor(Date.now() / HOUR);
+  let sel = 0; // column index from nowHour
   let all: Spot[] = [];
+  let hours: HoursData | null = null;
   let fetched: string | null = null;
-  let at: string | null = null; // null = now
+  const atIso = () => (sel === 0 ? null : new Date((nowHour + sel) * HOUR).toISOString());
   const box = $<HTMLInputElement>('hide-access');
   try { box.checked = localStorage.getItem(HIDE) === '1'; } catch {}
+  const hidden = (s: { access: string | null }) => box.checked && !!s.access && s.access !== 'acik';
   box.addEventListener('change', () => {
     try { localStorage.setItem(HIDE, box.checked ? '1' : '0'); } catch {}
     render();
+    heat();
   });
 
+  // ---------------------------------------------------------------- card drawer
+  const wide = matchMedia('(min-width: 768px)');
+  function openSpot(id: string, col = sel) {
+    const t = new Date((nowHour + col) * HOUR).toISOString();
+    const url = `/mera/?id=${encodeURIComponent(id)}&t=${encodeURIComponent(t)}`;
+    if (!wide.matches) { location.href = url; return; }
+    $<HTMLIFrameElement>('drawer-frame').src = `${url}&embed=1`;
+    $<HTMLAnchorElement>('drawer-open').href = url;
+    $('drawer-title').textContent = all.find((s) => s.id === id)?.name ?? hours?.spots.find((s) => s.id === id)?.name ?? 'Mera kartı';
+    $('drawer').hidden = false;
+    mapApi?.flyTo(id);
+    requestAnimationFrame(() => mapApi?.resize());
+  }
+  $('drawer-close').addEventListener('click', () => { $('drawer').hidden = true; requestAnimationFrame(() => mapApi?.resize()); });
+  addEventListener('message', (e) => { if (e.origin === location.origin && e.data === 'close-card') $('drawer-close').click(); });
+
+  // ---------------------------------------------------------------- map (only where it is visible: ≥768 px)
+  let mapApi: MapApi | null = null;
+  async function ensureMap() {
+    if (mapApi || !wide.matches || app.dataset.tab === 'heat' && innerWidth < 1920 && innerWidth >= 1200) return;
+    const { mountMap } = await import('../scripts/map');
+    mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id) });
+  }
+  const tab = (t: 'map' | 'heat') => {
+    app.dataset.tab = t;
+    $('tab-map').setAttribute('aria-selected', String(t === 'map'));
+    $('tab-heat').setAttribute('aria-selected', String(t === 'heat'));
+    if (t === 'map') ensureMap().then(() => mapApi?.resize());
+    else heat();
+  };
+  $('tab-map').addEventListener('click', () => tab('map'));
+  $('tab-heat').addEventListener('click', () => tab('heat'));
+  wide.addEventListener('change', () => ensureMap());
+
   // ---------------------------------------------------------------- hour picker (Istanbul local time)
-  const nowHour = Math.floor(Date.now() / HOUR);
-  const local = (h: number) => new Date((h + TZ_OFF) * HOUR); // UTC fields = Istanbul wall clock
   const day = $<HTMLSelectElement>('day');
   const hourSel = $<HTMLSelectElement>('hour');
+  const local = (h: number) => new Date((h + TZ_OFF) * HOUR);
   const days = [0, 1, 2, 3].map((k) => {
     const d = local(nowHour + 24 * k);
-    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / HOUR - TZ_OFF; // epoch hour of local midnight
-  }).filter((m, i) => i < 3 || m < nowHour + 72);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / HOUR - TZ_OFF;
+  }).filter((m) => m < nowHour + 72);
   day.innerHTML = days.map((m, i) => `<option value="${m}">${i === 0 ? 'Bugün' : i === 1 ? 'Yarın' : fmtDay(new Date((m + 12) * HOUR).toISOString())}</option>`).join('');
   function fillHours() {
     const m = Number(day.value);
-    const opts = [];
-    for (let h = 0; h < 24; h++) {
-      const e = m + h;
-      if (e < nowHour || e > nowHour + 71) continue;
-      opts.push(`<option value="${e}">${String(h).padStart(2, '0')}:00</option>`);
-    }
-    hourSel.innerHTML = opts.join('');
+    const o: string[] = [];
+    for (let h = 0; h < 24; h++) if (m + h >= nowHour && m + h <= nowHour + 71) o.push(`<option value="${m + h}">${String(h).padStart(2, '0')}:00</option>`);
+    hourSel.innerHTML = o.join('');
   }
-  function setNow() {
-    at = null;
-    $('now').classList.add('on');
-    day.value = String(days[0]);
-    fillHours();
-    hourSel.value = String(nowHour);
-    load();
-  }
-  function setHour(h: number) {
-    const m = [...days].reverse().find((d) => d <= h) ?? days[0]!;
-    day.value = String(m);
+  function setCol(col: number) {
+    sel = Math.max(0, Math.min(71, col));
+    const h = nowHour + sel;
+    day.value = String([...days].reverse().find((d) => d <= h) ?? days[0]);
     fillHours();
     hourSel.value = String(h);
-    at = h === nowHour ? null : new Date(h * HOUR).toISOString();
-    $('now').classList.toggle('on', at === null);
+    $('now').classList.toggle('on', sel === 0);
     load();
+    heat();
+    mapApi?.setHour(atIso());
   }
-  $('now').addEventListener('click', setNow);
-  day.addEventListener('change', () => { fillHours(); setHour(Number(hourSel.value)); });
-  hourSel.addEventListener('change', () => setHour(Number(hourSel.value)));
+  $('now').addEventListener('click', () => setCol(0));
+  day.addEventListener('change', () => { fillHours(); setCol(Number(hourSel.value) - nowHour); });
+  hourSel.addEventListener('change', () => setCol(Number(hourSel.value) - nowHour));
 
   // ---------------------------------------------------------------- list
   function render() {
-    // Access does not change the score; the filter only hides spots from this list.
-    const spots = box.checked ? all.filter((s) => !s.access || s.access === 'acik') : all;
-    const when = at ? `${fmtDay(at)} ${fmtTime(at)} için sıra` : 'şu anki sıra';
-    meta.textContent = `${spots.length}${spots.length !== all.length ? ` / ${all.length}` : ''} mera, ${when}. ${fmtAgo(fetched)}. Bant geniş olduğunda sıra puandan daha anlamlıdır.`;
-    empty.hidden = spots.length > 0;
-    if (spots.length === 0) {
-      empty.textContent = all.length ? 'Filtreye uyan mera yok.' : 'Henüz mera yok.';
-      list.innerHTML = '';
-      return;
-    }
-    list.innerHTML = spots
+    const spots = all.filter((s) => !hidden(s));
+    const at = atIso();
+    $('meta').textContent = `${spots.length}${spots.length !== all.length ? ` / ${all.length}` : ''} mera, ${at ? `${fmtDay(at)} ${fmtTime(at)} için sıra` : 'şu anki sıra'}. ${fmtAgo(fetched)}.`;
+    $('empty').hidden = spots.length > 0;
+    if (!spots.length) $('empty').textContent = all.length ? 'Filtreye uyan mera yok.' : 'Henüz mera yok.';
+    $('spots').innerHTML = spots
       .map((s) => {
-        const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
         const sc = s.score;
-        const band = sc.p10 !== null && sc.p90 !== null ? `bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
+        const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
+        const band = sc.p10 !== null && sc.p90 !== null ? ` · bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
         const why = sc.gated
           ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
           : sc.total === null
-            ? '<p class="why muted">Puan henüz hesaplanmadı</p>'
-            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${all.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · lamba bilinmiyor'}</p>`;
-        const badge = s.access && ACCESS_BADGE[s.access] ? ` <span class="badge">${ACCESS_BADGE[s.access]}</span>` : '';
-        const reason = sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : '';
-        const href = `/mera/?id=${encodeURIComponent(s.id)}${at ? `&t=${encodeURIComponent(at)}` : ''}`;
-        return `<li><a class="spot" href="${href}">
-          <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
-          <span><h2>${esc(s.name)}${badge}</h2><p class="sub">${esc(sub)}</p>${why}${reason}</span></a></li>`;
+            ? '<p class="why">Puan henüz hesaplanmadı</p>'
+            : `<p class="why"><b class="rk">${sc.rank}.</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
+        const legal = swimRule(s.kind, at ?? new Date().toISOString());
+        const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '');
+        return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}" data-id="${esc(s.id)}">
+          <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
+          <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;
       })
       .join('');
-    list.querySelectorAll<HTMLElement>('.lamp').forEach((el) =>
-      lampV2(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'),
-    );
+    $('spots').querySelectorAll<HTMLElement>('.lamp').forEach((el) => lampV2(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'));
+    $('spots').querySelectorAll<HTMLAnchorElement>('a.spot').forEach((a) => a.addEventListener('click', (e) => {
+      if (!wide.matches) return;
+      e.preventDefault();
+      openSpot(a.dataset.id!);
+    }));
   }
-
   let seq = 0;
   function load() {
     const my = ++seq;
-    meta.textContent = 'Meralar yükleniyor…';
+    const at = atIso();
     fetch(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
@@ -190,43 +294,66 @@ import Base from '../layouts/Base.astro';
         fetched = b.data_fetched_at;
         render();
       })
-      .catch(() => { if (my === seq) meta.textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.'; });
+      .catch(() => { if (my === seq) $('meta').textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.'; });
   }
 
-  // ---------------------------------------------------------------- best windows
+  // ---------------------------------------------------------------- heat map
+  function heat() {
+    if (!hours) return;
+    const el = $('heat');
+    if (!el.clientWidth) return; // hidden tab; rendered when shown
+    renderHeatmap(el, hours, {
+      selected: sel,
+      hide: (s) => hidden(s),
+      badges: (s: HourSpot) => {
+        const a = s.access && s.access !== 'acik' ? `<tspan class="hm-b" dx="6">▲</tspan>` : '';
+        const l = swimRule(s.kind, new Date((nowHour + sel) * HOUR)) ? `<tspan class="hm-b legal" dx="4">●</tspan>` : '';
+        return a + l;
+      },
+      onCell: (id, col) => {
+        if (col !== sel) setCol(col);
+        openSpot(id, col);
+      },
+    });
+  }
+  fetch('/api/hours', { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    .then((b: HoursData) => { hours = b; heat(); })
+    .catch(() => { $('heat').innerHTML = '<p class="muted fs-2">Isı haritası alınamadı.</p>'; });
+  let rz = 0;
+  addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(heat); });
+
+  // ---------------------------------------------------------------- best windows (E3)
   fetch('/api/windows', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: { windows: Win[]; threshold: number }) => {
       const ol = $('windows');
-      if (!b.windows.length) {
-        ol.innerHTML = '<li class="muted">72 saat içinde öne çıkan pencere yok.</li>';
-        return;
-      }
+      if (!b.windows.length) { ol.innerHTML = '<li class="muted">72 saat içinde öne çıkan pencere yok.</li>'; return; }
       ol.innerHTML = b.windows
-        .map((w, i) => {
-          const sameDay = fmtDay(w.start) === fmtDay(new Date(Date.parse(w.end) - 1).toISOString());
-          const range = `${fmtDay(w.start)} ${fmtTime(w.start)}–${sameDay ? '' : `${fmtDay(w.end)} `}${fmtTime(w.end)}`;
+        .map((w) => {
+          const end = new Date(Date.parse(w.end)).toISOString();
           const band = w.p10 !== null && w.p90 !== null ? ` · bant ${Math.round(w.p10)}–${Math.round(w.p90)}` : '';
-          return `<li><div class="win">
-            <span class="t">${esc(range)}</span>
+          const col = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
+          return `<li class="card win">
+            <span class="t">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(end)}</span>
             <span class="s">${Math.round(w.total)}<small>${w.rank}. sıra</small></span>
             <span class="n">${esc(w.name)}</span>
-            ${w.reason ? `<span class="r">En iyi saat ${fmtTime(w.peak)}${band}. ${esc(w.reason)}</span>` : ''}
-            <span class="act"><a href="/mera/?id=${encodeURIComponent(w.spot_id)}&t=${encodeURIComponent(w.peak)}">Merayı aç</a><button type="button" data-h="${Math.floor(Date.parse(w.peak) / HOUR)}" data-i="${i}">Listeyi bu saate göre sırala</button></span>
-          </div></li>`;
+            <span class="r">En iyi saat ${fmtTime(w.peak)}${band}.${w.why ? ` ${esc(w.why)}.` : ''} ${w.assumed ? '<span class="badge assume">varsayıma dayanıyor</span>' : ''}</span>
+            <span class="actions"><button type="button" class="btn small" data-open="${esc(w.spot_id)}" data-c="${col}">Merayı aç</button><button type="button" class="btn small secondary" data-c="${col}">Bu saate göre sırala</button></span>
+          </li>`;
         })
         .join('');
-      ol.querySelectorAll<HTMLButtonElement>('button[data-h]').forEach((btn) =>
-        btn.addEventListener('click', () => {
-          setHour(Number(btn.dataset.h));
-          $('day').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }),
-      );
+      ol.querySelectorAll<HTMLButtonElement>('button').forEach((btn) => btn.addEventListener('click', () => {
+        const c = Number(btn.dataset.c);
+        if (btn.dataset.open) openSpot(btn.dataset.open, c);
+        else setCol(c);
+      }));
       $('win-note').textContent = b.threshold < 65
-        ? `72 saatte 65 puanı geçen yeterli saat yok; en yüksek %15'lik dilim (≥ ${Math.round(b.threshold)}) gösteriliyor.`
-        : 'Pencere: puanın 65 ve üstünde kaldığı kesintisiz saatler; güvenlik uyarısı olan saatler hariç.';
+        ? `72 saatte 65'i geçen saat az; en yüksek %15'lik dilim (≥ ${Math.round(b.threshold)}) gösteriliyor.`
+        : 'Pencere: zirve saatin çevresinde puanın 65 ve zirve − 8\'in üstünde kaldığı en çok 4 saat; mera başına bir pencere.';
     })
     .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; });
 
-  setNow();
+  setCol(0);
+  ensureMap();
 </script>

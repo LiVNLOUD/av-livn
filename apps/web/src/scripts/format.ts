@@ -55,3 +55,14 @@ export const compass = (deg: number | null): string =>
 export function esc(s: string | null | undefined): string {
   return (s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 }
+
+/**
+ * E7: 6/2 Tebliğ md. 16(5) — 1 Nisan–15 Kasım arası şamandıralı yüzme alanlarında avcılık yasak (docs/REGULATION.md).
+ * Shown on beach spots for dates in that range; the exact extent (200 m) is marked "doğrulanmalı" there.
+ */
+export function swimRule(kind: string, iso: string | Date): string | null {
+  if (kind !== 'beach') return null;
+  const d = new Date(new Date(iso).getTime() + 3 * 3_600_000);
+  const md = (d.getUTCMonth() + 1) * 100 + d.getUTCDate();
+  return md >= 401 && md <= 1115 ? 'Yüzme alanı: 1 Nis–15 Kas avcılık yasak' : null;
+}

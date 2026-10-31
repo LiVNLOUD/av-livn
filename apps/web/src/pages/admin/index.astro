@@ -1,13 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
+import AdminLogin from '../../components/AdminLogin.astro';
 ---
 <Base title="Mera yönetimi — av.livn">
   <div class="wrap">
     <h1>Mera yönetimi</h1>
-    <form id="login" class="stack">
-      <label>Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
-      <button type="submit">Giriş yap</button>
-    </form>
+    <AdminLogin />
     <p class="msg" id="msg" role="status"></p>
 
     <section id="panel" hidden>
@@ -50,25 +48,25 @@ import Base from '../../layouts/Base.astro';
 </Base>
 
 <style>
-  h1 { font-size: 1.8rem; font-weight: 740; font-stretch: 80%; margin: 16px 0 12px; }
-  h2 { font-size: 1rem; margin: 26px 0 10px; }
+  h1 { font-size: var(--fs-5); font-weight: 740; font-stretch: 80%; margin: 16px 0 12px; }
+  h2 { font-size: var(--fs-3); margin: 26px 0 10px; }
   .stack { display: grid; gap: 12px; margin-top: 12px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .msg { min-height: 1.5em; font-size: 0.9rem; }
+  .msg { min-height: 1.5em; font-size: var(--fs-2); }
   .msg.err { color: var(--storm); }
   .go { color: var(--sodium); font-weight: 650; }
-  .small { font-size: 0.84rem; margin: 0 0 8px; }
+  .small { font-size: var(--fs-2); margin: 0 0 8px; }
   .cands { list-style: none; padding: 0; margin: 8px 0 0; max-height: 60vh; overflow: auto; }
   .cands li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--swell); }
   .cands b { font-weight: 620; }
-  .cands span { display: block; font-size: 0.8rem; color: var(--mist); }
+  .cands span { display: block; font-size: var(--fs-1); color: var(--mist); }
   .cands button { min-height: 44px; padding: 0 12px; }
   #cand-filter { width: 100%; }
   .linkish { background: none; border: 0; color: var(--mist); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
 </style>
 
 <script>
-  import { getToken, logout, setToken } from '../../scripts/admin';
+  import { getToken, logout, mountLogin } from '../../scripts/admin';
   type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null; kind: string; place: string | null; access: string | null };
   const KIND_TR: Record<string, string> = { pier: 'iskele', breakwater: 'mendirek', groyne: 'mahmuz', quay: 'rıhtım', harbour: 'liman / barınak', rocky: 'kayalık kıyı', beach: 'kumsal', river_mouth: 'dere ağzı', manual: 'elle' };
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık (tahmin)', belirsiz: 'erişim belirsiz', kisitli_feribot: 'kısıtlı olabilir' };
@@ -139,18 +137,9 @@ import Base from '../../layouts/Base.astro';
     load().catch(() => say('Meralar alınamadı.', true));
   }
 
-  $('login').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    token = $<HTMLInputElement>('token').value.trim();
-    try {
-      // Probe auth with an empty patch: 400 means the token is accepted.
-      await api('/api/admin/spots/_', 'PATCH', {}).catch((err: Error) => { if (!/empty_patch/.test(err.message)) throw err; });
-      setToken(token);
-      say('Giriş yapıldı.');
-      open();
-    } catch (err) {
-      say((err as Error).message, true);
-    }
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    await open();
   });
 
   $('pick').addEventListener('change', fill);
@@ -194,5 +183,4 @@ import Base from '../../layouts/Base.astro';
   });
 
   $('logout').addEventListener('click', () => { logout(); location.reload(); });
-  if (token) open();
 </script>

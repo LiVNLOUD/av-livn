@@ -17,6 +17,7 @@ const NO_CACHE = { 'cache-control': 'no-cache' };
 publicRoutes.get('/spots', (c) => (c.req.query('species') && c.req.query('species') !== 'istavrit' ? c.json({ ok: false, error: 'species_not_ready' }, 400) : listV2(c)));
 publicRoutes.get('/spots/:id', (c) => detailV2(c));
 publicRoutes.get('/windows', (c) => windowsV2(c));
+publicRoutes.get('/hours', (c) => hoursV2(c));
 
 type Ctx = Context<{ Bindings: Env }>;
 
@@ -37,7 +38,7 @@ async function listV2(c: Ctx) {
     c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
   ]);
   const nowHour = hourOf(c);
-  type Row = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null };
+  type Row = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
   const all = rows!.results as Row[];
   const spots = all.map((r) => {
     const e = r.list_json && r.start_hour !== null ? (JSON.parse(r.list_json) as ListEntryV2[])[nowHour - r.start_hour] : undefined;
@@ -51,7 +52,38 @@ async function listV2(c: Ctx) {
   spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
   const at = (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null;
   const version = all.find((r) => r.model_version)?.model_version ?? null;
-  return c.json({ ok: true, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, count: spots.length, spots }, 200, NO_CACHE);
+  const scored = all.reduce<string | null>((m, r) => (r.scored_at && (m === null || r.scored_at > m) ? r.scored_at : m), null);
+  return c.json({ ok: true, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, scored_at: scored, count: spots.length, spots }, 200, NO_CACHE);
+}
+
+/**
+ * Spot × hour grid for the heat map (E2): per active spot the next 72 h as compact arrays — score (rounded),
+ * band width (p90 − p10) and gated flag. Public info only (same as the list).
+ */
+async function hoursV2(c: Ctx) {
+  const [rows, fetched] = await c.env.DB.batch([
+    c.env.DB.prepare(`SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`),
+    c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
+  ]);
+  const from = Math.floor(Date.now() / HOUR);
+  type Row = SpotRow & { start_hour: number; list_json: string; scored_at: string };
+  const all = rows!.results as Row[];
+  const spots = all.map((r) => {
+    const list = JSON.parse(r.list_json) as ListEntryV2[];
+    const t: (number | null)[] = [];
+    const w: (number | null)[] = [];
+    const g: number[] = [];
+    for (let i = 0; i < 72; i++) {
+      const e = list[from + i - r.start_hour];
+      t.push(e && e[0] !== null ? Math.round(e[0]) : null);
+      w.push(e && e[1] !== null && e[2] !== null ? Math.round(e[2] - e[1]) : null);
+      if (e && e[4] === 1) g.push(i);
+    }
+    const p = publicSpot(r);
+    return { id: p.id, name: p.name, kind: p.kind, place: p.place, access: p.access, status: p.status, lat: p.lat, lon: p.lon, t, w, g };
+  });
+  const scored = all.reduce<string | null>((m, r) => (m === null || r.scored_at > m ? r.scored_at : m), null);
+  return c.json({ ok: true, from: new Date(from * HOUR).toISOString(), hours: 72, scored_at: scored, data_fetched_at: (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null, spots }, 200, NO_CACHE);
 }
 
 /** Best windows of the next 72 h (D2): spot, time range, peak score/rank/band and the main reason at the peak. */
