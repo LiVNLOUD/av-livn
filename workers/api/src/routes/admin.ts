@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { CELL_DEG, cellKey } from '../lib/seed';
-import { loadSnapshots, publicSpot, STATUSES, type SpotRow } from '../lib/spots';
+import { ACTIVE, loadSnapshots, publicSpot, STATUSES, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
@@ -38,6 +38,7 @@ export function validateFields(body: Fields): Valid {
   if (body.has_light !== undefined) {
     if (body.has_light !== null && typeof body.has_light !== 'boolean') return { ok: false, error: 'invalid_has_light' };
     set.has_light = body.has_light === null ? null : body.has_light ? 1 : 0;
+    set.lamp_admin = set.has_light;
   }
   if (body.status !== undefined) {
     if (!STATUSES.includes(body.status as (typeof STATUSES)[number])) return { ok: false, error: 'invalid_status' };
@@ -119,6 +120,8 @@ const SNAGS = ['yosun', 'midye', 'camur', 'hicbiri'] as const;
 const STRUCTURES = ['iskele', 'mendirek', 'dogal_kaya'] as const;
 const COLORS = ['beyaz', 'sari', 'led'] as const;
 const ACCESS = ['acik', 'kisitli_feribot', 'belirsiz'] as const;
+const KINDS = ['saha', 'uzaktan', 'masabasi'] as const;
+const REVIEW = ['onaysiz', 'onayli', 'reddedildi'] as const;
 const MAX_PHOTO_B64 = 550_000; // ≈ 400 KB JPEG
 
 export interface FieldInput {
@@ -133,6 +136,11 @@ export interface FieldInput {
   note: string | null;
   depths: { distance_m: number; method: 'plumb' | 'sink'; depth_m: number | null; sink_s: number | null; jig_g: number | null }[];
   photo: { mime: string; data_b64: string } | null;
+  /** saha ölçümü / uzaktan gözlem / masa başı veri (model priority saha > uzaktan > masabasi). */
+  source_kind: (typeof KINDS)[number];
+  status: (typeof REVIEW)[number];
+  light_prob: number | null;
+  evidence: Record<string, string> | null;
 }
 
 const oneOf = <T extends string>(v: unknown, list: readonly T[]): v is T => typeof v === 'string' && (list as readonly string[]).includes(v);
@@ -162,6 +170,13 @@ export function validateFieldInput(b: Record<string, unknown>, now: Date): { ok:
       depths.push({ distance_m: d.distance_m, method: 'sink', depth_m: null, sink_s: d.sink_s, jig_g: d.jig_g });
     } else return { ok: false, error: 'invalid_method' };
   }
+  if (!opt(b.source_kind) && !oneOf(b.source_kind, KINDS)) return { ok: false, error: 'invalid_source_kind' };
+  const kind = (opt(b.source_kind) ? 'saha' : b.source_kind) as FieldInput['source_kind'];
+  if (!opt(b.status) && !oneOf(b.status, REVIEW)) return { ok: false, error: 'invalid_status' };
+  if (!opt(b.light_prob) && !inRange(b.light_prob, 0, 1)) return { ok: false, error: 'invalid_light_prob' };
+  if (kind === 'saha' && !opt(b.light_prob)) return { ok: false, error: 'light_prob_needs_non_field_source' };
+  if (kind !== 'saha' && depths.some((d) => d.method === 'sink')) return { ok: false, error: 'sink_time_needs_field_source' };
+  if (!opt(b.evidence) && (typeof b.evidence !== 'object' || Array.isArray(b.evidence) || JSON.stringify(b.evidence).length > 2000)) return { ok: false, error: 'invalid_evidence' };
   let photo: FieldInput['photo'] = null;
   if (!opt(b.photo)) {
     const p = b.photo as Record<string, unknown>;
@@ -182,17 +197,41 @@ export function validateFieldInput(b: Record<string, unknown>, now: Date): { ok:
       note: opt(b.note) ? null : (b.note as string),
       depths,
       photo,
+      source_kind: kind,
+      // Desk findings wait for the user's review; field and remote entries are the user's own.
+      status: (opt(b.status) ? (kind === 'masabasi' ? 'onaysiz' : 'onayli') : b.status) as FieldInput['status'],
+      light_prob: opt(b.light_prob) ? null : (b.light_prob as number),
+      evidence: opt(b.evidence) ? null : (b.evidence as Record<string, string>),
     },
   };
 }
 
-/** Recompute one spot's v2 score now (no Monte Carlo; band offsets reused) and store it as partial. */
-export async function rescoreNow(db: D1Database, id: string, now = new Date()): Promise<ListEntryV2 | null> {
+/**
+ * After a field edit: mark the spot for the 15-minute Monte Carlo run (score.yml --pending) and, unless
+ * meta.rescore_mode = 'deferred' (set when the point score costs > 10 ms CPU), write the point score now.
+ * Returns the new list entry, 'deferred', or null for an unknown spot.
+ */
+export async function rescoreNow(db: D1Database, id: string, now = new Date()): Promise<ListEntryV2 | 'deferred' | null> {
+  const [exists, mode] = await db.batch([
+    db.prepare('SELECT id FROM spots WHERE id = ?1').bind(id),
+    db.prepare("SELECT value FROM meta WHERE key = 'rescore_mode'"),
+  ]);
+  if (!exists!.results.length) return null;
+  const deferred = (mode!.results[0] as { value: string } | undefined)?.value === 'deferred';
+  await db
+    .prepare('INSERT INTO pending_rescore (spot_id, since, immediate) VALUES (?1, ?2, ?3) ON CONFLICT(spot_id) DO UPDATE SET since = excluded.since, immediate = excluded.immediate')
+    .bind(id, now.toISOString(), deferred ? 0 : 1)
+    .run();
+  if (deferred) return 'deferred';
+  return pointRescore(db, id, now);
+}
+
+async function pointRescore(db: D1Database, id: string, now: Date): Promise<ListEntryV2 | null> {
   const [spotRes, obsRes, depthRes, scoreRes, oSeries, oNormal] = await db.batch([
     db.prepare('SELECT * FROM spots WHERE id = ?1').bind(id),
     db.prepare('SELECT * FROM field_obs WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
-    db.prepare("SELECT v.spot_id, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.status != 'rejected'"),
+    db.prepare(`SELECT v.spot_id, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.${ACTIVE}`),
     db.prepare('SELECT * FROM ocean_series WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT * FROM ocean_normal WHERE spot_id = ?1').bind(id),
   ]);
@@ -218,6 +257,50 @@ export async function rescoreNow(db: D1Database, id: string, now = new Date()): 
   return (JSON.parse(rec.list_json) as ListEntryV2[])[0]!;
 }
 
+const scoreJson = (r: ListEntryV2 | 'deferred' | null) =>
+  r === 'deferred' || r === null
+    ? { rescore: 'deferred' as const, score: null }
+    : { rescore: 'immediate' as const, score: { total: r[0], p10: r[1], p90: r[2], rank: r[3], gated: r[4] === 1 } };
+
+/** Statements writing one observation (insert or full replace) and the spot fields it drives. */
+function obsStatements(db: D1Database, obsId: string, spotId: string, f: FieldInput, now: Date, replace: boolean): D1PreparedStatement[] {
+  const light = f.has_light === undefined || f.has_light === null ? null : f.has_light ? 1 : 0;
+  const cols = [obsId, spotId, f.observed_at, f.substrate ? JSON.stringify(f.substrate) : null, f.snag, f.structure, light, f.light_color, f.access, f.note,
+    now.toISOString(), f.source_kind, f.status, f.light_prob, f.evidence ? JSON.stringify(f.evidence) : null];
+  const out = [
+    ...(replace ? [db.prepare('DELETE FROM field_depth WHERE obs_id = ?1').bind(obsId)] : []),
+    db.prepare(
+      `INSERT INTO field_obs (id, spot_id, observed_at, substrate, snag, structure, has_light, light_color, access, note, created_at, source_kind, status, light_prob, evidence_json)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)
+       ON CONFLICT(id) DO UPDATE SET observed_at = excluded.observed_at, substrate = excluded.substrate, snag = excluded.snag, structure = excluded.structure,
+       has_light = excluded.has_light, light_color = excluded.light_color, access = excluded.access, note = excluded.note, source_kind = excluded.source_kind,
+       status = excluded.status, light_prob = excluded.light_prob, evidence_json = excluded.evidence_json`,
+    ).bind(...cols),
+    ...f.depths.map((d) =>
+      db.prepare('INSERT INTO field_depth (obs_id, distance_m, method, depth_m, sink_s, jig_g) VALUES (?1, ?2, ?3, ?4, ?5, ?6)').bind(obsId, d.distance_m, d.method, d.depth_m, d.sink_s, d.jig_g),
+    ),
+  ];
+  if (f.photo) out.push(db.prepare('INSERT OR REPLACE INTO field_photo (obs_id, mime, data_b64) VALUES (?1, ?2, ?3)').bind(obsId, f.photo.mime, f.photo.data_b64));
+  if (f.access && f.source_kind !== 'masabasi') out.push(db.prepare('UPDATE spots SET access = ?1, updated_at = ?2 WHERE id = ?3').bind(f.access, now.toISOString(), spotId));
+  return out;
+}
+
+/**
+ * spots.has_light is the field (saha) answer: the newest non-rejected saha observation with a lamp state.
+ * When none is left after an edit/delete, it falls back to the admin's value (lamp_admin), else NULL (unknown).
+ */
+function syncLamp(db: D1Database, spotId: string, now: Date): D1PreparedStatement {
+  return db
+    .prepare(
+      `UPDATE spots SET
+         has_light = COALESCE((SELECT has_light FROM field_obs WHERE spot_id = ?1 AND source_kind = 'saha' AND status != 'reddedildi' AND has_light IS NOT NULL
+                               ORDER BY observed_at DESC LIMIT 1), lamp_admin),
+         admin_edited_at = ?2, updated_at = ?2
+       WHERE id = ?1`,
+    )
+    .bind(spotId, now.toISOString());
+}
+
 adminRoutes.post('/spots/:id/field', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json<Record<string, unknown>>().catch(() => null);
@@ -225,28 +308,31 @@ adminRoutes.post('/spots/:id/field', async (c) => {
   const now = new Date();
   const v = validateFieldInput(body, now);
   if (!v.ok) return c.json(v, 400);
-  const f = v.value;
   const exists = await c.env.DB.prepare('SELECT id FROM spots WHERE id = ?1').bind(id).first();
   if (!exists) return c.json({ ok: false, error: 'not_found' }, 404);
   const obsId = `obs-${crypto.randomUUID().slice(0, 12)}`;
-  const light = f.has_light === undefined ? null : f.has_light === null ? null : f.has_light ? 1 : 0;
-  const stmts = [
-    c.env.DB.prepare(
-      `INSERT INTO field_obs (id, spot_id, observed_at, substrate, snag, structure, has_light, light_color, access, note, created_at)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`,
-    ).bind(obsId, id, f.observed_at, f.substrate ? JSON.stringify(f.substrate) : null, f.snag, f.structure, light, f.light_color, f.access, f.note, now.toISOString()),
-    ...f.depths.map((d) =>
-      c.env.DB.prepare('INSERT INTO field_depth (obs_id, distance_m, method, depth_m, sink_s, jig_g) VALUES (?1, ?2, ?3, ?4, ?5, ?6)').bind(obsId, d.distance_m, d.method, d.depth_m, d.sink_s, d.jig_g),
-    ),
-  ];
-  if (f.photo) stmts.push(c.env.DB.prepare('INSERT INTO field_photo (obs_id, mime, data_b64) VALUES (?1, ?2, ?3)').bind(obsId, f.photo.mime, f.photo.data_b64));
-  // The spot's lamp state and access follow the latest field answer; admin_edited_at keeps the seed from overwriting them.
-  if (f.has_light !== undefined) stmts.push(c.env.DB.prepare('UPDATE spots SET has_light = ?1, admin_edited_at = ?2, updated_at = ?2 WHERE id = ?3').bind(light, now.toISOString(), id));
-  if (f.access) stmts.push(c.env.DB.prepare('UPDATE spots SET access = ?1, updated_at = ?2 WHERE id = ?3').bind(f.access, now.toISOString(), id));
-  await c.env.DB.batch(stmts);
-  const rescore = c.req.query('rescore') !== '0';
-  const score = rescore ? await rescoreNow(c.env.DB, id, now) : null;
-  return c.json({ ok: true, obs_id: obsId, rescored: rescore, score: score && { total: score[0], p10: score[1], p90: score[2], rank: score[3], gated: score[4] === 1 } }, 201);
+  await c.env.DB.batch([...obsStatements(c.env.DB, obsId, id, v.value, now, false), syncLamp(c.env.DB, id, now)]);
+  const r = c.req.query('rescore') === '0' ? null : await rescoreNow(c.env.DB, id, now);
+  return c.json({ ok: true, obs_id: obsId, ...(r === null ? { rescore: 'skipped', score: null } : scoreJson(r)) }, 201);
+});
+
+adminRoutes.patch('/field/:obs', async (c) => {
+  const obsId = c.req.param('obs');
+  const o = await c.env.DB.prepare('SELECT spot_id FROM field_obs WHERE id = ?1').bind(obsId).first<{ spot_id: string }>();
+  if (!o) return c.json({ ok: false, error: 'not_found' }, 404);
+  const body = await c.req.json<Record<string, unknown>>().catch(() => null);
+  if (!body || typeof body !== 'object') return c.json({ ok: false, error: 'invalid_json' }, 400);
+  const now = new Date();
+  // Review only (onayla / reddet a desk finding): keep everything else.
+  if (Object.keys(body).length === 1 && 'status' in body) {
+    if (!oneOf(body.status, REVIEW)) return c.json({ ok: false, error: 'invalid_status' }, 400);
+    await c.env.DB.batch([c.env.DB.prepare('UPDATE field_obs SET status = ?1 WHERE id = ?2').bind(body.status, obsId), syncLamp(c.env.DB, o.spot_id, now)]);
+  } else {
+    const v = validateFieldInput(body, now);
+    if (!v.ok) return c.json(v, 400);
+    await c.env.DB.batch([...obsStatements(c.env.DB, obsId, o.spot_id, v.value, now, true), syncLamp(c.env.DB, o.spot_id, now)]);
+  }
+  return c.json({ ok: true, obs_id: obsId, ...scoreJson(await rescoreNow(c.env.DB, o.spot_id, now)) });
 });
 
 adminRoutes.get('/spots/:id/field', async (c) => {
@@ -262,17 +348,18 @@ adminRoutes.get('/spots/:id/field', async (c) => {
 adminRoutes.delete('/field/:obs', async (c) => {
   const o = await c.env.DB.prepare('SELECT spot_id FROM field_obs WHERE id = ?1').bind(c.req.param('obs')).first<{ spot_id: string }>();
   if (!o) return c.json({ ok: false, error: 'not_found' }, 404);
+  const now = new Date();
   await c.env.DB.batch([
     c.env.DB.prepare('DELETE FROM field_depth WHERE obs_id = ?1').bind(c.req.param('obs')),
     c.env.DB.prepare('DELETE FROM field_photo WHERE obs_id = ?1').bind(c.req.param('obs')),
     c.env.DB.prepare('DELETE FROM field_obs WHERE id = ?1').bind(c.req.param('obs')),
+    syncLamp(c.env.DB, o.spot_id, now),
   ]);
-  await rescoreNow(c.env.DB, o.spot_id);
-  return c.json({ ok: true });
+  return c.json({ ok: true, ...scoreJson(await rescoreNow(c.env.DB, o.spot_id, now)) });
 });
 
 adminRoutes.post('/spots/:id/rescore', async (c) => {
-  const score = await rescoreNow(c.env.DB, c.req.param('id'));
-  if (!score) return c.json({ ok: false, error: 'not_found' }, 404);
-  return c.json({ ok: true, score: { total: score[0], p10: score[1], p90: score[2], rank: score[3], gated: score[4] === 1 } });
+  const r = await rescoreNow(c.env.DB, c.req.param('id'));
+  if (r === null) return c.json({ ok: false, error: 'not_found' }, 404);
+  return c.json({ ok: true, ...scoreJson(r) });
 });

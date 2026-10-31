@@ -5,23 +5,28 @@ import type { Params } from './params';
 
 export const FLOOR = 0.05;
 
-export type Source = 'saha' | 'Copernicus' | 'EUSeaMap' | 'DTM-interpolasyon' | 'DTM-ölçüm' | 'yapı-uzunluğu-tahmini' | 'önsel' | 'OSM' | 'Open-Meteo' | 'astronomi';
+export type Source = 'saha' | 'uzaktan gözlem' | 'masa başı' | 'Copernicus' | 'EUSeaMap' | 'DTM-interpolasyon' | 'DTM-ölçüm' | 'yapı-uzunluğu-tahmini' | 'önsel' | 'OSM' | 'Open-Meteo' | 'astronomi';
 
 export type StructureKind = 'pier' | 'breakwater' | 'groyne' | 'manual';
+/** Where a field-table value comes from (priority saha > uzaktan > masabasi > DTM > prior). */
+export type FieldKind = 'saha' | 'uzaktan' | 'masabasi';
+export const KIND_SOURCE: Record<FieldKind, Source> = { saha: 'saha', uzaktan: 'uzaktan gözlem', masabasi: 'masa başı' };
+
 export type FieldStructure = 'iskele' | 'mendirek' | 'dogal_kaya';
 export type FieldSubstrate = 'kum' | 'cakil' | 'kaya' | 'midyeli' | 'yosunlu' | 'camur';
 
 export interface FieldDepth {
   distance_m: number;
   depth_m: number;
-  /** plumb (kurşunla dikine), sink_cal (batma süresi, aynı merada dikine ölçümle kalibre), sink (kalibresiz). */
-  quality?: 'plumb' | 'sink_cal' | 'sink';
+  /** plumb (kurşunla dikine), sink_cal (batma süresi, kalibre), sink (kalibresiz), remote (uzaktan gözlem), desk (masa başı: ÇED, OpenSeaMap). */
+  quality?: 'plumb' | 'sink_cal' | 'sink' | 'remote' | 'desk';
 }
 
-/** Weight of field depths against the prior: plumb 0.95, calibrated sink time 0.9, uncalibrated sink time 0.7. */
+/** Weight of field depths against the prior: plumb 0.95, calibrated sink 0.9, uncalibrated sink 0.7, remote/desk 0.6. */
 export function fieldWeight(pairs: FieldDepth[]): number {
   if (pairs.some((d) => (d.quality ?? 'plumb') === 'plumb')) return 0.95;
-  return pairs.some((d) => d.quality === 'sink_cal') ? 0.9 : 0.7;
+  if (pairs.some((d) => d.quality === 'sink_cal')) return 0.9;
+  return pairs.some((d) => d.quality === 'sink') ? 0.7 : 0.6;
 }
 
 /** Static description of a spot as the v2 model sees it. */
@@ -34,12 +39,20 @@ export interface SpotV2 {
   dtm: { d0_50: number | null; d50_150: number | null; interpolated: boolean };
   /** Field-measured (or sink-time converted) depth pairs along the cast; overrides the DTM. */
   fieldDepths?: FieldDepth[] | null;
-  substrate: { eusm: string | null; conf: number | null; field?: FieldSubstrate[] | null; hint?: FieldSubstrate | null };
+  /** Source kind of fieldDepths (default saha). */
+  fieldDepthKind?: FieldKind;
+  /** field: classes from the field table (fieldKind/fieldWeight: source and trust, default saha 0.9). */
+  substrate: { eusm: string | null; conf: number | null; field?: FieldSubstrate[] | null; fieldKind?: FieldKind; fieldWeight?: number; hint?: FieldSubstrate | null };
   fieldStructure?: FieldStructure | null;
+  fieldStructureKind?: FieldKind;
   /** 16-direction fetch (km), 0°, 22.5°, … */
   fetchKm: number[] | null;
   /** true / false from the field; null = unknown (probability mixture). */
   lamp: boolean | null;
+  /** Lamp probability from remote observation or desk data (overrides the structure prior when lamp is null). */
+  lampP?: number | null;
+  /** Source kind of `lamp` (if known) or `lampP`. */
+  lampSource?: FieldKind | null;
 }
 
 export interface Weather {
@@ -81,6 +94,7 @@ const CONF_WEIGHT = [0.2, 0.4, 0.6, 0.8];
 export const LAMP_PRIOR = { ferry: 0.85, pier: 0.5, breakwater: 0.3, groyne: 0.3, manual: 0.5 } as const;
 
 export function lampPrior(s: SpotV2): number {
+  if (s.lampP !== undefined && s.lampP !== null) return s.lampP;
   return s.ferry ? LAMP_PRIOR.ferry : LAMP_PRIOR[s.kind];
 }
 
@@ -129,7 +143,7 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
     const prior = depthPrior(s);
     const fw = fieldWeight(s.fieldDepths);
     depthM = fw * (0.4 * fieldBand(s.fieldDepths, 0, 50) + 0.6 * fieldBand(s.fieldDepths, 50, 150)) + (1 - fw) * prior;
-    depthSrc = 'saha';
+    depthSrc = KIND_SOURCE[s.fieldDepthKind ?? 'saha'];
   } else {
     const prior = depthPrior(s);
     const w = s.dtm.interpolated ? p.dtm_weight_interp : 0.9;
@@ -143,8 +157,9 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   let substrate: number;
   let subSrc: Source;
   if (s.substrate.field && s.substrate.field.length > 0) {
-    substrate = 0.9 * Math.max(...s.substrate.field.map((k) => SUBSTRATE_FIELD[k])) + 0.1 * SUBSTRATE_PRIOR;
-    subSrc = 'saha';
+    const w = s.substrate.fieldWeight ?? 0.9;
+    substrate = w * Math.max(...s.substrate.field.map((k) => SUBSTRATE_FIELD[k])) + (1 - w) * SUBSTRATE_PRIOR;
+    subSrc = KIND_SOURCE[s.substrate.fieldKind ?? 'saha'];
   } else if (s.substrate.hint) {
     substrate = 0.4 * SUBSTRATE_FIELD[s.substrate.hint] + 0.6 * SUBSTRATE_PRIOR;
     subSrc = 'saha';
@@ -165,7 +180,7 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
       [struct, p.w_struct],
       [substrate, p.w_substrate],
     ]),
-    sources: { struct: fs ? 'saha' : 'OSM', substrate: subSrc, depth: depthSrc },
+    sources: { struct: fs ? KIND_SOURCE[s.fieldStructureKind ?? 'saha'] : 'OSM', substrate: subSrc, depth: depthSrc },
   };
 }
 
@@ -261,9 +276,19 @@ export interface RawResult {
   lampP: number | null;
 }
 
+/** Static term values forced from outside (explain.ts ablation); hsiS is recomputed. */
+export type TermOverrides = Partial<Pick<StaticTerms, 'struct' | 'substrate' | 'depth'>>;
+
 /** Expected raw HSI. A fixed `lampDraw` selects one lamp scenario (Monte Carlo); otherwise unknown → mixture. */
-export function rawScore(s: SpotV2, w: Weather, p: Params, lampDraw?: boolean): RawResult {
-  const st = staticTerms(s, p);
+export function rawScore(s: SpotV2, w: Weather, p: Params, lampDraw?: boolean, ov?: TermOverrides): RawResult {
+  let st = staticTerms(s, p);
+  if (ov) {
+    st = { ...st, ...ov };
+    st.hsiS = geo([
+      [st.struct, p.w_struct],
+      [st.substrate, p.w_substrate],
+    ]);
+  }
   const lamp = s.lamp ?? lampDraw;
   if (lamp !== undefined) {
     const d = dynamicTerms(s, st, w, p, lamp);

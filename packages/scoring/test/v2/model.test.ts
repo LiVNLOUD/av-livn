@@ -186,3 +186,23 @@ describe('field depth weights', () => {
     expect(fieldWeight([{ distance_m: 10, depth_m: 3, quality: 'sink' }])).toBe(0.7);
   });
 });
+
+describe('source kinds and lamp probability', () => {
+  it('uses lampP over the structure prior and labels non-field sources', () => {
+    expect(lampPrior({ ...BASE, lampP: 0.95 })).toBe(0.95);
+    const st = staticTerms(
+      { ...BASE, fieldDepths: [{ distance_m: 50, depth_m: 6, quality: 'desk' }], fieldDepthKind: 'masabasi', substrate: { eusm: null, conf: null, field: ['kum'], fieldKind: 'uzaktan', fieldWeight: 0.7 }, fieldStructure: 'iskele', fieldStructureKind: 'uzaktan' },
+      P,
+    );
+    expect(st.sources).toEqual({ struct: 'uzaktan gözlem', substrate: 'uzaktan gözlem', depth: 'masa başı' });
+    expect(st.substrate).toBeCloseTo(0.7 * 0.8 + 0.3 * 0.75, 6);
+    expect(fieldWeight([{ distance_m: 1, depth_m: 1, quality: 'remote' }])).toBe(0.6);
+  });
+
+  it('term overrides recompute HSI_s', () => {
+    const a = rawScore(BASE, CALM, P);
+    const b = rawScore(BASE, CALM, P, undefined, { struct: 1, substrate: 1 });
+    expect(b.st.hsiS).toBe(1);
+    expect(b.raw).toBeGreaterThan(a.raw);
+  });
+});

@@ -124,3 +124,13 @@ describe('ranks and astronomy helpers', () => {
     expect(dayOfYear(new Date('2026-12-31T23:00:00Z'))).toBe(365);
   });
 });
+
+describe('lamp source labels', () => {
+  it('desk / remote lamp probability is labelled with its source', () => {
+    const [h] = scoreSeriesV2({ spot: { ...SPOT, lamp: null, lampP: 0.95, lampSource: 'masabasi' }, points: series(140), from: FROM, hours: 1, profile: SAFETY });
+    const c = h!.components.find((x) => x.key === 'lamba')!;
+    expect([c.source, c.reason, h!.lampP]).toEqual(['masa başı', 'lamba olasılığı 0.95', 0.95]);
+    const [k] = scoreSeriesV2({ spot: { ...SPOT, lamp: true, lampSource: 'uzaktan' }, points: series(140), from: FROM, hours: 1, profile: SAFETY });
+    expect(k!.components.find((x) => x.key === 'lamba')!.source).toBe('uzaktan gözlem');
+  });
+});

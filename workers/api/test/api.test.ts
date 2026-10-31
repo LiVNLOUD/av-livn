@@ -25,7 +25,7 @@ beforeAll(async () => {
 describe('GET /api/health', () => {
   it('reports the current schema', async () => {
     const body = await (await app.request('/api/health', {}, env)).json<{ ok: boolean; schema: string }>();
-    expect(body).toMatchObject({ ok: true, schema: 'v2.2' });
+    expect(body).toMatchObject({ ok: true, schema: 'v2.3' });
   });
 
   it('JSON 404 for unknown routes', async () => {

@@ -17,7 +17,7 @@ export interface ConvertedDepth {
   distance_m: number;
   depth_m: number;
   sd_m: number;
-  quality: 'plumb' | 'sink_cal' | 'sink';
+  quality: 'plumb' | 'sink_cal' | 'sink' | 'remote' | 'desk';
 }
 
 export const PAIR_M = 15;

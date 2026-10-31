@@ -31,6 +31,16 @@ describe('GET /api/spots?model=v2', () => {
     }
   });
 
+  it('"N mera içinde" has one source: list count = detail spot_count = active spots (rejected excluded)', async () => {
+    await env.DB.prepare("UPDATE spots SET status = 'rejected' WHERE id = 'osm-way-3'").run();
+    const list = await (await app.request('/api/spots?model=v2&c=1', {}, env)).json<ListBody>();
+    const det = await (await app.request('/api/spots/osm-way-1?model=v2&c=1', {}, env)).json<DetailBody>();
+    const n = await env.DB.prepare("SELECT count(*) AS n FROM spots WHERE status != 'rejected'").first<{ n: number }>();
+    expect([list.count, det.spot_count]).toEqual([n!.n, n!.n]);
+    expect(list.count).toBe(2);
+    await env.DB.prepare("UPDATE spots SET status = 'candidate' WHERE id = 'osm-way-3'").run();
+  });
+
   it('null score for spots without a v2 row', async () => {
     await env.DB.prepare("DELETE FROM spot_scores_v2 WHERE spot_id = 'osm-way-3'").run();
     const body = await (await app.request('/api/spots?model=v2&x=1', {}, env)).json<ListBody>();
@@ -88,7 +98,7 @@ describe('field records and v2 inputs', () => {
 });
 
 describe('single-spot rescore', () => {
-  it('reuses the previous band offsets and re-ranks against stored totals', async () => {
+  it('point score only: band cleared, rank against stored totals, previous reason kept', async () => {
     const rows = (await env.DB.prepare('SELECT * FROM spots ORDER BY id').all()).results as unknown as SpotRow[];
     const stored = (await env.DB.prepare('SELECT spot_id, start_hour, list_json FROM spot_scores_v2 ORDER BY spot_id').all<{ spot_id: string; start_hour: number; list_json: string }>()).results;
     const parse = (r: { start_hour: number; list_json: string }) => ({ start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] });
@@ -96,16 +106,15 @@ describe('single-spot rescore', () => {
     const row = rows[0]!;
     const snaps = await loadSnapshots(env.DB, [row.wx_cell, row.sea_cell!]);
     const now = new Date();
-    const rec = rescoreSpot(row, snaps.get(row.wx_cell), snaps.get(row.sea_cell!), now, undefined, parse(stored[0]!), stored.slice(1).map(parse));
+    const prev = parse(stored[0]!);
+    const rec = rescoreSpot(row, snaps.get(row.wx_cell), snaps.get(row.sea_cell!), now, undefined, prev, stored.slice(1).map(parse));
     const list = JSON.parse(rec.list_json) as ListEntryV2[];
-    const old = parse(stored[0]!).list[0]!;
-    expect(list[0]![0]).toBe(old[0]);
-    expect(list[0]![2]! - list[0]![1]!).toBeCloseTo(old[2]! - old[1]!, 6);
+    expect(list[0]![0]).toBe(prev.list[0]![0]);
+    expect([list[0]![1], list[0]![2]]).toEqual([null, null]);
     expect(list[0]![3]).toBeGreaterThanOrEqual(1);
+    expect(list[0]![6]).toEqual(prev.list[0]![6]);
     const fresh = rescoreSpot(row, snaps.get(row.wx_cell), undefined, now, undefined, null, []);
     expect((JSON.parse(fresh.list_json) as ListEntryV2[])[0]!.slice(1, 4)).toEqual([null, null, 1]);
-    const empty = rescoreSpot(row, undefined, undefined, now, undefined, parse(stored[0]!), []);
-    expect((JSON.parse(empty.list_json) as ListEntryV2[])[0]!.slice(0, 3)).toEqual([null, null, null]);
   });
 
   it('packV2 keeps component metadata once', () => {

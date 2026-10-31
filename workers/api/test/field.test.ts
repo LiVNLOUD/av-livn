@@ -72,8 +72,10 @@ describe('POST /api/admin/spots/:id/field', () => {
       photo: { mime: 'image/jpeg', data_b64: 'QUJD' },
     });
     expect(res.status).toBe(201);
-    const b = await res.json<{ ok: boolean; obs_id: string; rescored: boolean; score: { total: number; rank: number } }>();
-    expect(b.rescored).toBe(true);
+    const b = await res.json<{ ok: boolean; obs_id: string; rescore: string; score: { total: number; rank: number; p10: number | null } }>();
+    expect(b.rescore).toBe('immediate');
+    expect(b.score.p10).toBeNull(); // band comes with the 15-minute Monte Carlo run
+    expect(await env.DB.prepare("SELECT immediate FROM pending_rescore WHERE spot_id = 'osm-way-2'").first()).toEqual({ immediate: 1 });
     expect(b.score.total).toBeGreaterThan(0);
     const spot = await env.DB.prepare("SELECT has_light, access, admin_edited_at FROM spots WHERE id = 'osm-way-2'").first<Record<string, unknown>>();
     expect(spot).toMatchObject({ has_light: 1, access: 'acik' });
@@ -97,7 +99,7 @@ describe('POST /api/admin/spots/:id/field', () => {
 
   it('can skip the rescore, rejects bad input and unknown spots', async () => {
     const r = await post('/api/admin/spots/osm-way-1/field?rescore=0', { note: 'sadece not' });
-    expect(await r.json()).toMatchObject({ ok: true, rescored: false, score: null });
+    expect(await r.json()).toMatchObject({ ok: true, rescore: 'skipped', score: null });
     expect((await post('/api/admin/spots/osm-way-1/field', { snag: 'x' })).status).toBe(400);
     expect((await app.request('/api/admin/spots/osm-way-1/field', { method: 'POST', headers: AUTH, body: 'nope' }, env)).status).toBe(400);
     expect((await post('/api/admin/spots/none/field', {})).status).toBe(404);
@@ -105,11 +107,70 @@ describe('POST /api/admin/spots/:id/field', () => {
 
   it('on-demand rescore and deleting an observation', async () => {
     const r = await post('/api/admin/spots/osm-way-1/rescore', {});
-    expect(await r.json()).toMatchObject({ ok: true, score: { gated: false } });
+    expect(await r.json()).toMatchObject({ ok: true, rescore: 'immediate', score: { gated: false } });
     expect((await post('/api/admin/spots/none/rescore', {})).status).toBe(404);
     const list = await (await app.request('/api/admin/spots/osm-way-1/field', { headers: AUTH }, env)).json<{ observations: { id: string }[] }>();
     const id = list.observations[0]!.id;
     expect((await app.request(`/api/admin/field/${id}`, { method: 'DELETE', headers: AUTH }, env)).status).toBe(200);
     expect((await app.request(`/api/admin/field/${id}`, { method: 'DELETE', headers: AUTH }, env)).status).toBe(404);
+  });
+});
+
+describe('field sources, review, edit and deferred rescoring', () => {
+  it('validates source kinds and their constraints', () => {
+    expect(validateFieldInput({ source_kind: 'x' }, NOW)).toEqual({ ok: false, error: 'invalid_source_kind' });
+    expect(validateFieldInput({ status: 'x' }, NOW)).toEqual({ ok: false, error: 'invalid_status' });
+    expect(validateFieldInput({ source_kind: 'masabasi', light_prob: 2 }, NOW)).toEqual({ ok: false, error: 'invalid_light_prob' });
+    expect(validateFieldInput({ light_prob: 0.9 }, NOW)).toEqual({ ok: false, error: 'light_prob_needs_non_field_source' });
+    expect(validateFieldInput({ source_kind: 'uzaktan', depths: [{ distance_m: 10, method: 'sink', sink_s: 5, jig_g: 2 }] }, NOW)).toEqual({ ok: false, error: 'sink_time_needs_field_source' });
+    expect(validateFieldInput({ source_kind: 'masabasi', evidence: [1] }, NOW)).toEqual({ ok: false, error: 'invalid_evidence' });
+    const d = validateFieldInput({ source_kind: 'masabasi', light_prob: 0.95, evidence: { source: 'OSM', confidence: 'orta' } }, NOW);
+    expect(d.ok && [d.value.status, d.value.light_prob]).toEqual(['onaysiz', 0.95]);
+    const u = validateFieldInput({ source_kind: 'uzaktan' }, NOW);
+    expect(u.ok && u.value.status).toBe('onayli');
+  });
+
+  it('desk lamp probability drives the model until a field answer exists; review and edit rescore', async () => {
+    const r = await post('/api/admin/spots/osm-way-3/field', { source_kind: 'masabasi', light_prob: 0.95, evidence: { source: 'OSM street_lamp', confidence: 'orta' } });
+    const { obs_id } = await r.json<{ obs_id: string }>();
+    const comps = async () => {
+      const d = await (await app.request('/api/spots/osm-way-3?model=v2&hours=1', {}, env)).json<{ packed: { meta: { comps: unknown[][] }; h: unknown[][] } }>();
+      const i = d.packed.meta.comps.findIndex((c) => c[0] === 'lamba');
+      return { source: d.packed.meta.comps[i]![4], lampP: d.packed.h[d.packed.h.length > 0 ? 0 : 0]![8] };
+    };
+    expect(await comps()).toMatchObject({ source: 'masa başı' });
+    // reject → back to the prior
+    const rej = await app.request(`/api/admin/field/${obs_id}`, { method: 'PATCH', headers: AUTH, body: JSON.stringify({ status: 'reddedildi' }) }, env);
+    expect(await rej.json()).toMatchObject({ ok: true, rescore: 'immediate' });
+    expect(await comps()).toMatchObject({ source: 'önsel' });
+    expect((await app.request(`/api/admin/field/${obs_id}`, { method: 'PATCH', headers: AUTH, body: JSON.stringify({ status: 'x' }) }, env)).status).toBe(400);
+    // full edit: turn it into a field answer → spot lamp known
+    const ed = await app.request(`/api/admin/field/${obs_id}`, { method: 'PATCH', headers: AUTH, body: JSON.stringify({ source_kind: 'saha', has_light: false, note: 'düzeltildi' }) }, env);
+    expect(ed.status).toBe(200);
+    expect(await env.DB.prepare("SELECT has_light FROM spots WHERE id = 'osm-way-3'").first()).toEqual({ has_light: 0 });
+    expect(await comps()).toMatchObject({ source: 'saha' });
+    expect((await app.request(`/api/admin/field/${obs_id}`, { method: 'PATCH', headers: AUTH, body: JSON.stringify({ snag: 'x' }) }, env)).status).toBe(400);
+    expect((await app.request(`/api/admin/field/${obs_id}`, { method: 'PATCH', headers: AUTH, body: 'x' }, env)).status).toBe(400);
+    expect((await app.request('/api/admin/field/none', { method: 'PATCH', headers: AUTH, body: '{}' }, env)).status).toBe(404);
+    // delete → lamp falls back to unknown
+    await app.request(`/api/admin/field/${obs_id}`, { method: 'DELETE', headers: AUTH }, env);
+    expect(await env.DB.prepare("SELECT has_light FROM spots WHERE id = 'osm-way-3'").first()).toEqual({ has_light: null });
+  });
+
+  it('deferred mode only records the change for the 15-minute run', async () => {
+    await env.DB.prepare("INSERT OR REPLACE INTO meta (key, value) VALUES ('rescore_mode', 'deferred')").run();
+    const r = await post('/api/admin/spots/osm-way-1/field', { note: 'ertelenmiş' });
+    expect(await r.json()).toMatchObject({ rescore: 'deferred', score: null });
+    expect(await env.DB.prepare("SELECT immediate FROM pending_rescore WHERE spot_id = 'osm-way-1'").first()).toEqual({ immediate: 0 });
+    await env.DB.prepare("DELETE FROM meta WHERE key = 'rescore_mode'").run();
+  });
+
+  it('an admin-set lamp survives deleting field entries', async () => {
+    await app.request('/api/admin/spots/osm-way-1', { method: 'PATCH', headers: AUTH, body: JSON.stringify({ has_light: true }) }, env);
+    const r = await post('/api/admin/spots/osm-way-1/field', { has_light: false });
+    const { obs_id } = await r.json<{ obs_id: string }>();
+    expect(await env.DB.prepare("SELECT has_light FROM spots WHERE id = 'osm-way-1'").first()).toEqual({ has_light: 0 });
+    await app.request(`/api/admin/field/${obs_id}`, { method: 'DELETE', headers: AUTH }, env);
+    expect(await env.DB.prepare("SELECT has_light FROM spots WHERE id = 'osm-way-1'").first()).toEqual({ has_light: 1 });
   });
 });

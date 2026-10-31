@@ -1,13 +1,13 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  fieldDepths, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2,
-  type ConvertedDepth, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour,
+  DEFAULTS, explain, fieldDepths, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, weatherAt,
+  type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
 import type { Snapshot } from './lib/openmeteo';
 import { mergeSnapshots } from './lib/series';
-import { haversineKm, type SpotRow } from './lib/spots';
+import { ACTIVE, haversineKm, type SpotRow } from './lib/spots';
 
 export const HOURS_V2 = 75;
 export const DRAWS = 200;
@@ -27,6 +27,11 @@ export interface FieldObsRow {
   light_color: string | null;
   access: string | null;
   note: string | null;
+  /** saha > uzaktan > masabasi (migration 0008; absent in older rows = saha). */
+  source_kind?: FieldKind;
+  status?: 'onaysiz' | 'onayli' | 'reddedildi';
+  light_prob?: number | null;
+  evidence_json?: string | null;
 }
 export interface FieldDepthRow {
   obs_id: string;
@@ -37,41 +42,84 @@ export interface FieldDepthRow {
   jig_g: number | null;
 }
 
-/** Field knowledge of one spot: latest non-null value per field over all observations, all depth pairs. */
+/** Field knowledge of one spot: per attribute the highest-priority source (saha > uzaktan > masabasi), latest within it. */
 export interface FieldRecord {
   latestAt: string;
   substrate: FieldSubstrate[] | null;
+  substrateKind: FieldKind | null;
+  /** Trust of the field substrate classes (saha 0.9, uzaktan 0.7, masabasi 0.35 low / 0.5 medium). */
+  substrateWeight: number;
   snag: string | null;
   structure: FieldStructure | null;
+  structureKind: FieldKind | null;
   lightColor: string | null;
+  /** Lamp from the field table: known state (saha) or probability (uzaktan/masabasi). */
+  lamp: { state: boolean | null; p: number | null; kind: FieldKind } | null;
   depths: ConvertedDepth[];
+  depthKind: FieldKind | null;
   calibration: SinkCalibration | null;
   lastDepthAt: string | null;
+}
+
+const RANK: Record<FieldKind, number> = { saha: 0, uzaktan: 1, masabasi: 2 };
+const kindOf = (o: FieldObsRow): FieldKind => o.source_kind ?? 'saha';
+
+function deskWeight(o: FieldObsRow): number {
+  const conf = o.evidence_json ? (JSON.parse(o.evidence_json) as { confidence?: string }).confidence : undefined;
+  return conf === 'orta' ? 0.5 : 0.35;
 }
 
 export function fieldRecords(obs: FieldObsRow[], depths: FieldDepthRow[]): Map<string, FieldRecord> {
   const out = new Map<string, FieldRecord>();
   const bySpot = new Map<string, FieldObsRow[]>();
-  for (const o of obs) bySpot.set(o.spot_id, [...(bySpot.get(o.spot_id) ?? []), o]);
+  for (const o of obs) if (o.status !== 'reddedildi') bySpot.set(o.spot_id, [...(bySpot.get(o.spot_id) ?? []), o]);
   for (const [spot, list] of bySpot) {
-    const sorted = [...list].sort((a, b) => a.observed_at.localeCompare(b.observed_at));
-    const latest = <K extends keyof FieldObsRow>(k: K) => [...sorted].reverse().find((o) => o[k] !== null)?.[k] ?? null;
-    const ids = new Set(sorted.map((o) => o.id));
+    // Best source first, then newest: the first row carrying a value wins.
+    const ordered = [...list].sort((a, b) => RANK[kindOf(a)] - RANK[kindOf(b)] || b.observed_at.localeCompare(a.observed_at));
+    const pick = <K extends keyof FieldObsRow>(k: K) => ordered.find((o) => o[k] !== null && o[k] !== undefined) ?? null;
+    const subRow = pick('substrate');
+    const structRow = pick('structure');
+    const lampRow = ordered.find((o) => o.has_light !== null || (o.light_prob !== null && o.light_prob !== undefined)) ?? null;
+    let lamp: FieldRecord['lamp'] = null;
+    if (lampRow) {
+      const k = kindOf(lampRow);
+      if (k === 'saha') lamp = { state: lampRow.has_light === null ? null : lampRow.has_light === 1, p: null, kind: k };
+      else lamp = { state: null, p: lampRow.light_prob ?? (lampRow.has_light === 1 ? (k === 'uzaktan' ? 0.97 : 0.95) : k === 'uzaktan' ? 0.03 : 0.05), kind: k };
+      if (k === 'saha' && lamp.state === null) lamp = null;
+    }
+    // Depths: only the best source that has any (sources are not mixed).
+    const withDepth = ordered.filter((o) => depths.some((d) => d.obs_id === o.id));
+    const depthKind = withDepth.length ? kindOf(withDepth[0]!) : null;
+    const ids = new Set(withDepth.filter((o) => kindOf(o) === depthKind).map((o) => o.id));
     const ds = depths.filter((d) => ids.has(d.obs_id));
-    const plumbs = ds.filter((d) => d.method === 'plumb' && d.depth_m !== null).map((d) => ({ distance_m: d.distance_m, depth_m: d.depth_m! }));
-    const sinks = ds.filter((d) => d.method === 'sink' && d.sink_s !== null && d.jig_g !== null).map((d) => ({ distance_m: d.distance_m, sink_s: d.sink_s!, jig_g: d.jig_g! }));
-    const conv = fieldDepths(sinks, plumbs);
-    const depthObs = sorted.filter((o) => ds.some((d) => d.obs_id === o.id));
-    const sub = latest('substrate');
+    let conv: { depths: ConvertedDepth[]; calibration: SinkCalibration | null } = { depths: [], calibration: null };
+    if (depthKind === 'saha') {
+      const plumbs = ds.filter((d) => d.method === 'plumb' && d.depth_m !== null).map((d) => ({ distance_m: d.distance_m, depth_m: d.depth_m! }));
+      const sinks = ds.filter((d) => d.method === 'sink' && d.sink_s !== null && d.jig_g !== null).map((d) => ({ distance_m: d.distance_m, sink_s: d.sink_s!, jig_g: d.jig_g! }));
+      conv = fieldDepths(sinks, plumbs);
+    } else if (depthKind) {
+      const q = depthKind === 'uzaktan' ? 'remote' : 'desk';
+      conv.depths = ds
+        .filter((d) => d.depth_m !== null)
+        .map((d): ConvertedDepth => ({ distance_m: d.distance_m, depth_m: d.depth_m!, sd_m: Math.round(d.depth_m! * 0.3 * 10) / 10, quality: q }))
+        .sort((a, b) => a.distance_m - b.distance_m);
+    }
+    const subKind = subRow ? kindOf(subRow) : null;
+    const byTime = [...list].sort((a, b) => a.observed_at.localeCompare(b.observed_at));
     out.set(spot, {
-      latestAt: sorted[sorted.length - 1]!.observed_at,
-      substrate: sub ? (JSON.parse(sub) as FieldSubstrate[]) : null,
-      snag: latest('snag'),
-      structure: latest('structure') as FieldStructure | null,
-      lightColor: latest('light_color'),
+      latestAt: byTime[byTime.length - 1]!.observed_at,
+      substrate: subRow ? (JSON.parse(subRow.substrate!) as FieldSubstrate[]) : null,
+      substrateKind: subKind,
+      substrateWeight: subKind === 'saha' ? 0.9 : subKind === 'uzaktan' ? 0.7 : subRow ? deskWeight(subRow) : 0.9,
+      snag: pick('snag')?.snag ?? null,
+      structure: (structRow?.structure ?? null) as FieldStructure | null,
+      structureKind: structRow ? kindOf(structRow) : null,
+      lightColor: pick('light_color')?.light_color ?? null,
+      lamp,
       depths: conv.depths,
+      depthKind,
       calibration: conv.calibration,
-      lastDepthAt: depthObs.length ? depthObs[depthObs.length - 1]!.observed_at : null,
+      lastDepthAt: withDepth.length ? withDepth[0]!.observed_at : null,
     });
   }
   return out;
@@ -96,10 +144,22 @@ export function spotV2(row: SpotRow, field?: FieldRecord): SpotV2 & { lat: numbe
     // profile: 25 m steps from the tip; DTM cells near shore are all interpolated (docs/DATA-AUDIT.md §1).
     dtm: { d0_50: bandMean(profile, 0, 3), d50_150: bandMean(profile, 2, 7), interpolated: true },
     fieldDepths: field?.depths.length ? field.depths : null,
-    substrate: { eusm: row.substrate ?? null, conf: row.substrate_conf ?? null, field: field?.substrate ?? null, hint: field?.snag ? SNAG[field.snag]! : null },
+    fieldDepthKind: field?.depthKind ?? undefined,
+    substrate: {
+      eusm: row.substrate ?? null,
+      conf: row.substrate_conf ?? null,
+      field: field?.substrate ?? null,
+      fieldKind: field?.substrateKind ?? undefined,
+      fieldWeight: field?.substrate ? field.substrateWeight : undefined,
+      hint: field?.snag ? SNAG[field.snag]! : null,
+    },
     fieldStructure: field?.structure ?? null,
+    fieldStructureKind: field?.structureKind ?? undefined,
     fetchKm: row.fetch_json ? (JSON.parse(row.fetch_json) as number[]) : null,
+    // A known lamp (saha form or admin) wins; otherwise a remote/desk probability; otherwise the prior.
     lamp: row.has_light === null ? null : row.has_light === 1,
+    lampP: row.has_light === null && field?.lamp && field.lamp.kind !== 'saha' ? field.lamp.p : null,
+    lampSource: row.has_light !== null ? (field?.lamp?.kind === 'saha' ? 'saha' : null) : field?.lamp && field.lamp.kind !== 'saha' ? field.lamp.kind : null,
   };
 }
 
@@ -189,6 +249,8 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
   const points = applyOcean(mergeSnapshots(wx?.snap, sea?.snap), ocean);
   const startHour = Math.floor(now.getTime() / HOUR);
   const hours = scoreSeriesV2({ spot, points, from: now, hours: HOURS_V2, profile: SAFETY, draws });
+  const index = indexSeries(points);
+  const weather = hours.map((_, i) => weatherAt(index, new Date((startHour + i) * HOUR), row.lat, row.lon));
   const seaGrid =
     sea?.snap.lat !== undefined && sea.snap.lon !== undefined
       ? { lat: sea.snap.lat, lon: sea.snap.lon, distance_km: Math.round(haversineKm(row.lat, row.lon, sea.snap.lat, sea.snap.lon) * 10) / 10 }
@@ -204,7 +266,7 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
     ocean: ocean?.series ? { fetched_at: ocean.series.fetched_at, cell: ocean.series.data.cell } : null,
     ocean_normal: ocean?.normal ? { years: ocean.normal.data.years, from: ocean.normal.data.from, to: ocean.normal.data.to } : null,
   });
-  return { startHour, hours, packed };
+  return { startHour, hours, packed, spot, weather };
 }
 
 export interface ScoreRecordV2 {
@@ -214,10 +276,59 @@ export interface ScoreRecordV2 {
   start_hour: number;
   list_json: string;
   detail_json: string;
+  /** Frozen model output of the first (current) hour for spot_scores_v2_history. */
+  history_json?: string;
 }
 
-/** [total, p10, p90, rank, gated, first warning] */
-export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null];
+/** Main reason of the rank at an hour: driver, score delta vs. the other spots, Turkish one-liner. */
+export type ReasonEntry = [DriverKey, number, string];
+/** [total, p10, p90, rank, gated, first warning, main reason] — p10/p90 null while the band is being recomputed. */
+export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null, ReasonEntry | null];
+
+const KIND_TR: Record<string, string> = { pier: 'iskele', breakwater: 'mendirek', groyne: 'mahmuz', manual: 'yapı' };
+const COMPASS_TR = ['kuzey', 'kuzeydoğu', 'doğu', 'güneydoğu', 'güney', 'güneybatı', 'batı', 'kuzeybatı'];
+const n1 = (x: number) => (Math.round(x * 10) / 10).toString().replace('.', ',');
+
+/** One honest line: the driver, its value and where that value comes from. */
+export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hour, w: Weather): string {
+  const c = (k: string) => h.components.find((x) => x.key === k)!;
+  const lead = delta >= 0 ? 'Öne çıkaran' : 'Geri bırakan';
+  let body: string;
+  switch (key) {
+    case 'lamba':
+      body =
+        spot.lamp !== null
+          ? `lamba ${spot.lamp ? 'var' : 'yok'} — ${c('lamba').source}`
+          : `lamba olasılığı ${n1(lampPrior(spot))} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
+      break;
+    case 'yapi':
+      body = `${spot.fieldStructure ? spot.fieldStructure.replace('_', ' ') : KIND_TR[spot.kind]} ${Math.round(spot.lengthM ?? 50)} m — ${c('yapi').source}, kanıt C`;
+      break;
+    case 'derinlik': {
+      const src = c('derinlik').source;
+      body = `atış mesafesinde ~${c('derinlik').reason.split(' m')[0]} m — ${src === 'yapı-uzunluğu-tahmini' ? 'yapı uzunluğundan tahmin (C), saha ölçümü yok' : src}`;
+      break;
+    }
+    case 'taban':
+      body = `dip ${c('taban').reason} — ${c('taban').source}`;
+      break;
+    default: {
+      const dir = w.windDir === null ? null : COMPASS_TR[Math.round(w.windDir / 45) % 8];
+      body = `${dir ? `${dir} rüzgarına ` : 'rüzgara '}${delta >= 0 ? 'korunaklı' : 'açık'}${w.windKmh === null ? '' : ` (${Math.round(w.windKmh)} km/sa)`} — kıyı OSM, rüzgar Open-Meteo`;
+    }
+  }
+  return `${lead}: ${body}`;
+}
+
+/** Main reason per spot for every hour (term ablation across spots, explain.ts). */
+export function reasonsFor(res: { hours: V2Hour[]; spot: SpotV2; weather: Weather[] }[]): (ReasonEntry | null)[][] {
+  const out: (ReasonEntry | null)[][] = res.map(() => []);
+  for (let i = 0; i < HOURS_V2; i++) {
+    const r = explain(res.map((x) => x.spot), res.map((x) => x.weather[i]!), DEFAULTS);
+    r.forEach((e, k) => out[k]!.push(e && res[k]!.hours[i]!.total !== null ? [e.key, e.delta, reasonText(e.key, e.delta, res[k]!.spot, res[k]!.hours[i]!, res[k]!.weather[i]!)] : null));
+  }
+  return out;
+}
 
 /** All spots, ranks per hour across spots. */
 export function scoreRecordsV2(
@@ -230,20 +341,36 @@ export function scoreRecordsV2(
 ): ScoreRecordV2[] {
   const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fields.get(r.id), draws, oceans.get(r.id)));
   const rankAt = Array.from({ length: HOURS_V2 }, (_, i) => ranks(res.map((x) => x.hours[i]!.total)));
-  return rows.map((r, k) => ({
-    spot_id: r.id,
-    model_version: MODEL_VERSION,
-    computed_at: now.toISOString(),
-    start_hour: res[k]!.startHour,
-    list_json: JSON.stringify(res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null])),
-    detail_json: JSON.stringify(res[k]!.packed),
-  }));
+  const reasons = reasonsFor(res);
+  return rows.map((r, k) => {
+    const list = res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null, reasons[k]![i]!]);
+    const h0 = res[k]!.hours[0]!;
+    return {
+      spot_id: r.id,
+      model_version: MODEL_VERSION,
+      computed_at: now.toISOString(),
+      start_hour: res[k]!.startHour,
+      list_json: JSON.stringify(list),
+      detail_json: JSON.stringify(res[k]!.packed),
+      history_json: JSON.stringify({
+        model_version: MODEL_VERSION,
+        total: h0.total,
+        p10: h0.p10,
+        p90: h0.p90,
+        rank: list[0]![3],
+        reason: list[0]![6],
+        lampP: h0.lampP,
+        components: h0.components.map((c) => [c.key, c.value === null ? null : Math.round(c.value * 1000) / 1000, c.source, c.reason]),
+        inputs: res[k]!.weather[0],
+      }),
+    };
+  });
 }
 
 /**
- * Single-spot rescore after a field entry (Worker, no Monte Carlo): new expected score; the previous run's
- * band offsets (p10 − total, p90 − total) are reused per hour and ranks are recomputed against the other
- * spots' stored totals. Marked partial until the next hourly run replaces it.
+ * Single-spot point rescore after a field edit (Worker, no Monte Carlo): new expected score, band null
+ * ("güncelleniyor") until score.yml's 15-minute pending run recomputes it; ranks against the other spots'
+ * stored totals; the previous main reason is kept (it needs every spot's inputs).
  */
 export function rescoreSpot(
   row: SpotRow,
@@ -259,14 +386,8 @@ export function rescoreSpot(
   const list = r.hours.map((h, i): ListEntryV2 => {
     const hour = r.startHour + i;
     const old = prev?.list[hour - prev.start_hour];
-    const lo = h.total === null || !old || old[0] === null || old[1] === null ? null : Math.max(0, h.total + old[1] - old[0]);
-    const hi = h.total === null || !old || old[0] === null || old[2] === null ? null : Math.min(100, h.total + old[2] - old[0]);
     const totals = [h.total, ...others.map((o) => o.list[hour - o.start_hour]?.[0] ?? null)];
-    return [h.total, lo, hi, ranks(totals)[0]!, h.gated ? 1 : 0, h.warnings[0] ?? null];
-  });
-  r.packed.h.forEach((x, i) => {
-    x[3] = list[i]![1];
-    x[4] = list[i]![2];
+    return [h.total, null, null, ranks(totals)[0]!, h.gated ? 1 : 0, h.warnings[0] ?? null, old?.[6] ?? null];
   });
   return {
     spot_id: row.id,
@@ -282,7 +403,7 @@ export const UPSERT_V2_SQL = `INSERT INTO spot_scores_v2 (spot_id, model_version
 ON CONFLICT(spot_id) DO UPDATE SET model_version = excluded.model_version, computed_at = excluded.computed_at, start_hour = excluded.start_hour,
 list_json = excluded.list_json, detail_json = excluded.detail_json, partial = excluded.partial`;
 
-export const DELETE_STALE_V2_SQL = `DELETE FROM spot_scores_v2 WHERE spot_id NOT IN (SELECT id FROM spots WHERE status != 'rejected')`;
+export const DELETE_STALE_V2_SQL = `DELETE FROM spot_scores_v2 WHERE spot_id NOT IN (SELECT id FROM spots WHERE ${ACTIVE})`;
 
 /** D1 rows of ocean_series / ocean_normal → per-spot Ocean. */
 export function oceanMap(series: { spot_id: string; fetched_at: string; json: string }[], normals: { spot_id: string; computed_at: string; json: string }[]): Map<string, Ocean> {
@@ -291,3 +412,6 @@ export function oceanMap(series: { spot_id: string; fetched_at: string; json: st
   for (const r of normals) out.set(r.spot_id, { ...out.get(r.spot_id), normal: { computed_at: r.computed_at, data: JSON.parse(r.json) as OceanNormal } });
   return out;
 }
+
+export const UPSERT_HISTORY_SQL = `INSERT INTO spot_scores_v2_history (spot_id, hour, json) VALUES (?1, ?2, ?3)
+ON CONFLICT(spot_id, hour) DO UPDATE SET json = excluded.json`;

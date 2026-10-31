@@ -4,7 +4,8 @@ name: score
 # The Worker's :07 cron fetches weather; this runs after it.
 on:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '23 * * * *'          # full hourly run (v1 + v2)
+    - cron: '8,38,53 * * * *'     # field edits: v2 with Monte Carlo only when pending_rescore has rows
   workflow_dispatch:
 concurrency:
   group: score
@@ -27,4 +28,4 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: node .score/job.mjs
+        run: node .score/job.mjs ${{ github.event.schedule == '8,38,53 * * * *' && '--pending' || '' }}

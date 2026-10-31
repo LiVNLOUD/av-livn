@@ -2,7 +2,7 @@
 import { getProfile, type SpeciesProfile } from '@av-livn/scoring';
 import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
-import { publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
+import { ACTIVE, ACTIVE_COUNT_SQL, publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
@@ -75,7 +75,7 @@ async function listV2(c: Ctx) {
   const [rows, fetched] = await c.env.DB.batch([
     c.env.DB.prepare(
       `SELECT s.*, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
-       LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.status != 'rejected'`,
+       LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`,
     ),
     c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
   ]);
@@ -105,7 +105,7 @@ async function detailV2(c: Ctx) {
     c.env.DB.prepare('SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.id = ?1').bind(id),
     c.env.DB.prepare('SELECT * FROM field_obs WHERE spot_id = ?1 ORDER BY observed_at').bind(id),
     c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
-    c.env.DB.prepare("SELECT count(*) AS n FROM spots WHERE status != 'rejected'"),
+    c.env.DB.prepare(ACTIVE_COUNT_SQL),
   ]);
   const r = spotRes!.results[0] as (SpotRow & { start_hour: number | null; detail_json: string | null; list_json: string | null; partial: number | null }) | undefined;
   if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
