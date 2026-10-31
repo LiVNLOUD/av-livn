@@ -21,12 +21,10 @@ Kaynak: RG 11.08.2024/32629, [20240811-4.htm](https://www.resmigazete.gov.tr/esk
 |---|---|---|---|---|
 | **İstavrit, İstavrit (karagöz)** | *Trachurus trachurus*, *T. mediterraneus* | **13 cm** | kg | — |
 | Levrek | *Dicentrarchus labrax* | 25 cm | kg | — |
-| Kalamar | çizelgede yok → "Diğer türler" | sınır yok | kg | — |
 | Lüfer (çinekop dahil) | *Pomatomus saltatrix* | 18 cm | kg | — |
 | Mırmır | çizelgede yok → "Diğer türler" | sınır yok | kg | — |
 | Karagöz (sparid) | *Diplodus vulgaris* | 18 cm | kg | — |
 | Kolyoz | *Scomber japonicus* | 18 cm | kg | — |
-| Sarpan | çizelgede yok → "Diğer türler" | sınır yok | kg | — |
 | (ilgili diğerleri) Sargos 21 cm, Çipura 20 cm, Mezgit 13 cm, Uskumru 20 cm, Palamut 25 cm (1 Nis–14 Ağu yasak) | | | | |
 
 - "kg" = md. 15(4): kişi başı toplam 5 kg (en büyük balık hariç 4 kg). Boy toleransı %5 (md. 15(2)).
