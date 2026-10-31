@@ -434,3 +434,49 @@ export function oceanMap(series: { spot_id: string; fetched_at: string; json: st
 
 export const UPSERT_HISTORY_SQL = `INSERT INTO spot_scores_v2_history (spot_id, hour, json) VALUES (?1, ?2, ?3)
 ON CONFLICT(spot_id, hour) DO UPDATE SET json = excluded.json`;
+
+/** Hourly observations row (observations table: the value valid at each fetch hour, since F1). */
+export interface ObservationRow {
+  ts: string;
+  pressure: number | null; wind_speed: number | null; wind_dir: number | null; wind_gust: number | null; precip: number | null; cloud: number | null;
+  wave_h: number | null; wave_dir?: number | null; sst: number | null; cur_vel: number | null;
+}
+
+/** Observation rows of the spot's weather and sea cells → HourlyPoint series (current km/h → m/s). */
+export function pointsFromObservations(wx: ObservationRow[], sea: ObservationRow[]): HourlyPoint[] {
+  const by = new Map<number, HourlyPoint>();
+  const at = (ts: string) => {
+    const t = Date.parse(ts);
+    let p = by.get(t);
+    if (!p) by.set(t, (p = { ts: new Date(t).toISOString() }));
+    return p;
+  };
+  for (const o of wx) Object.assign(at(o.ts), { pressure: o.pressure, windSpeed: o.wind_speed, windDir: o.wind_dir, windGust: o.wind_gust, precip: o.precip, cloud: o.cloud });
+  for (const o of sea) Object.assign(at(o.ts), { waveH: o.wave_h, waveDir: o.wave_dir ?? null, sst: o.sst, curVel: o.cur_vel === null ? null : o.cur_vel / 3.6 });
+  return [...by.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p);
+}
+
+/**
+ * Model output for past hours that predate the history table, recomputed from the hourly observations with
+ * today's model (no band, no rank): labelled "recomputed", never presented as the original forecast.
+ */
+export function recomputeHours(row: SpotRow, field: FieldRecord | undefined, points: HourlyPoint[], hours: number[]) {
+  if (!hours.length) return [];
+  const spot = spotV2(row, field);
+  const out = scoreSeriesV2({ spot, points, from: new Date(hours[0]! * HOUR), hours: hours[hours.length - 1]! - hours[0]! + 1, profile: SAFETY, draws: 0 });
+  const index = indexSeries(points);
+  return hours.map((h) => {
+    const x = out[h - hours[0]!]!;
+    return {
+      hour: h,
+      source: 'recomputed' as const,
+      model_version: MODEL_VERSION,
+      total: x.total,
+      p10: null,
+      p90: null,
+      rank: null,
+      components: x.components.map((c) => [c.key, c.value === null ? null : Math.round(c.value * 1000) / 1000, c.source, c.reason]),
+      inputs: weatherAt(index, new Date(h * HOUR), row.lat, row.lon),
+    };
+  });
+}

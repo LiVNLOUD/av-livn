@@ -315,12 +315,14 @@ Her bileşen değeriyle birlikte bir **kaynak** döner (UI rozeti):
 - Açı ve eşik parametreleri toplamsal Normal.
 - Ağırlıklar Dirichlet (yoğunlaşma A 200, B 50, C 10).
 
-**Av günlüğü:**
-- Kayıt: mera, başlangıç–bitiş, yöntem (LRF), adet (**sıfır av dahil**), boy (opsiyonel).
+**Av günlüğü** (C4, `/gunluk/`, yalnız yönetici):
+- Kayıt: mera, başlangıç–bitiş, aktif süre (dk), kamış sayısı, yöntem (jighead g, iğne no, silikon boy/renk, lamba altı), tür + adet (**sıfır av açık seçenek**), boy (isteğe bağlı), `observer_id` (şimdilik `kaan`, arayüzde görünmez).
+- **Birim: adet / saat / kamış** (`count / (active_min/60) / rods`).
+- Model çıktısı kayıt anında dondurulur (`spot_scores_v2_history` + canlı liste); geçmişi olmayan saatler gözlemlerden yeniden hesaplanır (`recomputed`, orijinal tahmin değil).
 - Olabilirlik:
   ```
-  adet ~ Poisson( süre_sa · λ₀ · (puan/100)^β )      β > 0, λ₀ bireysel/ekipman tabanı (rastgele etki)
-  sıfır av: P(0) = exp(−süre_sa · λ₀ · (puan/100)^β)  → bilgi taşır, atılmaz
+  adet ~ Poisson( süre_sa · kamış · λ₀ · (puan/100)^β )      β > 0, λ₀ gözlemci/ekipman tabanı (rastgele etki, observer_id)
+  sıfır av: P(0) = exp(−süre_sa · kamış · λ₀ · (puan/100)^β)  → bilgi taşır, atılmaz
   ```
 - **Güncelleme:** haftalık Actions işi. Önce Laplace yaklaşımı (MAP + Hessian); kayıt > 200 olunca SMC/MCMC. Sonuç yeni parametre dosyası + model sürümü.
 - **Sapma kontrolü:** kalibre parametre önsel bandının dışına çıkarsa MODEL.md'de işaretlenir ve kaynak tekrar okunur.

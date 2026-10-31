@@ -1,0 +1,296 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Av günlüğü — av.livn" description="Seans ve av kaydı.">
+  <div class="wrap field">
+    <h1>Av günlüğü</h1>
+    <p class="hint">Kayıt anında seans saatlerindeki model çıktısı (puan, bant, sıra, bileşenler) dondurulur. Sıfır av da bir sonuçtur: açıkça seçin.</p>
+
+    <form id="login" class="stack">
+      <label class="lbl">Yönetici anahtarı<input type="password" id="token" autocomplete="current-password" required /></label>
+      <button type="submit" class="primary">Giriş yap</button>
+    </form>
+
+    <form id="form" hidden novalidate>
+      <fieldset>
+        <legend>Mera ve zaman</legend>
+        <select id="spot" aria-label="Mera"></select>
+        <button type="button" id="near" class="ghost">📍 En yakın merayı seç</button>
+        <div class="two">
+          <label class="lbl">Başlangıç<input type="datetime-local" id="start" required /></label>
+          <label class="lbl">Bitiş<input type="datetime-local" id="end" required /></label>
+        </div>
+        <div class="two">
+          <label class="lbl">Aktif avlanma (dk)<input id="active" inputmode="numeric" /></label>
+          <label class="lbl">Kamış sayısı<input id="rods" inputmode="numeric" value="1" /></label>
+        </div>
+        <p class="hint">Aktif süre boş kalırsa başlangıç–bitiş farkı kullanılır. Verim birimi: adet / saat / kamış.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Yöntem</legend>
+        <div class="two">
+          <label class="lbl">Jighead (g)<input id="jig" inputmode="decimal" placeholder="1,5" /></label>
+          <label class="lbl">İğne no<input id="hook" placeholder="#8" /></label>
+        </div>
+        <div class="two">
+          <label class="lbl">Silikon boyu (cm)<input id="lurelen" inputmode="decimal" placeholder="5" /></label>
+          <label class="lbl">Silikon rengi<input id="lurecol" placeholder="şeffaf-simli" /></label>
+        </div>
+        <p class="sub">Lamba altında mıydı?</p>
+        <div class="seg" data-name="under_lamp" role="radiogroup">
+          <button type="button" data-v="true">Evet</button><button type="button" data-v="false">Hayır</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Av</legend>
+        <div id="items"></div>
+        <button type="button" id="add-item" class="ghost">+ Tür ekle</button>
+        <label class="zero"><input type="checkbox" id="zero" /> Sıfır av (hiç balık tutmadım)</label>
+        <p class="warn" id="legal" hidden></p>
+        <textarea id="note" rows="2" maxlength="1000" placeholder="Not (isteğe bağlı)"></textarea>
+      </fieldset>
+
+      <div class="bar">
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <button type="submit" class="primary" id="save">Seansı kaydet</button>
+      </div>
+
+      <section class="history">
+        <h2>Son seanslar</h2>
+        <ol id="sessions"></ol>
+        <div class="row">
+          <button type="button" id="csv" class="ghost">CSV indir</button>
+          <button type="button" id="logout" class="ghost">Çıkış</button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <template id="item-row">
+    <div class="item">
+      <label class="lbl">Tür<input class="i-sp" value="istavrit" list="species" /></label>
+      <div class="count">
+        <button type="button" class="ghost minus" aria-label="Bir azalt">−</button>
+        <input class="i-n" inputmode="numeric" value="1" aria-label="Adet" />
+        <button type="button" class="ghost plus" aria-label="Bir artır">+</button>
+      </div>
+      <label class="lbl">Boylar (cm, boşlukla ayırın; isteğe bağlı)<input class="i-len" inputmode="decimal" placeholder="12 14 13,5" /></label>
+      <button type="button" class="ghost del">Sil</button>
+    </div>
+  </template>
+  <datalist id="species"><option value="istavrit"></option><option value="kolyoz"></option><option value="sardalya"></option><option value="çinekop"></option><option value="lüfer"></option><option value="levrek"></option><option value="mırmır"></option><option value="karagöz"></option><option value="kalamar"></option></datalist>
+</Base>
+
+<style>
+  .field { padding-bottom: 120px; }
+  h1 { font-size: 1.7rem; font-weight: 740; font-stretch: 80%; margin: 14px 0 6px; }
+  h2 { font-size: 1rem; margin: 22px 0 8px; }
+  .stack { display: grid; gap: 14px; margin-top: 12px; }
+  fieldset { border: 0; border-top: 1px solid var(--swell); margin: 0; padding: 16px 0 6px; display: grid; gap: 10px; }
+  legend { font-size: 1.15rem; font-weight: 700; padding: 0; margin-bottom: 8px; }
+  .lbl { display: grid; gap: 6px; font-size: 0.95rem; color: var(--mist); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  input, select, textarea { font: inherit; font-size: 1.1rem; color: var(--foam); background: var(--deep); border: 1.5px solid var(--swell); border-radius: var(--radius); min-height: 56px; padding: 10px 12px; width: 100%; }
+  button { font: inherit; cursor: pointer; }
+  .primary, .ghost, .seg button { min-height: 56px; border-radius: var(--radius); font-size: 1.05rem; font-weight: 650; }
+  .primary { width: 100%; border: 0; color: #1a1006; background: var(--sodium); }
+  .ghost { border: 1.5px solid var(--swell); background: transparent; color: var(--foam); padding: 0 16px; }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+  .seg button { border: 1.5px solid var(--swell); background: var(--deep); color: var(--foam); }
+  .seg button[aria-pressed='true'] { background: var(--foam); color: var(--sea); border-color: var(--foam); }
+  .hint { color: var(--mist); font-size: 0.88rem; margin: 0; }
+  .sub { margin: 6px 0 0; font-weight: 650; }
+  .item { border: 1.5px solid var(--swell); border-radius: var(--radius); padding: 10px; display: grid; gap: 8px; margin-bottom: 10px; }
+  .count { display: grid; grid-template-columns: 64px 1fr 64px; gap: 8px; }
+  .count input { text-align: center; font-size: 1.4rem; font-weight: 700; }
+  .count button { font-size: 1.6rem; padding: 0; }
+  .zero { display: flex; gap: 10px; align-items: center; min-height: 56px; font-size: 1.05rem; font-weight: 650; }
+  .zero input { width: 28px; height: 28px; min-height: 0; }
+  .warn { color: var(--storm); margin: 0; font-weight: 650; }
+  .bar { position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--sea) 24%); display: grid; gap: 8px; }
+  .msg { min-height: 1.4em; margin: 0; }
+  .msg.err { color: var(--storm); }
+  .msg.ok { color: var(--good); }
+  .history ol { padding-left: 1.2em; display: grid; gap: 10px; }
+  .history .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .history li button { min-height: 44px; margin-top: 4px; }
+</style>
+
+<script>
+  import { getToken, logout, setToken } from '../../scripts/admin';
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const QUEUE = 'av-livn-catch-queue';
+  const LEGAL: Record<string, number> = { istavrit: 13 };
+  let token = getToken();
+  let spots: { id: string; name: string; lat: number; lon: number }[] = [];
+
+  function say(t: string, k: 'ok' | 'err' | '' = '') { const m = $('msg'); m.textContent = t; m.className = `msg ${k}`; }
+  async function api(path: string, method: string, body?: unknown) {
+    const r = await fetch(path, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) throw Object.assign(new Error('Anahtar geçersiz.'), { fatal: true });
+    if (!r.ok) throw Object.assign(new Error(`Kaydedilmedi (${j.error ?? r.status}).`), { fatal: true });
+    return j;
+  }
+  const local = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+
+  document.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    const seg = b?.closest('.seg');
+    if (!b || !seg) return;
+    const was = b.getAttribute('aria-pressed') === 'true';
+    seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    if (!was) b.setAttribute('aria-pressed', 'true');
+  });
+
+  function addItem(species = 'istavrit') {
+    const n = ($('item-row') as HTMLTemplateElement).content.firstElementChild!.cloneNode(true) as HTMLElement;
+    n.querySelector<HTMLInputElement>('.i-sp')!.value = species;
+    const cnt = n.querySelector<HTMLInputElement>('.i-n')!;
+    n.querySelector('.plus')!.addEventListener('click', () => (cnt.value = String((Number(cnt.value) || 0) + 1)));
+    n.querySelector('.minus')!.addEventListener('click', () => (cnt.value = String(Math.max(1, (Number(cnt.value) || 1) - 1))));
+    n.querySelector('.del')!.addEventListener('click', () => { n.remove(); legal(); });
+    n.addEventListener('input', legal);
+    $('items').append(n);
+    ($('zero') as HTMLInputElement).checked = false;
+  }
+  $('add-item').addEventListener('click', () => addItem());
+  $('zero').addEventListener('change', () => { if (($('zero') as HTMLInputElement).checked) $('items').innerHTML = ''; legal(); });
+
+  const num = (v: string) => (v.trim() === '' ? undefined : Number(v.trim().replace(',', '.')));
+  function items() {
+    return [...document.querySelectorAll<HTMLElement>('#items .item')].flatMap((row) => {
+      const species = row.querySelector<HTMLInputElement>('.i-sp')!.value.trim() || 'istavrit';
+      const count = Number(row.querySelector<HTMLInputElement>('.i-n')!.value) || 0;
+      const lens = row.querySelector<HTMLInputElement>('.i-len')!.value.split(/[;\s]+/).map((x) => num(x)).filter((x): x is number => x !== undefined && !Number.isNaN(x));
+      if (count < 1) return [];
+      // One line per measured fish, the rest without length.
+      const out = lens.slice(0, count).map((l) => ({ species, count: 1, length_cm: l }));
+      if (count > out.length) out.push({ species, count: count - out.length, length_cm: undefined as unknown as number });
+      return out;
+    });
+  }
+  function legal() {
+    const small = items().filter((i) => i.length_cm !== undefined && LEGAL[i.species.toLocaleLowerCase('tr')] && i.length_cm < LEGAL[i.species.toLocaleLowerCase('tr')]!);
+    $('legal').hidden = !small.length;
+    $('legal').textContent = small.length ? `${small.length} balık yasal asgari boyun altında (istavrit 13 cm). Denize geri bırakın.` : '';
+  }
+
+  function payload() {
+    const under = document.querySelector<HTMLButtonElement>('.seg[data-name="under_lamp"] button[aria-pressed="true"]')?.dataset.v;
+    return {
+      spot_id: ($('spot') as HTMLSelectElement).value,
+      start_at: new Date(($('start') as HTMLInputElement).value).toISOString(),
+      end_at: new Date(($('end') as HTMLInputElement).value).toISOString(),
+      active_min: num(($('active') as HTMLInputElement).value),
+      rods: num(($('rods') as HTMLInputElement).value) ?? 1,
+      jig_g: num(($('jig') as HTMLInputElement).value),
+      hook_no: ($('hook') as HTMLInputElement).value.trim() || undefined,
+      lure_len_cm: num(($('lurelen') as HTMLInputElement).value),
+      lure_color: ($('lurecol') as HTMLInputElement).value.trim() || undefined,
+      under_lamp: under === undefined ? undefined : under === 'true',
+      zero_catch: ($('zero') as HTMLInputElement).checked,
+      note: ($('note') as HTMLTextAreaElement).value.trim() || undefined,
+      items: items(),
+    };
+  }
+
+  const queued = (): unknown[] => { try { return JSON.parse(localStorage.getItem(QUEUE) ?? '[]'); } catch { return []; } };
+  const setQueue = (q: unknown[]) => { try { localStorage.setItem(QUEUE, JSON.stringify(q)); } catch {} };
+  async function flush() {
+    const q = queued();
+    if (!q.length) return;
+    const left = [];
+    for (const b of q) { try { await api('/api/admin/catch', 'POST', b); } catch (e) { if (!(e as { fatal?: boolean }).fatal) left.push(b); } }
+    setQueue(left);
+    if (left.length !== q.length) { say(`Bekleyen ${q.length - left.length} seans gönderildi.`, 'ok'); history(); }
+  }
+  window.addEventListener('online', flush);
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const b = payload();
+    if (!b.zero_catch && !b.items.length) return say('Av girin ya da "Sıfır av" seçin.', 'err');
+    ($('save') as HTMLButtonElement).disabled = true;
+    try {
+      const j = await api('/api/admin/catch', 'POST', b);
+      say(`Kaydedildi. Verim ${String(j.cpue).replace('.', ',')} istavrit/saat/kamış.${j.freeze_status === 'partial' ? ' Eski saatlerin model çıktısı gözlemlerden yeniden hesaplanacak.' : ''}${j.warnings.length ? ' ' + j.warnings.join(' ') : ''}`, 'ok');
+      reset();
+      history();
+    } catch (err) {
+      if ((err as { fatal?: boolean }).fatal) say((err as Error).message, 'err');
+      else { setQueue([...queued(), b]); say('Bağlantı yok: seans telefona kaydedildi, bağlantı gelince gönderilecek.', 'err'); reset(); }
+    } finally {
+      ($('save') as HTMLButtonElement).disabled = false;
+    }
+  });
+  function reset() {
+    $('items').innerHTML = '';
+    addItem();
+    ($('zero') as HTMLInputElement).checked = false;
+    ($('note') as HTMLTextAreaElement).value = '';
+    legal();
+  }
+
+  async function history() {
+    try {
+      const j = await api('/api/admin/catch', 'GET');
+      const ses = j.sessions as { id: string; spot_name: string; start_at: string; active_min: number; rods: number; zero_catch: number; items: { species: string; count: number }[]; cpue: number; freeze_status: string; model: { hours: { total: number | null; rank: number | null }[] } | null }[];
+      $('sessions').innerHTML = ses.length
+        ? ses.map((s) => {
+            const n = s.items.reduce((a, i) => a + i.count, 0);
+            const t = s.model?.hours.map((h) => h.total).filter((x): x is number => x !== null) ?? [];
+            const mean = t.length ? Math.round(t.reduce((a, x) => a + x, 0) / t.length) : null;
+            return `<li>${new Date(s.start_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })} · ${s.spot_name.replace(/</g, '&lt;')} · ${s.zero_catch ? 'sıfır av' : `${n} balık`} · ${String(s.cpue).replace('.', ',')}/sa/kamış${mean !== null ? ` · model ${mean}` : ''}${s.freeze_status === 'partial' ? ' · model yeniden hesaplanıyor' : ''}<br><button type="button" class="ghost" data-del="${s.id}">Sil</button></li>`;
+          }).join('')
+        : '<li class="hint">Henüz seans yok.</li>';
+    } catch {}
+  }
+  $('sessions').addEventListener('click', async (e) => {
+    const id = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-del]')?.dataset.del;
+    if (!id || !confirm('Bu seans silinsin mi?')) return;
+    await api(`/api/admin/catch/${id}`, 'DELETE');
+    history();
+  });
+  $('csv').addEventListener('click', async () => {
+    const r = await fetch('/api/admin/catch/export.csv', { headers: { authorization: `Bearer ${token}` } });
+    if (!r.ok) return say('CSV alınamadı.', 'err');
+    const url = URL.createObjectURL(await r.blob());
+    const a = Object.assign(document.createElement('a'), { href: url, download: 'av-gunlugu.csv' });
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+  $('near').addEventListener('click', () => {
+    // Location stays on the device: only the chosen spot id is sent.
+    navigator.geolocation?.getCurrentPosition((p) => {
+      const d = (s: { lat: number; lon: number }) => (s.lat - p.coords.latitude) ** 2 + ((s.lon - p.coords.longitude) * Math.cos((s.lat * Math.PI) / 180)) ** 2;
+      const best = [...spots].sort((a, b) => d(a) - d(b))[0];
+      if (best) ($('spot') as HTMLSelectElement).value = best.id;
+    }, () => say('Konum alınamadı.', 'err'), { enableHighAccuracy: true, timeout: 10_000 });
+  });
+  $('logout').addEventListener('click', () => { logout(); location.reload(); });
+
+  async function open() {
+    $('login').hidden = true;
+    $('form').hidden = false;
+    const b = await api('/api/admin/spots', 'GET');
+    spots = b.spots;
+    $('spot').innerHTML = spots.map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
+    const want = new URLSearchParams(location.search).get('id');
+    if (want) ($('spot') as HTMLSelectElement).value = want;
+    const now = new Date();
+    ($('end') as HTMLInputElement).value = local(now);
+    ($('start') as HTMLInputElement).value = local(new Date(now.getTime() - 2 * 3_600_000));
+    reset();
+    history();
+    flush();
+  }
+  $('login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    token = ($('token') as HTMLInputElement).value.trim();
+    try { await api('/api/admin/ping', 'GET'); setToken(token); open(); } catch (err) { say((err as Error).message, 'err'); }
+  });
+  if (token) open().catch(() => say('Yüklenemedi.', 'err'));
+</script>

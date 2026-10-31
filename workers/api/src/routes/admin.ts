@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
+import { catchRoutes } from './catch';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
@@ -53,6 +54,7 @@ export function validateFields(body: Fields): Valid {
 }
 
 adminRoutes.get('/ping', (c) => c.json({ ok: true }));
+adminRoutes.route('/catch', catchRoutes);
 
 /** All spots with private fields (lamp state, notes) for /admin/ and /saha/. */
 adminRoutes.get('/spots', async (c) => {

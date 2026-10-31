@@ -10,7 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
-import { DELETE_STALE_V2_SQL, fieldRecords, oceanMap, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
+import { DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 
 const dryRun = process.argv.includes('--dry-run');
@@ -93,6 +93,26 @@ if (dryRun) {
     await query(UPSERT_HISTORY_SQL, [r.spot_id, r.start_hour, r.history_json]);
   }
   await query(DELETE_STALE_V2_SQL);
+  // Catch-log sessions whose hours predate the history table: fill them from the hourly observations.
+  const partial = await query<{ id: string; spot_id: string; model_json: string }>("SELECT id, spot_id, model_json FROM catch_session WHERE freeze_status = 'partial'");
+  const fields = fieldRecords(obs, depths);
+  for (const ses of partial) {
+    const row = rows.find((r) => r.id === ses.spot_id);
+    const model = JSON.parse(ses.model_json) as { hours: { hour: number }[]; missing: number[] };
+    if (!row || !model.missing.length) continue;
+    const from = new Date((model.missing[0]! - 50) * 3_600_000).toISOString();
+    const to = new Date((model.missing[model.missing.length - 1]! + 1) * 3_600_000).toISOString();
+    const q = 'SELECT * FROM observations WHERE cell_id = ?1 AND ts >= ?2 AND ts < ?3 ORDER BY ts';
+    const wx = await query<ObservationRow>(q, [row.wx_cell, from, to]);
+    const sea = row.sea_cell ? await query<ObservationRow>(q, [row.sea_cell, from, to]) : [];
+    const filled = recomputeHours(row, fields.get(row.id), pointsFromObservations(wx, sea), model.missing);
+    const hours = [...model.hours, ...filled.filter((h) => h.total !== null)].sort((a, b) => a.hour - b.hour);
+    const missing = filled.filter((h) => h.total === null).map((h) => h.hour);
+    await query("UPDATE catch_session SET model_json = ?1, freeze_status = ?2 WHERE id = ?3", [
+      JSON.stringify({ ...model, hours, missing, recomputed_at: new Date().toISOString() }), missing.length ? 'partial' : 'complete', ses.id,
+    ]);
+    console.log(`catch ${ses.id}: recomputed ${filled.length - missing.length} hours from observations, ${missing.length} without data`);
+  }
   // Edits made while this run computed stay pending for the next 15-minute run.
   await query('DELETE FROM pending_rescore WHERE since <= ?1', [startedAt]);
   console.log(`wrote ${records.length} rows in ${(performance.now() - t2).toFixed(0)} ms (total ${(performance.now() - t0).toFixed(0)} ms)`);

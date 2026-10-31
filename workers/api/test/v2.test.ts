@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { refreshWeather } from '../src/cron';
 import { app } from '../src/index';
-import { applyOcean, computeSpotV2, fieldRecords, oceanMap, packV2, rescoreSpot, spotV2, type ListEntryV2, type Ocean, type PackedV2 } from '../src/precompute_v2';
+import { applyOcean, computeSpotV2, fieldRecords, oceanMap, packV2, pointsFromObservations, recomputeHours, rescoreSpot, spotV2, type ListEntryV2, type Ocean, type PackedV2 } from '../src/precompute_v2';
 import type { SpotRow } from '../src/lib/spots';
 import { omFetch, resetAndSeed, writeScoresV2 } from './helpers';
 
@@ -170,5 +170,24 @@ describe('Copernicus overlay', () => {
     const c = Object.fromEntries(r.hours[0]!.components.map((x) => [x.key, x]));
     expect(c.su_degisim!.source).toBe('Copernicus');
     expect(c.su_sapma!.reason).toBe('−2.0 °C (5 yıllık kısa normal)');
+  });
+});
+
+describe('recomputed model output from observations', () => {
+  it('builds points from observation rows and labels recomputed hours', async () => {
+    const pts = pointsFromObservations(
+      [{ ts: '2026-11-01T00:00:00.000Z', pressure: 1010, wind_speed: 8, wind_dir: 30, wind_gust: 12, precip: 0, cloud: 50, wave_h: null, sst: null, cur_vel: null }],
+      [{ ts: '2026-11-01T00:00:00.000Z', pressure: null, wind_speed: null, wind_dir: null, wind_gust: null, precip: null, cloud: null, wave_h: 0.3, wave_dir: 40, sst: 16, cur_vel: 3.6 },
+       { ts: '2026-11-01T01:00:00.000Z', pressure: null, wind_speed: null, wind_dir: null, wind_gust: null, precip: null, cloud: null, wave_h: 0.2, sst: 16, cur_vel: null }],
+    );
+    expect(pts).toHaveLength(2);
+    expect(pts[0]).toMatchObject({ windSpeed: 8, cloud: 50, waveH: 0.3, curVel: 1 });
+    expect(pts[1]!.waveDir).toBeNull();
+    const row = (await env.DB.prepare("SELECT * FROM spots WHERE id = 'osm-way-1'").first()) as unknown as SpotRow;
+    const h = Math.floor(Date.parse('2026-11-01T00:00:00Z') / 3_600_000);
+    const r = recomputeHours(row, undefined, pts, [h, h + 1]);
+    expect(r.map((x) => [x.source, x.rank, x.p10])).toEqual([['recomputed', null, null], ['recomputed', null, null]]);
+    expect(r[0]!.total).not.toBeNull();
+    expect(recomputeHours(row, undefined, pts, [])).toEqual([]);
   });
 });
