@@ -173,8 +173,8 @@
   "place": null
  },
  "dropped": {
-  "near_existing": 10,
-  "near_other": 6,
+  "near_existing": 8,
+  "near_other": 7,
   "forbidden": 1
  },
  "known_missing": [
