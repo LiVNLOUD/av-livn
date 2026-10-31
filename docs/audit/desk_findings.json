@@ -4,6 +4,7 @@
  "osm_lamp": {
   "osm-way-77362926": "OSM: 1 lamba/fener ≤ 40 m (seamark_light 37 m)"
  },
+ "pruned_osm_lamp": 0,
  "mapillary": {
   "osm-way-1005837524": 0,
   "osm-way-1170373161": 0,
@@ -23,22 +24,6 @@
   "osm-way-77362926": 0
  },
  "sentinel2": {
-  "osm-way-1005837524": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 603 su pikselinin %87'i, 12 sahne, medyan oran 0.99",
-  "osm-way-1170373161": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 394 su pikselinin %68'i, 12 sahne, medyan oran 1.08",
-  "osm-way-1218507890": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 343 su pikselinin %95'i, 12 sahne, medyan oran 0.99",
-  "osm-way-1233883494": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 709 su pikselinin %75'i, 12 sahne, medyan oran 0.99",
-  "osm-way-1364814104": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 451 su pikselinin %90'i, 12 sahne, medyan oran 1.0",
-  "osm-way-1394208144": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 615 su pikselinin %51'i, 12 sahne, medyan oran 1.1",
-  "osm-way-1413355181": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 709 su pikselinin %82'i, 12 sahne, medyan oran 1.01",
-  "osm-way-1414984335": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 654 su pikselinin %74'i, 12 sahne, medyan oran 1.01",
-  "osm-way-1422122108": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 485 su pikselinin %72'i, 12 sahne, medyan oran 1.02",
-  "osm-way-1456975486": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 487 su pikselinin %56'i, 12 sahne, medyan oran 1.08",
-  "osm-way-252356832": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 701 su pikselinin %65'i, 12 sahne, medyan oran 1.05",
-  "osm-way-252356833": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 707 su pikselinin %71'i, 12 sahne, medyan oran 0.97",
-  "osm-way-479047532": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 526 su pikselinin %51'i, 12 sahne, medyan oran 1.09",
-  "osm-way-483965349": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 522 su pikselinin %77'i, 12 sahne, medyan oran 1.02",
-  "osm-way-503770078": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 705 su pikselinin %72'i, 12 sahne, medyan oran 0.97",
-  "osm-way-77362926": "Sentinel-2: koyu dip (kaya, yosun, midye — ya da derin su), uç çevresi 614 su pikselinin %96'i, 12 sahne, medyan oran 0.97",
   "_scenes": {
    "osm-way-1005837524": 12,
    "osm-way-1170373161": 12,
@@ -59,6 +44,10 @@
   },
   "_pixels": 9225
  },
+ "pruned_sentinel2": 16,
  "manual": {},
- "written": 17
+ "pruned_openseamap": 0,
+ "pruned_ced": 0,
+ "pruned_literatur": 0,
+ "written": 1
 }
