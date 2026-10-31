@@ -36,6 +36,8 @@ from av_pipeline.bathy.grid import Grid
 from av_pipeline.bathy.sample import dtm_normal, dtm_probe, features, sea_probe
 from av_pipeline.habitat import eusm
 from av_pipeline.spots.fetch_rose import rose_km
+from av_pipeline.spots.labels import labels as map_labels
+from av_pipeline.spots.naming import unique_names
 from av_pipeline.spots.geo import M_PER_DEG_LAT, M_PER_DEG_LON, bearing, offset, to_lonlat, to_xy
 
 KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
@@ -166,6 +168,7 @@ def build_candidate(
     props = {
         "id": f"osm-way-{s['osm_id']}",
         "name": name,
+        "name_source": "osm" if s["tags"].get("name") else "generated",
         "kind": kind,
         "length_m": round(line.length),
         "shore_normal_deg": round(normal, 1),
@@ -261,7 +264,11 @@ def main(argv: list[str]) -> int:
     dst = Path(argv[2] if len(argv) > 2 else "data/spots.geojson")
     grid = Grid.from_netcdf(argv[argv.index("--dtm") + 1]) if "--dtm" in argv else None
     land = land_xy(json.loads(Path(argv[argv.index("--land") + 1]).read_text())) if "--land" in argv else None
-    fc = build(json.loads(src.read_text()), grid, land)
+    raw = json.loads(src.read_text())
+    fc = build(raw, grid, land)
+    harbours = [{"name": f["properties"]["name"], "lon": f["geometry"]["coordinates"][0], "lat": f["geometry"]["coordinates"][1]}
+                for f in map_labels(raw)["features"] if f["properties"]["kind"] == "harbour"]
+    renamed = unique_names(fc["features"], harbours)
     if "--habitat" in argv:
         eusm.annotate(fc["features"])
     if "--check-marine" in argv:
@@ -271,7 +278,7 @@ def main(argv: list[str]) -> int:
     dtm = sum(1 for f in fc["features"] if f["properties"]["probe_source"] == "dtm")
     none = sum(1 for f in fc["features"] if f["properties"]["probe_lat"] is None)
     moved = sum(1 for f in fc["features"] if f["properties"]["alt_lat"] is not None)
-    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe, {dtm} probes from DTM, {none} without probe, {moved} tips moved off the coastline vertex")
+    print(f"{len(fc['features'])} candidates, {ok} with marine data at probe, {dtm} probes from DTM, {none} without probe, {moved} tips moved off the coastline vertex, {renamed} duplicate names made unique")
     return 0
 
 

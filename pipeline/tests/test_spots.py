@@ -229,3 +229,28 @@ def test_shared_junction_node_is_not_the_tip_and_neighbours_are_kept():
     assert set(by) == {"osm-way-10", "osm-way-11"}
     assert by["osm-way-10"]["geometry"]["coordinates"][1] == pytest.approx(LAT + 150 * DLAT, abs=2 * DLAT)
     assert by["osm-way-11"]["geometry"]["coordinates"][1] == pytest.approx(junction[0], abs=2 * DLAT)
+
+
+def test_duplicate_generated_names_become_unique_and_descriptive():
+    from av_pipeline.spots.naming import unique_names
+
+    def f(i, lon, lat, kind="breakwater", name="Mendirek (Armutlu)", src="generated", length=100):
+        return {"geometry": {"coordinates": [lon, lat]}, "properties": {"id": i, "name": name, "name_source": src, "kind": kind, "place": "Armutlu", "length_m": length}}
+
+    feats = [f("a", 28.820, 40.509), f("b", 28.830, 40.509), f("c", 28.825, 40.512), f("d", 28.825, 40.5089),
+             f("e", 28.90, 40.40, name="Mudanya İskelesi", src="osm"), f("g", 28.95, 40.45, kind="pier", name="İskele (Kapaklı)")]
+    harbours = [{"name": "Armutlu Devlet Limanı", "lon": 28.826, "lat": 40.510}]
+    assert unique_names(feats, harbours) == 4
+    names = [x["properties"]["name"] for x in feats]
+    assert names[0] == "Armutlu Devlet Limanı – batı mendireği"
+    assert names[1] == "Armutlu Devlet Limanı – doğu mendireği"
+    assert names[2] == "Armutlu Devlet Limanı – kuzey mendireği"
+    assert len(set(names[:4])) == 4
+    assert names[4] == "Mudanya İskelesi" and names[5] == "İskele (Kapaklı)"
+    # no harbour nearby → place prefix; same direction → dış/iç; identical tips → numbered
+    pair = [f("x", 28.93, 40.357, name="Mendirek (Burgaz)"), f("y", 28.94, 40.357, name="Mendirek (Burgaz)")]
+    unique_names(pair, [])
+    assert [p["properties"]["name"] for p in pair] == ["Armutlu – batı mendireği", "Armutlu – doğu mendireği"]
+    same = [f("p", 28.9, 40.4, name="Z", length=50), f("q", 28.9, 40.4, name="Z", length=90), f("r", 28.91, 40.4, name="Z")]
+    unique_names(same, [])
+    assert len({p["properties"]["name"] for p in same}) == 3
