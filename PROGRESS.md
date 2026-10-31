@@ -79,3 +79,17 @@
 - **B2:** Copernicus Marmara 500 m saatlik su sıcaklığı (1–20 m) ve akıntı (1–5 m), `ocean.yml` 6 saatte bir; 2021-11+ günlük arşivden kısa normal (kanıt C, ağırlık 0.03).
 - **B3:** tam ekran harita: OpenFreeMap altlık, Türkçe adlar, ölçek, OSM vektör kıyı, geniş ve kenarı soldurulmuş batimetri, taralı enterpolasyon alanı, burun/liman etiketleri, çakışmasız v2 işaretleri.
 - **B4/B6:** kart ve liste v2: bant > 30 ise sıra öne, derinlik kaynağı metni, kanıt rozeti + kaynak etiketi, %10–90 bantlı grafik, uçtan profil + saha noktaları; v2 renk bantları (65/40), bulut ve lamba üç durumu koşullar panelinde.
+
+## v2 Bölüm C — adlar, dürüstlük, saha formu, av günlüğü, masa başı veri (2026-10-31) ✅
+- **C2c "18 mera":** canlıda hiç 18 görünmedi; ekran görüntüsünü yanlış okumuştum (küçültülmüş görüntü), gerçek sayı 16. Yine de tek kaynak: `ACTIVE` + `ACTIVE_COUNT_SQL`; liste `count` = kart `spot_count` testi.
+- **C1:** aynı adlı yapılar ayrıştı: en yakın liman ≤ 1 km ya da yerleşim + yön ("Armutlu Devlet Limanı – uzun/orta/kısa batı mendireği"); OSM adı ve id değişmez, yönetici adı korunur.
+- **C2:** erişim rozeti + "gizle" anahtarı (puana girmez); her merada sıranın ana nedeni (sürücü takası ablasyonu, `explain.ts`, %100 test). Saha kaynaklı değerler "değer gizli".
+- **C3:** anahtar cihazda kalır, çıkış düğmesi; giriş düzenle/sil/onayla/reddet; kaynak türü saha/uzaktan/masa başı ve öncelik zinciri. Canlı CPU (Workers Observability): nokta puanı POST 42, PATCH 24, DELETE 27 ms > 10 ms → Worker yalnız kaydeder, `score.yml` 15 dk'lık `--pending` çalışması Monte Carlo ile günceller ("en geç 20 dakika"). `field-smoke.yml` canlı test: 201/200/200, sızıntı yok.
+- **C4:** `/gunluk/` av günlüğü (yalnız anahtarla): seans, efor (aktif dk, kamış), yöntem, tür/adet/boy, açık "sıfır av", 13 cm uyarısı, çevrimdışı kuyruk, CSV. Model çıktısı kayıtta dondurulur (geçmiş saat → `spot_scores_v2_history`, daha eskisi gözlemlerden yeniden hesap, "recomputed"). Birim adet/saat/kamış.
+- **C6:** `desk.yml` (aylık): OSM lamba (1 bulgu: Demirsubaşı seyir ışığı 37 m → p 0.6), Mapillary (token var, 16 merada ±50 m'de 0 görüntü), Sentinel-2 (12 sahne/mera; uçlar açık sudan ayırt edilemiyor, oran 0.97–1.10 → bulgu yok; ilk çalışmanın yanlış "koyu" sınıfı düzeltildi ve silindi). Literatür, ÇED, OpenSeaMap: meraya uygulanabilir değer bulunamadı (DESK-DATA.md). Önce/sonra: öğlen fark yok; 21:00'de Demirsubaşı 74.7 → 77.0, sıra #3 değişmedi.
+- **C5:** 390 px: `docs/screenshots/saha-*-390.png`, `gunluk-*-390.png` (form yerel D1 ile, giriş ekranı canlı).
+
+## v2 Bölüm D — (2026-10-31, sürüyor)
+- **D0:** gizlilik düzeltmesi canlı (public API yalnız puan/sıra/bant/genel bilgi; v1 kaldırıldı). Git geçmişi: kişisel saha/av verisi yok, secret yok; yalnız commit e-postaları (`akdagkn@gmail.com` 17, `akdagknmain@gmail.com` 1). Şifreli günlük yedek `backup.yml` (gpg AES256, `BACKUP_PASSPHRASE` secret'ı bekleniyor), geri yükleme testi yerelde geçti (BACKUP.md).
+- **D1:** envanter adayları `proposed` (puanlanmaz), harita gri katman + erişim yasak katmanı, `/admin/` onay/ret. Karacaali/Büyükkumla kök nedeni: OSM'de iskele yolu değil `leisure=marina` noktası.
+- **D2:** ana sayfa "Nereye, ne zaman?": 72 saatin en iyi pencereleri, gün/saat seçici, tür seçici.
