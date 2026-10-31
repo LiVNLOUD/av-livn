@@ -69,7 +69,7 @@ export function validateSession(b: Record<string, unknown>, now: Date): { ok: tr
   if (!zero && !items.length) return { ok: false, error: 'catch_or_zero_required' };
   const warnings = items
     .filter((i) => i.length_cm !== null && LEGAL_MIN_CM[i.species] !== undefined && i.length_cm < LEGAL_MIN_CM[i.species]!)
-    .map((i) => `${i.length_cm} cm ${i.species} yasal asgari boyun (${LEGAL_MIN_CM[i.species]} cm) altında — denize geri bırakın.`);
+    .map((i) => `${String(i.length_cm).replace('.', ',')} cm ${i.species} yasal asgari boyun (${LEGAL_MIN_CM[i.species]} cm) altında — denize geri bırakın.`);
   return {
     ok: true,
     warnings,
