@@ -82,7 +82,11 @@ import AdminLogin from '../../../components/AdminLogin.astro';
     const yf = ((1 - Math.log(Math.tan((lat * Math.PI) / 180) + 1 / Math.cos((lat * Math.PI) / 180)) / Math.PI) / 2) * n;
     const tx = Math.floor(xf), ty = Math.floor(yf);
     const ox = Math.round((xf - tx) * 256), oy = Math.round((yf - ty) * 256);
-    return `<div class="mini"><img loading="lazy" alt="" src="https://tile.openstreetmap.org/${z}/${tx}/${ty}.png" style="left:${56 - ox}px;top:${36 - oy}px" /><i></i></div>`;
+    // The frame is 112×72 around the point: add neighbour tiles only where it reaches past the centre tile.
+    const dxs = [0, ...(ox < 56 ? [-1] : []), ...(256 - ox < 56 ? [1] : [])];
+    const dys = [0, ...(oy < 36 ? [-1] : []), ...(256 - oy < 36 ? [1] : [])];
+    const imgs = dxs.flatMap((dx) => dys.map((dy) => `<img loading="lazy" alt="" src="https://tile.openstreetmap.org/${z}/${tx + dx}/${ty + dy}.png" style="left:${56 - ox + dx * 256}px;top:${36 - oy + dy * 256}px" />`));
+    return `<div class="mini">${imgs.join('')}<i></i></div>`;
   }
 
   function shown() {
