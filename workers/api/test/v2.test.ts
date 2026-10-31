@@ -123,7 +123,7 @@ describe('single-spot rescore', () => {
       { computed_at: 'c', weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, field_at: null, depth_field_at: null, sink_calibration: null, ocean: null, ocean_normal: null },
     );
     expect(p.meta.comps).toEqual([['k', 'K', 'statik', null, 'saha', 'C']]);
-    expect(p.h[0]).toEqual(['t', 1, 0.1, null, null, 1, ['w'], 1, null, [null], ['r']]);
+    expect(p.h[0]).toEqual(['t', 1, 0.1, null, null, 1, ['w'], 1, null, [null], ['saha bilgisi (yalnız yönetici görür)']]);
   });
 });
 

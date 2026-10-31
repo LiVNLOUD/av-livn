@@ -11,7 +11,7 @@ import Base from '../../layouts/Base.astro';
     <p class="msg" id="msg" role="status"></p>
 
     <section id="panel" hidden>
-      <p><a href="/saha/" class="go">Saha formu → ölçüm, dip tipi, lamba, fotoğraf</a></p>
+      <p><a href="/saha/" class="go">Saha formu → ölçüm, dip tipi, lamba, fotoğraf</a> · <button type="button" id="logout" class="linkish">Çıkış (anahtarı bu cihazdan sil)</button></p>
       <h2>Mevcut meralar</h2>
       <label>Düzenlenecek mera<select id="pick"></select></label>
       <form id="edit" class="stack">
@@ -52,14 +52,14 @@ import Base from '../../layouts/Base.astro';
   .msg { min-height: 1.5em; font-size: 0.9rem; }
   .msg.err { color: var(--storm); }
   .go { color: var(--sodium); font-weight: 650; }
+  .linkish { background: none; border: 0; color: var(--mist); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
 </style>
 
 <script>
+  import { getToken, logout, setToken } from '../../scripts/admin';
   type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-  const KEY = 'av-livn-admin';
-  let token = '';
-  try { token = sessionStorage.getItem(KEY) ?? ''; } catch {}
+  let token = getToken();
   let spots: Spot[] = [];
 
   function say(text: string, err = false) {
@@ -78,7 +78,7 @@ import Base from '../../layouts/Base.astro';
   }
 
   async function load() {
-    const b = await (await fetch('/api/spots')).json();
+    const b = await (await fetch('/api/admin/spots', { headers: { authorization: `Bearer ${token}` }, cache: 'no-cache' })).json();
     spots = b.spots;
     $('pick').innerHTML = spots.map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
     fill();
@@ -105,7 +105,7 @@ import Base from '../../layouts/Base.astro';
     try {
       // Probe auth with an empty patch: 400 means the token is accepted.
       await api('/api/admin/spots/_', 'PATCH', {}).catch((err: Error) => { if (!/empty_patch/.test(err.message)) throw err; });
-      try { sessionStorage.setItem(KEY, token); } catch {}
+      setToken(token);
       say('Giriş yapıldı.');
       open();
     } catch (err) {
@@ -153,5 +153,6 @@ import Base from '../../layouts/Base.astro';
     }
   });
 
+  $('logout').addEventListener('click', () => { logout(); location.reload(); });
   if (token) open();
 </script>

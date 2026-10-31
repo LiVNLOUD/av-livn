@@ -83,12 +83,10 @@ describe('POST /api/admin/spots/:id/field', () => {
     expect(after!.partial).toBe(1);
     expect(after!.list_json).not.toBe(before!.list_json);
 
-    const d = await (await app.request('/api/spots/osm-way-2?model=v2', {}, env)).json<{ field: Record<string, any>; partial: boolean; packed: { meta: { comps: unknown[][]; sink_calibration: { pairs: number } } } }>();
+    const d = await (await app.request('/api/spots/osm-way-2?model=v2', {}, env)).json<{ field: Record<string, any>; partial: boolean; packed: { meta: { comps: unknown[][]; sink_calibration: unknown } } }>();
     expect(d.partial).toBe(true);
     expect(d.field.observations).toBe(1);
-    expect(d.field.last_note).toBe('ölçüm');
-    expect(d.field.depths.map((x: { quality: string }) => x.quality)).toEqual(['plumb', 'sink_cal', 'sink_cal']);
-    expect(d.packed.meta.sink_calibration.pairs).toBe(1);
+    expect(d.packed.meta.sink_calibration).toBeNull(); // private: admin field endpoint only
     const sources = Object.fromEntries(d.packed.meta.comps.map((c) => [c[0], c[4]]));
     expect(sources).toMatchObject({ derinlik: 'saha', taban: 'saha', yapi: 'saha', lamba: 'saha' });
 

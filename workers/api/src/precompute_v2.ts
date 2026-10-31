@@ -235,12 +235,24 @@ export interface PackedV2 {
 
 const r3 = (x: number | null) => (x === null ? null : Math.round(x * 1000) / 1000);
 
+/** Sources whose values come from the private field table (redacted in the public detail). */
+export const PRIVATE_SOURCES = new Set(['saha', 'uzaktan gözlem']);
+export const REDACTED = 'saha bilgisi (yalnız yönetici görür)';
+
+/**
+ * Public detail: components fed by the private field table keep their key, weight and source but not their
+ * value or reason (the value would reveal e.g. the measured depth or the lamp state).
+ */
 export function packV2(hours: V2Hour[], meta: Omit<PackedV2['meta'], 'comps' | 'model_version'>): PackedV2 {
   const first = hours[0]!;
+  const hide = first.components.map((c) => PRIVATE_SOURCES.has(c.source));
   return {
     v: 2,
     meta: { model_version: MODEL_VERSION, ...meta, comps: first.components.map((c) => [c.key, c.label, c.group, c.weight, c.source, c.evidence]) },
-    h: hours.map((h) => [h.ts, h.total, h.raw, h.p10, h.p90, h.gated ? 1 : 0, h.warnings, h.wNight, h.lampP, h.components.map((c) => r3(c.value)), h.components.map((c) => c.reason)]),
+    h: hours.map((h) => [
+      h.ts, h.total, h.raw, h.p10, h.p90, h.gated ? 1 : 0, h.warnings, h.wNight, hide[first.components.findIndex((c) => c.key === 'lamba')] ? null : h.lampP,
+      h.components.map((c, i) => (hide[i] ? null : r3(c.value))), h.components.map((c, i) => (hide[i] ? REDACTED : c.reason)),
+    ]),
   };
 }
 
@@ -260,9 +272,10 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
     weather_fetched_at: wx?.fetched_at ?? null,
     sea_fetched_at: sea?.fetched_at ?? null,
     sea_grid: seaGrid,
-    field_at: field?.latestAt ?? null,
-    depth_field_at: field?.lastDepthAt ?? null,
-    sink_calibration: field?.calibration ?? null,
+    // Dates of visits and the sink calibration are private (admin field endpoint).
+    field_at: null,
+    depth_field_at: null,
+    sink_calibration: null,
     ocean: ocean?.series ? { fetched_at: ocean.series.fetched_at, cell: ocean.series.data.cell } : null,
     ocean_normal: ocean?.normal ? { years: ocean.normal.data.years, from: ocean.normal.data.from, to: ocean.normal.data.to } : null,
   });
@@ -297,20 +310,26 @@ export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hou
   switch (key) {
     case 'lamba':
       body =
-        spot.lamp !== null
+        spot.lamp !== null && spot.lampSource !== null && spot.lampSource !== undefined
+          ? `lamba — ${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi (değer gizli)`
+          : spot.lamp !== null
           ? `lamba ${spot.lamp ? 'var' : 'yok'} — ${c('lamba').source}`
           : `lamba olasılığı ${n1(lampPrior(spot))} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
       break;
     case 'yapi':
-      body = `${spot.fieldStructure ? spot.fieldStructure.replace('_', ' ') : KIND_TR[spot.kind]} ${Math.round(spot.lengthM ?? 50)} m — ${c('yapi').source}, kanıt C`;
+      body = PRIVATE_SOURCES.has(c('yapi').source)
+        ? `yapı — ${c('yapi').source} bilgisi (değer gizli)`
+        : `${KIND_TR[spot.kind]} ${Math.round(spot.lengthM ?? 50)} m — ${c('yapi').source}, kanıt C`;
       break;
     case 'derinlik': {
       const src = c('derinlik').source;
-      body = `atış mesafesinde ~${c('derinlik').reason.split(' m')[0]} m — ${src === 'yapı-uzunluğu-tahmini' ? 'yapı uzunluğundan tahmin (C), saha ölçümü yok' : src}`;
+      body = PRIVATE_SOURCES.has(src)
+        ? `derinlik — ${src === 'saha' ? 'saha ölçümü' : src} var (değer gizli)`
+        : `atış mesafesinde ~${c('derinlik').reason.split(' m')[0]} m — ${src === 'yapı-uzunluğu-tahmini' ? 'yapı uzunluğundan tahmin (C), saha ölçümü yok' : src}`;
       break;
     }
     case 'taban':
-      body = `dip ${c('taban').reason} — ${c('taban').source}`;
+      body = PRIVATE_SOURCES.has(c('taban').source) ? `dip — ${c('taban').source} bilgisi (değer gizli)` : `dip ${c('taban').reason} — ${c('taban').source}`;
       break;
     default: {
       const dir = w.windDir === null ? null : COMPASS_TR[Math.round(w.windDir / 45) % 8];

@@ -99,6 +99,7 @@ import Base from '../../layouts/Base.astro';
 <script>
   import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
+  import { adminGet } from '../../scripts/admin';
   import { bandOf, bandV2, leadWithRank, RANK_FIRST_WIDTH, type Band } from '@av-livn/scoring';
 
   type Hour = [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]];
@@ -111,10 +112,11 @@ import Base from '../../layouts/Base.astro';
   type FieldDepth = { distance_m: number; depth_m: number; sd_m: number; quality: 'plumb' | 'sink_cal' | 'sink' };
   type Resp = {
     spot: {
-      id: string; name: string; kind: string; status: string; place: string | null; has_light: boolean | null; access: string | null;
+      id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null;
       shore_normal_deg: number | null; length_m: number | null; profile: (number | null)[] | null; alt: { lat: number; lon: number } | null;
     };
-    field: { depths: FieldDepth[]; observations: number; latestAt: string; last_note: string | null } | null;
+    /** Public: which kinds of field knowledge exist (badges), never values. */
+    field: { observations: number; desk_pending: number; kinds: Record<'lamba' | 'derinlik' | 'taban' | 'yapi', string | null> } | null;
     spot_count: number; partial: boolean; from: number; hours: number; ranks: number[];
     packed: { meta: Meta; h: Hour[] } | null;
   };
@@ -122,6 +124,9 @@ import Base from '../../layouts/Base.astro';
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const id = new URLSearchParams(location.search).get('id');
   let d: Resp;
+  /** Owner view (ADMIN_TOKEN on this device): private field record and lamp state, fetched from /api/admin. */
+  type Priv = { record: { depths: FieldDepth[]; lastDepthAt: string | null; latestAt: string; calibration: { pairs: number } | null } | null; observations: { note: string | null }[]; has_light: boolean | null };
+  let priv: Priv | null = null;
   let H: Hour[] = [];
   let sel = 0;
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık', kisitli_feribot: 'erişim kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
@@ -233,11 +238,13 @@ import Base from '../../layouts/Base.astro';
     // Conditions: what the dynamic terms see this hour, coloured by their own value; cloud now affects the score.
     const cloud = /bulut (\d+|–) %/.exec(why(h, 'diel'))?.[1];
     const lampP = h[8];
-    const lampLine = d.spot.has_light === true ? 'Var' : d.spot.has_light === false ? 'Yok' : `Bilinmiyor (olasılık %${Math.round((lampP ?? 0) * 100)})`;
+    const lampLine = d.spot.lamp_known
+      ? priv ? (priv.has_light ? 'Var (saha)' : 'Yok (saha)') : 'Saha bilgisi var (gizli)'
+      : `Bilinmiyor (olasılık %${Math.round((lampP ?? 0) * 100)})`;
     const conds: [string, string, number | null, string][] = [
       ['Rüzgar × maruziyet', why(h, 'ruzgar_dalga'), val(h, 'ruzgar_dalga'), 'kıyıya vuran rüzgar açık yönlerde puanı düşürür'],
       ['Bulut', cloud === undefined || cloud === '–' ? '–' : `%${cloud}`, val(h, 'diel'), 'ışığı değiştirir: gündüz yumuşatır, gece lamba kontrastını artırır'],
-      ['Lamba', lampLine, d.spot.has_light === null ? null : val(h, 'diel'), d.spot.has_light === null ? 'var/yok karışımı; saha formundan girin' : 'saha bilgisi'],
+      ['Lamba', lampLine, d.spot.lamp_known ? val(h, 'diel') : null, d.spot.lamp_known ? 'saha bilgisi; değer yalnız yöneticiye görünür' : 'var/yok karışımı; saha formundan girin'],
       ['Su sıcaklığı (48 sa)', why(h, 'su_degisim'), val(h, 'su_degisim'), 'ani soğuma cezalandırılır'],
       ['Kısa normalden sapma', why(h, 'su_sapma'), val(h, 'su_sapma'), meta.ocean_normal ? `${Math.round(meta.ocean_normal.years)} yıllık kısa normal (kanıt C)` : 'normal yok'],
       ['Bulanıklık', why(h, 'bulaniklik'), val(h, 'bulaniklik'), 'yağış ve dalgadan'],
@@ -258,10 +265,11 @@ import Base from '../../layouts/Base.astro';
 
   function profileChart(): void {
     const prof = d.spot.profile ?? [];
-    const field = d.field?.depths ?? [];
-    const depthSrc = d.packed?.meta.comps[ci('derinlik')]?.[4];
-    $('depth-src').innerHTML = depthSrc === 'saha'
-      ? `Derinlik: <b class="band-good">saha ölçümü</b> (${d.packed!.meta.depth_field_at ? fmtDay(d.packed!.meta.depth_field_at) : '–'})${d.packed!.meta.sink_calibration ? `, batma süreleri ${d.packed!.meta.sink_calibration.pairs} dikine ölçümle kalibre` : ''}`
+    const field = priv?.record?.depths ?? [];
+    const kind = d.field?.kinds.derinlik ?? null;
+    const own = priv?.record;
+    $('depth-src').innerHTML = kind
+      ? `Derinlik: <b class="band-good">${kind === 'saha' ? 'saha ölçümü' : kind === 'uzaktan' ? 'uzaktan gözlem' : 'masa başı veri'} var</b>${own ? ` (${own.lastDepthAt ? fmtDay(own.lastDepthAt) : '–'})${own.calibration ? `, batma süreleri ${own.calibration.pairs} dikine ölçümle kalibre` : ''}` : ' — değerler yalnız yöneticiye görünür'}`
       : `Derinlik: <b class="band-warn">tahmini — yapı uzunluğundan, saha ölçümü yok</b>. DTM bu kıyıda tamamen enterpolasyon (kesikli çizgi).`;
     const valid = prof.map((v, i) => [i * 25, v] as const).filter((p): p is readonly [number, number] => p[1] !== null);
     if (!valid.length && !field.length) {
@@ -307,7 +315,7 @@ import Base from '../../layouts/Base.astro';
     const { spot } = d;
     document.title = `${spot.name} — av.livn`;
     $('name').textContent = spot.name;
-    const lampTxt = spot.has_light === null ? 'lamba bilinmiyor' : spot.has_light ? 'lamba var' : 'lamba yok';
+    const lampTxt = spot.lamp_known ? 'lamba: saha bilgisi var' : 'lamba bilinmiyor';
     const facing = spot.shore_normal_deg === null ? null : `denize bakış ${compass(spot.shore_normal_deg)}`;
     $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt, spot.access ? ACCESS_TR[spot.access] : null, facing]
       .filter(Boolean)
@@ -328,7 +336,11 @@ import Base from '../../layouts/Base.astro';
     if (m.ocean) notes.push(`Su sıcaklığı ve akıntı Copernicus Marmara 500 m modelinden (en yakın deniz hücresi ${n1(m.ocean.cell.distance_km)} km).`);
     else if (m.sea_grid && m.sea_grid.distance_km > 2) notes.push(`Dalga ve su verisi ${n1(m.sea_grid.distance_km)} km uzaktaki model noktasından.`);
     if (m.ocean_normal) notes.push(`Sapma, ${m.ocean_normal.from.slice(0, 4)}–${m.ocean_normal.to.slice(0, 4)} günlük analiz arşivinden kurulan ${Math.round(m.ocean_normal.years)} yıllık kısa normale göre: uzun dönem klimatoloji değil, kanıt C.`);
-    if (d.field) notes.push(`${d.field.observations} saha girişi, sonuncusu ${fmtDay(d.field.latestAt)}.${d.field.last_note ? ` Not: “${d.field.last_note}”` : ''}`);
+    if (d.field) {
+      const lastNote = priv?.observations.find((o) => o.note)?.note;
+      notes.push(`${d.field.observations} saha girişi${priv?.record ? `, sonuncusu ${fmtDay(priv.record.latestAt)}${lastNote ? `. Not: “${lastNote}”` : ''}` : ' (ayrıntılar yalnız yöneticiye görünür)'}.`);
+      if (d.field.desk_pending) notes.push(`${d.field.desk_pending} masa başı bulgu onay bekliyor.`);
+    }
     $('note').textContent = notes.join(' ');
     chart();
     select(0);
@@ -342,8 +354,13 @@ import Base from '../../layouts/Base.astro';
   } else {
     fetch(`/api/spots/${encodeURIComponent(id)}?model=v2`, { cache: 'no-cache' })
       .then((r) => (r.status === 404 ? Promise.reject(new Error('404')) : r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((b: Resp) => {
+      .then(async (b: Resp) => {
         d = b;
+        const [fr, sp] = await Promise.all([
+          adminGet<Priv>(`/api/admin/spots/${encodeURIComponent(id)}/field`),
+          adminGet<{ spots: { id: string; has_light: boolean | null }[] }>('/api/admin/spots'),
+        ]);
+        if (fr) priv = { ...fr, has_light: sp?.spots.find((x) => x.id === id)?.has_light ?? null };
         H = b.packed ? b.packed.h.slice(b.from, b.from + b.hours) : [];
         render();
       })

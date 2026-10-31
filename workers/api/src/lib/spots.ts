@@ -29,6 +29,7 @@ export interface SpotRow {
   substrate_dist_m?: number | null;
   substrate_conf?: number | null;
   access?: string | null;
+  lamp_admin?: number | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -69,9 +70,9 @@ export function publicSpot(r: SpotRow) {
     max_depth_100m: r.max_depth_100m ?? null,
     probe_source: r.probe_source ?? null,
     normal_source: r.normal_source ?? null,
-    has_light: r.has_light === null ? null : r.has_light === 1,
+    // Field knowledge is private: only whether the lamp state is known, never its value or the notes.
+    lamp_known: r.has_light !== null,
     access: r.access ?? null,
-    notes: r.notes,
     source: r.source,
   };
 }
@@ -94,6 +95,11 @@ export async function loadSnapshots(db: D1Database, ids: string[]): Promise<Map<
     .all<{ cell_id: string; fetched_at: string; json: string }>();
   for (const r of results) out.set(r.cell_id, { snap: JSON.parse(r.json) as Snapshot, fetched_at: r.fetched_at });
   return out;
+}
+
+/** Admin view: public fields plus the field-verified lamp state and notes. */
+export function adminSpot(r: SpotRow) {
+  return { ...publicSpot(r), has_light: r.has_light === null ? null : r.has_light === 1, lamp_admin: r.lamp_admin ?? null, notes: r.notes };
 }
 
 /** Spot with its 0–500 m depth profile (detail endpoint only; the list stays small). */

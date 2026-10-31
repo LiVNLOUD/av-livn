@@ -2,16 +2,7 @@ import { env } from 'cloudflare:workers';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { CRON_FETCH, refreshWeather, runCron } from '../src/cron';
 import { app } from '../src/index';
-import { omFetch, resetAndSeed, writeScores } from './helpers';
-import { unpackDetail, type Detail, type DetailHour, type PackedDetail } from '@av-livn/scoring';
-
-/** Detail responses carry the packed hours; unpack like the web client does. */
-async function detail(path: string) {
-  const b = await (await app.request(path, {}, env)).json<{ spot: Record<string, unknown>; from: number; hours: number; packed: PackedDetail | null }>();
-  const empty = { meta: { computed_at: null, weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, conditions: [] }, hours: [] };
-  const d = (b.packed ? unpackDetail(b.packed, b.from, b.hours) : empty) as Omit<Detail, 'meta'> & { meta: Omit<Detail['meta'], 'computed_at'> & { computed_at: string | null } };
-  return { spot: b.spot as Record<string, any>, data: d.meta, scores: d.hours as DetailHour[] };
-}
+import { omFetch, resetAndSeed, writeScores, writeScoresV2 } from './helpers';
 
 const AUTH = { authorization: 'Bearer test-admin-token', 'content-type': 'application/json' };
 
@@ -33,76 +24,51 @@ describe('GET /api/health', () => {
   });
 });
 
-describe('GET /api/spots (reads precomputed scores)', () => {
-  it('lists spots sorted by the current hour score', async () => {
-    const res = await app.request('/api/spots', {}, env);
-    expect(res.status).toBe(200);
-    expect(res.headers.get('cache-control')).toBe('no-cache');
-    const body = await res.json<{ spots: { id: string; score: { total: number | null; missing_count: number } }[]; data_fetched_at: string }>();
-    expect(body.spots).toHaveLength(3);
-    const totals = body.spots.map((s) => s.score.total ?? -1);
-    expect([...totals].sort((a, b) => b - a)).toEqual(totals);
-    expect(body.spots.every((s) => typeof s.score.total === 'number')).toBe(true);
-    expect(body.spots.find((s) => s.id === 'osm-way-3')!.score.missing_count).toBeGreaterThan(0);
-    expect(body.data_fetched_at).toBeTruthy();
+describe('public spot API (v2 only)', () => {
+  it('lists v2 scores; v1 and unknown species are not served', async () => {
+    await writeScoresV2();
+    const b = await (await app.request('/api/spots', {}, env)).json<{ model: string; spots: { score: object }[] }>();
+    expect(b.model).toBe('v2.0');
+    expect(b.spots).toHaveLength(3);
+    expect((await app.request('/api/spots?species=levrek', {}, env)).status).toBe(400);
   });
 
-  it('only reads: a tampered stored list is returned as-is', async () => {
-    const row = await env.DB.prepare("SELECT start_hour, list_json FROM spot_scores WHERE spot_id = 'osm-way-1'").first<{ start_hour: number; list_json: string }>();
-    const list = JSON.parse(row!.list_json) as unknown[];
-    const idx = Math.floor(Date.now() / 3_600_000) - row!.start_hour;
-    list[idx] = [12.3, 1, 'test uyarısı', 0];
-    await env.DB.prepare("UPDATE spot_scores SET list_json = ?1 WHERE spot_id = 'osm-way-1'").bind(JSON.stringify(list)).run();
-    const body = await (await app.request('/api/spots?v=tamper', {}, env)).json<{ spots: { id: string; score: object }[] }>();
-    expect(body.spots.find((s) => s.id === 'osm-way-1')!.score).toEqual({ total: 12.3, gated: true, warnings: ['test uyarısı'], missing_count: 0 });
-  });
-
-  it('shows null scores before the first scoring run', async () => {
-    await env.DB.prepare("DELETE FROM spot_scores WHERE spot_id = 'osm-way-2'").run();
-    const body = await (await app.request('/api/spots?v=empty', {}, env)).json<{ spots: { id: string; score: { total: unknown } }[] }>();
-    expect(body.spots.at(-1)).toMatchObject({ id: 'osm-way-2', score: { total: null } });
-    const d = await detail('/api/spots/osm-way-2?v=empty');
-    expect(d.scores).toEqual([]);
-    expect(d.data.computed_at).toBeNull();
-    await writeScores();
-  });
-
-  it('rejects unknown and TODO species', async () => {
-    expect((await (await app.request('/api/spots?species=yok', {}, env)).json<{ error: string }>()).error).toBe('unknown_species');
-    expect((await (await app.request('/api/spots?species=levrek', {}, env)).json<{ error: string }>()).error).toBe('species_not_ready');
-    expect((await app.request('/api/spots/osm-way-1?species=kalamar', {}, env)).status).toBe(400);
+  it('includes DTM depth features and the 0–500 m profile; 404s unknown spots', async () => {
+    const b = await (await app.request('/api/spots/osm-way-1?v=depth', {}, env)).json<{ spot: Record<string, any> }>();
+    expect(b.spot).toMatchObject({ depth_200m: 8.5, slope_pct: 3.1, max_depth_100m: 5.2, probe_source: 'dtm', normal_source: 'dtm' });
+    expect(b.spot.profile).toHaveLength(21);
+    expect(b.spot.alt).toEqual({ lat: 40.375, lon: 28.883 });
+    expect(b.spot.fetch_km).toHaveLength(16);
+    expect(b.spot.substrate).toEqual({ class: 'Sandy mud', biozone: 'Infralittoral', distance_m: 0, confidence: 2 });
+    const other = await (await app.request('/api/spots/osm-way-2?v=depth', {}, env)).json<{ spot: Record<string, any> }>();
+    expect(other.spot).toMatchObject({ profile: null, alt: null, fetch_km: null, substrate: null });
+    expect((await app.request('/api/spots/yok', {}, env)).status).toBe(404);
   });
 });
 
-describe('GET /api/spots/:id', () => {
-  it('returns 72 hours with components, night multiplier and coloured conditions', async () => {
-    const body = await detail('/api/spots/osm-way-1');
-    expect(body.scores).toHaveLength(72);
-    expect(body.scores[0]!.components).toHaveLength(6);
-    expect(body.scores[0]!.multipliers[0]!.key).toBe('gece_carpani');
-    expect(body.scores[0]!.conditions.map((c) => c.key)).toEqual(body.data.conditions.map((c) => c.key));
-    expect(body.data.conditions.find((c) => c.key === 'hamle')!.target).toContain('40 km/sa');
-    expect(body.data.sea_grid!.distance_km).toBeGreaterThan(0);
-  });
-
-  it('includes DTM depth features and the 0–500 m profile', async () => {
-    const body = await detail('/api/spots/osm-way-1?v=depth');
-    expect(body.spot).toMatchObject({ depth_200m: 8.5, slope_pct: 3.1, max_depth_100m: 5.2, probe_source: 'dtm', normal_source: 'dtm' });
-    expect(body.spot.profile).toHaveLength(21);
-    expect(body.spot.alt).toEqual({ lat: 40.375, lon: 28.883 });
-    expect(body.spot.fetch_km).toHaveLength(16);
-    expect(body.spot.substrate).toEqual({ class: 'Sandy mud', biozone: 'Infralittoral', distance_m: 0, confidence: 2 });
-    const other = await detail('/api/spots/osm-way-2?v=depth');
-    expect(other.spot.profile).toBeNull();
-    expect(other.spot).toMatchObject({ alt: null, fetch_km: null, substrate: null });
-  });
-
-  it('starts at the current hour and honours the hours parameter; 404s unknown spots', async () => {
-    const body = await detail('/api/spots/osm-way-3?hours=5');
-    expect(body.scores).toHaveLength(5);
-    expect(Date.parse(body.scores[0]!.ts)).toBe(Math.floor(Date.now() / 3_600_000) * 3_600_000);
-    expect(body.data.sea_grid).toBeNull();
-    expect((await app.request('/api/spots/yok', {}, env)).status).toBe(404);
+describe('privacy: public endpoints never return field values (docs/PRIVACY.md)', () => {
+  it('field notes, lamp state, measured depths and visit dates stay behind ADMIN_TOKEN', async () => {
+    await app.request('/api/admin/spots/osm-way-1', { method: 'PATCH', headers: AUTH, body: JSON.stringify({ notes: 'GİZLİ-NOT', has_light: true }) }, env);
+    await app.request('/api/admin/spots/osm-way-1/field', {
+      method: 'POST', headers: AUTH,
+      body: JSON.stringify({ note: 'GİZLİ-SAHA', substrate: ['kaya'], structure: 'iskele', has_light: true, depths: [{ distance_m: 20, method: 'plumb', depth_m: 7.77 }], photo: { mime: 'image/jpeg', data_b64: 'QUJD' } }),
+    }, env);
+    await writeScoresV2();
+    const list = await (await app.request('/api/spots?p=1', {}, env)).text();
+    const det = await (await app.request('/api/spots/osm-way-1?p=1', {}, env)).text();
+    for (const body of [list, det]) {
+      for (const secret of ['GİZLİ', '7.77', 'has_light', '"notes"', 'QUJD', 'depth_field_at":"', 'observed_at', 'kaya']) expect(body).not.toContain(secret);
+    }
+    const d = JSON.parse(det) as { field: Record<string, any>; spot: { lamp_known: boolean }; packed: { meta: { comps: unknown[][] }; h: unknown[][] } };
+    expect(d.spot.lamp_known).toBe(true);
+    expect(d.field).toEqual({ observations: 1, desk_pending: 0, kinds: { lamba: 'saha', derinlik: 'saha', taban: 'saha', yapi: 'saha' } });
+    const i = d.packed.meta.comps.findIndex((c) => c[0] === 'derinlik');
+    expect((d.packed.h[0]![9] as unknown[])[i]).toBeNull();
+    expect((d.packed.h[0]![10] as string[])[i]).toContain('yalnız yönetici');
+    // the owner still sees everything with the token
+    const adm = await (await app.request('/api/admin/spots', { headers: AUTH }, env)).json<{ spots: { id: string; notes: string; has_light: boolean }[] }>();
+    expect(adm.spots.find((s) => s.id === 'osm-way-1')).toMatchObject({ notes: 'GİZLİ-NOT', has_light: true });
+    expect((await app.request('/api/admin/spots', {}, env)).status).toBe(401);
   });
 });
 
@@ -120,17 +86,6 @@ describe('admin', () => {
   it('ping answers only with the token', async () => {
     expect((await app.request('/api/admin/ping', { headers: AUTH }, env)).status).toBe(200);
     expect((await app.request('/api/admin/ping', {}, env)).status).toBe(401);
-  });
-
-  it('a lamp edit changes the night multiplier after the next scoring run', async () => {
-    const night = async () => {
-      const b = await detail(`/api/spots/osm-way-1?v=${Math.random()}`);
-      return b.scores.map((s) => s.multipliers[0]!).find((m) => m.phase === 'full')!.value;
-    };
-    expect(await night()).toBe(0.75);
-    await app.request('/api/admin/spots/osm-way-1', { method: 'PATCH', headers: AUTH, body: JSON.stringify({ has_light: true }) }, env);
-    await writeScores();
-    expect(await night()).toBe(1);
   });
 
   it('is disabled without ADMIN_TOKEN and rejects bad tokens', async () => {

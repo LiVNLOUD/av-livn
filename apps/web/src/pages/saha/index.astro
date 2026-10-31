@@ -76,6 +76,7 @@ import Base from '../../layouts/Base.astro';
         <h2>Bu merada önceki girişler</h2>
         <ol id="obs"></ol>
         <button type="button" id="rescore" class="ghost">Puanı şimdi yeniden hesapla</button>
+        <button type="button" id="logout" class="ghost">Çıkış (anahtarı bu cihazdan sil)</button>
       </section>
     </form>
   </div>
@@ -140,13 +141,12 @@ import Base from '../../layouts/Base.astro';
 </style>
 
 <script>
+  import { getToken, logout, setToken } from '../../scripts/admin';
   type Spot = { id: string; name: string; lat: number; lon: number; has_light: boolean | null; access: string | null };
   type Depth = { distance_m: number; method: 'plumb' | 'sink'; depth_m?: number; sink_s?: number; jig_g?: number };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
-  const KEY = 'av-livn-admin';
   const QUEUE = 'av-livn-field-queue';
-  let token = '';
-  try { token = sessionStorage.getItem(KEY) ?? ''; } catch {}
+  let token = getToken();
   let spots: Spot[] = [];
   let photo: { mime: string; data_b64: string } | null = null;
 
@@ -249,7 +249,7 @@ import Base from '../../layouts/Base.astro';
 
   // ---- spots
   async function loadSpots() {
-    const b = await (await fetch('/api/spots?model=v2')).json();
+    const b = await api('/api/admin/spots', 'GET');
     spots = b.spots;
     $('spot').innerHTML = spots.map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
     const want = new URLSearchParams(location.search).get('id');
@@ -385,11 +385,12 @@ import Base from '../../layouts/Base.astro';
     token = ($('token') as HTMLInputElement).value.trim();
     try {
       await api('/api/admin/ping', 'GET');
-      try { sessionStorage.setItem(KEY, token); } catch {}
+      setToken(token);
       open();
     } catch (err) {
       say((err as Error).message, 'err');
     }
   });
+  $('logout').addEventListener('click', () => { logout(); location.reload(); });
   if (token) open();
 </script>

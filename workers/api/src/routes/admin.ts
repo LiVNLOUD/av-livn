@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { CELL_DEG, cellKey } from '../lib/seed';
-import { ACTIVE, loadSnapshots, publicSpot, STATUSES, type SpotRow } from '../lib/spots';
+import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
@@ -54,6 +54,12 @@ export function validateFields(body: Fields): Valid {
 
 adminRoutes.get('/ping', (c) => c.json({ ok: true }));
 
+/** All spots with private fields (lamp state, notes) for /admin/ and /saha/. */
+adminRoutes.get('/spots', async (c) => {
+  const { results } = await c.env.DB.prepare('SELECT * FROM spots ORDER BY name').all<SpotRow>();
+  return c.json({ ok: true, spots: results.map(adminSpot) });
+});
+
 adminRoutes.patch('/spots/:id', async (c) => {
   const body = await c.req.json<Fields>().catch(() => null);
   if (!body || typeof body !== 'object') return c.json({ ok: false, error: 'invalid_json' }, 400);
@@ -70,7 +76,7 @@ adminRoutes.patch('/spots/:id', async (c) => {
   if (!res.meta.changes) return c.json({ ok: false, error: 'not_found' }, 404);
   const row = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(c.req.param('id')).first<SpotRow>();
   // Scores reflect the edit after the next hourly scoring run (GitHub Actions, score.yml).
-  return c.json({ ok: true, spot: publicSpot(row!) });
+  return c.json({ ok: true, spot: adminSpot(row!) });
 });
 
 interface NewSpot extends Fields {
@@ -110,7 +116,7 @@ adminRoutes.post('/spots', async (c) => {
     ).bind(id, v.set.name, b.lat, b.lon, probe?.lat ?? null, probe?.lon ?? null, b.shore_normal_deg, v.set.has_light ?? null, v.set.notes ?? null, wx, sea, now),
   ]);
   const row = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(id).first<SpotRow>();
-  return c.json({ ok: true, spot: publicSpot(row!) }, 201);
+  return c.json({ ok: true, spot: adminSpot(row!) }, 201);
 });
 
 // ---------------------------------------------------------------- field form (B5)
@@ -342,7 +348,12 @@ adminRoutes.get('/spots/:id/field', async (c) => {
     c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
   ]);
   const ds = depths!.results as FieldDepthRow[];
-  return c.json({ ok: true, observations: (obs!.results as (FieldObsRow & { has_photo: number })[]).map((o) => ({ ...o, depths: ds.filter((d) => d.obs_id === o.id) })) });
+  const rows = obs!.results as (FieldObsRow & { has_photo: number })[];
+  return c.json({
+    ok: true,
+    observations: rows.map((o) => ({ ...o, depths: ds.filter((d) => d.obs_id === o.id) })),
+    record: fieldRecords(rows, ds).get(id) ?? null,
+  });
 });
 
 adminRoutes.delete('/field/:obs', async (c) => {

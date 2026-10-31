@@ -1,5 +1,4 @@
 // Read-only endpoints: scores are precomputed by cron (see precompute.ts); handlers only slice stored JSON.
-import { getProfile, type SpeciesProfile } from '@av-livn/scoring';
 import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
 import { ACTIVE, ACTIVE_COUNT_SQL, publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
@@ -12,61 +11,10 @@ const HOUR = 3_600_000;
 // exceeded the work it saved. `no-cache` because the livn.tr zone rewrites max-age to 4 h for browsers.
 const NO_CACHE = { 'cache-control': 'no-cache' };
 
-function profileFor(id: string | undefined): SpeciesProfile | { error: string } {
-  const p = getProfile(id ?? 'istavrit');
-  if (!p) return { error: 'unknown_species' };
-  if (Object.keys(p.weights).length === 0) return { error: 'species_not_ready' };
-  return p;
-}
-
-type ListEntry = [number | null, 0 | 1, string | null, number];
-
-publicRoutes.get('/spots', async (c) => {
-    if (c.req.query('model') === 'v2') return listV2(c);
-    const profile = profileFor(c.req.query('species'));
-    if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
-    const [rows, fetched] = await c.env.DB.batch([
-      c.env.DB.prepare(
-        `SELECT s.*, sc.start_hour, sc.list_json, sc.computed_at FROM spots s
-         LEFT JOIN spot_scores sc ON sc.spot_id = s.id AND sc.species = ?1
-         WHERE s.status != 'rejected'`,
-      ).bind(profile.id),
-      c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
-    ]);
-    const nowHour = Math.floor(Date.now() / HOUR);
-    const spots = (rows!.results as (SpotRow & { start_hour: number | null; list_json: string | null })[]).map((r) => {
-      const entry = r.list_json && r.start_hour !== null ? (JSON.parse(r.list_json) as ListEntry[])[nowHour - r.start_hour] : undefined;
-      return {
-        ...publicSpot(r),
-        score: entry
-          ? { total: entry[0], gated: entry[1] === 1, warnings: entry[2] ? [entry[2]] : [], missing_count: entry[3] }
-          : { total: null, gated: false, warnings: [], missing_count: 0 },
-      };
-    });
-    spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
-    const at = (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null;
-    return c.json({ ok: true, species: { id: profile.id, name: profile.name }, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, spots }, 200, NO_CACHE);
-});
-
-publicRoutes.get('/spots/:id', async (c) => {
-    if (c.req.query('model') === 'v2') return detailV2(c);
-    const profile = profileFor(c.req.query('species'));
-    if ('error' in profile) return c.json({ ok: false, error: profile.error }, 400);
-    const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
-    const r = await c.env.DB.prepare(
-      `SELECT s.*, sc.start_hour, sc.detail_json FROM spots s
-       LEFT JOIN spot_scores sc ON sc.spot_id = s.id AND sc.species = ?2
-       WHERE s.id = ?1`,
-    )
-      .bind(c.req.param('id'), profile.id)
-      .first<SpotRow & { start_hour: number | null; detail_json: string | null }>();
-    if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
-    const from = r.start_hour === null ? 0 : Math.max(0, Math.floor(Date.now() / HOUR) - r.start_hour);
-    // The stored packed detail is spliced in as a raw string: no parse/serialise of ~45 KB per request.
-    // Clients call unpackDetail(packed, from, hours).
-    const head = JSON.stringify({ ok: true, species: { id: profile.id, name: profile.name, weights: profile.weights }, spot: publicSpotDetail(r), from, hours });
-    return c.body(`${head.slice(0, -1)},"packed":${r.detail_json ?? 'null'}}`, 200, { 'content-type': 'application/json; charset=utf-8', ...NO_CACHE });
-});
+// Public API = scores, ranks, bands and general spot info only (docs/PRIVACY.md). Field notes, photos, measured
+// values and the catch log are served by /api/admin/* (ADMIN_TOKEN). v1 scores are no longer served publicly.
+publicRoutes.get('/spots', (c) => (c.req.query('species') && c.req.query('species') !== 'istavrit' ? c.json({ ok: false, error: 'species_not_ready' }, 400) : listV2(c)));
+publicRoutes.get('/spots/:id', (c) => detailV2(c));
 
 type Ctx = Context<{ Bindings: Env }>;
 
@@ -116,7 +64,12 @@ async function detailV2(c: Ctx) {
   const head = JSON.stringify({
     ok: true,
     spot: publicSpotDetail(r),
-    field: rec && { ...rec, observations: obs.length, last_note: [...obs].reverse().find((o) => o.note)?.note ?? null },
+    // Which kinds of field knowledge exist, never their values (badges on the card).
+    field: rec && {
+      observations: obs.filter((o) => o.status !== 'reddedildi' && (o.source_kind ?? 'saha') !== 'masabasi').length,
+      desk_pending: obs.filter((o) => o.source_kind === 'masabasi' && o.status === 'onaysiz').length,
+      kinds: { lamba: rec.lamp?.kind ?? null, derinlik: rec.depthKind, taban: rec.substrateKind, yapi: rec.structureKind },
+    },
     spot_count: (countRes!.results[0] as { n: number }).n,
     partial: r.partial === 1,
     from,

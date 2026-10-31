@@ -34,7 +34,7 @@ import Base from '../layouts/Base.astro';
   import { leadWithRank } from '@av-livn/scoring';
 
   type Spot = {
-    id: string; name: string; kind: string; status: string; place: string | null; has_light: boolean | null;
+    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean };
   };
 
@@ -58,7 +58,7 @@ import Base from '../layouts/Base.astro';
           ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
           : sc.total === null
             ? '<p class="why muted">Puan henüz hesaplanmadı</p>'
-            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${spots.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.has_light === null ? ' · lamba bilinmiyor' : ''}</p>`;
+            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${spots.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · lamba bilinmiyor'}</p>`;
         return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}">
           <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
           <span><h2>${esc(s.name)}</h2><p class="sub">${esc(sub)}</p>${why}</span></a></li>`;
