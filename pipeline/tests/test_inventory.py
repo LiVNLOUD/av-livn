@@ -77,7 +77,10 @@ def test_helpers():
     assert inv.classify({"amenity": "ferry_terminal"}) == "harbour"
     assert inv.classify({"leisure": "fishing"}) == "fishing"
     assert inv.classify({"highway": "x"}) is None
-    assert inv.is_forbidden({"operator": "Borusan Lojistik"}) and inv.is_forbidden({"industrial": "port"})
+    assert inv.is_forbidden({"operator": "Borusan Lojistik", "man_made": "pier"}) and inv.is_forbidden({"industrial": "port"})
+    assert inv.is_forbidden({"name": "Gemport", "landuse": "industrial"})
+    assert not inv.is_forbidden({"name": "Gemport Gemlik Anadolu Lisesi", "amenity": "school"})
+    assert not inv.is_forbidden({"name": "Roda Anadolu İmam Hatip Lisesi", "building": "school"})
     assert inv.access_estimate("harbour", {"amenity": "ferry_terminal"}, 100)[0] == "kisitli_feribot"
     assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Setur Marina"}, 100)[0] == "belirsiz"
     assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Karacaali İskelesi"}, 100)[0] == "acik"

@@ -100,8 +100,16 @@ def ref(el: dict) -> str:
     return f"{el['type']}/{el['id']}"
 
 
+PORTISH = ("harbour", "industrial", "man_made", "seamark:type", "waterway", "port")
+
+
 def is_forbidden(tags: dict) -> bool:
-    return bool(FORBIDDEN_NAMES.search(tags.get("name", "") + " " + tags.get("operator", ""))) or tags.get("landuse") == "port" or tags.get("industrial") == "port"
+    """Commercial port: tagged as one, or a company name on a port/industrial/structure object (a school or
+    shop named after the company is not a port)."""
+    if tags.get("landuse") == "port" or tags.get("industrial") == "port":
+        return True
+    portish = tags.get("landuse") in ("industrial", "port") or any(k in tags for k in PORTISH)
+    return portish and "amenity" not in tags and bool(FORBIDDEN_NAMES.search(tags.get("name", "") + " " + tags.get("operator", "")))
 
 
 def classify(tags: dict) -> str | None:
