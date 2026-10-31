@@ -14,3 +14,11 @@ def test_generic_names_become_place_plus_type_with_side_when_far():
           feat("Armutlu Devlet Limanı – batı mendireği", "breakwater", "Armutlu"), feat("İskele (Fıstıklı)", "pier", "Fıstıklı", src="osm")]
     assert describe_singles(fs, places) == 2
     assert [f["properties"]["name"] for f in fs] == ["Fıstıklı İskelesi", "Fıstıklı Mahmuzu (Fıstıklı batısı)", "Armutlu Devlet Limanı – batı mendireği", "İskele (Fıstıklı)"]
+
+
+def test_fix_tr_common_words():
+    from av_pipeline.spots.labels import fix_tr
+
+    assert fix_tr("Güzelyalı Yat Limani") == "Güzelyalı Yat Limanı"
+    assert fix_tr("Balikci Barinagi") == "Balıkçı Barınağı"
+    assert fix_tr(None) is None

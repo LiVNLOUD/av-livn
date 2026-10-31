@@ -21,13 +21,23 @@ def centre(el: dict) -> tuple[float, float] | None:
     return None
 
 
+# Common words typed without Turkish letters in OSM (display only; OSM is not edited).
+TR_WORDS = {"Limani": "Limanı", "Iskelesi": "İskelesi", "Iskele": "İskele", "Barinagi": "Barınağı", "Balikci": "Balıkçı"}
+
+
+def fix_tr(name: str | None) -> str | None:
+    if not name:
+        return name
+    return " ".join(TR_WORDS.get(w, w) for w in name.split(" "))
+
+
 def labels(raw: dict) -> dict:
     feats: list[dict] = []
     seen: dict[tuple[str, str], dict] = {}
     for el in raw.get("elements", []):
         t = el.get("tags", {})
         kind = "cape" if t.get("natural") == "cape" else "harbour" if t.get("harbour") == "yes" or t.get("leisure") == "marina" else None
-        name = t.get("name:tr") or t.get("name")
+        name = fix_tr(t.get("name:tr") or t.get("name"))
         xy = centre(el)
         if not kind or not name or xy is None:
             continue
