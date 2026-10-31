@@ -50,6 +50,13 @@
      "amenity": "school",
      "name": "Gemport Gemlik Anadolu Lisesi"
     }
+   },
+   {
+    "ref": "way/1501002525",
+    "tags": {
+     "landuse": "military",
+     "name": "Gemlik Askerlik Şubesi"
+    }
    }
   ]
  },
@@ -60,7 +67,6 @@
   ],
   "proposals": [
    "osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı)",
-   "osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı)",
    "osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)"
   ],
   "existing": [],
@@ -81,7 +87,6 @@
   ],
   "proposals": [
    "osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı)",
-   "osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı)",
    "osm-way-1218508014 Kumla Deresi ağzı (dere ağzı)",
    "osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)"
   ],
@@ -116,9 +121,7 @@
    29.03196,
    40.48081
   ],
-  "proposals": [
-   "known-narli Narlı kıyısı (konum tahmini) (bilinen yer (kullanıcı listesi))"
-  ],
+  "proposals": [],
   "existing": [],
   "osm_within_1km": []
  },
@@ -127,7 +130,10 @@
    28.88379,
    40.37526
   ],
-  "proposals": [],
+  "proposals": [
+   "osm-node-5069596322 Mudanya İskelesi (liman / balıkçı barınağı)",
+   "osm-way-862153219 Bursa Deniz Otobüsleri/BUDO (liman / balıkçı barınağı)"
+  ],
   "existing": [
    "osm-way-1233883494 Mudanya İskelesi"
   ],
@@ -137,6 +143,13 @@
     "tags": {
      "amenity": "ferry_terminal",
      "name": "Mudanya İskelesi"
+    }
+   },
+   {
+    "ref": "way/503796445",
+    "tags": {
+     "landuse": "military",
+     "name": "T.C. Mudanya Kaymakamlığı İlçe Jandarma Komutanlığı"
     }
    },
    {
@@ -152,6 +165,24 @@
      "man_made": "pier",
      "name": "Mudanya İskelesi"
     }
+   },
+   {
+    "ref": "way/1377877328",
+    "tags": {
+     "name": "Jandarma Komutanlığı"
+    }
+   },
+   {
+    "ref": "way/1377878675",
+    "tags": {
+     "name": "Askeri İrtibat Bürosu"
+    }
+   },
+   {
+    "ref": "way/1377879263",
+    "tags": {
+     "name": "Sahil Güvenlik Komutanlığı"
+    }
    }
   ]
  },
@@ -160,10 +191,7 @@
    28.82583,
    40.38506
   ],
-  "proposals": [
-   "known-kumyaka Kumyaka kıyısı (konum tahmini) (bilinen yer (kullanıcı listesi))",
-   "osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)"
-  ],
+  "proposals": [],
   "existing": [
    "osm-way-1456975486 Petek Sitesi İskele"
   ],
@@ -173,11 +201,92 @@
   "place": null
  },
  "dropped": {
-  "near_existing": 8,
-  "near_other": 7,
-  "forbidden": 1
+  "duplicate": 3,
+  "excluded": 6
  },
  "known_missing": [
+  "Narlı: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)",
+  "Kumyaka: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)",
   "Eşkel: OSM'de yerleşim noktası yok"
+ ],
+ "excluded": [
+  {
+   "id": "osm-node-11865648199",
+   "type": "liman / balıkçı barınağı",
+   "place": "Tirilye",
+   "osm": [
+    "node/11865648199"
+   ],
+   "reason": "kıyı çizgisine 40 m (> 30 m): fiziksel kıyı nesnesi değil",
+   "lonlat": [
+    28.800794,
+    40.392733
+   ]
+  },
+  {
+   "id": "osm-node-2794622004",
+   "type": "liman / balıkçı barınağı",
+   "place": "Büyükkumla",
+   "osm": [
+    "node/2794622004"
+   ],
+   "reason": "kıyı çizgisine 40 m (> 30 m): fiziksel kıyı nesnesi değil",
+   "lonlat": [
+    29.083768,
+    40.476761
+   ]
+  },
+  {
+   "id": "osm-node-3493263849",
+   "type": "liman / balıkçı barınağı",
+   "place": "Armutlu",
+   "osm": [
+    "node/3493263849"
+   ],
+   "reason": "kıyı çizgisine 42 m (> 30 m): fiziksel kıyı nesnesi değil",
+   "lonlat": [
+    28.789766,
+    40.517312
+   ]
+  },
+  {
+   "id": "osm-node-11981834876-1",
+   "type": "kayalık kıyı",
+   "place": "Armutlu",
+   "osm": [
+    "node/11981834876"
+   ],
+   "reason": "kıyı çizgisine 52 m (> 30 m): fiziksel kıyı nesnesi değil",
+   "lonlat": [
+    28.78094,
+    40.518943
+   ]
+  },
+  {
+   "id": "osm-node-11981834876-2",
+   "type": "kayalık kıyı",
+   "place": "Armutlu",
+   "osm": [
+    "node/11981834876"
+   ],
+   "reason": "kıyı çizgisine 52 m (> 30 m): fiziksel kıyı nesnesi değil",
+   "lonlat": [
+    28.781764,
+    40.518012
+   ]
+  },
+  {
+   "id": "osm-way-479047533-1",
+   "type": "kumsal",
+   "place": "İslamköy",
+   "osm": [
+    "way/479047533"
+   ],
+   "reason": "ticari liman sahası (Borusan Port)",
+   "lonlat": [
+    29.090982,
+    40.41697
+   ]
+  }
  ]
 }
