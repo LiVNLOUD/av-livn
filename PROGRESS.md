@@ -134,3 +134,22 @@
 - **E7:** Çizelge 7 RG görüntüsünden okundu: istavrit 13 cm doğru; levrek 25, lüfer 18, kolyoz 18, karagöz 18; mırmır sınırsız. md. 16(5) birebir ve kumsal rozeti; md. 8(8): arayüzde "lamba" → "iskelenin mevcut aydınlatması".
 - **E8:** watchdog (saatlik + puanlama hatasında) → PWA push, ntfy yalnız tanımlıysa, arıza başına 6 saatte bir; 2 saati geçen veride site üstünde uyarı; yedek artifact'ları 7 gün.
 - **E9 (takım kutusu):** uygulanmadı, ayrı faz (TACKLE.md kuralları hazır).
+
+## Faz F — takım kutusu, otomatik mera, kaynaklar, /model/, kalibrasyon, ısı haritası (2026-10-31) ✅ DUR
+- **F0:** Takım kutusu her saat için takım, jighead, iğne #8 (A, Peksu vd. 2020), silikon, renk, saydırma ve yasal 13 cm (A) önerir. Açık veriyle herkese açık; yönetici saha derinliğiyle inceltilmiş sürümü ve fark satırını görür. Takım profilleri /admin/'den düzenlenir. Sahadayım ve ana sayfada kısa sürüm var. md. 8/8 gereği ışık önerilmez.
+- **F1:** Onay adımı kaldırıldı. 63 aktif mera var, 47'si otomatik eklendi: kumsal 28, liman 9, dere ağzı 8, kayalık 2.
+  - 6 yer elendi: 5'i kıyıya 30 m'den uzak, 1'i ticari liman sahası (Borusan).
+  - Yönetici bir merayı herkesten gizleyip geri alabilir ve yasak alan çizebilir.
+- **F2:** Kaynaklara R20 (hal fiyat–miktar tezi), R21 (Hoyle vd. 2024) ve R22 (İBB hal girişleri) eklendi.
+  - TÜİK/BSGM'de aylık Marmara istavrit serisi **bulunamadı**.
+  - Hal serisi kışın tepe yapıyor ve ticari avı yansıtıyor, bu yüzden mevsim eğrisine uydurulmadı. Parametreler değişmedi: A 3, B 1, C 41.
+- **F3:** /model/ yayında. Parametre tablosu PARAMS'tan üretiliyor. Canlı örnek hesap, yayımlanan puanla aynı çıkıyor. Kanıt rozetleri bu sayfaya bağlanıyor; menüde "Model" var.
+- **F4:** `analysis/calibrate.py` iki model kuruyor: log(efor) offset'li Poisson/NB GLM ve GAM.
+  - 30 seansın altında "yetersiz veri" raporlar.
+  - Sahte veriyle 8 test geçiyor.
+  - `calibrate.yml` haftalık çalışıp sonucu `meta.calibration_report`'a yazar; durum /admin/tahmin/'de görünür.
+- **F5:** Isı haritasında iki görünüm var: "Puan" ve "Meraya özgü fark".
+  - "Belirsizliği göster" varsayılan kapalı. Açılınca bant genişliği en yüksek üçte birdeki hücreleri işaretler; lejant ortalama bandı gösterir.
+  - Haritanın altında seçili meranın özeti ve kısa takım önerisi var. Harita lejantına "Ölçülmüş alan sınırı" eklendi.
+  - Düzeltme: 1200–1919 px'te görünmeyen Harita/Isı haritası sekmeleri artık görünüyor.
+- **Açık:** Hal tablosu (tarim.ibb.istanbul) ve Kökçek tezinin tam metni oturumdan indirilemedi (bağlantı kesildi / 503).
