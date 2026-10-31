@@ -23,31 +23,9 @@
   "osm-way-503770078": 0,
   "osm-way-77362926": 0
  },
- "sentinel2": {
-  "_scenes": {
-   "osm-way-1005837524": 12,
-   "osm-way-1170373161": 12,
-   "osm-way-1218507890": 12,
-   "osm-way-1233883494": 12,
-   "osm-way-1364814104": 12,
-   "osm-way-1394208144": 12,
-   "osm-way-1413355181": 12,
-   "osm-way-1414984335": 12,
-   "osm-way-1422122108": 12,
-   "osm-way-1456975486": 12,
-   "osm-way-252356832": 12,
-   "osm-way-252356833": 12,
-   "osm-way-479047532": 12,
-   "osm-way-483965349": 12,
-   "osm-way-503770078": 12,
-   "osm-way-77362926": 12
-  },
-  "_pixels": 9225
- },
- "pruned_sentinel2": 16,
  "manual": {},
- "pruned_openseamap": 0,
  "pruned_ced": 0,
+ "pruned_openseamap": 0,
  "pruned_literatur": 0,
  "written": 1
 }

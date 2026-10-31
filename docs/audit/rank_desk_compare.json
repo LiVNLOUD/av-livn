@@ -6,8 +6,8 @@
    "name": "İskele (Kapaklı)",
    "before": [
     68.6,
-    40.2,
-    79.4,
+    46.3,
+    81.2,
     8,
     0,
     null,
@@ -19,8 +19,8 @@
    ],
    "after": [
     68.6,
-    40.2,
-    79.4,
+    46.3,
+    81.2,
     8,
     0,
     null,
@@ -36,8 +36,8 @@
    "name": "İskele (Armutlu)",
    "before": [
     52.1,
-    29.9,
-    70.6,
+    34.1,
+    70.7,
     15,
     0,
     null,
@@ -49,8 +49,8 @@
    ],
    "after": [
     52.1,
-    29.9,
-    70.6,
+    34.1,
+    70.7,
     15,
     0,
     null,
@@ -66,8 +66,8 @@
    "name": "Küçükkumla İskelesi",
    "before": [
     54.8,
-    31.5,
-    71.8,
+    36,
+    72.8,
     12,
     0,
     null,
@@ -79,8 +79,8 @@
    ],
    "after": [
     54.8,
-    31.5,
-    71.8,
+    36,
+    72.8,
     12,
     0,
     null,
@@ -96,8 +96,8 @@
    "name": "Mudanya İskelesi",
    "before": [
     73.6,
-    42.3,
-    82.2,
+    47.1,
+    83.5,
     5,
     0,
     null,
@@ -109,8 +109,8 @@
    ],
    "after": [
     73.6,
-    42.3,
-    82.2,
+    47.1,
+    83.5,
     5,
     0,
     null,
@@ -126,8 +126,8 @@
    "name": "Armutlu Devlet Limanı – doğu mendireği",
    "before": [
     54.2,
-    31.8,
-    73.5,
+    34.6,
+    73.3,
     14,
     0,
     null,
@@ -139,8 +139,8 @@
    ],
    "after": [
     54.2,
-    31.8,
-    73.5,
+    34.6,
+    73.3,
     14,
     0,
     null,
@@ -156,8 +156,8 @@
    "name": "Armutlu Devlet Limanı – kısa batı mendireği",
    "before": [
     63.2,
-    36.8,
-    79.4,
+    40.3,
+    78.9,
     11,
     0,
     null,
@@ -169,8 +169,8 @@
    ],
    "after": [
     63.2,
-    36.8,
-    79.4,
+    40.3,
+    78.9,
     11,
     0,
     null,
@@ -186,8 +186,8 @@
    "name": "Armutlu Devlet Limanı – uzun batı mendireği",
    "before": [
     81,
-    50.8,
-    88.4,
+    50.5,
+    88.2,
     2,
     0,
     null,
@@ -199,8 +199,8 @@
    ],
    "after": [
     81,
-    50.8,
-    88.4,
+    50.5,
+    88.2,
     2,
     0,
     null,
@@ -216,8 +216,8 @@
    "name": "İskele (Fıstıklı)",
    "before": [
     76.5,
-    47.8,
-    86.4,
+    48.1,
+    87.5,
     4,
     0,
     null,
@@ -229,8 +229,8 @@
    ],
    "after": [
     76.5,
-    47.8,
-    86.4,
+    48.1,
+    87.5,
     4,
     0,
     null,
@@ -246,8 +246,8 @@
    "name": "Armutlu Devlet Limanı – orta batı mendireği",
    "before": [
     72,
-    42.6,
-    84.3,
+    45.7,
+    84.1,
     6,
     0,
     null,
@@ -259,8 +259,8 @@
    ],
    "after": [
     72,
-    42.6,
-    84.3,
+    45.7,
+    84.1,
     6,
     0,
     null,
@@ -276,8 +276,8 @@
    "name": "Petek Sitesi İskele",
    "before": [
     64.7,
-    36.7,
-    78.3,
+    38.3,
+    81.7,
     10,
     0,
     null,
@@ -289,8 +289,8 @@
    ],
    "after": [
     64.7,
-    36.7,
-    78.3,
+    38.3,
+    81.7,
     10,
     0,
     null,
@@ -306,8 +306,8 @@
    "name": "Güzelyalı Yat Limanı – doğu mendireği",
    "before": [
     81.4,
-    50.7,
-    88.6,
+    51.2,
+    88.4,
     1,
     0,
     null,
@@ -319,8 +319,8 @@
    ],
    "after": [
     81.4,
-    50.7,
-    88.6,
+    51.2,
+    88.4,
     1,
     0,
     null,
@@ -336,8 +336,8 @@
    "name": "Güzelyalı Yat Limanı – batı mendireği",
    "before": [
     68.5,
-    40.5,
-    82.5,
+    44,
+    82,
     9,
     0,
     null,
@@ -349,8 +349,8 @@
    ],
    "after": [
     68.5,
-    40.5,
-    82.5,
+    44,
+    82,
     9,
     0,
     null,
@@ -366,8 +366,8 @@
    "name": "İskele (İslamköy)",
    "before": [
     36.6,
-    20,
-    58.8,
+    22.1,
+    61.5,
     16,
     0,
     null,
@@ -379,8 +379,8 @@
    ],
    "after": [
     36.6,
-    20,
-    58.8,
+    22.1,
+    61.5,
     16,
     0,
     null,
@@ -396,8 +396,8 @@
    "name": "İskele (Tirilye)",
    "before": [
     54.6,
-    28.6,
-    71.4,
+    35.3,
+    72,
     13,
     0,
     null,
@@ -409,8 +409,8 @@
    ],
    "after": [
     54.6,
-    28.6,
-    71.4,
+    35.3,
+    72,
     13,
     0,
     null,
@@ -426,8 +426,8 @@
    "name": "İDO Güzelyalı Feribot İskelesi",
    "before": [
     76.8,
-    45.7,
-    84,
+    49.6,
+    86.1,
     3,
     0,
     null,
@@ -439,8 +439,8 @@
    ],
    "after": [
     76.8,
-    45.7,
-    84,
+    49.6,
+    86.1,
     3,
     0,
     null,
@@ -456,8 +456,8 @@
    "name": "İskele (Demirsubaşı)",
    "before": [
     70.5,
-    42.3,
-    80.6,
+    46.1,
+    82.2,
     7,
     0,
     null,
@@ -469,8 +469,8 @@
    ],
    "after": [
     70.5,
-    42.3,
-    80.6,
+    46.1,
+    82.2,
     7,
     0,
     null,
@@ -481,5 +481,490 @@
     ]
    ]
   }
- ]
+ ],
+ "night": {
+  "hour": "2026-10-31T18:00:00.000Z",
+  "spots": [
+   {
+    "spot_id": "osm-way-1005837524",
+    "name": "İskele (Kapaklı)",
+    "before": [
+     74.3,
+     44.3,
+     89.9,
+     4,
+     0,
+     null,
+     [
+      "yapi",
+      2,
+      "Öne çıkaran: iskele 283 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     74.3,
+     44.3,
+     89.9,
+     4,
+     0,
+     null,
+     [
+      "yapi",
+      2,
+      "Öne çıkaran: iskele 283 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1170373161",
+    "name": "İskele (Armutlu)",
+    "before": [
+     67.9,
+     38.9,
+     86,
+     12,
+     0,
+     null,
+     [
+      "yapi",
+      -4.9,
+      "Geri bırakan: iskele 93 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     67.9,
+     38.9,
+     86,
+     12,
+     0,
+     null,
+     [
+      "yapi",
+      -4.9,
+      "Geri bırakan: iskele 93 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1218507890",
+    "name": "Küçükkumla İskelesi",
+    "before": [
+     69.6,
+     40.2,
+     87.7,
+     10,
+     0,
+     null,
+     [
+      "yapi",
+      -2.7,
+      "Geri bırakan: iskele 128 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     69.6,
+     40.2,
+     87.7,
+     10,
+     0,
+     null,
+     [
+      "yapi",
+      -2.7,
+      "Geri bırakan: iskele 128 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1233883494",
+    "name": "Mudanya İskelesi",
+    "before": [
+     82,
+     63.5,
+     91.2,
+     2,
+     0,
+     null,
+     [
+      "lamba",
+      9.1,
+      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ]
+    ],
+    "after": [
+     82,
+     63.5,
+     91.2,
+     2,
+     0,
+     null,
+     [
+      "lamba",
+      9,
+      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1364814104",
+    "name": "Armutlu Devlet Limanı – doğu mendireği",
+    "before": [
+     62.7,
+     39.3,
+     80.6,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      -4.5,
+      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ]
+    ],
+    "after": [
+     62.7,
+     39.3,
+     80.6,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      -4.7,
+      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394208144",
+    "name": "Armutlu Devlet Limanı – kısa batı mendireği",
+    "before": [
+     66.5,
+     41.9,
+     83.9,
+     14,
+     0,
+     null,
+     [
+      "lamba",
+      -4.5,
+      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ]
+    ],
+    "after": [
+     66.5,
+     41.9,
+     83.9,
+     14,
+     0,
+     null,
+     [
+      "lamba",
+      -4.7,
+      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1413355181",
+    "name": "Armutlu Devlet Limanı – uzun batı mendireği",
+    "before": [
+     73.9,
+     48.5,
+     89.4,
+     5,
+     0,
+     null,
+     [
+      "yapi",
+      7.2,
+      "Öne çıkaran: mendirek 930 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     73.9,
+     48.5,
+     89.4,
+     5,
+     0,
+     null,
+     [
+      "yapi",
+      7.2,
+      "Öne çıkaran: mendirek 930 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1414984335",
+    "name": "İskele (Fıstıklı)",
+    "before": [
+     72.1,
+     43.5,
+     89.4,
+     7,
+     0,
+     null,
+     [
+      "lamba",
+      1.1,
+      "Öne çıkaran: lamba olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ]
+    ],
+    "after": [
+     72.1,
+     43.5,
+     89.4,
+     7,
+     0,
+     null,
+     [
+      "lamba",
+      1,
+      "Öne çıkaran: lamba olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1422122108",
+    "name": "Armutlu Devlet Limanı – orta batı mendireği",
+    "before": [
+     71.9,
+     46.9,
+     88.3,
+     8,
+     0,
+     null,
+     [
+      "yapi",
+      5.1,
+      "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     71.9,
+     46.9,
+     88.3,
+     8,
+     0,
+     null,
+     [
+      "yapi",
+      5.1,
+      "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-1456975486",
+    "name": "Petek Sitesi İskele",
+    "before": [
+     67.7,
+     39.2,
+     86,
+     13,
+     0,
+     null,
+     [
+      "yapi",
+      -4.5,
+      "Geri bırakan: iskele 99 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     67.7,
+     39.2,
+     86,
+     13,
+     0,
+     null,
+     [
+      "yapi",
+      -4.5,
+      "Geri bırakan: iskele 99 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-252356832",
+    "name": "Güzelyalı Yat Limanı – doğu mendireği",
+    "before": [
+     73.7,
+     48.4,
+     89,
+     6,
+     0,
+     null,
+     [
+      "yapi",
+      7.2,
+      "Öne çıkaran: mendirek 1067 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     73.7,
+     48.4,
+     89,
+     6,
+     0,
+     null,
+     [
+      "yapi",
+      7.2,
+      "Öne çıkaran: mendirek 1067 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-252356833",
+    "name": "Güzelyalı Yat Limanı – batı mendireği",
+    "before": [
+     70,
+     44.7,
+     86.9,
+     9,
+     0,
+     null,
+     [
+      "lamba",
+      -4.5,
+      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ]
+    ],
+    "after": [
+     70,
+     44.7,
+     86.9,
+     9,
+     0,
+     null,
+     [
+      "lamba",
+      -4.7,
+      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-479047532",
+    "name": "İskele (İslamköy)",
+    "before": [
+     59.2,
+     28.3,
+     78.7,
+     16,
+     0,
+     null,
+     [
+      "yapi",
+      -14.1,
+      "Geri bırakan: iskele 16 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     59.2,
+     28.3,
+     78.7,
+     16,
+     0,
+     null,
+     [
+      "yapi",
+      -14.1,
+      "Geri bırakan: iskele 16 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-483965349",
+    "name": "İskele (Tirilye)",
+    "before": [
+     68.6,
+     38,
+     85.7,
+     11,
+     0,
+     null,
+     [
+      "yapi",
+      -3.4,
+      "Geri bırakan: iskele 116 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     68.6,
+     38,
+     85.7,
+     11,
+     0,
+     null,
+     [
+      "yapi",
+      -3.4,
+      "Geri bırakan: iskele 116 m — OSM, kanıt C"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-503770078",
+    "name": "İDO Güzelyalı Feribot İskelesi",
+    "before": [
+     83.7,
+     66.2,
+     92.5,
+     1,
+     0,
+     null,
+     [
+      "lamba",
+      9.1,
+      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ]
+    ],
+    "after": [
+     83.7,
+     66.2,
+     92.5,
+     1,
+     0,
+     null,
+     [
+      "lamba",
+      9,
+      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ]
+    ]
+   },
+   {
+    "spot_id": "osm-way-77362926",
+    "name": "İskele (Demirsubaşı)",
+    "before": [
+     74.7,
+     44.7,
+     89.6,
+     3,
+     0,
+     null,
+     [
+      "yapi",
+      2.9,
+      "Öne çıkaran: iskele 353 m — OSM, kanıt C"
+     ]
+    ],
+    "after": [
+     77,
+     48.3,
+     90.2,
+     3,
+     0,
+     null,
+     [
+      "lamba",
+      3.4,
+      "Öne çıkaran: lamba olasılığı 0,60 — masa başı veri (onay bekliyor)"
+     ]
+    ]
+   }
+  ]
+ }
 }
