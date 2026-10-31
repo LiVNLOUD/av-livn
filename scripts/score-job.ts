@@ -10,6 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
+import { CLEAR_PRE_SQL, FETCHED_SQL, fetchedAt, HOURS_SQL, LIST_SQL, preBodies, WINDOWS_SQL, type HoursRow, type ListRow, type WindowsRow } from '../workers/api/src/lib/views';
 import { DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
@@ -110,6 +111,15 @@ if (dryRun) {
     await query(UPSERT_HISTORY_SQL, [r.spot_id, r.start_hour, r.history_json]);
   }
   await query(DELETE_STALE_V2_SQL);
+  // Phase F CPU: default /api/spots, /api/hours, /api/windows bodies for this and the next two hours.
+  {
+    const h0 = Math.floor(Date.now() / 3_600_000);
+    const [list, hrs, win, fet] = await Promise.all([query<ListRow>(LIST_SQL), query<HoursRow>(HOURS_SQL), query<WindowsRow>(WINDOWS_SQL), query(FETCHED_SQL)]);
+    const bodies = preBodies(list, hrs, win, fetchedAt(fet), [h0, h0 + 1, h0 + 2]);
+    await query(CLEAR_PRE_SQL);
+    for (const [k, v] of bodies) await query('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value', [k, v]);
+    console.log(`public bodies: ${bodies.length} (${Math.round(bodies.reduce((a, [, v]) => a + v.length, 0) / 1024)} KB)`);
+  }
   // Catch-log sessions whose hours predate the history table: fill them from the hourly observations.
   const partial = await query<{ id: string; spot_id: string; model_json: string }>("SELECT id, spot_id, model_json FROM catch_session WHERE freeze_status = 'partial'");
   const fields = fieldRecords(obs, depths);

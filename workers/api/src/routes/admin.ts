@@ -8,6 +8,8 @@ import { CELL_DEG, cellKey } from '../lib/seed';
 import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
+import { CLEAR_PRE_SQL } from '../lib/views';
+
 export const adminRoutes = new Hono<{ Bindings: Env }>();
 
 /** Constant-time comparison of SHA-256 digests, so neither content nor length leaks through timing. */
@@ -28,6 +30,8 @@ adminRoutes.use('*', async (c, next) => {
   const given = (auth.startsWith('Bearer ') ? auth.slice(7) : '').trim();
   if (!given || !(await safeEqual(given, token))) return c.json({ ok: false, error: 'unauthorized' }, 401);
   await next();
+  // A successful change to spots or forbidden areas drops the precomputed public bodies (lib/views.ts).
+  if (c.req.method !== 'GET' && c.res.status < 400 && /\/(spots|forbidden)(\/|$)/.test(c.req.path)) await c.env.DB.prepare(CLEAR_PRE_SQL).run();
 });
 
 type Fields = { name?: unknown; has_light?: unknown; status?: unknown; notes?: unknown; hidden?: unknown };

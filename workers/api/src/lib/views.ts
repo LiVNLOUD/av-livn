@@ -1,0 +1,76 @@
+// Public list/hours/windows bodies as pure functions of the stored rows. The Worker builds them live as a
+// fallback; the score job (scripts/score-job.ts) builds them once per hour and stores the JSON text in meta
+// (`pub:<kind>:<epoch hour>`), so the default requests cost one row read instead of parsing every list_json
+// (Phase F: 63 spots pushed live parsing over the ~10 ms CPU budget).
+import { ACTIVE, publicSpot, type SpotRow } from './spots';
+import { bestWindows } from './windows';
+import type { ListEntryV2 } from '../precompute_v2';
+
+const HOUR = 3_600_000;
+
+export const LIST_SQL = `SELECT s.*, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
+       LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`;
+export const HOURS_SQL = `SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`;
+export const WINDOWS_SQL = `SELECT s.id, s.name, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`;
+export const FETCHED_SQL = 'SELECT max(fetched_at) AS at FROM forecast_snapshots';
+export const PRE_KINDS = ['list', 'hours', 'windows'] as const;
+export const preKey = (kind: (typeof PRE_KINDS)[number], hour: number) => `pub:${kind}:${hour}`;
+/** Any change to which spots are public (hide, forbidden area, edit, rescore) drops the stored bodies. */
+export const CLEAR_PRE_SQL = "DELETE FROM meta WHERE key LIKE 'pub:%'";
+
+export type ListRow = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
+export type HoursRow = SpotRow & { start_hour: number; list_json: string; scored_at: string };
+export type WindowsRow = { id: string; name: string; start_hour: number; list_json: string };
+
+export const fetchedAt = (r: unknown[]) => (r[0] as { at: string | null } | undefined)?.at ?? null;
+
+export function listBody(all: ListRow[], dataFetchedAt: string | null, nowHour: number) {
+  const spots = all.map((r) => {
+    const e = r.list_json && r.start_hour !== null ? (JSON.parse(r.list_json) as ListEntryV2[])[nowHour - r.start_hour] : undefined;
+    return {
+      ...publicSpot(r),
+      score: e
+        ? { total: e[0], p10: e[1], p90: e[2], rank: e[3], gated: e[4] === 1, warnings: e[5] ? [e[5]] : [], partial: r.partial === 1, reason: e[6]?.[2] ?? null }
+        : { total: null, p10: null, p90: null, rank: null, gated: false, warnings: [], partial: false, reason: null },
+    };
+  });
+  spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
+  const version = all.find((r) => r.model_version)?.model_version ?? null;
+  const scored = all.reduce<string | null>((m, r) => (r.scored_at && (m === null || r.scored_at > m) ? r.scored_at : m), null);
+  return { ok: true, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: dataFetchedAt, scored_at: scored, count: spots.length, spots };
+}
+
+/** Per active spot the next 72 h: score (rounded), band width (p90 − p10) and gated hours. */
+export function hoursBody(all: HoursRow[], dataFetchedAt: string | null, from: number) {
+  const spots = all.map((r) => {
+    const list = JSON.parse(r.list_json) as ListEntryV2[];
+    const t: (number | null)[] = [];
+    const w: (number | null)[] = [];
+    const g: number[] = [];
+    for (let i = 0; i < 72; i++) {
+      const e = list[from + i - r.start_hour];
+      t.push(e && e[0] !== null ? Math.round(e[0]) : null);
+      w.push(e && e[1] !== null && e[2] !== null ? Math.round(e[2] - e[1]) : null);
+      if (e && e[4] === 1) g.push(i);
+    }
+    const p = publicSpot(r);
+    return { id: p.id, name: p.name, kind: p.kind, place: p.place, access: p.access, status: p.status, lat: p.lat, lon: p.lon, t, w, g };
+  });
+  const scored = all.reduce<string | null>((m, r) => (m === null || r.scored_at > m ? r.scored_at : m), null);
+  return { ok: true, from: new Date(from * HOUR).toISOString(), hours: 72, scored_at: scored, data_fetched_at: dataFetchedAt, spots };
+}
+
+export function windowsBody(rows: WindowsRow[], from: number, hours: number) {
+  const { threshold, windows } = bestWindows(rows.map((r) => ({ id: r.id, name: r.name, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] })), from, hours);
+  const iso = (h: number) => new Date(h * HOUR).toISOString();
+  return { ok: true, from: iso(from), hours, threshold, windows: windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) };
+}
+
+/** Bodies for the given hours, as [meta key, JSON text] rows (score job). */
+export function preBodies(list: ListRow[], hoursRows: HoursRow[], win: WindowsRow[], dataFetchedAt: string | null, hours: number[]): [string, string][] {
+  return hours.flatMap((h) => [
+    [preKey('list', h), JSON.stringify(listBody(list, dataFetchedAt, h))],
+    [preKey('hours', h), JSON.stringify(hoursBody(hoursRows, dataFetchedAt, h))],
+    [preKey('windows', h), JSON.stringify(windowsBody(win, h, 72))],
+  ] as [string, string][]);
+}

@@ -1,9 +1,9 @@
 // Read-only endpoints: scores are precomputed by cron (see precompute.ts); handlers only slice stored JSON.
 import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
-import { ACTIVE, ACTIVE_COUNT_SQL, publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
+import { ACTIVE_COUNT_SQL, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
-import { bestWindows } from '../lib/windows';
+import { FETCHED_SQL, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
 import { parseProfiles } from '../lib/tackle';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
@@ -42,76 +42,42 @@ function hourOf(c: Ctx): number {
   return Number.isNaN(t) ? now : Math.min(Math.max(Math.floor(t / HOUR), now), now + 71);
 }
 
+/** Precomputed body (score job, lib/views.ts) for the default request at this hour; null → build live. */
+async function pre(c: Ctx, kind: 'list' | 'hours' | 'windows', hour: number): Promise<Response | null> {
+  const r = await c.env.DB.prepare('SELECT value FROM meta WHERE key = ?1').bind(preKey(kind, hour)).first<{ value: string }>();
+  return r ? c.body(r.value, 200, { 'content-type': 'application/json; charset=UTF-8', ...NO_CACHE, 'x-av-pre': '1' }) : null;
+}
+
 /** v2 list: expected score, 10–90 % band and rank (among scored spots) at the current or requested hour. */
 async function listV2(c: Ctx) {
-  const [rows, fetched] = await c.env.DB.batch([
-    c.env.DB.prepare(
-      `SELECT s.*, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
-       LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`,
-    ),
-    c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
-  ]);
   const nowHour = hourOf(c);
-  type Row = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
-  const all = rows!.results as Row[];
-  const spots = all.map((r) => {
-    const e = r.list_json && r.start_hour !== null ? (JSON.parse(r.list_json) as ListEntryV2[])[nowHour - r.start_hour] : undefined;
-    return {
-      ...publicSpot(r),
-      score: e
-        ? { total: e[0], p10: e[1], p90: e[2], rank: e[3], gated: e[4] === 1, warnings: e[5] ? [e[5]] : [], partial: r.partial === 1, reason: e[6]?.[2] ?? null }
-        : { total: null, p10: null, p90: null, rank: null, gated: false, warnings: [], partial: false, reason: null },
-    };
-  });
-  spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
-  const at = (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null;
-  const version = all.find((r) => r.model_version)?.model_version ?? null;
-  const scored = all.reduce<string | null>((m, r) => (r.scored_at && (m === null || r.scored_at > m) ? r.scored_at : m), null);
-  return c.json({ ok: true, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, scored_at: scored, count: spots.length, spots }, 200, NO_CACHE);
+  if (nowHour === Math.floor(Date.now() / HOUR)) {
+    const p = await pre(c, 'list', nowHour);
+    if (p) return p;
+  }
+  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(LIST_SQL), c.env.DB.prepare(FETCHED_SQL)]);
+  return c.json(listBody(rows!.results as ListRow[], fetchedAt(fetched!.results), nowHour), 200, NO_CACHE);
 }
 
-/**
- * Spot × hour grid for the heat map (E2): per active spot the next 72 h as compact arrays — score (rounded),
- * band width (p90 − p10) and gated flag. Public info only (same as the list).
- */
+/** Spot × hour grid for the heat map (E2). */
 async function hoursV2(c: Ctx) {
-  const [rows, fetched] = await c.env.DB.batch([
-    c.env.DB.prepare(`SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`),
-    c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
-  ]);
   const from = Math.floor(Date.now() / HOUR);
-  type Row = SpotRow & { start_hour: number; list_json: string; scored_at: string };
-  const all = rows!.results as Row[];
-  const spots = all.map((r) => {
-    const list = JSON.parse(r.list_json) as ListEntryV2[];
-    const t: (number | null)[] = [];
-    const w: (number | null)[] = [];
-    const g: number[] = [];
-    for (let i = 0; i < 72; i++) {
-      const e = list[from + i - r.start_hour];
-      t.push(e && e[0] !== null ? Math.round(e[0]) : null);
-      w.push(e && e[1] !== null && e[2] !== null ? Math.round(e[2] - e[1]) : null);
-      if (e && e[4] === 1) g.push(i);
-    }
-    const p = publicSpot(r);
-    return { id: p.id, name: p.name, kind: p.kind, place: p.place, access: p.access, status: p.status, lat: p.lat, lon: p.lon, t, w, g };
-  });
-  const scored = all.reduce<string | null>((m, r) => (m === null || r.scored_at > m ? r.scored_at : m), null);
-  return c.json({ ok: true, from: new Date(from * HOUR).toISOString(), hours: 72, scored_at: scored, data_fetched_at: (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null, spots }, 200, NO_CACHE);
+  const p = await pre(c, 'hours', from);
+  if (p) return p;
+  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(HOURS_SQL), c.env.DB.prepare(FETCHED_SQL)]);
+  return c.json(hoursBody(rows!.results as HoursRow[], fetchedAt(fetched!.results), from), 200, NO_CACHE);
 }
 
-/** Best windows of the next 72 h (D2): spot, time range, peak score/rank/band and the main reason at the peak. */
+/** Best windows of the next 72 h (D2). */
 async function windowsV2(c: Ctx) {
-  const rows = await c.env.DB.prepare(`SELECT s.id, s.name, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`).all<{ id: string; name: string; start_hour: number; list_json: string }>();
   const from = Math.floor(Date.now() / HOUR);
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
-  const { threshold, windows } = bestWindows(rows.results.map((r) => ({ id: r.id, name: r.name, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] })), from, hours);
-  const iso = (h: number) => new Date(h * HOUR).toISOString();
-  return c.json(
-    { ok: true, from: iso(from), hours, threshold, windows: windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) },
-    200,
-    NO_CACHE,
-  );
+  if (hours === 72) {
+    const p = await pre(c, 'windows', from);
+    if (p) return p;
+  }
+  const rows = await c.env.DB.prepare(WINDOWS_SQL).all<WindowsRow>();
+  return c.json(windowsBody(rows.results, from, hours), 200, NO_CACHE);
 }
 
 /** v2 detail: spot, field summary and the packed v2 hours (spliced raw, as for v1). */

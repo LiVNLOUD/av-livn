@@ -117,5 +117,6 @@ export function seedSql(fc: { features: SpotFeature[] }, now: string): string {
   out.push(`DELETE FROM spots WHERE source = 'osm' AND admin_edited_at IS NULL AND id NOT IN (${ids});`);
   out.push(`DELETE FROM cells WHERE id NOT IN (SELECT wx_cell FROM spots UNION SELECT sea_cell FROM spots WHERE sea_cell IS NOT NULL);`);
   out.push(`DELETE FROM forecast_snapshots WHERE cell_id NOT IN (SELECT id FROM cells);`);
+  out.push("DELETE FROM meta WHERE key LIKE 'pub:%';"); // spot set may have changed: public bodies rebuilt by the score job
   return out.join('\n') + '\n';
 }
