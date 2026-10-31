@@ -11,7 +11,8 @@ Repo ve av.livn.tr herkese açık. Kural: **saha verisi ve av günlüğü yalnı
 | Saha kaynaklı bileşenlerin değeri ve gerekçesi | `spot_scores_v2.detail_json` | **hayır** — public detayda `null` + "saha bilgisi (yalnız yönetici görür)" |
 | Av günlüğü, CSV dışa aktarma | `catch_session`, `catch_item` | **hayır** — yalnız `/api/admin/*` |
 | Saatlik dondurulmuş model çıktısı | `spot_scores_v2_history` | hayır (yalnız D1; günlük ve D6 paneli admin) |
-| Push abonelikleri, ntfy konu adı | `push_subscription`, repo secret | **hayır** |
+| Push abonelikleri, bildirim ayarları (favori meralar dahil), gönderim kaydı | `push_subscription`, `notify_settings`, `notify_sent` | **hayır** — yalnız `/api/admin/notify` |
+| VAPID özel anahtarı, ntfy konu adı | repo secret (`VAPID_PRIVATE_KEY`, `NTFY_TOPIC`) | **hayır** — yalnız Actions ortamında |
 
 **Uygulama:**
 - `workers/api/src/lib/spots.ts` `publicSpot` / `adminSpot`.
@@ -19,6 +20,6 @@ Repo ve av.livn.tr herkese açık. Kural: **saha verisi ve av günlüğü yalnı
 - `reasonText`: saha kaynaklı sürücüde "değer gizli".
 - `routes/public.ts`: v1 public uçları kaldırıldı.
 
-**Test:** `workers/api/test/api.test.ts` → "privacy: public endpoints never return field values". Gizli not, ölçülen derinlik, fotoğraf, lamba durumu ve ziyaret tarihi public list/detay gövdesinde aranır.
+**Test:** `workers/api/test/notify.test.ts` abonelik uç noktasının ve favorilerin public gövdelerde geçmediğini dener. `workers/api/test/api.test.ts` → "privacy: public endpoints never return field values". Gizli not, ölçülen derinlik, fotoğraf, lamba durumu ve ziyaret tarihi public list/detay gövdesinde aranır.
 
 **Yedek:** `docs/BACKUP.md` (şifreli, yalnız Actions artifact).

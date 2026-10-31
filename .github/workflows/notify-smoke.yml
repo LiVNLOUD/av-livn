@@ -1,0 +1,47 @@
+name: notify-smoke
+# Live test of D9 notifications: request a test via the admin API (ADMIN_TOKEN), run the scoring job's
+# notification step (same code as score.yml), read the delivery result back, and check on the ntfy server
+# that the message arrived. Secrets are never printed (topic and keys stay in env; output is counts/codes).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: score
+  cancel-in-progress: false
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      BASE: https://av.livn.tr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --outfile=.score/job.mjs --log-level=warning
+      - name: Secrets present?
+        run: |
+          echo "VAPID_PRIVATE_KEY: $([ -n "$VAPID_PRIVATE_KEY" ] && echo var || echo YOK)"
+          echo "NTFY_TOPIC:        $([ -n "$NTFY_TOPIC" ] && echo var || echo YOK)"
+      - name: Request a test notification (admin API)
+        run: |
+          curl -sf -X POST -H "authorization: Bearer $ADMIN_TOKEN" "$BASE/api/admin/notify/test" | jq -c '{ok}'
+          curl -sf -H "authorization: Bearer $ADMIN_TOKEN" "$BASE/api/admin/notify" | jq -c '{subscriptions: (.subscriptions | length), settings: .settings.channels}'
+      - name: Send (scoring job, pending mode → test only)
+        run: node .score/job.mjs --pending
+      - name: Delivery result
+        run: |
+          curl -sf -H "authorization: Bearer $ADMIN_TOKEN" "$BASE/api/admin/notify" | jq -c '{test: .test, secrets: .secrets}'
+          if [ -n "$NTFY_TOPIC" ]; then
+            n=$(curl -s "https://ntfy.sh/$NTFY_TOPIC/json?poll=1&since=10m" | jq -s '[.[] | select(.event=="message" and .title=="av.livn test bildirimi")] | length')
+            echo "ntfy server: $n test message(s) in the last 10 minutes"
+          fi

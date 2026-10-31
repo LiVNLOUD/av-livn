@@ -50,3 +50,30 @@ self.addEventListener('fetch', (e) => {
     );
   }
 });
+
+// D9 web push: payload {title, body, url, tag}. Tapping opens the spot card at that hour (or focuses a tab).
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
+  e.waitUntil(
+    self.registration.showNotification(d.title || 'av.livn', {
+      body: d.body || '',
+      tag: d.tag || 'av-livn',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: { url: d.url || '/' },
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const target = new URL((e.notification.data && e.notification.data.url) || '/', self.location.origin);
+  if (target.origin !== self.location.origin) return;
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) if ('navigate' in c) return c.focus().then(() => c.navigate(target.href));
+      return self.clients.openWindow(target.href);
+    }),
+  );
+});

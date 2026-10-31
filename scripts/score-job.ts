@@ -12,6 +12,8 @@ import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../work
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
 import { DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
+import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
+import { runNotify } from './notify-send';
 
 const dryRun = process.argv.includes('--dry-run');
 const pendingOnly = process.argv.includes('--pending');
@@ -43,6 +45,8 @@ if (pendingOnly) {
   const pending = await query<{ spot_id: string }>('SELECT spot_id FROM pending_rescore');
   if (pending.length === 0) {
     console.log('pending: nothing to rescore');
+    // A test notification requested in /ayarlar/ goes out within 15 minutes.
+    if (!dryRun) await runNotify(query, { spots: [], nowHour: Math.floor(Date.now() / 3_600_000), testOnly: true });
     process.exit(0);
   }
   console.log(`pending: ${pending.map((p) => p.spot_id).join(', ')}`);
@@ -120,4 +124,8 @@ if (dryRun) {
   // Edits made while this run computed stay pending for the next 15-minute run.
   await query('DELETE FROM pending_rescore WHERE since <= ?1', [startedAt]);
   console.log(`wrote ${records.length} rows in ${(performance.now() - t2).toFixed(0)} ms (total ${(performance.now() - t0).toFixed(0)} ms)`);
+  // D9: daily summary / opportunity / safety on the hourly run, test requests on every run.
+  const names = new Map(rows.map((r) => [r.id, r.name]));
+  const spotsHours = v2.map((r) => ({ id: r.spot_id, name: names.get(r.spot_id) ?? r.spot_id, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
+  await runNotify(query, { spots: spotsHours, nowHour: Math.floor(Date.now() / 3_600_000), testOnly: pendingOnly }).catch((e) => console.log(`notify failed: ${(e as Error).message}`));
 }
