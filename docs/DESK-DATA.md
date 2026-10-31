@@ -34,7 +34,7 @@ Kod: `pipeline/av_pipeline/desk/` — çalıştırma yalnız GitHub Actions'ta (
 
 ## c) Sentinel-2 dip parlaklığı
 Yöntem: SCL = 6 (su) pikselleri; parlaklık (B02 + B03)/2; aynı sahnede uçtan 800–1500 m açık su medyanına oran;
-uç 0–150 m pikselleri; sahneler arası piksel medyanı (≥ 2 sahne). Oran ≥ 1.5 açık, ≤ 1.1 koyu, arası belirsiz.
+uç 0–150 m pikselleri; sahneler arası piksel medyanı (≥ 2 sahne). Oran ≥ 1.5 açık, ≤ 0.85 koyu (açık sudan belirgin koyu), arası belirsiz. Oran ≈ 1 uç çevresinin açık sudan ayırt edilemediğini (bulanık ya da derin, dip sinyali yok) gösterir; ilk çalışmada eşik 1.1 idi ve 16 meranın hepsini yanlışlıkla "koyu" yazdı (medyan oranlar 0.97–1.10). Eşik düzeltildi; iş artık üretmediği onaysız bulguları siler (`findings.prune`; onaylanmış ya da reddedilmiş satırlara dokunmaz).
 Pikselerin ≥ %50'si aynı sınıfta değilse bulgu yazılmaz. Güven "orta" yalnız açık sınıf, ≥ 6 sahne, pay ≥ %60.
 
 Sınırlamalar:

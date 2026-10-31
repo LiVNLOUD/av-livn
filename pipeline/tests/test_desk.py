@@ -25,13 +25,14 @@ def test_osm_lamps_within_radius_only_and_no_negative_findings():
 
 
 def test_sentinel2_classification_and_summary():
-    assert [sentinel2.classify(r) for r in (1.6, 1.3, 1.0)] == ["acik", "belirsiz", "koyu"]
+    assert [sentinel2.classify(r) for r in (1.6, 1.3, 1.0, 0.8)] == ["acik", "belirsiz", "belirsiz", "koyu"]
     f = sentinel2.summarise("a", [1.7] * 8 + [1.0] * 2, 7, "2026-10-31")
     assert f.substrate == ["kum"] and f.evidence["confidence"] == "orta" and f.evidence["share"] == 0.8
-    k = sentinel2.summarise("a", [1.0] * 5, 9, "d")
+    k = sentinel2.summarise("a", [0.8] * 5, 9, "d")
+    assert sentinel2.summarise("a", [1.0] * 5, 9, "d") is None
     assert k.substrate == ["yosunlu"] and k.evidence["confidence"] == "düşük"
     assert sentinel2.summarise("a", [1.3] * 5, 9, "d") is None
-    assert sentinel2.summarise("a", [1.7, 1.0, 1.3], 9, "d") is None
+    assert sentinel2.summarise("a", [1.7, 0.8, 1.3], 9, "d") is None
     assert sentinel2.summarise("a", [], 0, "d") is None
     assert round(sentinel2.metres_between((40.4, 28.9), (40.401, 28.9))) == 111
 
@@ -71,3 +72,23 @@ def test_write_upserts_without_touching_review_status_and_replaces_depths(tmp_pa
     m = manual(SPOTS, p)
     assert len(m) == 1 and m[0].depths == [(30, 5)]
     assert manual(SPOTS, tmp_path / "none.json") == []
+
+
+def test_prune_deletes_only_unreviewed_stale_rows_of_that_source():
+    class D:
+        def __init__(self):
+            self.calls = []
+
+        def query(self, sql, params=None):
+            self.calls.append((sql, params))
+            return [{"id": "desk-sentinel2-b"}] if sql.startswith("SELECT") else []
+
+    d = D()
+    keep = [fz.Finding(spot_id="a", source="sentinel2", observed_at="d", evidence={})]
+    assert fz.prune(d, "sentinel2", keep) == 1
+    sel, params = d.calls[0]
+    assert "status = 'onaysiz'" in sel and "NOT IN (?2)" in sel and params == ["desk-sentinel2-%", "desk-sentinel2-a"]
+    assert [c[1] for c in d.calls[1:]] == [["desk-sentinel2-b"], ["desk-sentinel2-b"]]
+    d2 = D()
+    fz.prune(d2, "ced", [])
+    assert "NOT IN" not in d2.calls[0][0]

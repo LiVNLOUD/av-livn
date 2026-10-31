@@ -41,3 +41,16 @@ def write(d1, findings: list[Finding], now: str) -> int:
         for dist, depth in f.depths:
             d1.query("INSERT INTO field_depth (obs_id, distance_m, method, depth_m) VALUES (?1, ?2, 'plumb', ?3)", [f.id, dist, depth])
     return len(findings)
+
+
+def prune(d1, source: str, keep: list[Finding]) -> int:
+    """Delete still-unreviewed findings of `source` that the current run no longer produces (a method fix or
+    a vanished OSM object). Approved or rejected rows stay: the user's review is never undone."""
+    ids = [f.id for f in keep]
+    marks = ", ".join(f"?{i + 2}" for i in range(len(ids)))
+    cond = f" AND id NOT IN ({marks})" if ids else ""
+    stale = d1.query(f"SELECT id FROM field_obs WHERE created_by = 'desk-pipeline' AND status = 'onaysiz' AND id LIKE ?1{cond}", [f"desk-{source}-%", *ids])
+    for r in stale:
+        d1.query("DELETE FROM field_depth WHERE obs_id = ?1", [r["id"]])
+        d1.query("DELETE FROM field_obs WHERE id = ?1", [r["id"]])
+    return len(stale)

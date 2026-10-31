@@ -43,6 +43,7 @@ def main(argv: list[str]) -> int:
     try:
         lamps = osm_lamps.run(spots, today.isoformat())
         report["osm_lamp"] = {f.spot_id: f.note for f in lamps}
+        report["pruned_osm_lamp"] = fz.prune(d1, "osm_lamp", lamps)
         all_f += lamps
     except Exception as e:  # noqa: BLE001 - one source failing must not stop the others
         report["osm_lamp"] = {"error": str(e)[:300]}
@@ -59,11 +60,14 @@ def main(argv: list[str]) -> int:
             s2, geo = sentinel2.run(spots, today)
             (ROOT / "apps/web/public/tiles/s2_substrate.geojson").write_text(json.dumps(geo) + "\n")
             report["sentinel2"] = {f.spot_id: f.note for f in s2} | {"_scenes": geo["scenes"], "_pixels": len(geo["features"])}
+            report["pruned_sentinel2"] = fz.prune(d1, "sentinel2", s2)
             all_f += s2
         except Exception as e:  # noqa: BLE001
             report["sentinel2"] = {"error": str(e)[:300]}
     man = manual(spots)
     report["manual"] = {f.id: f.note for f in man}
+    for src in {"ced", "literatur", "openseamap"}:
+        report[f"pruned_{src}"] = fz.prune(d1, src, [f for f in man if f.source == src])
     all_f += man
     report["written"] = fz.write(d1, all_f, now)
     (ROOT / "docs/audit/desk_findings.json").write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n")

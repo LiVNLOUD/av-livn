@@ -3,7 +3,8 @@ Copernicus Sentinel data, free and open). Runs in Actions.
 
 Per spot: water pixels (SCL = 6) 0–NEAR_M from the tip; brightness (B02 + B03) / 2 divided by the median of water
 pixels REF_M offshore in the same scene; per-pixel median over the clear scenes of the last 3 years.
-  r ≥ BRIGHT → açık (kum)      r ≤ DARK → koyu (kaya / yosun / midye — ya da derin su)      else belirsiz
+  r ≥ BRIGHT → açık (kum)      r ≤ DARK → koyu (kaya / yosun / midye: darker than open water)      else belirsiz
+  (r ≈ 1 means the tip looks like open water — turbid or deep, no bottom signal — so it stays belirsiz.)
 Limits (docs/DESK-DATA.md): 10 m pixels mix pier, shadow and water; turbidity brightens water; bottom signal
 fades beyond ~5 m depth (dark ≠ rock); glint and wakes. Confidence: düşük, at most orta.
 """
@@ -19,7 +20,7 @@ from av_pipeline.desk.findings import Finding
 NEAR_M = 150.0
 REF_M = (800.0, 1500.0)
 BRIGHT = 1.5
-DARK = 1.1
+DARK = 0.85  # ratio ≈ 1 = same as offshore water: no bottom signal, not "dark bottom"
 MAX_SCENES = 12
 
 
