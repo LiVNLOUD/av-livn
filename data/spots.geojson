@@ -14,6 +14,7 @@
    "properties": {
     "id": "osm-way-1005837524",
     "name": "İskele (Kapaklı)",
+    "name_source": "generated",
     "kind": "pier",
     "length_m": 283,
     "shore_normal_deg": 215.0,
@@ -93,6 +94,7 @@
    "properties": {
     "id": "osm-way-1170373161",
     "name": "İskele (Armutlu)",
+    "name_source": "generated",
     "kind": "pier",
     "length_m": 93,
     "shore_normal_deg": 190.0,
@@ -172,6 +174,7 @@
    "properties": {
     "id": "osm-way-1218507890",
     "name": "Küçükkumla İskelesi",
+    "name_source": "osm",
     "kind": "pier",
     "length_m": 128,
     "shore_normal_deg": 215.0,
@@ -251,6 +254,7 @@
    "properties": {
     "id": "osm-way-1233883494",
     "name": "Mudanya İskelesi",
+    "name_source": "osm",
     "kind": "pier",
     "length_m": 353,
     "shore_normal_deg": 45.0,
@@ -329,7 +333,8 @@
    },
    "properties": {
     "id": "osm-way-1364814104",
-    "name": "Mendirek (Armutlu)",
+    "name": "Armutlu Devlet Limanı – doğu 4 mendireği",
+    "name_source": "generated",
     "kind": "breakwater",
     "length_m": 64,
     "shore_normal_deg": 195.0,
@@ -408,7 +413,8 @@
    },
    "properties": {
     "id": "osm-way-1394208144",
-    "name": "Mendirek (Armutlu)",
+    "name": "Armutlu Devlet Limanı – batı iç 3 mendireği",
+    "name_source": "generated",
     "kind": "breakwater",
     "length_m": 112,
     "shore_normal_deg": 180.0,
@@ -487,7 +493,8 @@
    },
    "properties": {
     "id": "osm-way-1413355181",
-    "name": "Mendirek (Armutlu)",
+    "name": "Armutlu Devlet Limanı – batı iç 1 mendireği",
+    "name_source": "generated",
     "kind": "breakwater",
     "length_m": 930,
     "shore_normal_deg": 180.0,
@@ -567,6 +574,7 @@
    "properties": {
     "id": "osm-way-1414984335",
     "name": "İskele (Fıstıklı)",
+    "name_source": "generated",
     "kind": "pier",
     "length_m": 184,
     "shore_normal_deg": 230.0,
@@ -645,7 +653,8 @@
    },
    "properties": {
     "id": "osm-way-1422122108",
-    "name": "Mendirek (Armutlu)",
+    "name": "Armutlu Devlet Limanı – batı dış 2 mendireği",
+    "name_source": "generated",
     "kind": "breakwater",
     "length_m": 292,
     "shore_normal_deg": 215.0,
@@ -725,6 +734,7 @@
    "properties": {
     "id": "osm-way-1456975486",
     "name": "Petek Sitesi İskele",
+    "name_source": "osm",
     "kind": "pier",
     "length_m": 99,
     "shore_normal_deg": 15.0,
@@ -803,7 +813,8 @@
    },
    "properties": {
     "id": "osm-way-252356832",
-    "name": "Mendirek (Güzelyalı Burgaz)",
+    "name": "Güzelyalı Yat Limani – doğu mendireği",
+    "name_source": "generated",
     "kind": "breakwater",
     "length_m": 1067,
     "shore_normal_deg": 0.0,
@@ -882,7 +893,8 @@
    },
    "properties": {
     "id": "osm-way-252356833",
-    "name": "Mendirek (Güzelyalı Burgaz)",
+    "name": "Güzelyalı Yat Limani – batı mendireği",
+    "name_source": "generated",
     "kind": "breakwater",
     "length_m": 204,
     "shore_normal_deg": 5.0,
@@ -962,6 +974,7 @@
    "properties": {
     "id": "osm-way-479047532",
     "name": "İskele (İslamköy)",
+    "name_source": "generated",
     "kind": "pier",
     "length_m": 16,
     "shore_normal_deg": 10.0,
@@ -1041,6 +1054,7 @@
    "properties": {
     "id": "osm-way-483965349",
     "name": "İskele (Tirilye)",
+    "name_source": "generated",
     "kind": "pier",
     "length_m": 116,
     "shore_normal_deg": 0.0,
@@ -1120,6 +1134,7 @@
    "properties": {
     "id": "osm-way-503770078",
     "name": "İDO Güzelyalı Feribot İskelesi",
+    "name_source": "osm",
     "kind": "pier",
     "length_m": 960,
     "shore_normal_deg": 5.0,
@@ -1199,6 +1214,7 @@
    "properties": {
     "id": "osm-way-77362926",
     "name": "İskele (Demirsubaşı)",
+    "name_source": "generated",
     "kind": "pier",
     "length_m": 353,
     "shore_normal_deg": 255.0,
