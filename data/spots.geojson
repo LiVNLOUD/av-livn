@@ -1287,6 +1287,180 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
+     28.826107,
+     40.385828
+    ]
+   },
+   "properties": {
+    "id": "known-kumyaka",
+    "osm_name": null,
+    "kind": "harbour",
+    "type": "harbour",
+    "type_tr": "bilinen yer (kullanıcı listesi)",
+    "length_m": null,
+    "shore_normal_deg": 20.0,
+    "place": "Kumyaka",
+    "place_m": 88,
+    "access": "acik",
+    "access_note": "kullanıcı listesi; konum yerleşime en yakın kıyı noktası, sahada düzeltin",
+    "osm": [],
+    "osm_tags": {},
+    "name": "Kumyaka kıyısı (konum tahmini)",
+    "status": "proposed",
+    "source": "© OpenStreetMap contributors, ODbL",
+    "name_source": "generated",
+    "probe_lat": 40.3922,
+    "probe_lon": 28.82913,
+    "probe_ok": null,
+    "probe_source": "dtm",
+    "normal_source": "dtm",
+    "osm_normal_deg": 23.2,
+    "depth_200m": 0.4,
+    "slope_pct": 0.7,
+    "max_depth_100m": 0.0,
+    "profile": [
+     null,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.1,
+     0.2,
+     0.4,
+     0.6,
+     0.8,
+     1.3,
+     1.8,
+     2.4,
+     3.0,
+     3.6,
+     4.4,
+     5.2,
+     6.1,
+     6.9,
+     7.8
+    ],
+    "has_light": null,
+    "tip_source": "inventory",
+    "alt_lat": null,
+    "alt_lon": null,
+    "fetch_km": [
+     13.49,
+     11.81,
+     12.46,
+     0.05,
+     20.68,
+     0.68,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.06,
+     99.43,
+     74.8
+    ],
+    "substrate": "Sandy mud",
+    "substrate_biozone": "Infralittoral",
+    "substrate_dist_m": 0,
+    "substrate_conf": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     29.032044,
+     40.479978
+    ]
+   },
+   "properties": {
+    "id": "known-narli",
+    "osm_name": null,
+    "kind": "harbour",
+    "type": "harbour",
+    "type_tr": "bilinen yer (kullanıcı listesi)",
+    "length_m": null,
+    "shore_normal_deg": 205.0,
+    "place": "Narlı",
+    "place_m": 92,
+    "access": "acik",
+    "access_note": "kullanıcı listesi; konum yerleşime en yakın kıyı noktası, sahada düzeltin",
+    "osm": [],
+    "osm_tags": {},
+    "name": "Narlı kıyısı (konum tahmini)",
+    "status": "proposed",
+    "source": "© OpenStreetMap contributors, ODbL",
+    "name_source": "generated",
+    "probe_lat": 40.47383,
+    "probe_lon": 29.0283,
+    "probe_ok": null,
+    "probe_source": "dtm",
+    "normal_source": "dtm",
+    "osm_normal_deg": 168.0,
+    "depth_200m": 0.0,
+    "slope_pct": 1.0,
+    "max_depth_100m": null,
+    "profile": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.3,
+     5.2,
+     10.0,
+     15.7,
+     22.3,
+     27.7,
+     29.3,
+     30.2,
+     28.5
+    ],
+    "has_light": null,
+    "tip_source": "inventory",
+    "alt_lat": null,
+    "alt_lon": null,
+    "fetch_km": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.07,
+     8.88,
+     9.7,
+     9.62,
+     0.09,
+     0.12,
+     0.14,
+     1.06,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "substrate": null,
+    "substrate_biozone": "Infralittoral",
+    "substrate_dist_m": 0,
+    "substrate_conf": null
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
      28.826631,
      40.509575
     ]
@@ -1394,7 +1568,7 @@
     "place": "Güzelyalı Burgaz",
     "place_m": 170,
     "access": "belirsiz",
-    "access_note": "OSM access=private ya da özel marina",
+    "access_note": "marina: giriş kısıtlı olabilir",
     "osm": [
      "node/11450096002"
     ],
@@ -1487,7 +1661,7 @@
     "place": "Tirilye",
     "place_m": 387,
     "access": "belirsiz",
-    "access_note": "OSM access=private ya da özel marina",
+    "access_note": "marina: giriş kısıtlı olabilir",
     "osm": [
      "node/11865648199"
     ],
@@ -1565,6 +1739,190 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
+     28.803066,
+     40.557299
+    ]
+   },
+   "properties": {
+    "id": "osm-node-11981818601-1",
+    "osm_name": "Ayı Burnu",
+    "kind": "rocky",
+    "type": "rocky",
+    "type_tr": "kayalık kıyı",
+    "length_m": 433,
+    "shore_normal_deg": 335.0,
+    "place": null,
+    "place_m": null,
+    "access": "belirsiz",
+    "access_note": "kayalık: yürüyüş yolu bilinmiyor",
+    "osm": [
+     "node/11981818601"
+    ],
+    "osm_tags": {
+     "name": "Ayı Burnu",
+     "natural": "cape"
+    },
+    "name": "Ayı Burnu",
+    "status": "proposed",
+    "source": "© OpenStreetMap contributors, ODbL",
+    "name_source": "generated",
+    "probe_lat": 40.56345,
+    "probe_lon": 28.79933,
+    "probe_ok": null,
+    "probe_source": "dtm",
+    "normal_source": "dtm",
+    "osm_normal_deg": 321.9,
+    "depth_200m": 15.6,
+    "slope_pct": 12.2,
+    "max_depth_100m": 2.5,
+    "profile": [
+     0.0,
+     0.0,
+     0.0,
+     0.7,
+     2.5,
+     5.1,
+     8.0,
+     11.2,
+     15.6,
+     21.2,
+     26.6,
+     31.7,
+     36.6,
+     40.5,
+     43.7,
+     46.8,
+     49.9,
+     52.8,
+     55.3,
+     56.6,
+     58.1
+    ],
+    "has_light": null,
+    "tip_source": "inventory",
+    "alt_lat": null,
+    "alt_lon": null,
+    "fetch_km": [
+     44.77,
+     50.64,
+     49.92,
+     0.06,
+     0.04,
+     0.03,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     79.75,
+     54.28
+    ],
+    "substrate": "Sandy mud",
+    "substrate_biozone": "Infralittoral",
+    "substrate_dist_m": 0,
+    "substrate_conf": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     28.78094,
+     40.518943
+    ]
+   },
+   "properties": {
+    "id": "osm-node-11981834876-1",
+    "osm_name": "Boz Burnu",
+    "kind": "rocky",
+    "type": "rocky",
+    "type_tr": "kayalık kıyı",
+    "length_m": 180,
+    "shore_normal_deg": 265.0,
+    "place": "Armutlu",
+    "place_m": 3989,
+    "access": "belirsiz",
+    "access_note": "kayalık: yürüyüş yolu bilinmiyor",
+    "osm": [
+     "node/11981834876"
+    ],
+    "osm_tags": {
+     "name": "Boz Burnu",
+     "natural": "cape"
+    },
+    "name": "Boz Burnu",
+    "status": "proposed",
+    "source": "© OpenStreetMap contributors, ODbL",
+    "name_source": "generated",
+    "probe_lat": 40.51835,
+    "probe_lon": 28.77212,
+    "probe_ok": null,
+    "probe_source": "dtm",
+    "normal_source": "dtm",
+    "osm_normal_deg": 269.8,
+    "depth_200m": 3.1,
+    "slope_pct": 2.3,
+    "max_depth_100m": 0.7,
+    "profile": [
+     0.0,
+     0.0,
+     0.3,
+     0.5,
+     0.7,
+     1.2,
+     1.8,
+     2.4,
+     3.1,
+     4.1,
+     5.1,
+     6.0,
+     6.9,
+     7.8,
+     8.6,
+     9.4,
+     10.1,
+     10.8,
+     11.5,
+     12.3,
+     13.1
+    ],
+    "has_light": null,
+    "tip_source": "inventory",
+    "alt_lat": null,
+    "alt_lon": null,
+    "fetch_km": [
+     0.28,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     8.66,
+     25.19,
+     0.03,
+     0.06,
+     17.01,
+     23.02,
+     35.67,
+     20.22,
+     100.0,
+     84.15,
+     56.8
+    ],
+    "substrate": null,
+    "substrate_biozone": "Infralittoral",
+    "substrate_dist_m": 0,
+    "substrate_conf": null
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
      29.063313,
      40.478702
     ]
@@ -1579,8 +1937,8 @@
     "shore_normal_deg": 170.0,
     "place": "Karacaali",
     "place_m": 358,
-    "access": "belirsiz",
-    "access_note": "OSM access=private ya da özel marina",
+    "access": "acik",
+    "access_note": "yerleşime 358 m",
     "osm": [
      "node/13872728204"
     ],
@@ -1763,8 +2121,8 @@
     "shore_normal_deg": 205.0,
     "place": "Büyükkumla",
     "place_m": 248,
-    "access": "belirsiz",
-    "access_note": "OSM access=private ya da özel marina",
+    "access": "acik",
+    "access_note": "yerleşime 248 m",
     "osm": [
      "node/2794622004"
     ],
@@ -1856,7 +2214,7 @@
     "place": "Kurşunlu",
     "place_m": 911,
     "access": "belirsiz",
-    "access_note": "OSM access=private ya da özel marina",
+    "access_note": "marina: giriş kısıtlı olabilir",
     "osm": [
      "way/1165497962"
     ],
@@ -2139,7 +2497,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (Güzelyalı Yalı kuzeybatısu)",
+    "name": "Kumsal (Güzelyalı Yalı kuzeybatısı)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -2230,7 +2588,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (Güzelyalı Siteler kuzeysu)",
+    "name": "Kumsal (Güzelyalı Siteler kuzeyi)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -2322,7 +2680,7 @@
      "name": "Armutlu Belediyesi Kadınlar Plajı",
      "natural": "beach"
     },
-    "name": "Kumsal (Fıstıklı batısu)",
+    "name": "Kumsal (Fıstıklı batısı)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -2782,7 +3140,7 @@
      "name": "Armutlu Yılandar  Plajı",
      "natural": "beach"
     },
-    "name": "Kumsal (Fıstıklı batısu) 2",
+    "name": "Kumsal (Fıstıklı batısı) 2",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -2965,7 +3323,7 @@
      "name": "Armutlu Dereağzı Plajı",
      "natural": "beach"
     },
-    "name": "Kumsal (Armutlu güneysu)",
+    "name": "Kumsal (Armutlu güneyi)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3057,7 +3415,7 @@
      "name": "Armutlu Dereağzı Plajı",
      "natural": "beach"
     },
-    "name": "Kumsal (Armutlu güneysu) 2",
+    "name": "Kumsal (Armutlu güneyi) 2",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3149,7 +3507,7 @@
      "name": "Armutlu Dereağzı Sahili",
      "natural": "beach"
     },
-    "name": "Kumsal (Armutlu güneybatısu)",
+    "name": "Kumsal (Armutlu güneybatısı)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3241,7 +3599,7 @@
      "name": "Armutlu Dereağzı Sahili",
      "natural": "beach"
     },
-    "name": "Kumsal (Armutlu güneybatısu) 2",
+    "name": "Kumsal (Armutlu güneybatısı) 2",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3333,7 +3691,7 @@
      "name": "Armutlu Dereağzı Sahili",
      "natural": "beach"
     },
-    "name": "Kumsal (Armutlu güneybatısu) 3",
+    "name": "Kumsal (Armutlu güneybatısı) 3",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3425,7 +3783,7 @@
      "name": "Armutlu Dereağzı Sahili",
      "natural": "beach"
     },
-    "name": "Kumsal (Armutlu güneysu) 3",
+    "name": "Kumsal (Armutlu güneyi) 3",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3517,7 +3875,7 @@
      "name": "Fıstıklı İskele Sahili",
      "natural": "beach"
     },
-    "name": "Kumsal (Fıstıklı batısu) 3",
+    "name": "Kumsal (Fıstıklı batısı) 3",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3608,7 +3966,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (Fıstıklı güneybatısu)",
+    "name": "Kumsal (Fıstıklı güneybatısı)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3790,7 +4148,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (İslamköy kuzeybatısu)",
+    "name": "Kumsal (İslamköy kuzeybatısı)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3881,7 +4239,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (İslamköy kuzeybatısu) 2",
+    "name": "Kumsal (İslamköy kuzeybatısı) 2",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -3972,7 +4330,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (İslamköy kuzeybatısu) 3",
+    "name": "Kumsal (İslamköy kuzeybatısı) 3",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -4063,7 +4421,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (Tirilye kuzeybatısu)",
+    "name": "Kumsal (Tirilye kuzeybatısı)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",
@@ -4154,7 +4512,7 @@
     "osm_tags": {
      "natural": "beach"
     },
-    "name": "Kumsal (Güzelyalı Eğitim kuzeysu)",
+    "name": "Kumsal (Güzelyalı Eğitim kuzeyi)",
     "status": "proposed",
     "source": "© OpenStreetMap contributors, ODbL",
     "name_source": "generated",

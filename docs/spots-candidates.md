@@ -4,17 +4,19 @@ Otomatik üretilir: `python -m av_pipeline.spots.inventory build` (geodata.yml).
 puanlanmaz ve listede görünmez; haritada gri "aday" katmanında durur. `/admin/` sayfasında **Onayla** ile
 mevcut meralara katılır (sonraki saatlik puanlamada), **Reddet** ile elenir. Kaynak © OpenStreetMap katkıcıları (ODbL).
 
-**Toplam 37 aday.** Ticari liman/sanayi alanı (erişim yasak katmanı): 2.
+**Toplam 41 aday.** Ticari liman/sanayi alanı (erişim yasak katmanı): 2.
 
 | Tip | Aday |
 |---|---|
 | kumsal | 24 |
 | liman / balıkçı barınağı | 7 |
 | dere ağzı | 6 |
+| bilinen yer (kullanıcı listesi) | 2 |
+| kayalık kıyı | 2 |
 
 | Yerleşim | Aday |
 |---|---|
-| Armutlu | 13 |
+| Armutlu | 14 |
 | Fıstıklı | 5 |
 | İslamköy | 3 |
 | Büyükkumla | 2 |
@@ -28,7 +30,10 @@ mevcut meralara katılır (sonraki saatlik puanlamada), **Reddet** ile elenir. K
 | Karacaali | 1 |
 | Kumla | 1 |
 | Kumsaz | 1 |
+| Kumyaka | 1 |
 | Kurşunlu | 1 |
+| Narlı | 1 |
+| — | 1 |
 
 ## Yeni tipler için istavrit tercih değerleri (kanıt C, literatür yok)
 
@@ -47,43 +52,47 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 
 | Ad | Tip | Yerleşim | Erişim tahmini | OSM |
 |---|---|---|---|---|
-| Kumsal (Armutlu güneybatısu) | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1394523720 |
-| Kumsal (Armutlu güneybatısu) 2 | kumsal | Armutlu | acik (yerleşime 1405 m) | way/1394523720 |
-| Kumsal (Armutlu güneybatısu) 3 | kumsal | Armutlu | acik (yerleşime 1113 m) | way/1394523720 |
+| Kumsal (Armutlu güneybatısı) | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1394523720 |
+| Kumsal (Armutlu güneybatısı) 2 | kumsal | Armutlu | acik (yerleşime 1405 m) | way/1394523720 |
+| Kumsal (Armutlu güneybatısı) 3 | kumsal | Armutlu | acik (yerleşime 1113 m) | way/1394523720 |
 | Kumsal (Armutlu güneydoğusu) | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
 | Kumsal (Armutlu güneydoğusu) 2 | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
 | Kumsal (Armutlu güneydoğusu) 3 | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
 | Kumsal (Armutlu güneydoğusu) 4 | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
 | Kumsal (Armutlu güneydoğusu) 5 | kumsal | Armutlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1393123413 |
-| Kumsal (Armutlu güneysu) | kumsal | Armutlu | acik (yerleşime 1119 m) | way/1394208138 |
-| Kumsal (Armutlu güneysu) 2 | kumsal | Armutlu | acik (yerleşime 1236 m) | way/1394208138 |
-| Kumsal (Armutlu güneysu) 3 | kumsal | Armutlu | acik (yerleşime 1088 m) | way/1394523720 |
+| Kumsal (Armutlu güneyi) | kumsal | Armutlu | acik (yerleşime 1119 m) | way/1394208138 |
+| Kumsal (Armutlu güneyi) 2 | kumsal | Armutlu | acik (yerleşime 1236 m) | way/1394208138 |
+| Kumsal (Armutlu güneyi) 3 | kumsal | Armutlu | acik (yerleşime 1088 m) | way/1394523720 |
 | Armutlu İskelesi | liman / balıkçı barınağı | Armutlu | kisitli_feribot (feribot iskelesi: sefer saatlerinde kısıtlı olabilir) | node/2590599404 |
 | Eski Turyol Armutlu Şubesi | liman / balıkçı barınağı | Armutlu | kisitli_feribot (feribot iskelesi: sefer saatlerinde kısıtlı olabilir) | node/11132493095 |
-| Büyükkumla İskelesi | liman / balıkçı barınağı | Büyükkumla | belirsiz (OSM access=private ya da özel marina) | node/2794622004 |
+| Boz Burnu | kayalık kıyı | Armutlu | belirsiz (kayalık: yürüyüş yolu bilinmiyor) | node/11981834876 |
+| Büyükkumla İskelesi | liman / balıkçı barınağı | Büyükkumla | acik (yerleşime 248 m) | node/2794622004 |
 | Büyükkumla Deresi ağzı | dere ağzı | Büyükkumla | acik (yerleşime 330 m) | way/681112515 |
 | Karsak Çayı ağzı | dere ağzı | Dr.Ziya Kaya | acik (yerleşime 256 m) | way/700323582 |
-| Kumsal (Fıstıklı batısu) | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1391521782 |
-| Kumsal (Fıstıklı batısu) 2 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
-| Kumsal (Fıstıklı batısu) 3 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985743 |
-| Kumsal (Fıstıklı güneybatısu) | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985744 |
+| Kumsal (Fıstıklı batısı) | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1391521782 |
+| Kumsal (Fıstıklı batısı) 2 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
+| Kumsal (Fıstıklı batısı) 3 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985743 |
+| Kumsal (Fıstıklı güneybatısı) | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985744 |
 | Fıstıklı Deresi ağzı | dere ağzı | Fıstıklı | acik (yerleşime 1487 m) | way/698849100 |
-| Güzelyalı Yat Limani | liman / balıkçı barınağı | Güzelyalı Burgaz | belirsiz (OSM access=private ya da özel marina) | node/11450096002 |
-| Kumsal (Güzelyalı Eğitim kuzeysu) | kumsal | Güzelyalı Eğitim | acik (yerleşime 200 m) | way/665674892 |
-| Kumsal (Güzelyalı Siteler kuzeysu) | kumsal | Güzelyalı Siteler | acik (yerleşime 628 m) | way/1305691029 |
-| Kumsal (Güzelyalı Yalı kuzeybatısu) | kumsal | Güzelyalı Yalı | acik (yerleşime 425 m) | way/1305691027 |
+| Güzelyalı Yat Limani | liman / balıkçı barınağı | Güzelyalı Burgaz | belirsiz (marina: giriş kısıtlı olabilir) | node/11450096002 |
+| Kumsal (Güzelyalı Eğitim kuzeyi) | kumsal | Güzelyalı Eğitim | acik (yerleşime 200 m) | way/665674892 |
+| Kumsal (Güzelyalı Siteler kuzeyi) | kumsal | Güzelyalı Siteler | acik (yerleşime 628 m) | way/1305691029 |
+| Kumsal (Güzelyalı Yalı kuzeybatısı) | kumsal | Güzelyalı Yalı | acik (yerleşime 425 m) | way/1305691027 |
 | Kumsal (Güzelyalı Yalı kuzeydoğusu) | kumsal | Güzelyalı Yalı | acik (yerleşime 165 m) | way/1305691023 |
 | Kumsal (Kapaklı güneydoğusu) | kumsal | Kapaklı | acik (yerleşime 1044 m) | way/757494038 |
 | Kapaklı Deresi ağzı | dere ağzı | Kapaklı | acik (yerleşime 337 m) | way/684554355 |
-| Karacaali İskelesi | liman / balıkçı barınağı | Karacaali | belirsiz (OSM access=private ya da özel marina) | node/13872728204 |
+| Karacaali İskelesi | liman / balıkçı barınağı | Karacaali | acik (yerleşime 358 m) | node/13872728204 |
 | Kumla Deresi ağzı | dere ağzı | Kumla | acik (yerleşime 312 m) | way/1218508014 |
 | Dere ağzı (Kumsaz) | dere ağzı | Kumsaz | acik (yerleşime 255 m) | way/253063517 |
-| Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu | belirsiz (OSM access=private ya da özel marina) | way/1165497962 |
-| Kumsal (Tirilye kuzeybatısu) | kumsal | Tirilye | acik (yerleşime 155 m) | way/519554786 |
-| Tirilye Limanı | liman / balıkçı barınağı | Tirilye | belirsiz (OSM access=private ya da özel marina) | node/11865648199 |
-| Kumsal (İslamköy kuzeybatısu) | kumsal | İslamköy | belirsiz (yerleşimden uzak (> 1,5 km)) | way/479047534 |
-| Kumsal (İslamköy kuzeybatısu) 2 | kumsal | İslamköy | belirsiz (yerleşimden uzak (> 1,5 km)) | way/479047534 |
-| Kumsal (İslamköy kuzeybatısu) 3 | kumsal | İslamköy | belirsiz (yerleşimden uzak (> 1,5 km)) | way/479047535 |
+| Kumyaka kıyısı (konum tahmini) | bilinen yer (kullanıcı listesi) | Kumyaka | acik (kullanıcı listesi; konum yerleşime en yakın kıyı noktası, sahada düzeltin) |  |
+| Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu | belirsiz (marina: giriş kısıtlı olabilir) | way/1165497962 |
+| Narlı kıyısı (konum tahmini) | bilinen yer (kullanıcı listesi) | Narlı | acik (kullanıcı listesi; konum yerleşime en yakın kıyı noktası, sahada düzeltin) |  |
+| Kumsal (Tirilye kuzeybatısı) | kumsal | Tirilye | acik (yerleşime 155 m) | way/519554786 |
+| Tirilye Limanı | liman / balıkçı barınağı | Tirilye | belirsiz (marina: giriş kısıtlı olabilir) | node/11865648199 |
+| Ayı Burnu | kayalık kıyı | — | belirsiz (kayalık: yürüyüş yolu bilinmiyor) | node/11981818601 |
+| Kumsal (İslamköy kuzeybatısı) | kumsal | İslamköy | belirsiz (yerleşimden uzak (> 1,5 km)) | way/479047534 |
+| Kumsal (İslamköy kuzeybatısı) 2 | kumsal | İslamköy | belirsiz (yerleşimden uzak (> 1,5 km)) | way/479047534 |
+| Kumsal (İslamköy kuzeybatısı) 3 | kumsal | İslamköy | belirsiz (yerleşimden uzak (> 1,5 km)) | way/479047535 |
 
 ## Erişim yasak (ticari liman / sanayi)
 
@@ -92,13 +101,21 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Borusan Port | node/825452158 |
 | Borusan Port | way/588510511 |
 
+## Neden Karacaali ve Büyükkumla iskeleleri listede yoktu?
+
+İkisi de OpenStreetMap'te iskele *yolu* (`man_made=pier`) olarak değil, adı "… İskelesi" olan tek bir **nokta**
+(`leisure=marina`) olarak çizilmiş. Harita etiket katmanı adlı liman/marina noktalarını gösterdiği için haritada
+göründüler; mera listesi ise yalnız `man_made=pier|breakwater|groyne` **yollarından** üretiliyordu (uç noktası ve
+uzunluk için çizgi gerekir). D1 envanteri nokta ve alan nesnelerini de alır; ikisi artık aday.
+
 ## Bilinen yerler (kullanıcı listesi)
 
+- Eşkel: OSM'de yerleşim noktası yok
 - **Kurşunlu:** 0 mevcut mera, 1 aday (≤ 2,5 km). osm-way-1165497962 Kurşunlu Yat Limanı (liman / balıkçı barınağı)
 - **Gemlik:** 1 mevcut mera, 1 aday (≤ 2,5 km). osm-way-700323582 Karsak Çayı ağzı (dere ağzı)
 - **Karacaali:** 0 mevcut mera, 3 aday (≤ 2,5 km). osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı); osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı); osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)
 - **Büyükkumla:** 1 mevcut mera, 4 aday (≤ 2,5 km). osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı); osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı); osm-way-1218508014 Kumla Deresi ağzı (dere ağzı); osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)
-- **Narlı:** 0 mevcut mera, 0 aday (≤ 2,5 km). 
+- **Narlı:** 0 mevcut mera, 1 aday (≤ 2,5 km). known-narli Narlı kıyısı (konum tahmini) (bilinen yer (kullanıcı listesi))
 - **Mudanya:** 1 mevcut mera, 0 aday (≤ 2,5 km). 
-- **Kumyaka:** 1 mevcut mera, 1 aday (≤ 2,5 km). osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)
+- **Kumyaka:** 1 mevcut mera, 2 aday (≤ 2,5 km). known-kumyaka Kumyaka kıyısı (konum tahmini) (bilinen yer (kullanıcı listesi)); osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)
 - **Eşkel:** OSM'de yerleşim noktası yok.

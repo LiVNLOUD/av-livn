@@ -109,7 +109,9 @@
    29.03196,
    40.48081
   ],
-  "proposals": [],
+  "proposals": [
+   "known-narli Narlı kıyısı (konum tahmini) (bilinen yer (kullanıcı listesi))"
+  ],
   "existing": [],
   "osm_within_1km": []
  },
@@ -152,6 +154,7 @@
    40.38506
   ],
   "proposals": [
+   "known-kumyaka Kumyaka kıyısı (konum tahmini) (bilinen yer (kullanıcı listesi))",
    "osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)"
   ],
   "existing": [
@@ -163,8 +166,11 @@
   "place": null
  },
  "dropped": {
-  "near_existing": 8,
-  "near_other": 6,
+  "near_existing": 9,
+  "near_other": 7,
   "forbidden": 1
- }
+ },
+ "known_missing": [
+  "Eşkel: OSM'de yerleşim noktası yok"
+ ]
 }
