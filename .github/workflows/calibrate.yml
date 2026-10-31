@@ -1,0 +1,28 @@
+name: calibrate
+# F4 (docs/MODEL.md §8a): weekly GLM/GAM fit of catch sessions against the frozen model score.
+# Below 30 sessions the report says "yetersiz veri". The report (coefficients and n only) goes to
+# D1 meta.calibration_report and is shown on /admin/tahmin/; nothing personal is written to the repo.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 3 * * 1' # Monday 06:41 TRT
+permissions:
+  contents: read
+concurrency:
+  group: calibrate
+jobs:
+  calibrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e './pipeline[dev]'
+      - run: pytest pipeline/tests/test_calibrate.py -q
+      - name: Fit and store the report
+        run: python analysis/calibrate.py --d1 --write

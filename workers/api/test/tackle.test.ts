@@ -38,4 +38,13 @@ describe('tackle profiles (F0)', () => {
     expect(d.packed.tk[0]).toHaveLength(9);
     expect(typeof d.packed.tk[0]![0]).toBe('number');
   });
+  it('calibration status (F4): count, next threshold, last report', async () => {
+    expect((await app.request('/api/admin/calibration', {}, env)).status).toBe(401);
+    const a = await (await app.request('/api/admin/calibration', { headers: auth }, env)).json<{ sessions: number; next_threshold: number; report: unknown }>();
+    expect(a).toMatchObject({ sessions: 0, next_threshold: 30, report: null });
+    await env.DB.prepare("INSERT INTO meta (key, value) VALUES ('calibration_report', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind('{"status":"yetersiz veri","n":0}').run();
+    expect((await (await app.request('/api/admin/calibration', { headers: auth }, env)).json<{ report: { status: string } }>()).report.status).toBe('yetersiz veri');
+    await env.DB.prepare("UPDATE meta SET value = '{bad' WHERE key = 'calibration_report'").run();
+    expect((await (await app.request('/api/admin/calibration', { headers: auth }, env)).json<{ report: unknown }>()).report).toBeNull();
+  });
 });

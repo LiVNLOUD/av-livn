@@ -102,6 +102,18 @@ adminRoutes.put('/tackle', async (c) => {
   return c.json({ ok: true, profiles: v.value });
 });
 
+/** F4: calibration status: session count now and the last report of analysis/calibrate.py (coefficients, n). */
+adminRoutes.get('/calibration', async (c) => {
+  const [n, rep] = await Promise.all([
+    c.env.DB.prepare('SELECT COUNT(*) AS n FROM catch_session').first<{ n: number }>(),
+    c.env.DB.prepare("SELECT value FROM meta WHERE key = 'calibration_report'").first<{ value: string }>(),
+  ]);
+  const sessions = n?.n ?? 0;
+  let report: unknown = null;
+  try { report = rep ? JSON.parse(rep.value) : null; } catch { report = null; }
+  return c.json({ ok: true, sessions, min_sessions: 30, next_threshold: [30, 100, 300].find((t) => sessions < t) ?? null, report });
+});
+
 /** All spots with private fields (lamp state, notes) for /admin/ and /saha/. */
 adminRoutes.get('/spots', async (c) => {
   const { results } = await c.env.DB.prepare('SELECT * FROM spots ORDER BY name').all<SpotRow>();
