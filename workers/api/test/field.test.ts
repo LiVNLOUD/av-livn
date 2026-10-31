@@ -10,6 +10,7 @@ const post = (path: string, body: unknown) => app.request(path, { method: 'POST'
 const NOW = new Date('2026-11-07T10:00:00Z');
 
 beforeAll(async () => {
+  await env.DB.prepare("DELETE FROM meta WHERE key = 'rescore_mode'").run(); // test the immediate path; deferred is tested below
   await resetAndSeed();
   const now = new Date();
   await refreshWeather(env, now, omFetch(now));

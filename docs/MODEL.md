@@ -223,6 +223,13 @@ Her bileşen değeriyle birlikte bir **kaynak** döner (UI rozeti):
 | `Open-Meteo` | rüzgar, dalga, yağış, basınç (Copernicus yoksa su/akıntı) |
 | `astronomi` | güneş/ay konumu |
 
+## 6c. Saha düzenlemesinden sonra yeniden puanlama (C3)
+
+- Worker'da anında nokta puanı ölçüldü (Workers Observability, canlı): POST 42 ms, PATCH 24 ms, DELETE 27 ms CPU. Ücretsiz katmanın ~10 ms sınırını aştığı için `meta.rescore_mode = 'deferred'` (migration 0009).
+- Düzenleme Worker'da yalnız kaydedilir ve `pending_rescore`'a yazılır.
+- `score.yml` 15 dakikada bir (`:08`, `:38`, `:53`; saatlik `:23` aynen) bekleyen varsa Monte Carlo dahil tam v2 çalıştırır; yoksa hemen çıkar.
+- Form "Puan en geç 20 dakika içinde güncellenecek" der.
+
 ## 7. Duyarlılık analizi: v1 ve v2, 16 mera × 72 sa
 
 **Kurulum:**
