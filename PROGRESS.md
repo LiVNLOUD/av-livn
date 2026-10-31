@@ -153,5 +153,5 @@
   - Haritanın altında seçili meranın özeti ve kısa takım önerisi var. Harita lejantına "Ölçülmüş alan sınırı" eklendi.
   - Düzeltme: 1200–1919 px'te görünmeyen Harita/Isı haritası sekmeleri artık görünüyor.
 - Düzeltme: F0 takım kutusu yanlış fonksiyondan çağrılıyordu; canlıda gizli kalıyor ve saat değişince yenilenmiyordu. Artık her saat seçiminde çiziliyor.
-- CPU: 63 merada canlı ölçüm /api/hours p50 14 ms, /api/windows 15 ms, /api/spots p50 9 / max 31 ms çıktı (sınır ~10 ms). Score job artık bu üç varsayılan yanıtı her saat için hazırlayıp D1 `meta` (`pub:*`) satırına yazıyor; Worker metni parse etmeden döndürüyor. Yönetici değişikliği ve seed bu satırları siliyor (canlı hesaba düşer).
+- CPU: 63 merada canlı ölçüm /api/hours p50 14 ms, /api/windows 15 ms, /api/spots p50 9 / max 31 ms çıktı (sınır ~10 ms). Score job artık bu üç varsayılan yanıtı her saat için hazırlayıp D1 `meta` (`pub:*`) satırına yazıyor; Worker metni parse etmeden döndürüyor. Yönetici değişikliği ve seed bu satırları siliyor (canlı hesaba düşer). Sonra: isteklerin çoğu 0–2 ms; 5–14 ms'lik birkaç istek soğuk başlangıç.
 - **Açık:** Hal tablosu (tarim.ibb.istanbul) ve Kökçek tezinin tam metni oturumdan indirilemedi (bağlantı kesildi / 503).
