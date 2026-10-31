@@ -89,7 +89,30 @@
 - **C6:** `desk.yml` (aylık): OSM lamba (1 bulgu: Demirsubaşı seyir ışığı 37 m → p 0.6), Mapillary (token var, 16 merada ±50 m'de 0 görüntü), Sentinel-2 (12 sahne/mera; uçlar açık sudan ayırt edilemiyor, oran 0.97–1.10 → bulgu yok; ilk çalışmanın yanlış "koyu" sınıfı düzeltildi ve silindi). Literatür, ÇED, OpenSeaMap: meraya uygulanabilir değer bulunamadı (DESK-DATA.md). Önce/sonra: öğlen fark yok; 21:00'de Demirsubaşı 74.7 → 77.0, sıra #3 değişmedi.
 - **C5:** 390 px: `docs/screenshots/saha-*-390.png`, `gunluk-*-390.png` (form yerel D1 ile, giriş ekranı canlı).
 
-## v2 Bölüm D — (2026-10-31, sürüyor)
-- **D0:** gizlilik düzeltmesi canlı (public API yalnız puan/sıra/bant/genel bilgi; v1 kaldırıldı). Git geçmişi: kişisel saha/av verisi yok, secret yok; yalnız commit e-postaları (`akdagkn@gmail.com` 17, `akdagknmain@gmail.com` 1). Şifreli günlük yedek `backup.yml` (gpg AES256, `BACKUP_PASSPHRASE` secret'ı bekleniyor), geri yükleme testi yerelde geçti (BACKUP.md).
-- **D1:** envanter adayları `proposed` (puanlanmaz), harita gri katman + erişim yasak katmanı, `/admin/` onay/ret. Karacaali/Büyükkumla kök nedeni: OSM'de iskele yolu değil `leisure=marina` noktası.
-- **D2:** ana sayfa "Nereye, ne zaman?": 72 saatin en iyi pencereleri, gün/saat seçici, tür seçici.
+## v2 Bölüm D — (2026-10-31) ✅ uygulananlar canlıda; D3/D4/D7/D8 ve mevzuat yalnız tasarım
+- **D0:**
+  - Public API yalnız puan/sıra/bant/genel bilgi döndürüyor; v1 kaldırıldı.
+  - Git geçmişi: kişisel saha/av verisi yok, secret yok; yalnız commit e-postaları var (`akdagkn@gmail.com` 17, `akdagknmain@gmail.com` 1).
+  - Şifreli günlük yedek: `backup.yml` (gpg AES256, Actions artifact). Geri yükleme yerelde test edildi (BACKUP.md). **`BACKUP_PASSPHRASE` secret'ı bekleniyor** (ilk çalışma bu yüzden durdu).
+- **D1:**
+  - OSM envanteri → 41 aday (`proposed`, puanlanmaz): kumsal 24, liman/barınak 7, dere ağzı 6, kayalık 2, bilinen yer 2.
+  - Gri aday katmanı + erişim yasak katmanı; `/admin/` onay/ret; yeni tipler için statik tercih değerleri (kanıt C).
+  - Kök neden: Karacaali/Büyükkumla iskeleleri OSM'de iskele yolu değil, `leisure=marina` noktası. Artık ikisi de aday.
+  - Eşkel OSM'de yerleşim olarak yok; Mudanya balıkçı barınağı için etiketli nesne yok.
+  - İlk ada-göre aramada okulları liman sanma hatası düzeltildi.
+- **D2:** Ana sayfa "Nereye, ne zaman?": `/api/windows` ile 72 saatin en iyi pencereleri (≥ 65, en çok 12 sa, mera başına 2); gün/saat seçici (`/api/spots?at=`); tür seçici (yalnız istavrit aktif); kart `?t=` ile o saatte açılır.
+- **D5:** `/sahadayim/`:
+  - Yakındaki 3 mera; konum cihazda kalır.
+  - Büyük +1 düğmesi, uzun basışla tür, geri al, boy (13 cm uyarısı), mola.
+  - Kırmızı gece modu, Wake Lock, çevrimdışı kuyruk.
+  - Bitirirken açık "sıfır av"; yöntem değişince ayrı seans.
+  - Yerel uçtan uca test geçti.
+- **D6:** `/admin/tahmin/`: dondurulmuş puan ↔ adet/saat/kamış; puan aralığına göre verim (t aralığı) ve sıfır av oranı (Wilson), n her grafikte; n < 5'te "veri az"; aynı akşam sıra isabeti.
+- **D9 bildirim:**
+  - Kanallar: web push (VAPID) + ntfy; gönderen puanlama işi. Abonelik/ayar yalnız admin.
+  - Türler: 17:00 günlük özet, fırsat (≥ eşik, dar bant, tekrar yok), favori merada güvenlik; sessiz saatler.
+  - `/ayarlar/`, `notify-smoke.yml`, NOTIFICATIONS.md.
+  - Olay: D9 sonrası 3 saatlik puanlama başarısız oldu (`web-push` ESM paketinde dinamik `require`). `--external:web-push` ile düzeltildi.
+- **Tasarım:** TACKLE.md (iki takım profili, jighead/iğne/silikon kuralları, kart), SPECIES-ROADMAP.md, ABUNDANCE-MUCILAGE.md (D7, D8), REGULATION.md.
+  - Mevzuat: 6/2 Tebliğ md. 8/8 cezbetme amaçlı ışığı yasaklıyor. Altbilgide "lamba = mevcut aydınlatma" notu var.
+  - Çizelge 7 boyları okunamadı; 13 cm doğrulanacak.
