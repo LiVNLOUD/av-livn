@@ -40,7 +40,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --outfile=.score/job.mjs --log-level=warning
+      - run: node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/job.mjs --log-level=warning
       - name: Ranking without / with desk findings (dry run, same hour and weather)
         run: node .score/job.mjs --dry-run --compare-desk docs/audit/rank_desk_compare.json
       - name: Commit public outputs to main if changed
