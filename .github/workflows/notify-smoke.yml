@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: score
+  group: notify-smoke
   cancel-in-progress: false
 jobs:
   smoke:
