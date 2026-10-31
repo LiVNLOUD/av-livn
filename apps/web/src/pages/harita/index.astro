@@ -9,9 +9,10 @@ import Base from '../../layouts/Base.astro';
       <summary>Lejant</summary>
       <ol class="scale" id="scale"></ol>
       <p><span class="sw hatch"></span> Taralı alan: DTM enterpolasyonu (GEBCO dolgusu, yerinde ölçüm yok). Buradaki konturlar güvenilmez.</p>
+      <p><b>Ölçülmüş alan sınırı:</b> taralı alanın kenarı, EMODnet'in yerinde ölçüm bloğu ile GEBCO dolgusunun birleştiği yerdir. Burada görülen düz kenar ya da konturun aniden kırılması veri sınırıdır, gerçek bir şev değildir.</p>
       <p><span class="sw dot"></span> Meralar v2 puan rengiyle: <b class="g">≥ 65</b>, <b class="w">40–65</b>, <b class="b">&lt; 40</b>. Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir.</p>
       <p><label class="lt"><input type="checkbox" id="show-cand" checked /> <span class="sw cand"></span> Aday yerler (OSM envanteri, henüz puanlanmadı)</label></p>
-      <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Erişim yasak: ticari liman / sanayi</label></p>
+      <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Erişim yasak: ticari liman, sanayi, askeri alan veya işaretlenmiş yasak alan</label></p>
       <p>Çizgiler 2, 5, 10, 15, 20, 30, 50, 75, 100 m. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki derinliği göstermez.</p>
     </details>
   </section>

@@ -22,9 +22,17 @@ import Base from '../layouts/Base.astro';
     <section class="r-heat" aria-labelledby="t-heat">
       <div class="heat-head">
         <h2 id="t-heat">Mera × saat</h2>
-        <p class="fs-1 muted legend-line"><span class="ramp" aria-hidden="true"></span> düşük → yüksek puan · <span class="hatchsw" aria-hidden="true"></span> belirsizlik geniş · üst şerit: gece / alacakaranlık / gündüz</p>
+        <div class="heat-ctl">
+          <div class="seg-sm" role="radiogroup" aria-label="Isı haritası görünümü">
+            <button type="button" role="radio" aria-checked="true" data-mode="score">Puan</button>
+            <button type="button" role="radio" aria-checked="false" data-mode="diff">Meraya özgü fark</button>
+          </div>
+          <label class="toggle sm"><input type="checkbox" id="hm-unc" /> Belirsizliği göster</label>
+        </div>
       </div>
+      <p class="fs-1 muted legend-line" id="hm-legend"></p>
       <div class="heat" id="heat"><p class="muted fs-2">Yükleniyor…</p></div>
+      <div class="card heat-sum" id="heat-sum" hidden aria-live="polite"></div>
     </section>
 
     <section class="r-spots" aria-labelledby="t-spots">
@@ -84,7 +92,7 @@ import Base from '../layouts/Base.astro';
     .r-map { display: block; pointer-events: none; }
     .r-map > * { pointer-events: auto; }
     .app[data-tab='heat'] .r-map { z-index: 2; height: 56px; }
-    .tabs { display: flex; }
+    .tabs { display: flex !important; }
     .r-card:not([hidden]) { position: static; height: auto; width: 420px; border-left: 1px solid var(--swell); }
   }
   @media (min-width: 1920px) {
@@ -112,9 +120,23 @@ import Base from '../layouts/Base.astro';
   :global(.win .r) { grid-column: 1 / -1; font-size: var(--fs-2); line-height: var(--lh-2); color: var(--mist); }
   :global(.win .actions) { grid-column: 1 / -1; margin-top: var(--s2); }
   .heat-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2); margin-bottom: var(--s3); }
-  .legend-line { margin: 0; display: flex; align-items: center; gap: var(--s1); flex-wrap: wrap; }
-  .ramp { display: inline-block; width: 56px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(57 50 52), rgb(185 126 80), rgb(71 157 109)); }
-  .hatchsw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #0e1c27 0 1.5px, #5d9a76 1.5px 4px); }
+  .legend-line { margin: 0 0 var(--s2); display: flex; align-items: center; gap: var(--s1); flex-wrap: wrap; }
+  .heat-ctl { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+  .seg-sm { display: inline-flex; border: 1px solid var(--swell); border-radius: 999px; padding: 2px; }
+  .seg-sm button { border: 0; background: none; color: var(--mist); font: inherit; font-size: var(--fs-1); font-weight: 600; padding: 0 var(--s3); min-height: 32px; border-radius: 999px; cursor: pointer; }
+  .seg-sm button[aria-checked='true'] { background: var(--swell); color: var(--foam); }
+  .toggle.sm { min-height: 32px; font-size: var(--fs-1); color: var(--mist); }
+  .toggle.sm input { width: 16px; height: 16px; }
+  :global(.divramp) { display: inline-block; width: 64px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(86 160 204), rgb(27 46 59), rgb(245 168 60)); }
+  .heat-sum { margin-top: var(--s4); display: grid; gap: var(--s1); font-size: var(--fs-2); }
+  :global(.heat-sum h3) { font-size: var(--fs-3); margin: 0; display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
+  :global(.heat-sum .big) { font-size: var(--fs-5); font-weight: 760; line-height: 1; }
+  :global(.heat-sum p) { margin: 0; color: var(--mist); }
+  :global(.heat-sum .tk) { color: var(--foam); }
+  :global(.heat-sum .tk b) { color: var(--sodium); font-weight: 650; }
+  :global(.heatmap .hm-focus) { fill: none; stroke: var(--sodium); stroke-width: 1; opacity: 0.8; }
+  :global(.ramp) { display: inline-block; width: 56px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(57 50 52), rgb(185 126 80), rgb(71 157 109)); }
+  :global(.hatchsw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #0e1c27 0 1.5px, #5d9a76 1.5px 4px); }
   .heat { overflow-x: auto; }
   :global(.heatmap) { display: block; font-family: inherit; }
   :global(.heatmap text) { fill: var(--foam); font-size: var(--fs-1); }
@@ -154,7 +176,7 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2, swimRule } from '../scripts/format';
-  import { leadWithRank } from '@av-livn/scoring';
+  import { DEFAULT_PROFILES, leadWithRank, tackle, tackleShort, type TackleProfile } from '@av-livn/scoring';
   import { renderHeatmap, type HoursData, type HourSpot } from '../scripts/heatmap';
   import type { MapApi } from '../scripts/map';
 
@@ -183,6 +205,7 @@ import Base from '../layouts/Base.astro';
     try { localStorage.setItem(HIDE, box.checked ? '1' : '0'); } catch {}
     render();
     heat();
+    summary();
   });
 
   // ---------------------------------------------------------------- card drawer
@@ -291,17 +314,43 @@ import Base from '../layouts/Base.astro';
         all = b.spots;
         fetched = b.data_fetched_at;
         render();
+        heat();
+        summary();
       })
       .catch(() => { if (my === seq) $('meta').textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.'; });
   }
 
-  // ---------------------------------------------------------------- heat map
+  // ---------------------------------------------------------------- heat map (F5: view, uncertainty toggle, summary)
+  const HM = 'av-livn-heat';
+  let hmMode: 'score' | 'diff' = 'score';
+  let focus: string | null = null; // spot of the summary under the map; null = top spot at the selected hour
+  const unc = $<HTMLInputElement>('hm-unc');
+  try {
+    const st = JSON.parse(localStorage.getItem(HM) ?? '{}') as { mode?: 'score' | 'diff'; unc?: boolean };
+    if (st.mode === 'diff') hmMode = 'diff';
+    unc.checked = !!st.unc;
+  } catch {}
+  const saveHm = () => { try { localStorage.setItem(HM, JSON.stringify({ mode: hmMode, unc: unc.checked })); } catch {} };
+  document.querySelectorAll<HTMLButtonElement>('.seg-sm button').forEach((b) => {
+    b.setAttribute('aria-checked', String(b.dataset.mode === hmMode));
+    b.addEventListener('click', () => {
+      hmMode = b.dataset.mode as 'score' | 'diff';
+      document.querySelectorAll<HTMLButtonElement>('.seg-sm button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+      saveHm();
+      heat();
+    });
+  });
+  unc.addEventListener('change', () => { saveHm(); heat(); });
+
   function heat() {
     if (!hours) return;
     const el = $('heat');
     if (!el.clientWidth) return; // hidden tab; rendered when shown
-    renderHeatmap(el, hours, {
+    const st = renderHeatmap(el, hours, {
       selected: sel,
+      mode: hmMode,
+      showUncertainty: unc.checked,
+      focus: focusId(),
       hide: (s) => hidden(s),
       badges: (s: HourSpot) => {
         const a = s.access && s.access !== 'acik' ? `<tspan class="hm-b" dx="6">▲</tspan>` : '';
@@ -309,10 +358,66 @@ import Base from '../layouts/Base.astro';
         return a + l;
       },
       onCell: (id, col) => {
+        focus = id;
         if (col !== sel) setCol(col);
+        else { heat(); summary(); }
         openSpot(id, col);
       },
     });
+    const sky = 'üst şerit: gece / alacakaranlık / gündüz';
+    const band = st.meanBand === null ? '' : ` · ortalama bant genişliği ${Math.round(st.meanBand)} puan`;
+    const scale = hmMode === 'diff'
+      ? `<span class="divramp" aria-hidden="true"></span> saat ortalamasının altında ← → üstünde (±${st.diffMax} puanda doyar)`
+      : '<span class="ramp" aria-hidden="true"></span> düşük → yüksek puan';
+    const hatch = unc.checked && st.wideFrom !== null ? ` · <span class="hatchsw" aria-hidden="true"></span> bandı en geniş üçte bir (≥ ${Math.round(st.wideFrom)} puan)` : '';
+    $('hm-legend').innerHTML = `${scale}${hatch}${band} · ${sky}`;
+  }
+
+  /** Focused spot: the clicked one if still visible, else the best at the selected hour. */
+  function focusId(): string | null {
+    const vis = all.filter((s) => !hidden(s));
+    if (focus && vis.some((s) => s.id === focus)) return focus;
+    return [...vis].filter((s) => s.score.total !== null).sort((a, b) => (a.score.rank ?? 1e9) - (b.score.rank ?? 1e9))[0]?.id ?? null;
+  }
+
+  let profiles: TackleProfile[] = DEFAULT_PROFILES;
+  fetch('/api/tackle').then((r) => (r.ok ? r.json() : null)).then((b) => { if (b?.profiles?.length) profiles = b.profiles; }).catch(() => {});
+  type Detail = { from: number; packed: { tk?: (number | null)[][] } | null };
+  const details = new Map<string, Promise<Detail | null>>();
+  const detail = (id: string) => {
+    if (!details.has(id)) details.set(id, fetch(`/api/spots/${encodeURIComponent(id)}?model=v2`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    return details.get(id)!;
+  };
+  let sumSeq = 0;
+  /** F5: the empty area under the heat map holds the focused spot's summary and the short tackle line. */
+  async function summary() {
+    const box = $('heat-sum');
+    const id = focusId();
+    const s = all.find((x) => x.id === id);
+    if (!s) { box.hidden = true; return; }
+    const my = ++sumSeq;
+    const sc = s.score;
+    const at = atIso() ?? new Date().toISOString();
+    const legal = swimRule(s.kind, at);
+    const badges = [
+      s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '',
+      legal ? `<span class="badge legal">${legal}</span>` : '',
+      s.auto_added ? '<span class="badge assume">otomatik eklendi — sahada doğrulanmadı</span>' : '',
+    ].join('');
+    const band = sc.p10 !== null && sc.p90 !== null ? `bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : 'bant yok';
+    const head = `<h3><span class="big">${sc.total === null ? '–' : Math.round(sc.total)}</span> ${esc(s.name)}</h3>
+      <p>${sc.gated ? esc(sc.warnings[0] ?? 'güvenlik uyarısı') : `${sc.rank}. / ${all.length} · ${band}`} · ${at === atIso() ? `${fmtDay(at)} ${fmtTime(at)}` : 'şimdi'}</p>
+      ${sc.reason ? `<p>${esc(sc.reason)}</p>` : ''}${badges ? `<p>${badges}</p>` : ''}`;
+    box.innerHTML = `${head}<p class="tk" id="sum-tk">Takım: hesaplanıyor…</p><p><a class="link" href="/mera/?id=${encodeURIComponent(s.id)}">Mera kartı ve takım kutusu →</a></p>`;
+    box.hidden = false;
+    const d = await detail(s.id);
+    if (my !== sumSeq) return;
+    const v = d?.packed?.tk?.[d.from + sel];
+    const tkEl = document.getElementById('sum-tk');
+    if (!tkEl) return;
+    if (!v || sc.gated) { tkEl.textContent = sc.gated ? 'Takım: güvenlik uyarısı varken öneri yok.' : 'Takım: veri yok.'; return; }
+    const t = tackle({ depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null }, profiles);
+    tkEl.innerHTML = `Takım: <b>${esc(tackleShort(t))}</b> · yasal asgari boy 13 cm`;
   }
   fetch('/api/hours', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))

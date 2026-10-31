@@ -281,8 +281,8 @@ const anchor = (ref: string) => {
         if (!meta || !h) continue;
         const comps = meta.comps as Comp[];
         const vals = h[9] as (number | null)[];
-        const weighted = comps.map((c, i) => [c, vals[i]] as const).filter(([c]) => c[3] !== null);
-        if (weighted.some(([, v]) => v === null)) continue; // field value hidden: pick a spot whose parts are public
+        // static parts must be public (field values are hidden); a dynamic part without data is left out, as in the engine
+        if (comps.some((c, i) => c[2] === 'statik' && c[3] !== null && vals[i] === null)) continue;
         render(s.name, s.id, h, comps, vals);
         return;
       }
@@ -306,7 +306,7 @@ const anchor = (ref: string) => {
     const score = calibrate(raw);
     $('ex-steps').innerHTML = [
       `Statik parça: yapı ve tabanın ağırlıklı geometrik ortalaması = <b>${n(s, 3)}</b>`,
-      `Dinamik parça: sekiz koşulun ağırlıklı geometrik ortalaması = <b>${n(dyn, 3)}</b> (ışık değeri derinlik ve lamba kollarını içerir)`,
+      `Dinamik parça: ${pick('dinamik').length} koşulun ağırlıklı geometrik ortalaması = <b>${n(dyn, 3)}</b> (ışık değeri derinlik ve lamba kollarını içerir${comps.some((c, i) => c[2] === 'dinamik' && c[3] !== null && vals[i] === null) ? '; verisi olmayan koşul hesaba katılmadı' : ''})`,
       `Ham sonuç: ${n(s, 3)} × ${n(dyn, 3)} = <b>${n(raw, 3)}</b>`,
       `Ölçek (en kötü senaryo 8, en iyi 92): <b>${Math.round(score)}</b>; yayımlanan ${Math.round(total)}`,
     ].map((x) => `<li>${x}</li>`).join('');

@@ -1,6 +1,8 @@
 // E2: spot × hour heat map — rows = spots (sorted by the selected hour), columns = the next 72 h.
-// Cell colour = score on a continuous version of the band palette; a wide 10–90 % band shows as a hatched,
-// faded cell. A sky strip above the grid shows night and twilight; day separators and a "now" line.
+// Cell colour = score on a continuous version of the band palette, or (F5 "meraya özgü fark") the deviation from
+// the hour's mean over the visible spots on a diverging sea ↔ sodium scale. Uncertainty hatching is off by default;
+// when on, only cells in the widest third of band widths (relative threshold, 67th percentile) are hatched.
+// A sky strip above the grid shows night and twilight; day separators and a "now" line.
 import { skyAt } from '@av-livn/scoring';
 import { esc } from './format';
 
@@ -15,9 +17,42 @@ export interface HeatOpts {
   badges?: (s: HourSpot) => string; // extra HTML in the row label (access, legal)
   onCell: (id: string, col: number) => void;
   onColumn?: (col: number) => void;
+  mode?: 'score' | 'diff';
+  showUncertainty?: boolean;
+  /** Row drawn with an outline (summary below the map). */
+  focus?: string | null;
+}
+export interface HeatStats { meanBand: number | null; wideFrom: number | null; diffMax: number }
+
+/** Value at quantile q (0..1) of a sorted copy, linear interpolation. */
+export function quantile(xs: number[], q: number): number | null {
+  if (!xs.length) return null;
+  const a = [...xs].sort((x, y) => x - y);
+  const i = (a.length - 1) * q;
+  const lo = Math.floor(i);
+  return a[lo]! + (a[Math.min(a.length - 1, lo + 1)]! - a[lo]!) * (i - lo);
 }
 
-const WIDE = 30; // same width at which the list leads with rank
+/** Per-column mean over the given rows (null / gated cells skipped). */
+export function columnMeans(rows: HourSpot[], hours: number): (number | null)[] {
+  return Array.from({ length: hours }, (_, c) => {
+    const v = rows.filter((s) => s.t[c] !== null && !s.g.includes(c)).map((s) => s.t[c]!);
+    return v.length ? v.reduce((a, x) => a + x, 0) / v.length : null;
+  });
+}
+
+const DIFF_MAX = 20; // points at which the diverging scale saturates
+const DIV_NEG: [number, number, number] = [86, 160, 204]; // sea blue
+const DIV_POS: [number, number, number] = [245, 168, 60]; // sodium
+const DIV_MID: [number, number, number] = [27, 46, 59]; // swell
+/** Diverging colour for score − hour mean. */
+export function diffColor(d: number): string {
+  const f = Math.max(-1, Math.min(1, d / DIFF_MAX));
+  const end = f < 0 ? DIV_NEG : DIV_POS;
+  const k = Math.abs(f);
+  const m = DIV_MID.map((ch, i) => Math.round(ch + (end[i]! - ch) * k));
+  return `rgb(${m[0]} ${m[1]} ${m[2]})`;
+}
 const STOPS: [number, [number, number, number]][] = [[15, [255, 122, 107]], [52, [240, 163, 94]], [82, [95, 208, 138]]];
 const SEA: [number, number, number] = [14, 28, 39];
 
@@ -40,9 +75,15 @@ export function scoreColor(v: number): string {
 const TZ = 3;
 const DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
 
-export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): void {
+export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatStats {
   const from = Math.floor(Date.parse(d.from) / 3_600_000);
   const rows = d.spots.filter((s) => !o.hide?.(s)).sort((a, b) => (b.t[o.selected] ?? -1) - (a.t[o.selected] ?? -1) || a.name.localeCompare(b.name, 'tr'));
+  const diff = o.mode === 'diff';
+  const means = diff ? columnMeans(rows, d.hours) : [];
+  const widths: number[] = [];
+  for (const s of rows) for (let c = 0; c < d.hours; c++) if (s.t[c] !== null && !s.g.includes(c) && s.w[c] !== null) widths.push(s.w[c]!);
+  const meanBand = widths.length ? widths.reduce((a, x) => a + x, 0) / widths.length : null;
+  const wideFrom = quantile(widths, 2 / 3);
   const narrow = el.clientWidth < 600;
   const L = narrow ? 132 : 220;
   const cw = Math.max(narrow ? 9 : 6, Math.floor((el.clientWidth - L - 8) / d.hours));
@@ -52,7 +93,7 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): void 
   const H = top + rows.length * rh + 4;
   const x = (c: number) => L + c * cw;
   const parts: string[] = [];
-  parts.push(`<defs><pattern id="hm-wide" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.5" height="4" fill="#0e1c27" opacity="0.7"/></pattern></defs>`);
+  parts.push(`<defs><pattern id="hm-wide" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.2" height="4" fill="#0e1c27" opacity="0.5"/></pattern></defs>`);
   // sky strip: night (sun < −6°) dark, twilight (−6…0°) mid, day light
   for (let c = 0; c < d.hours; c++) {
     const alt = skyAt(new Date((from + c + 0.5) * 3_600_000), 40.42, 28.98).sunAlt;
@@ -62,7 +103,7 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): void 
   // day separators and labels (local midnight), 6-hour ticks
   for (let c = 0; c <= d.hours; c++) {
     const lh = (from + c + TZ) % 24;
-    if (lh === 0 || c === 0) {
+    if (lh === 0 || (c === 0 && (24 - lh) % 24 >= 4)) {
       const day = new Date((from + c + TZ) * 3_600_000);
       if (c < d.hours - 2) parts.push(`<text class="hm-day" x="${x(c) + 3}" y="13">${DAYS[day.getUTCDay()]} ${day.getUTCDate()}</text>`);
       if (c > 0) parts.push(`<line class="hm-sep" x1="${x(c)}" x2="${x(c)}" y1="2" y2="${H}"/>`);
@@ -70,13 +111,16 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): void 
   }
   rows.forEach((s, r) => {
     const y = top + r * rh;
+    if (s.id === o.focus) parts.push(`<rect class="hm-focus" x="0.5" y="${y + 0.5}" width="${W - 1}" height="${rh - 1}" pointer-events="none"/>`);
     parts.push(`<a href="/mera/?id=${encodeURIComponent(s.id)}" class="hm-name" data-id="${esc(s.id)}"><text x="0" y="${y + rh / 2 + 4}">${esc(s.name.length > (narrow ? 17 : 28) ? s.name.slice(0, narrow ? 16 : 27) + '…' : s.name)}<title>${esc(s.name)}</title></text></a>`);
     for (let c = 0; c < d.hours; c++) {
       const v = s.t[c];
       const gated = s.g.includes(c);
-      const fill = v === null ? '#132632' : gated ? '#3a1c1f' : scoreColor(v);
-      const wide = (s.w[c] ?? 0) > WIDE;
-      parts.push(`<rect class="hm-cell" data-id="${esc(s.id)}" data-c="${c}" x="${x(c) + 0.5}" y="${y + 1}" width="${cw - 1}" height="${rh - 2}" fill="${fill}"${wide ? ' opacity="0.72"' : ''}><title>${esc(s.name)} · ${v === null ? 'puan yok' : gated ? 'güvenlik uyarısı' : `${v}${wide ? ' (belirsizlik geniş)' : ''}`}</title></rect>`);
+      const dv = diff && v !== null && means[c] !== null ? v - means[c]! : null;
+      const fill = v === null ? '#132632' : gated ? '#3a1c1f' : dv !== null ? diffColor(dv) : scoreColor(v);
+      const wide = !!o.showUncertainty && wideFrom !== null && s.w[c] !== null && s.w[c]! >= wideFrom && s.w[c]! > 0;
+      const label = v === null ? 'puan yok' : gated ? 'güvenlik uyarısı' : dv !== null ? `${v} (saat ortalamasından ${dv >= 0 ? '+' : '−'}${Math.abs(Math.round(dv))})` : String(v);
+      parts.push(`<rect class="hm-cell" data-id="${esc(s.id)}" data-c="${c}" x="${x(c) + 0.5}" y="${y + 1}" width="${cw - 1}" height="${rh - 2}" fill="${fill}"><title>${esc(s.name)} · ${label}${wide ? ' · belirsizlik geniş' : ''}</title></rect>`);
       if (wide && v !== null && !gated) parts.push(`<rect x="${x(c) + 0.5}" y="${y + 1}" width="${cw - 1}" height="${rh - 2}" fill="url(#hm-wide)" pointer-events="none"/>`);
     }
   });
@@ -102,4 +146,5 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): void 
         t.insertAdjacentHTML('beforeend', b);
       }
     });
+  return { meanBand, wideFrom, diffMax: DIFF_MAX };
 }
