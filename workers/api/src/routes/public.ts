@@ -3,6 +3,7 @@ import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
 import { ACTIVE, ACTIVE_COUNT_SQL, publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
+import { bestWindows } from '../lib/windows';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
@@ -15,10 +16,18 @@ const NO_CACHE = { 'cache-control': 'no-cache' };
 // values and the catch log are served by /api/admin/* (ADMIN_TOKEN). v1 scores are no longer served publicly.
 publicRoutes.get('/spots', (c) => (c.req.query('species') && c.req.query('species') !== 'istavrit' ? c.json({ ok: false, error: 'species_not_ready' }, 400) : listV2(c)));
 publicRoutes.get('/spots/:id', (c) => detailV2(c));
+publicRoutes.get('/windows', (c) => windowsV2(c));
 
 type Ctx = Context<{ Bindings: Env }>;
 
-/** v2 list: expected score, 10–90 % band and rank (among scored spots) at the current hour. */
+/** Requested hour (?at=ISO) clamped to [now, now + 71 h]; default now. */
+function hourOf(c: Ctx): number {
+  const now = Math.floor(Date.now() / HOUR);
+  const t = Date.parse(c.req.query('at') ?? '');
+  return Number.isNaN(t) ? now : Math.min(Math.max(Math.floor(t / HOUR), now), now + 71);
+}
+
+/** v2 list: expected score, 10–90 % band and rank (among scored spots) at the current or requested hour. */
 async function listV2(c: Ctx) {
   const [rows, fetched] = await c.env.DB.batch([
     c.env.DB.prepare(
@@ -27,7 +36,7 @@ async function listV2(c: Ctx) {
     ),
     c.env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
   ]);
-  const nowHour = Math.floor(Date.now() / HOUR);
+  const nowHour = hourOf(c);
   type Row = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null };
   const all = rows!.results as Row[];
   const spots = all.map((r) => {
@@ -43,6 +52,20 @@ async function listV2(c: Ctx) {
   const at = (fetched!.results[0] as { at: string | null } | undefined)?.at ?? null;
   const version = all.find((r) => r.model_version)?.model_version ?? null;
   return c.json({ ok: true, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: at, count: spots.length, spots }, 200, NO_CACHE);
+}
+
+/** Best windows of the next 72 h (D2): spot, time range, peak score/rank/band and the main reason at the peak. */
+async function windowsV2(c: Ctx) {
+  const rows = await c.env.DB.prepare(`SELECT s.id, s.name, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.${ACTIVE}`).all<{ id: string; name: string; start_hour: number; list_json: string }>();
+  const from = Math.floor(Date.now() / HOUR);
+  const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
+  const { threshold, windows } = bestWindows(rows.results.map((r) => ({ id: r.id, name: r.name, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] })), from, hours);
+  const iso = (h: number) => new Date(h * HOUR).toISOString();
+  return c.json(
+    { ok: true, from: iso(from), hours, threshold, windows: windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) },
+    200,
+    NO_CACHE,
+  );
 }
 
 /** v2 detail: spot, field summary and the packed v2 hours (spliced raw, as for v1). */

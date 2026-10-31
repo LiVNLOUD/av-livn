@@ -347,7 +347,10 @@ import Base from '../../layouts/Base.astro';
     }
     $('note').textContent = notes.join(' ');
     chart();
-    select(0);
+    // ?t=<ISO hour> (best windows, notifications): open the card at that hour if it is in range.
+    const t = Date.parse(new URLSearchParams(location.search).get('t') ?? '');
+    const ti = Number.isNaN(t) ? -1 : H.findIndex((h) => Math.floor(Date.parse(h[0]) / 3_600_000) === Math.floor(t / 3_600_000));
+    select(ti >= 0 ? ti : 0);
     profileChart();
     $('spot').setAttribute('aria-busy', 'false');
   }

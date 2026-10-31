@@ -1,9 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="av.livn — Gemlik–Mudanya mera puanları">
+<Base title="av.livn — Nereye, ne zaman?">
   <section class="wrap intro">
-    <h1>Bu gece nereye?</h1>
+    <h1>Nereye, ne zaman?</h1>
+    <div class="species" role="radiogroup" aria-label="Tür">
+      <button type="button" role="radio" aria-checked="true" class="sp on">İstavrit</button>
+      <button type="button" role="radio" aria-checked="false" class="sp" disabled>Lüfer <small>yakında</small></button>
+      <button type="button" role="radio" aria-checked="false" class="sp" disabled>Kolyoz <small>yakında</small></button>
+      <button type="button" role="radio" aria-checked="false" class="sp" disabled>Mırmır <small>yakında</small></button>
+    </div>
+
+    <h2 class="sec">En iyi pencereler <span class="muted">önümüzdeki 72 saat</span></h2>
+    <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
+    <p class="muted fine" id="win-note"></p>
+
+    <h2 class="sec">Meralar</h2>
+    <div class="when" role="group" aria-label="Saat seçimi">
+      <button type="button" id="now" class="chip on">Şimdi</button>
+      <select id="day" aria-label="Gün"></select>
+      <select id="hour" aria-label="Saat"></select>
+    </div>
     <p class="muted" id="meta">Meralar yükleniyor…</p>
     <label class="toggle"><input type="checkbox" id="hide-access" /> Erişimi belirsiz/kısıtlı olanları gizle</label>
   </section>
@@ -17,6 +34,27 @@ import Base from '../layouts/Base.astro';
   .intro { padding-top: 18px; padding-bottom: 10px; }
   h1 { margin: 0; font-size: clamp(2rem, 9vw, 2.9rem); line-height: 1.02; font-weight: 750; font-stretch: 78%; letter-spacing: -0.02em; }
   .intro p { margin: 8px 0 0; font-size: 0.92rem; }
+  .sec { margin: 22px 0 8px; font-size: 1.02rem; font-weight: 680; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .sec .muted { font-weight: 450; font-size: 0.84rem; }
+  .species { display: flex; gap: 8px; overflow-x: auto; margin-top: 14px; padding-bottom: 2px; }
+  .sp { flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font: inherit; font-size: 0.9rem; }
+  .sp.on { background: var(--sodium); border-color: var(--sodium); color: #1a1205; font-weight: 700; }
+  .sp:disabled { opacity: 0.55; }
+  .sp small { font-size: 0.72rem; margin-left: 4px; }
+  .windows { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  :global(.win) { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 10px 12px; border: 1px solid var(--swell); border-radius: 12px; text-decoration: none; }
+  :global(.win .t) { font-weight: 720; font-size: 0.98rem; }
+  :global(.win .n) { grid-column: 1; font-size: 0.92rem; }
+  :global(.win .s) { grid-row: 1 / span 2; grid-column: 2; align-self: center; text-align: right; font-size: 1.4rem; font-weight: 760; font-variant-numeric: tabular-nums; }
+  :global(.win .s small) { display: block; font-size: 0.72rem; font-weight: 500; color: var(--mist); }
+  :global(.win .r) { grid-column: 1 / -1; font-size: 0.8rem; color: var(--mist); }
+  :global(.win .act) { grid-column: 1 / -1; display: flex; gap: 14px; font-size: 0.82rem; }
+  :global(.win .act button) { background: none; border: 0; padding: 6px 0; color: var(--sodium); font: inherit; font-weight: 650; cursor: pointer; min-height: 36px; }
+  .fine { font-size: 0.8rem; }
+  .when { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .when select { min-height: 44px; flex: 1 1 120px; }
+  .chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--foam); font: inherit; font-weight: 650; }
+  .chip.on { background: var(--foam); color: #0e1c27; border-color: var(--foam); }
   .spots { list-style: none; margin: 8px 0 0; padding: 0; }
   :global(.spot) {
     display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: center;
@@ -29,13 +67,13 @@ import Base from '../layouts/Base.astro';
   :global(.spot .rk) { color: var(--foam); font-weight: 700; }
   :global(.spot .reason) { margin: 3px 0 0; font-size: 0.8rem; color: var(--mist); }
   :global(.badge) { display: inline-block; vertical-align: 2px; margin-left: 6px; font-size: 0.68rem; font-weight: 650; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--warn); color: var(--warn); }
-  .toggle { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 0.9rem; color: var(--mist); min-height: 44px; }
+  .toggle { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 0.9rem; color: var(--mist); min-height: 44px; }
   .toggle input { width: 20px; height: 20px; }
   .empty { padding: 24px 0; }
 </style>
 
 <script>
-  import { esc, fmtAgo, KIND_TR, lampV2 } from '../scripts/format';
+  import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2 } from '../scripts/format';
   import { leadWithRank } from '@av-livn/scoring';
 
   type Spot = {
@@ -43,29 +81,78 @@ import Base from '../layouts/Base.astro';
     access: string | null;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
+  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; reason: string | null };
 
-  const list = document.getElementById('spots')!;
-  const meta = document.getElementById('meta')!;
-  const empty = document.getElementById('empty')!;
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const list = $('spots');
+  const meta = $('meta');
+  const empty = $('empty');
+  const HOUR = 3_600_000;
+  const TZ_OFF = 3; // Europe/Istanbul is UTC+3 all year (no DST since 2016)
 
   const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
   const HIDE = 'av-livn-hide-access';
   let all: Spot[] = [];
   let fetched: string | null = null;
-  const box = document.getElementById('hide-access') as HTMLInputElement;
+  let at: string | null = null; // null = now
+  const box = $<HTMLInputElement>('hide-access');
   try { box.checked = localStorage.getItem(HIDE) === '1'; } catch {}
   box.addEventListener('change', () => {
     try { localStorage.setItem(HIDE, box.checked ? '1' : '0'); } catch {}
-    render(all, fetched);
+    render();
   });
 
-  function render(source: Spot[], fetchedAt: string | null) {
+  // ---------------------------------------------------------------- hour picker (Istanbul local time)
+  const nowHour = Math.floor(Date.now() / HOUR);
+  const local = (h: number) => new Date((h + TZ_OFF) * HOUR); // UTC fields = Istanbul wall clock
+  const day = $<HTMLSelectElement>('day');
+  const hourSel = $<HTMLSelectElement>('hour');
+  const days = [0, 1, 2, 3].map((k) => {
+    const d = local(nowHour + 24 * k);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / HOUR - TZ_OFF; // epoch hour of local midnight
+  }).filter((m, i) => i < 3 || m < nowHour + 72);
+  day.innerHTML = days.map((m, i) => `<option value="${m}">${i === 0 ? 'Bugün' : i === 1 ? 'Yarın' : fmtDay(new Date((m + 12) * HOUR).toISOString())}</option>`).join('');
+  function fillHours() {
+    const m = Number(day.value);
+    const opts = [];
+    for (let h = 0; h < 24; h++) {
+      const e = m + h;
+      if (e < nowHour || e > nowHour + 71) continue;
+      opts.push(`<option value="${e}">${String(h).padStart(2, '0')}:00</option>`);
+    }
+    hourSel.innerHTML = opts.join('');
+  }
+  function setNow() {
+    at = null;
+    $('now').classList.add('on');
+    day.value = String(days[0]);
+    fillHours();
+    hourSel.value = String(nowHour);
+    load();
+  }
+  function setHour(h: number) {
+    const m = [...days].reverse().find((d) => d <= h) ?? days[0]!;
+    day.value = String(m);
+    fillHours();
+    hourSel.value = String(h);
+    at = h === nowHour ? null : new Date(h * HOUR).toISOString();
+    $('now').classList.toggle('on', at === null);
+    load();
+  }
+  $('now').addEventListener('click', setNow);
+  day.addEventListener('change', () => { fillHours(); setHour(Number(hourSel.value)); });
+  hourSel.addEventListener('change', () => setHour(Number(hourSel.value)));
+
+  // ---------------------------------------------------------------- list
+  function render() {
     // Access does not change the score; the filter only hides spots from this list.
-    const spots = box.checked ? source.filter((s) => !s.access || s.access === 'acik') : source;
-    meta.textContent = `${spots.length}${spots.length !== source.length ? ` / ${source.length}` : ''} mera, bu saatteki sıraya göre. ${fmtAgo(fetchedAt)}. Puan v2 (HSI); bant geniş olduğunda sıra puandan daha anlamlıdır.`;
+    const spots = box.checked ? all.filter((s) => !s.access || s.access === 'acik') : all;
+    const when = at ? `${fmtDay(at)} ${fmtTime(at)} için sıra` : 'şu anki sıra';
+    meta.textContent = `${spots.length}${spots.length !== all.length ? ` / ${all.length}` : ''} mera, ${when}. ${fmtAgo(fetched)}. Bant geniş olduğunda sıra puandan daha anlamlıdır.`;
+    empty.hidden = spots.length > 0;
     if (spots.length === 0) {
-      empty.hidden = false;
-      empty.textContent = 'Henüz mera yok. Aday meralar OpenStreetMap verisinden ayda bir eklenir.';
+      empty.textContent = all.length ? 'Filtreye uyan mera yok.' : 'Henüz mera yok.';
+      list.innerHTML = '';
       return;
     }
     list.innerHTML = spots
@@ -77,10 +164,11 @@ import Base from '../layouts/Base.astro';
           ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
           : sc.total === null
             ? '<p class="why muted">Puan henüz hesaplanmadı</p>'
-            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${source.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · lamba bilinmiyor'}</p>`;
+            : `<p class="why muted"><b class="rk">${sc.rank}.</b> / ${all.length}${band ? ` · ${band}` : ''}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · lamba bilinmiyor'}</p>`;
         const badge = s.access && ACCESS_BADGE[s.access] ? ` <span class="badge">${ACCESS_BADGE[s.access]}</span>` : '';
         const reason = sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : '';
-        return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}">
+        const href = `/mera/?id=${encodeURIComponent(s.id)}${at ? `&t=${encodeURIComponent(at)}` : ''}`;
+        return `<li><a class="spot" href="${href}">
           <span class="lamp" data-total="${s.score.total ?? ''}" data-gated="${s.score.gated}"></span>
           <span><h2>${esc(s.name)}${badge}</h2><p class="sub">${esc(sub)}</p>${why}${reason}</span></a></li>`;
       })
@@ -90,14 +178,55 @@ import Base from '../layouts/Base.astro';
     );
   }
 
-  fetch('/api/spots?model=v2', { cache: 'no-cache' })
+  let seq = 0;
+  function load() {
+    const my = ++seq;
+    meta.textContent = 'Meralar yükleniyor…';
+    fetch(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
+        if (my !== seq) return;
+        all = b.spots;
+        fetched = b.data_fetched_at;
+        render();
+      })
+      .catch(() => { if (my === seq) meta.textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.'; });
+  }
+
+  // ---------------------------------------------------------------- best windows
+  fetch('/api/windows', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-    .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
-      all = b.spots;
-      fetched = b.data_fetched_at;
-      render(all, fetched);
+    .then((b: { windows: Win[]; threshold: number }) => {
+      const ol = $('windows');
+      if (!b.windows.length) {
+        ol.innerHTML = '<li class="muted">72 saat içinde öne çıkan pencere yok.</li>';
+        return;
+      }
+      ol.innerHTML = b.windows
+        .map((w, i) => {
+          const sameDay = fmtDay(w.start) === fmtDay(new Date(Date.parse(w.end) - 1).toISOString());
+          const range = `${fmtDay(w.start)} ${fmtTime(w.start)}–${sameDay ? '' : `${fmtDay(w.end)} `}${fmtTime(w.end)}`;
+          const band = w.p10 !== null && w.p90 !== null ? ` · bant ${Math.round(w.p10)}–${Math.round(w.p90)}` : '';
+          return `<li><div class="win">
+            <span class="t">${esc(range)}</span>
+            <span class="s">${Math.round(w.total)}<small>${w.rank}. sıra</small></span>
+            <span class="n">${esc(w.name)}</span>
+            ${w.reason ? `<span class="r">En iyi saat ${fmtTime(w.peak)}${band}. ${esc(w.reason)}</span>` : ''}
+            <span class="act"><a href="/mera/?id=${encodeURIComponent(w.spot_id)}&t=${encodeURIComponent(w.peak)}">Merayı aç</a><button type="button" data-h="${Math.floor(Date.parse(w.peak) / HOUR)}" data-i="${i}">Listeyi bu saate göre sırala</button></span>
+          </div></li>`;
+        })
+        .join('');
+      ol.querySelectorAll<HTMLButtonElement>('button[data-h]').forEach((btn) =>
+        btn.addEventListener('click', () => {
+          setHour(Number(btn.dataset.h));
+          $('day').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }),
+      );
+      $('win-note').textContent = b.threshold < 65
+        ? `72 saatte 65 puanı geçen yeterli saat yok; en yüksek %15'lik dilim (≥ ${Math.round(b.threshold)}) gösteriliyor.`
+        : 'Pencere: puanın 65 ve üstünde kaldığı kesintisiz saatler; güvenlik uyarısı olan saatler hariç.';
     })
-    .catch(() => {
-      meta.textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.';
-    });
+    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; });
+
+  setNow();
 </script>
