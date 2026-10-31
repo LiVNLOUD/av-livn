@@ -39,12 +39,16 @@ jobs:
       - name: Build candidate spots with depth features
         # Tip from eroded OSM land, 16-direction fetch, EUSeaMap substrate (land file: analysis/audit/land_polygons.sh)
         run: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geojson --check-marine --dtm data/bathy/dtm.nc --land data/osm/land_marmara.geojson --habitat
+      - name: D1 inventory — wider OSM query (piers, quays, harbours, beaches, rocky shores, river mouths)
+        run: python -m av_pipeline.spots.inventory fetch data/osm/inventory_raw.json
+      - name: D1 inventory — proposals (not scored until approved), forbidden ports, report
+        run: python -m av_pipeline.spots.inventory build data/osm/inventory_raw.json data/spots.geojson --dtm data/bathy/dtm.nc --land data/osm/land_marmara.geojson --habitat
       - name: Commit to main if changed
         id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles apps/web/public/tiles/labels.geojson
+          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles apps/web/public/tiles/labels.geojson apps/web/public/tiles/candidates.geojson apps/web/public/tiles/forbidden.geojson docs/spots-candidates.md docs/audit/inventory.json
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else

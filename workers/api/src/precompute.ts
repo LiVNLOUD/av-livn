@@ -84,4 +84,4 @@ export function scoreRecords(rows: SpotRow[], snaps: SnapMap, now: Date): ScoreR
 export const UPSERT_SCORE_SQL = `INSERT INTO spot_scores (spot_id, species, computed_at, start_hour, list_json, detail_json) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
 ON CONFLICT(spot_id, species) DO UPDATE SET computed_at = excluded.computed_at, start_hour = excluded.start_hour, list_json = excluded.list_json, detail_json = excluded.detail_json`;
 
-export const DELETE_STALE_SCORES_SQL = `DELETE FROM spot_scores WHERE spot_id NOT IN (SELECT id FROM spots WHERE status != 'rejected')`;
+export const DELETE_STALE_SCORES_SQL = `DELETE FROM spot_scores WHERE spot_id NOT IN (SELECT id FROM spots WHERE status NOT IN ('rejected', 'proposed'))`;

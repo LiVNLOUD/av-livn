@@ -146,7 +146,7 @@ class D1:
 
 
 def spots_from_d1(d1: D1) -> list[dict]:
-    return d1.query("SELECT id, lat, lon FROM spots WHERE status != 'rejected' ORDER BY id")
+    return d1.query("SELECT id, lat, lon FROM spots WHERE status NOT IN ('rejected', 'proposed') ORDER BY id")
 
 
 def extent(spots: list[dict]) -> tuple[float, float, float, float]:

@@ -1,7 +1,7 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  DEFAULTS, explain, fieldDepths, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, weatherAt,
+  DEFAULTS, explain, fieldDepths, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt,
   type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
@@ -138,7 +138,7 @@ export function spotV2(row: SpotRow, field?: FieldRecord): SpotV2 & { lat: numbe
   return {
     lat: row.lat,
     lon: row.lon,
-    kind: (['pier', 'breakwater', 'groyne'].includes(row.kind) ? row.kind : 'manual') as StructureKind,
+    kind: (['pier', 'breakwater', 'groyne', ...SHORE_KINDS].includes(row.kind) ? row.kind : 'manual') as StructureKind,
     ferry: row.access === 'kisitli_feribot',
     lengthM: row.length_m,
     // profile: 25 m steps from the tip; DTM cells near shore are all interpolated (docs/DATA-AUDIT.md §1).

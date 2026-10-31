@@ -50,7 +50,7 @@ async function detailV2(c: Ctx) {
   const id = c.req.param('id')!;
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
   const [spotRes, obsRes, depthRes, countRes] = await c.env.DB.batch([
-    c.env.DB.prepare('SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.id = ?1').bind(id),
+    c.env.DB.prepare("SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.id = ?1 AND s.status != 'proposed'").bind(id),
     c.env.DB.prepare('SELECT * FROM field_obs WHERE spot_id = ?1 ORDER BY observed_at').bind(id),
     c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
     c.env.DB.prepare(ACTIVE_COUNT_SQL),

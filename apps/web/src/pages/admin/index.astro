@@ -12,6 +12,11 @@ import Base from '../../layouts/Base.astro';
 
     <section id="panel" hidden>
       <p><a href="/saha/" class="go">Saha formu</a> · <a href="/gunluk/" class="go">Av günlüğü</a> · <button type="button" id="logout" class="linkish">Çıkış (anahtarı bu cihazdan sil)</button></p>
+      <h2>Adaylar <span class="muted" id="cand-n"></span></h2>
+      <p class="muted small">OpenStreetMap envanterinden önerilen yerler (docs/spots-candidates.md). Onaylanan aday bir sonraki saatlik puanlamada listeye girer; reddedilen haritadan kalkar.</p>
+      <label class="toggle"><input type="text" id="cand-filter" placeholder="Ara: yerleşim, tip, ad" /></label>
+      <ol class="cands" id="cands"></ol>
+
       <h2>Mevcut meralar</h2>
       <label>Düzenlenecek mera<select id="pick"></select></label>
       <form id="edit" class="stack">
@@ -20,7 +25,7 @@ import Base from '../../layouts/Base.astro';
           <select id="e-light"><option value="">Bilinmiyor</option><option value="true">Var</option><option value="false">Yok</option></select>
         </label>
         <label>Durum
-          <select id="e-status"><option value="candidate">Doğrulanmadı</option><option value="verified">Sahada doğrulandı</option><option value="rejected">Elendi</option></select>
+          <select id="e-status"><option value="candidate">Doğrulanmadı</option><option value="verified">Sahada doğrulandı</option><option value="rejected">Elendi</option><option value="proposed">Aday (onay bekliyor)</option></select>
         </label>
         <label>Notlar<textarea id="e-notes" rows="3" maxlength="1000"></textarea></label>
         <button type="submit">Değişiklikleri kaydet</button>
@@ -52,12 +57,21 @@ import Base from '../../layouts/Base.astro';
   .msg { min-height: 1.5em; font-size: 0.9rem; }
   .msg.err { color: var(--storm); }
   .go { color: var(--sodium); font-weight: 650; }
+  .small { font-size: 0.84rem; margin: 0 0 8px; }
+  .cands { list-style: none; padding: 0; margin: 8px 0 0; max-height: 60vh; overflow: auto; }
+  .cands li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--swell); }
+  .cands b { font-weight: 620; }
+  .cands span { display: block; font-size: 0.8rem; color: var(--mist); }
+  .cands button { min-height: 44px; padding: 0 12px; }
+  #cand-filter { width: 100%; }
   .linkish { background: none; border: 0; color: var(--mist); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
 </style>
 
 <script>
   import { getToken, logout, setToken } from '../../scripts/admin';
-  type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null };
+  type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null; kind: string; place: string | null; access: string | null };
+  const KIND_TR: Record<string, string> = { pier: 'iskele', breakwater: 'mendirek', groyne: 'mahmuz', quay: 'rıhtım', harbour: 'liman / barınak', rocky: 'kayalık kıyı', beach: 'kumsal', river_mouth: 'dere ağzı', manual: 'elle' };
+  const ACCESS_TR: Record<string, string> = { acik: 'erişim açık (tahmin)', belirsiz: 'erişim belirsiz', kisitli_feribot: 'kısıtlı olabilir' };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   let token = getToken();
   let spots: Spot[] = [];
@@ -80,9 +94,35 @@ import Base from '../../layouts/Base.astro';
   async function load() {
     const b = await (await fetch('/api/admin/spots', { headers: { authorization: `Bearer ${token}` }, cache: 'no-cache' })).json();
     spots = b.spots;
-    $('pick').innerHTML = spots.map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
+    renderCands();
+    $('pick').innerHTML = spots.filter((s) => s.status !== 'proposed').map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
     fill();
   }
+
+  function renderCands() {
+    const q = $<HTMLInputElement>('cand-filter').value.trim().toLocaleLowerCase('tr');
+    const all = spots.filter((s) => s.status === 'proposed');
+    const shown = all.filter((s) => !q || `${s.name} ${s.place ?? ''} ${KIND_TR[s.kind] ?? s.kind}`.toLocaleLowerCase('tr').includes(q));
+    $('cand-n').textContent = `(${all.length})`;
+    const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    $('cands').innerHTML = shown.length
+      ? shown.map((s) => `<li><div><b>${esc(s.name)}</b><span>${esc(KIND_TR[s.kind] ?? s.kind)} · ${esc(s.place ?? '—')} · ${esc(ACCESS_TR[s.access ?? ''] ?? 'erişim ?')}</span></div>
+          <button type="button" data-id="${esc(s.id)}" data-to="candidate">Onayla</button><button type="button" data-id="${esc(s.id)}" data-to="rejected">Reddet</button></li>`).join('')
+      : '<li class="muted">Bekleyen aday yok.</li>';
+  }
+
+  $('cand-filter').addEventListener('input', renderCands);
+  $('cands').addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    if (!b) return;
+    try {
+      await api(`/api/admin/spots/${encodeURIComponent(b.dataset.id!)}`, 'PATCH', { status: b.dataset.to });
+      say(b.dataset.to === 'candidate' ? 'Aday onaylandı: sonraki saatlik puanlamada listeye girer.' : 'Aday reddedildi.');
+      await load();
+    } catch (err) {
+      say((err as Error).message, true);
+    }
+  });
 
   function fill() {
     const s = spots.find((x) => x.id === $<HTMLSelectElement>('pick').value);

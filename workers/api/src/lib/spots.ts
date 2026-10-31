@@ -41,10 +41,11 @@ export interface SpotRow {
   updated_at: string;
 }
 
-export const STATUSES = ['candidate', 'verified', 'rejected'] as const;
+export const STATUSES = ['candidate', 'verified', 'rejected', 'proposed'] as const;
 
 /** The one definition of an active spot: lists, "N mera içinde", ranks and scoring all use it. */
-export const ACTIVE = "status != 'rejected'";
+/** Scored and listed: not rejected and not a D1 inventory proposal awaiting approval ('proposed'). */
+export const ACTIVE = "status NOT IN ('rejected', 'proposed')";
 export const ACTIVE_COUNT_SQL = `SELECT count(*) AS n FROM spots WHERE ${ACTIVE}`;
 
 export function toSpotInput(r: SpotRow): SpotInput {

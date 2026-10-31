@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ambientLogLux, calibrate, DEFAULTS, depthPrior, drawParams, dynamicTerms, exposure, fieldBand, fieldWeight, IDEAL_SPOT, IDEAL_WEATHER, lampPrior,
-  PARAMS, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type Weather,
+  PARAMS, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, SHORE_KINDS, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type StructureKind, type Weather,
 } from '../../src';
 import { BASE, CALM } from './fixtures';
 
@@ -79,6 +79,8 @@ describe('v2 static terms and sources', () => {
     expect(depthPrior({ ...BASE, kind: 'breakwater', lengthM: 400 })).toBeCloseTo(2 + 4 * (1 - Math.exp(-1)), 6);
     expect(depthPrior({ ...BASE, lengthM: 20, ferry: true })).toBe(5);
     expect(depthPrior({ ...BASE, lengthM: null })).toBeCloseTo(1 + 4 * (1 - Math.exp(-0.2)), 6);
+    expect(depthPrior({ ...BASE, kind: 'beach' })).toBe(1.2);
+    expect(depthPrior({ ...BASE, kind: 'quay', lengthM: 250 })).toBeCloseTo(1 + 4 * (1 - Math.exp(-1)), 6);
   });
 
   it('field profile band interpolates and holds flat outside the measured range', () => {
@@ -204,5 +206,22 @@ describe('source kinds and lamp probability', () => {
     const b = rawScore(BASE, CALM, P, undefined, { struct: 1, substrate: 1 });
     expect(b.st.hsiS).toBe(1);
     expect(b.raw).toBeGreaterThan(a.raw);
+  });
+});
+
+describe('shore types (D1, evidence C)', () => {
+  it('rank harbour ≥ rocky > river mouth > beach on the structure term, independent of length', () => {
+    const t = (kind: StructureKind, lengthM: number | null = null) => staticTerms({ ...BASE, kind, lengthM, fieldStructure: null }, DEFAULTS).struct;
+    expect(t('harbour')).toBeGreaterThanOrEqual(t('rocky'));
+    expect(t('rocky')).toBeGreaterThan(t('river_mouth'));
+    expect(t('river_mouth')).toBeGreaterThan(t('beach'));
+    expect(t('beach', 10)).toBe(t('beach', 900));
+    expect(t('quay', 900)).toBeGreaterThan(t('quay', 10));
+    expect(staticTerms({ ...BASE, kind: 'beach', fieldStructure: 'mendirek' }, DEFAULTS).struct).toBeGreaterThan(t('beach'));
+  });
+  it('lamp priors: lit harbours, dark shores', () => {
+    expect(lampPrior({ ...BASE, kind: 'harbour' })).toBe(0.6);
+    expect(lampPrior({ ...BASE, kind: 'rocky' })).toBe(0.1);
+    expect(SHORE_KINDS).toContain('river_mouth');
   });
 });

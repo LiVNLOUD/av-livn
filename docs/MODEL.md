@@ -181,7 +181,7 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `w_struct` | 0.75 | - | C | 0.5 | — |
 | `w_substrate` | 0.25 | - | C | 0.5 | — |
 
-**Dağılım:** 42 parametre; A 3, B 1, C 38. Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
+**Dağılım:** 45 parametre; A 3, B 1, C 41 (D1: struct_harbour, struct_beach, struct_river eklendi). Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
 
 ## 6. Belirsizlik: Monte Carlo %10–90 bandı
 - **Çekim sayısı:** N = 200 (B1'de 500).

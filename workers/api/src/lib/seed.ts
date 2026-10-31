@@ -30,6 +30,7 @@ export interface SpotFeature {
     substrate_biozone?: string | null;
     substrate_dist_m?: number | null;
     substrate_conf?: number | null;
+    access?: 'acik' | 'kisitli_feribot' | 'belirsiz' | null;
   };
 }
 
@@ -90,9 +91,10 @@ export function seedSql(fc: { features: SpotFeature[] }, now: string): string {
   const cols = [
     'id', 'name', 'kind', 'lat', 'lon', 'probe_lat', 'probe_lon', 'probe_ok', 'shore_normal_deg', 'length_m', 'depth_200m', 'slope_pct',
     'max_depth_100m', 'profile_json', 'probe_source', 'normal_source', 'osm_normal_deg', 'has_light', 'status', 'place', 'source', 'wx_cell', 'sea_cell', 'updated_at',
-    'alt_lat', 'alt_lon', 'tip_source', 'fetch_json', 'substrate', 'substrate_biozone', 'substrate_dist_m', 'substrate_conf',
+    'alt_lat', 'alt_lon', 'tip_source', 'fetch_json', 'substrate', 'substrate_biozone', 'substrate_dist_m', 'substrate_conf', 'access',
   ];
-  const geoCols = cols.filter((c) => c !== 'id' && !(FIELD_FROM_ADMIN as readonly string[]).includes(c));
+  // access: the inventory's estimate only fills an empty value; the user's field knowledge wins.
+  const geoCols = cols.filter((c) => c !== 'id' && c !== 'access' && !(FIELD_FROM_ADMIN as readonly string[]).includes(c));
   for (const f of fc.features) {
     const p = f.properties;
     const [lon, lat] = f.geometry.coordinates;
@@ -100,10 +102,11 @@ export function seedSql(fc: { features: SpotFeature[] }, now: string): string {
     const vals = [
       p.id, p.name, p.kind, lat, lon, p.probe_lat, p.probe_lon, p.probe_ok, p.shore_normal_deg, p.length_m, p.depth_200m, p.slope_pct,
       p.max_depth_100m, p.profile ? JSON.stringify(p.profile) : null, p.probe_source, p.normal_source, p.osm_normal_deg, p.has_light, p.status, p.place, 'osm', cell.wx, cell.sea, now,
-      p.alt_lat, p.alt_lon, p.tip_source, p.fetch_km ? JSON.stringify(p.fetch_km) : null, p.substrate, p.substrate_biozone, p.substrate_dist_m, p.substrate_conf,
+      p.alt_lat, p.alt_lon, p.tip_source, p.fetch_km ? JSON.stringify(p.fetch_km) : null, p.substrate, p.substrate_biozone, p.substrate_dist_m, p.substrate_conf, p.access ?? null,
     ];
     const set = [
       ...geoCols.map((c) => `${c} = excluded.${c}`),
+      'access = COALESCE(spots.access, excluded.access)',
       ...FIELD_FROM_ADMIN.filter((c) => c !== 'notes').map((c) => `${c} = CASE WHEN spots.admin_edited_at IS NULL THEN excluded.${c} ELSE spots.${c} END`),
     ];
     out.push(`INSERT INTO spots (${cols.join(', ')}) VALUES (${vals.map(sql).join(', ')}) ON CONFLICT(id) DO UPDATE SET ${set.join(', ')};`);

@@ -41,6 +41,16 @@ describe('GET /api/spots?model=v2', () => {
     await env.DB.prepare("UPDATE spots SET status = 'candidate' WHERE id = 'osm-way-3'").run();
   });
 
+  it('D1 proposals are neither listed nor counted until approved', async () => {
+    await env.DB.prepare("UPDATE spots SET status = 'proposed' WHERE id = 'osm-way-2'").run();
+    const list = await (await app.request('/api/spots?model=v2&c=2', {}, env)).json<ListBody>();
+    expect(list.count).toBe(2);
+    expect(list.spots.map((s) => (s as { id: string }).id)).not.toContain('osm-way-2');
+    const det = await app.request('/api/spots/osm-way-2?model=v2&c=2', {}, env);
+    expect(det.status).toBe(404);
+    await env.DB.prepare("UPDATE spots SET status = 'candidate' WHERE id = 'osm-way-2'").run();
+  });
+
   it('null score for spots without a v2 row', async () => {
     await env.DB.prepare("DELETE FROM spot_scores_v2 WHERE spot_id = 'osm-way-3'").run();
     const body = await (await app.request('/api/spots?model=v2&x=1', {}, env)).json<ListBody>();

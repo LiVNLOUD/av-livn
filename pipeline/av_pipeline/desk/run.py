@@ -37,7 +37,7 @@ def main(argv: list[str]) -> int:
     d1 = D1()
     today = dt.date.today()
     now = dt.datetime.now(dt.timezone.utc).isoformat()
-    spots = d1.query("SELECT id, name, lat, lon FROM spots WHERE status != 'rejected' ORDER BY id")
+    spots = d1.query("SELECT id, name, lat, lon FROM spots WHERE status NOT IN ('rejected', 'proposed') ORDER BY id")
     all_f: list[Finding] = []
     report: dict = {"date": today.isoformat(), "spots": len(spots)}
     try:

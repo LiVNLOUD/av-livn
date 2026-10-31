@@ -1,7 +1,10 @@
 import { bandOf, bandV2 } from '@av-livn/scoring';
 
-export const KIND_TR: Record<string, string> = { pier: 'İskele', breakwater: 'Mendirek', groyne: 'Mahmuz', manual: 'Elle eklenen' };
-export const STATUS_TR: Record<string, string> = { candidate: 'Doğrulanmadı', verified: 'Sahada doğrulandı', rejected: 'Elendi' };
+export const KIND_TR: Record<string, string> = {
+  pier: 'İskele', breakwater: 'Mendirek', groyne: 'Mahmuz', manual: 'Elle eklenen',
+  quay: 'Rıhtım', harbour: 'Liman / balıkçı barınağı', rocky: 'Kayalık kıyı', beach: 'Kumsal', river_mouth: 'Dere ağzı',
+};
+export const STATUS_TR: Record<string, string> = { candidate: 'Doğrulanmadı', verified: 'Sahada doğrulandı', rejected: 'Elendi', proposed: 'Aday (onay bekliyor)' };
 
 export const COMPONENT_TR: Record<string, string> = {
   ruzgar_dalga_kiyiya_gore: 'Rüzgar ve dalga (kıyıya göre)',

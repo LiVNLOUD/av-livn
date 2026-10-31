@@ -7,7 +7,10 @@ export const FLOOR = 0.05;
 
 export type Source = 'saha' | 'uzaktan gözlem' | 'masa başı' | 'Copernicus' | 'EUSeaMap' | 'DTM-interpolasyon' | 'DTM-ölçüm' | 'yapı-uzunluğu-tahmini' | 'önsel' | 'OSM' | 'Open-Meteo' | 'astronomi';
 
-export type StructureKind = 'pier' | 'breakwater' | 'groyne' | 'manual';
+export type StructureKind = 'pier' | 'breakwater' | 'groyne' | 'manual' | ShoreKind;
+/** D1 inventory types without a single structure tip (docs/spots-candidates.md); static preferences, evidence C. */
+export type ShoreKind = 'quay' | 'harbour' | 'rocky' | 'beach' | 'river_mouth';
+export const SHORE_KINDS: readonly ShoreKind[] = ['quay', 'harbour', 'rocky', 'beach', 'river_mouth'];
 /** Where a field-table value comes from (priority saha > uzaktan > masabasi > DTM > prior). */
 export type FieldKind = 'saha' | 'uzaktan' | 'masabasi';
 export const KIND_SOURCE: Record<FieldKind, Source> = { saha: 'saha', uzaktan: 'uzaktan gözlem', masabasi: 'masa başı' };
@@ -91,7 +94,14 @@ const SUBSTRATE_EUSM: Record<string, number> = { 'Fine mud': 0.7, 'Sandy mud': 0
 const SUBSTRATE_FIELD: Record<FieldSubstrate, number> = { camur: 0.7, kum: 0.8, cakil: 0.85, yosunlu: 0.9, kaya: 0.95, midyeli: 0.95 };
 export const SUBSTRATE_PRIOR = 0.75;
 const CONF_WEIGHT = [0.2, 0.4, 0.6, 0.8];
-export const LAMP_PRIOR = { ferry: 0.85, pier: 0.5, breakwater: 0.3, groyne: 0.3, manual: 0.5 } as const;
+export const LAMP_PRIOR = {
+  ferry: 0.85, pier: 0.5, breakwater: 0.3, groyne: 0.3, manual: 0.5,
+  // C: quays and harbours are usually lit (working areas); shores only by a promenade, if at all
+  quay: 0.5, harbour: 0.6, rocky: 0.1, beach: 0.2, river_mouth: 0.15,
+} as const;
+
+/** Depth prior (m) for shore types: what is typically in reach of a cast from the shore (C). */
+const SHORE_DEPTH: Record<Exclude<ShoreKind, 'quay'>, number> = { harbour: 3, rocky: 2.5, beach: 1.2, river_mouth: 1 };
 
 export function lampPrior(s: SpotV2): number {
   if (s.lampP !== undefined && s.lampP !== null) return s.lampP;
@@ -99,6 +109,7 @@ export function lampPrior(s: SpotV2): number {
 }
 
 export function depthPrior(s: SpotV2): number {
+  if (s.kind !== 'quay' && s.kind in SHORE_DEPTH) return SHORE_DEPTH[s.kind as keyof typeof SHORE_DEPTH];
   const L = s.lengthM ?? 50;
   const d = s.kind === 'breakwater' ? 2 + 4 * (1 - Math.exp(-L / 400)) : 1 + 4 * (1 - Math.exp(-L / 250));
   return s.ferry ? Math.max(d, 5) : d;
@@ -132,9 +143,13 @@ export interface StaticTerms {
 
 export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   const fs = s.fieldStructure;
-  const base = fs === 'mendirek' || (!fs && s.kind === 'breakwater') ? p.struct_breakwater : fs === 'dogal_kaya' ? p.struct_rock : p.struct_pier;
+  const shore: Partial<Record<StructureKind, number>> = { harbour: p.struct_harbour, rocky: p.struct_rock, beach: p.struct_beach, river_mouth: p.struct_river };
+  const base =
+    fs === 'mendirek' || (!fs && s.kind === 'breakwater') ? p.struct_breakwater : fs === 'dogal_kaya' ? p.struct_rock : (!fs && shore[s.kind]) || p.struct_pier;
   const L = s.lengthM ?? 50;
-  const struct = base * (0.4 + 0.6 * (1 - Math.exp(-L / 1000 / p.struct_len_km)));
+  // Shore types have no structure length: a fixed share (a 150 m structure's) stands in for it.
+  const lenF = !fs && s.kind in shore ? 0.4 + 0.6 * (1 - Math.exp(-1)) : 0.4 + 0.6 * (1 - Math.exp(-L / 1000 / p.struct_len_km));
+  const struct = base * lenF;
 
   let depthM: number;
   let depthSrc: Source;

@@ -10,6 +10,8 @@ import Base from '../../layouts/Base.astro';
       <ol class="scale" id="scale"></ol>
       <p><span class="sw hatch"></span> Taralı alan: DTM enterpolasyonu (GEBCO dolgusu, yerinde ölçüm yok). Buradaki konturlar güvenilmez.</p>
       <p><span class="sw dot"></span> Meralar v2 puan rengiyle: <b class="g">≥ 65</b>, <b class="w">40–65</b>, <b class="b">&lt; 40</b>. Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir.</p>
+      <p><label class="lt"><input type="checkbox" id="show-cand" checked /> <span class="sw cand"></span> Aday yerler (OSM envanteri, henüz puanlanmadı)</label></p>
+      <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Erişim yasak: ticari liman / sanayi</label></p>
       <p>Çizgiler 2, 5, 10, 15, 20, 30, 50, 75, 100 m. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki derinliği göstermez.</p>
     </details>
   </section>
@@ -25,6 +27,10 @@ import Base from '../../layouts/Base.astro';
   }
   .legend summary { cursor: pointer; color: var(--foam); font-weight: 620; font-size: 0.86rem; min-height: 28px; display: flex; align-items: center; }
   .legend p { margin: 6px 0 0; line-height: 1.4; }
+  .legend .lt { display: flex; gap: 6px; align-items: center; min-height: 32px; }
+  .legend .lt input { width: 18px; height: 18px; margin: 0; }
+  .sw.cand { width: 10px; height: 10px; border-radius: 50%; background: #9aa7ad; display: inline-block; border: 1.5px solid #0e1c27; }
+  .sw.forb { width: 14px; height: 10px; background: rgba(214, 80, 72, 0.35); border: 1.5px solid #d65048; display: inline-block; }
   .legend b.g { color: var(--good); } .legend b.w { color: var(--warn); } .legend b.b { color: var(--bad); }
   .sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
   .sw.hatch { background: repeating-linear-gradient(135deg, rgb(219 230 234 / .55) 0 1.5px, transparent 1.5px 5px), #2f78a6; }
@@ -232,6 +238,41 @@ import Base from '../../layouts/Base.astro';
     spotCount = spots.length;
     const byId = new Map(spots.map((s) => [s.id, s]));
     const empty = { type: 'FeatureCollection' as const, features: [] };
+    // D1: forbidden commercial ports and grey inventory proposals (approved ones are already in the spot list).
+    const [cand, forb] = await Promise.all(['/tiles/candidates.geojson', '/tiles/forbidden.geojson'].map((u) => fetch(u).then((r) => (r.ok ? r.json() : empty)).catch(() => empty)));
+    cand.features = (cand.features ?? []).filter((f: { properties: { id: string } }) => !byId.has(f.properties.id));
+    map.addSource('forbidden', { type: 'geojson', data: forb });
+    map.addLayer({ id: 'forb-fill', type: 'fill', source: 'forbidden', paint: { 'fill-color': '#d65048', 'fill-opacity': 0.22 } });
+    map.addLayer({ id: 'forb-line', type: 'line', source: 'forbidden', paint: { 'line-color': '#d65048', 'line-width': 1.4 } });
+    map.addLayer({
+      id: 'forb-label', type: 'symbol', source: 'forbidden', minzoom: 11,
+      layout: { 'text-field': ['concat', ['get', 'name'], '\nerişim yasak'], 'text-font': ['Noto Sans Bold'], 'text-size': 10.5 },
+      paint: { 'text-color': '#f2a29c', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.4 },
+    });
+    map.addSource('cands', { type: 'geojson', data: cand });
+    map.addLayer({ id: 'cands', type: 'circle', source: 'cands', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 3, 14, 6], 'circle-color': '#9aa7ad', 'circle-stroke-color': '#0e1c27', 'circle-stroke-width': 1.2 } });
+    map.addLayer({
+      id: 'cand-labels', type: 'symbol', source: 'cands', minzoom: 12.5,
+      layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 10.5, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-max-width': 9 },
+      paint: { 'text-color': '#b9c4c9', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.3 },
+    });
+    const toggle = (box: string, layers: string[]) => {
+      const el = document.getElementById(box) as HTMLInputElement;
+      el.addEventListener('change', () => layers.forEach((l) => map.setLayoutProperty(l, 'visibility', el.checked ? 'visible' : 'none')));
+    };
+    toggle('show-cand', ['cands', 'cand-labels']);
+    toggle('show-forb', ['forb-fill', 'forb-line', 'forb-label']);
+    map.on('click', 'cands', (e) => {
+      const p = e.features?.[0]?.properties as { name: string; type_tr: string; place: string | null } | undefined;
+      if (!p) return;
+      card.hidden = false;
+      card.innerHTML = `<button class="x" type="button" aria-label="Kapat">×</button><h2>${esc(p.name)}</h2>
+        <p class="muted">${esc(p.type_tr)}${p.place && p.place !== 'null' ? `, ${esc(p.place)}` : ''}. Aday yer: OpenStreetMap envanterinden önerildi, henüz onaylanmadı ve puanlanmıyor.</p>`;
+      card.querySelector('button.x')!.addEventListener('click', () => (card.hidden = true));
+    });
+    map.on('mouseenter', 'cands', () => (map.getCanvas().style.cursor = 'pointer'));
+    map.on('mouseleave', 'cands', () => (map.getCanvas().style.cursor = ''));
+
     map.addSource('spots', { type: 'geojson', data: empty });
     map.addSource('leaders', { type: 'geojson', data: empty });
     map.addLayer({ id: 'leaders', type: 'line', source: 'leaders', paint: { 'line-color': '#dbe6ea', 'line-opacity': 0.7, 'line-width': 1 } });
