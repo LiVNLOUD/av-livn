@@ -1,0 +1,485 @@
+{
+ "hour": "2026-10-31T09:00:00.000Z",
+ "spots": [
+  {
+   "spot_id": "osm-way-1005837524",
+   "name": "İskele (Kapaklı)",
+   "before": [
+    68.6,
+    40.2,
+    79.4,
+    8,
+    0,
+    null,
+    [
+     "yapi",
+     2.1,
+     "Öne çıkaran: iskele 283 m — OSM, kanıt C"
+    ]
+   ],
+   "after": [
+    69.4,
+    40.8,
+    80.1,
+    8,
+    0,
+    null,
+    [
+     "yapi",
+     2.1,
+     "Öne çıkaran: iskele 283 m — OSM, kanıt C"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1170373161",
+   "name": "İskele (Armutlu)",
+   "before": [
+    52.1,
+    29.9,
+    70.6,
+    15,
+    0,
+    null,
+    [
+     "derinlik",
+     -10.1,
+     "Geri bırakan: atış mesafesinde ~1.6 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    52.6,
+    30.1,
+    71.1,
+    15,
+    0,
+    null,
+    [
+     "derinlik",
+     -10.1,
+     "Geri bırakan: atış mesafesinde ~1.6 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "before": [
+    54.8,
+    31.5,
+    71.8,
+    12,
+    0,
+    null,
+    [
+     "derinlik",
+     -8.3,
+     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    55.6,
+    32,
+    72.4,
+    12,
+    0,
+    null,
+    [
+     "derinlik",
+     -8.3,
+     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "before": [
+    73.6,
+    42.3,
+    82.2,
+    5,
+    0,
+    null,
+    [
+     "derinlik",
+     6.5,
+     "Öne çıkaran: atış mesafesinde ~3.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    74.4,
+    43.8,
+    82.9,
+    5,
+    0,
+    null,
+    [
+     "derinlik",
+     6.5,
+     "Öne çıkaran: atış mesafesinde ~3.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1364814104",
+   "name": "Armutlu Devlet Limanı – doğu mendireği",
+   "before": [
+    54.2,
+    31.8,
+    73.5,
+    14,
+    0,
+    null,
+    [
+     "derinlik",
+     -8,
+     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    54.7,
+    32.1,
+    74,
+    14,
+    0,
+    null,
+    [
+     "derinlik",
+     -8,
+     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394208144",
+   "name": "Armutlu Devlet Limanı – kısa batı mendireği",
+   "before": [
+    63.2,
+    36.8,
+    79.4,
+    11,
+    0,
+    null,
+    [
+     "derinlik",
+     -2.3,
+     "Geri bırakan: atış mesafesinde ~2.4 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    63.7,
+    37.6,
+    80.1,
+    11,
+    0,
+    null,
+    [
+     "derinlik",
+     -2.3,
+     "Geri bırakan: atış mesafesinde ~2.4 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1413355181",
+   "name": "Armutlu Devlet Limanı – uzun batı mendireği",
+   "before": [
+    81,
+    50.8,
+    88.4,
+    2,
+    0,
+    null,
+    [
+     "derinlik",
+     8.8,
+     "Öne çıkaran: atış mesafesinde ~3.9 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    81.5,
+    51.3,
+    89,
+    2,
+    0,
+    null,
+    [
+     "derinlik",
+     8.8,
+     "Öne çıkaran: atış mesafesinde ~3.9 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1414984335",
+   "name": "İskele (Fıstıklı)",
+   "before": [
+    76.5,
+    47.8,
+    86.4,
+    4,
+    0,
+    null,
+    [
+     "derinlik",
+     11.6,
+     "Öne çıkaran: atış mesafesinde ~4.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    77,
+    48.5,
+    86.9,
+    4,
+    0,
+    null,
+    [
+     "derinlik",
+     11.6,
+     "Öne çıkaran: atış mesafesinde ~4.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1422122108",
+   "name": "Armutlu Devlet Limanı – orta batı mendireği",
+   "before": [
+    72,
+    42.6,
+    84.3,
+    6,
+    0,
+    null,
+    [
+     "yapi",
+     5.2,
+     "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
+    ]
+   ],
+   "after": [
+    72.5,
+    43.1,
+    84.6,
+    6,
+    0,
+    null,
+    [
+     "yapi",
+     5.2,
+     "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "before": [
+    64.7,
+    36.7,
+    78.3,
+    10,
+    0,
+    null,
+    [
+     "yapi",
+     -4.5,
+     "Geri bırakan: iskele 99 m — OSM, kanıt C"
+    ]
+   ],
+   "after": [
+    65.5,
+    37.2,
+    79.8,
+    10,
+    0,
+    null,
+    [
+     "yapi",
+     -4.5,
+     "Geri bırakan: iskele 99 m — OSM, kanıt C"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-252356832",
+   "name": "Güzelyalı Yat Limanı – doğu mendireği",
+   "before": [
+    81.4,
+    50.7,
+    88.6,
+    1,
+    0,
+    null,
+    [
+     "derinlik",
+     9.8,
+     "Öne çıkaran: atış mesafesinde ~4.1 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    81.9,
+    51.3,
+    89.1,
+    1,
+    0,
+    null,
+    [
+     "derinlik",
+     9.8,
+     "Öne çıkaran: atış mesafesinde ~4.1 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-252356833",
+   "name": "Güzelyalı Yat Limanı – batı mendireği",
+   "before": [
+    68.5,
+    40.5,
+    82.5,
+    9,
+    0,
+    null,
+    [
+     "yapi",
+     3.3,
+     "Öne çıkaran: mendirek 204 m — OSM, kanıt C"
+    ]
+   ],
+   "after": [
+    69,
+    41.3,
+    83,
+    9,
+    0,
+    null,
+    [
+     "yapi",
+     3.3,
+     "Öne çıkaran: mendirek 204 m — OSM, kanıt C"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "before": [
+    36.6,
+    20,
+    58.8,
+    16,
+    0,
+    null,
+    [
+     "derinlik",
+     -16.6,
+     "Geri bırakan: atış mesafesinde ~1.0 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    37.1,
+    20.6,
+    59.2,
+    16,
+    0,
+    null,
+    [
+     "derinlik",
+     -16.6,
+     "Geri bırakan: atış mesafesinde ~1.0 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-483965349",
+   "name": "İskele (Tirilye)",
+   "before": [
+    54.6,
+    28.6,
+    71.4,
+    13,
+    0,
+    null,
+    [
+     "derinlik",
+     -8,
+     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    55.4,
+    29.6,
+    72,
+    13,
+    0,
+    null,
+    [
+     "derinlik",
+     -8,
+     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "before": [
+    76.8,
+    45.7,
+    84,
+    3,
+    0,
+    null,
+    [
+     "derinlik",
+     7.9,
+     "Öne çıkaran: atış mesafesinde ~3.7 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ],
+   "after": [
+    77.3,
+    46,
+    84.6,
+    3,
+    0,
+    null,
+    [
+     "derinlik",
+     7.9,
+     "Öne çıkaran: atış mesafesinde ~3.7 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
+    ]
+   ]
+  },
+  {
+   "spot_id": "osm-way-77362926",
+   "name": "İskele (Demirsubaşı)",
+   "before": [
+    70.5,
+    42.3,
+    80.6,
+    7,
+    0,
+    null,
+    [
+     "yapi",
+     2.9,
+     "Öne çıkaran: iskele 353 m — OSM, kanıt C"
+    ]
+   ],
+   "after": [
+    71.3,
+    42.7,
+    81.7,
+    7,
+    0,
+    null,
+    [
+     "yapi",
+     2.9,
+     "Öne çıkaran: iskele 353 m — OSM, kanıt C"
+    ]
+   ]
+  }
+ ]
+}
