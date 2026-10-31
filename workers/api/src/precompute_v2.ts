@@ -1,7 +1,7 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  DEFAULTS, explain, fieldDepths, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt,
+  crossWind, DEFAULTS, explain, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt,
   type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
@@ -229,6 +229,8 @@ export interface PackedV2 {
     ocean_normal: { years: number; from: string; to: string } | null;
     comps: [string, string, string, number | null, string, string][];
   };
+  /** F0: open-data tackle inputs per hour [depth, current m/s, wind, gust, cross wind, sun alt, lampP, turbidity, sstDev]. */
+  tk?: (number | null)[][];
   /** [ts, total, raw, p10, p90, gated, warnings, wNight, lampP, values[], reasons[]] */
   h: [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]][];
 }
@@ -278,6 +280,14 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
     sink_calibration: null,
     ocean: ocean?.series ? { fetched_at: ocean.series.fetched_at, cell: ocean.series.data.cell } : null,
     ocean_normal: ocean?.normal ? { years: ocean.normal.data.years, from: ocean.normal.data.from, to: ocean.normal.data.to } : null,
+  });
+  // F0: tackle inputs from open data only — the public depth ignores field soundings (they are private).
+  const depthPub = Math.round(staticTerms({ ...spot, fieldDepths: null }, DEFAULTS).depthM * 10) / 10;
+  const turbIdx = hours[0]?.components.findIndex((c) => c.key === 'bulaniklik') ?? -1;
+  packed.tk = hours.map((h, i) => {
+    const w = weather[i]!;
+    const r = (x: number | null, k = 10) => (x === null ? null : Math.round(x * k) / k);
+    return [depthPub, r(w.currentMs, 100), r(w.windKmh), r(w.gustKmh), crossWind(w.windKmh, w.windDir, row.shore_normal_deg), Math.round(w.sunAlt), packed.h[i]![8] as number | null, turbIdx >= 0 ? r(h.components[turbIdx]!.value, 100) : null, r(w.sstDev)];
   });
   return { startHour, hours, packed, spot, weather };
 }

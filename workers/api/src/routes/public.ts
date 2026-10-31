@@ -4,6 +4,7 @@ import type { Env } from '../env';
 import { ACTIVE, ACTIVE_COUNT_SQL, publicSpot, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 import { bestWindows } from '../lib/windows';
+import { parseProfiles } from '../lib/tackle';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
@@ -18,6 +19,10 @@ publicRoutes.get('/spots', (c) => (c.req.query('species') && c.req.query('specie
 publicRoutes.get('/spots/:id', (c) => detailV2(c));
 publicRoutes.get('/windows', (c) => windowsV2(c));
 publicRoutes.get('/hours', (c) => hoursV2(c));
+publicRoutes.get('/tackle', async (c) => {
+  const r = await c.env.DB.prepare("SELECT value FROM meta WHERE key = 'tackle_profiles'").first<{ value: string }>();
+  return c.json({ ok: true, profiles: parseProfiles(r?.value) }, 200, NO_CACHE);
+});
 
 type Ctx = Context<{ Bindings: Env }>;
 

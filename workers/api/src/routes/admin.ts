@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { catchRoutes } from './catch';
 import { notifyRoutes } from './notify';
+import { validateProfiles } from '../lib/tackle';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
@@ -57,6 +58,14 @@ export function validateFields(body: Fields): Valid {
 adminRoutes.get('/ping', (c) => c.json({ ok: true }));
 adminRoutes.route('/catch', catchRoutes);
 adminRoutes.route('/notify', notifyRoutes);
+
+adminRoutes.put('/tackle', async (c) => {
+  const b = await c.req.json().catch(() => null);
+  const v = validateProfiles(b);
+  if (!v.ok) return c.json(v, 400);
+  await c.env.DB.prepare("INSERT INTO meta (key, value) VALUES ('tackle_profiles', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(JSON.stringify(v.value)).run();
+  return c.json({ ok: true, profiles: v.value });
+});
 
 /** All spots with private fields (lamp state, notes) for /admin/ and /saha/. */
 adminRoutes.get('/spots', async (c) => {

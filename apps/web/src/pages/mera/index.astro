@@ -20,6 +20,13 @@ import Base from '../../layouts/Base.astro';
     <p class="flag" id="dayflag" hidden></p>
     <p class="flag" id="partial" hidden>Saha girişinden sonra hızlı hesap: puan güncel, belirsizlik bandı bir sonraki saatlik çalışmada yenilenecek.</p>
 
+    <section class="tackle card" aria-labelledby="t-tk">
+      <div class="tk-head"><h2 id="t-tk">Takım ve yem</h2><span class="fs-1 muted" id="tk-ver">açık veriyle</span></div>
+      <p class="fs-2 tk-diff" id="tk-diff" hidden></p>
+      <dl class="tk" id="tk"></dl>
+      <p class="fs-1 muted tk-notes" id="tk-notes"></p>
+    </section>
+
     <section class="chart-block">
       <h2 class="sr-only">72 saatlik puan</h2>
       <div class="chart" id="chart"></div>
@@ -66,6 +73,17 @@ import Base from '../../layouts/Base.astro';
   .reason-line:empty { display: none; }
   .warn:empty { display: none; }
   .warn { font-size: var(--fs-2); margin-top: 4px !important; color: var(--storm); }
+  .tackle { margin-top: var(--s4); }
+  .tk-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
+  .tk-head h2 { font-size: var(--fs-4); }
+  .tk { margin: var(--s3) 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s2) var(--s3); }
+  :global(.tk dt) { color: var(--mist); font-size: var(--fs-2); line-height: var(--lh-2); }
+  :global(.tk dd) { margin: 0; font-size: var(--fs-2); line-height: var(--lh-2); }
+  :global(.tk dd b) { font-size: var(--fs-3); color: var(--foam); font-weight: 700; }
+  :global(.tk dd .y) { display: block; color: var(--mist); }
+  :global(.tk .ev) { margin-left: var(--s1); text-decoration: none; }
+  .tk-diff { margin: var(--s2) 0 0; color: var(--sodium); }
+  .tk-notes { margin: var(--s3) 0 0; }
   .flag { margin: 12px 0 0; font-size: var(--fs-2); padding: 8px 10px; border-left: 3px solid var(--warn); background: color-mix(in oklab, var(--warn) 8%, transparent); }
   .chart-block { margin-top: 18px; }
   .chart, .profile { margin: 0 calc(var(--gutter) * -1); background: var(--deep); border-block: 1px solid var(--swell); }
@@ -103,7 +121,7 @@ import Base from '../../layouts/Base.astro';
   import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
   import { adminGet } from '../../scripts/admin';
-  import { bandOf, bandV2, leadWithRank, RANK_FIRST_WIDTH, type Band } from '@av-livn/scoring';
+  import { bandOf, bandV2, DEFAULT_PROFILES, fieldBand, leadWithRank, RANK_FIRST_WIDTH, tackle, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
 
   type Hour = [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]];
   type Meta = {
@@ -121,7 +139,7 @@ import Base from '../../layouts/Base.astro';
     /** Public: which kinds of field knowledge exist (badges), never values. */
     field: { observations: number; desk_pending: number; kinds: Record<'lamba' | 'derinlik' | 'taban' | 'yapi', string | null> } | null;
     spot_count: number; partial: boolean; from: number; hours: number; ranks: number[]; reasons: (string | null)[];
-    packed: { meta: Meta; h: Hour[] } | null;
+    packed: { meta: Meta; h: Hour[]; tk?: (number | null)[][] } | null;
   };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -131,6 +149,34 @@ import Base from '../../layouts/Base.astro';
   type Priv = { record: { depths: FieldDepth[]; lastDepthAt: string | null; latestAt: string; calibration: { pairs: number } | null } | null; observations: { note: string | null }[]; has_light: boolean | null };
   let priv: Priv | null = null;
   let H: Hour[] = [];
+  let TK: (number | null)[][] = [];
+  let profiles: TackleProfile[] = DEFAULT_PROFILES;
+  fetch('/api/tackle').then((r) => (r.ok ? r.json() : null)).then((b) => { if (b?.profiles?.length) profiles = b.profiles; }).catch(() => {});
+  const tkInput = (v: (number | null)[]): TackleInput => ({
+    depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null,
+    sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null,
+  });
+  /** F0 box: open-data version for everyone; the owner also sees the field-depth version and the difference. */
+  function renderTackle(i: number) {
+    const v = TK[i];
+    const box = document.querySelector<HTMLElement>('.tackle')!;
+    box.hidden = !v || H[i]?.[5] === 1; // no box while the safety gate is on
+    if (!v || box.hidden) return;
+    const pub = tackle(tkInput(v), profiles);
+    const depths = priv?.record?.depths ?? [];
+    const fieldDepth = depths.length ? 0.4 * fieldBand(depths, 0, 50) + 0.6 * fieldBand(depths, 50, 150) : null;
+    const own = fieldDepth !== null ? tackle({ ...tkInput(v), depthM: fieldDepth }, profiles) : null;
+    const t = own ?? pub;
+    $('tk-ver').textContent = own ? 'saha ölçümüyle inceltildi' : 'açık veriyle';
+    const diff = $('tk-diff');
+    const same = !own || (own.profile === pub.profile && own.jigG === pub.jigG && own.jigType === pub.jigType);
+    diff.hidden = same;
+    if (!same) diff.textContent = `Açık veri: ${pub.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(pub.jigG).replace('.', ',')} g ${pub.jigType} → saha: ${own!.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(own!.jigG).replace('.', ',')} g ${own!.jigType}`;
+    $('tk').innerHTML = t.rows
+      .map((r) => `<dt>${esc(r.label)}</dt><dd><b>${esc(r.value)}</b><a class="tag ev ev-${r.evidence}" href="/model/#kanit-${r.evidence}" title="Kanıt düzeyi ${r.evidence}">${r.evidence}</a><span class="y">${esc(r.why)}</span></dd>`)
+      .join('');
+    $('tk-notes').textContent = t.notes.join(' ');
+  }
   let sel = 0;
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık', kisitli_feribot: 'erişim kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
   const SRC_TR: Record<string, string> = { 'yapı-uzunluğu-tahmini': 'tahmin', 'DTM-interpolasyon': 'DTM enterp.', 'DTM-ölçüm': 'DTM ölçüm' };
@@ -352,6 +398,7 @@ import Base from '../../layouts/Base.astro';
     const ti = Number.isNaN(t) ? -1 : H.findIndex((h) => Math.floor(Date.parse(h[0]) / 3_600_000) === Math.floor(t / 3_600_000));
     select(ti >= 0 ? ti : 0);
     profileChart();
+    renderTackle(i);
     $('spot').setAttribute('aria-busy', 'false');
   }
 
@@ -369,6 +416,7 @@ import Base from '../../layouts/Base.astro';
         ]);
         if (fr) priv = { ...fr, has_light: sp?.spots.find((x) => x.id === id)?.has_light ?? null };
         H = b.packed ? b.packed.h.slice(b.from, b.from + b.hours) : [];
+        TK = b.packed?.tk ? b.packed.tk.slice(b.from, b.from + b.hours) : [];
         render();
       })
       .catch((e: Error) => {

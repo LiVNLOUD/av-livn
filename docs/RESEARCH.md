@@ -42,6 +42,7 @@ Durum: v2 Bölüm A, 2026-10-30. Hedef: `docs/MODEL.md`'deki her parametrenin da
 | R16 | Paun C. vd. (2020). Variations in growth and reproduction measurements of *T. mediterraneus* from the Romanian Black Sea coast. *AgroLife Sci. J.* 9:212–218 | [10.17930/AGL2020227](https://doi.org/10.17930/AGL2020227) | Romanya | *T. mediterraneus* | Haziran–Kasım örneklemesi, n = 563 | Boy, ağırlık, yaş; yıllar ve aylar arası fark | Romanya kıyısında da sezon Haziran–Kasım; diyet–sıcaklık verisi **yok** | A | özet |
 | R17 | Kasten F., Czeplak G. (1980). Solar and terrestrial radiation dependent on the amount and type of cloud. *Solar Energy* 24:177–189 | [10.1016/0038-092X(80)90391-6](https://doi.org/10.1016/0038-092X(80)90391-6) | — | Fizik | Ölçüm regresyonu | Işınım ≈ açık gök × (1 − 0.75·(N/8)^3.4) | Ortam ışığı indeksinde bulut zayıflatması | fizik | künye + formül (yaygın kullanım) |
 | R18 | Donchik I. vd. (2026). Biology of *T. mediterraneus* off the coast of Crimea. *TrJFAS* 26 | [10.4194/trjfas29817](https://doi.org/10.4194/trjfas29817) | Kırım | *T. mediterraneus* | — | İçerik okunmadı | Bölüm B okuma listesi | A | künye |
+| R19 | Peksu M., Uzer U., Yıldız T., Ayaz A., Karakulak F.S. (2020). Hook selectivity and catch efficiency in two sport fishing sectors in the Strait of Istanbul, Turkey: Classic handline fishing and Light Rock Fishing (LRF). *J. Appl. Ichthyol.* 36(6):893–900. Türkçe tez sürümü: "Amatör olta balıkçılığında çapari ve hafif olta takımlarının (LRF) av etkinliğinin karşılaştırılması" (YÖK Açık Bilim 20.500.12812/146015) | [10.1111/jai.14140](https://doi.org/10.1111/jai.14140) | İstanbul Boğazı | *T. mediterraneus* (%89,6), *Scorpaena porcus* (%5,12) | Aylık deneme avcılığı Eylül 2014 – Eylül 2015; bir çapari ve bir LRF takımı; çaparide 6, 8, 10 no iğne; seçicilik SELECT, log-normal | LRF CPUE 1,295 kg/10 iğne/saat (en yüksek). Boy: LRF 9–16 cm, çapari 6,1–19 cm. Modal yakalanma boyu (makale özeti) #10: 13,4 cm (yayılım 3,58), #8: 17,7 cm (yayılım 4,74). Kullanıcının aktardığı tez değerleri #10: 12,97 cm, #8: 17,16 cm (tez metnine oturumdan erişilemedi; iki sürüm arasındaki fark yöntem/örneklem farkı olabilir). Saat ve istasyon bilgisi özette yok | Takım kutusu (F0): varsayılan **#8** iğne; #10'un modal boyu yasal 13 cm sınırında, küçük balık oranı yüksek. Not: iğne numaraları çapari iğneleri; LRF jighead iğnesine aktarım varsayım | A (yerel) | özet + künye (makale); tez erişilemedi (acikbilim.yok.gov.tr 503, bağlantı yok) |
 
 ## Bulunamayanlar (uydurulmadı)
 - **GB Karadeniz mevsimsel diyet ve beslenme stratejisi:** Crossref'te hedefli aramada bulunamadı. En yakın kaynak R3 (Marmara).
@@ -69,6 +70,8 @@ Durum: v2 Bölüm A, 2026-10-30. Hedef: `docs/MODEL.md`'deki her parametrenin da
 | Rüzgar ve dalga × maruziyet gülü | Balıkçı bilgisi, güvenlik | C |
 | Yapı, taban, derinlik | Bulunamadı; R9 genel | C |
 | Basınç, akıntı | Bulunamadı | C |
+| Takım kutusu: iğne no (#8), LRF boy aralığı | R19 | A (yerel) |
+| Takım kutusu: jighead, renk, silikon, saydırma | TACKLE.md kuralları, balıkçı bilgisi | C |
 
 ## Sayım
 - **Toplam kaynak:** 18.

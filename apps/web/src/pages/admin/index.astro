@@ -29,6 +29,22 @@ import AdminLogin from '../../components/AdminLogin.astro';
         <button type="submit">Değişiklikleri kaydet</button>
       </form>
 
+      <h2>Takım profilleri</h2>
+      <p class="muted fs-2">Mera kartındaki takım ve yem kutusu bu iki seti kullanır (docs/TACKLE.md). Ağırlıklar gram, hamle km/sa.</p>
+      <form id="tackle" class="stack">
+        <fieldset class="tp" data-id="lrf"><legend>LRF</legend>
+          <label>Ad<input name="name" maxlength="120" /></label>
+          <div class="two"><label>En hafif (g)<input name="jigMin" inputmode="decimal" /></label><label>En ağır (g)<input name="jigMax" inputmode="decimal" /></label></div>
+          <div class="two"><label>En fazla hamle (km/sa)<input name="maxGustKmh" inputmode="numeric" /></label><label>Misina<input name="line" maxlength="120" /></label></div>
+        </fieldset>
+        <fieldset class="tp" data-id="spin"><legend>Spin</legend>
+          <label>Ad<input name="name" maxlength="120" /></label>
+          <div class="two"><label>En hafif (g)<input name="jigMin" inputmode="decimal" /></label><label>En ağır (g)<input name="jigMax" inputmode="decimal" /></label></div>
+          <div class="two"><label>En fazla hamle (km/sa)<input name="maxGustKmh" inputmode="numeric" /></label><label>Misina<input name="line" maxlength="120" /></label></div>
+        </fieldset>
+        <button type="submit" class="btn">Profilleri kaydet</button>
+      </form>
+
       <h2>Yeni mera ekle</h2>
       <form id="add" class="stack">
         <label>Ad<input id="a-name" maxlength="80" required /></label>
@@ -181,6 +197,30 @@ import AdminLogin from '../../components/AdminLogin.astro';
       say((err as Error).message, true);
     }
   });
+
+  // F0: tackle profiles
+  async function loadTackle() {
+    const b = await (await fetch('/api/tackle', { cache: 'no-cache' })).json();
+    for (const p of b.profiles) {
+      const fs = document.querySelector<HTMLFieldSetElement>(`.tp[data-id="${p.id}"]`)!;
+      for (const k of ['name', 'jigMin', 'jigMax', 'maxGustKmh', 'line']) (fs.querySelector(`[name="${k}"]`) as HTMLInputElement).value = String(p[k]).replace('.', ',');
+    }
+  }
+  $('tackle').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = [...document.querySelectorAll<HTMLFieldSetElement>('.tp')].map((fs) => {
+      const v = (k: string) => (fs.querySelector(`[name="${k}"]`) as HTMLInputElement).value.trim();
+      const n = (k: string) => Number(v(k).replace(',', '.'));
+      return { id: fs.dataset.id, name: v('name'), jigMin: n('jigMin'), jigMax: n('jigMax'), maxGustKmh: n('maxGustKmh'), line: v('line') };
+    });
+    try {
+      await api('/api/admin/tackle', 'PUT', body);
+      say('Takım profilleri kaydedildi.');
+    } catch (err) {
+      say((err as Error).message, true);
+    }
+  });
+  loadTackle().catch(() => {});
 
   $('logout').addEventListener('click', () => { logout(); location.reload(); });
 </script>
