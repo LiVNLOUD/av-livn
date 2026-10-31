@@ -152,4 +152,5 @@
   - "Belirsizliği göster" varsayılan kapalı. Açılınca bant genişliği en yüksek üçte birdeki hücreleri işaretler; lejant ortalama bandı gösterir.
   - Haritanın altında seçili meranın özeti ve kısa takım önerisi var. Harita lejantına "Ölçülmüş alan sınırı" eklendi.
   - Düzeltme: 1200–1919 px'te görünmeyen Harita/Isı haritası sekmeleri artık görünüyor.
+- Düzeltme: F0 takım kutusu yanlış fonksiyondan çağrılıyordu; canlıda gizli kalıyor ve saat değişince yenilenmiyordu. Artık her saat seçiminde çiziliyor.
 - **Açık:** Hal tablosu (tarim.ibb.istanbul) ve Kökçek tezinin tam metni oturumdan indirilemedi (bağlantı kesildi / 503).

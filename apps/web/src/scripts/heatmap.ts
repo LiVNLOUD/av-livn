@@ -118,7 +118,7 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatS
       const gated = s.g.includes(c);
       const dv = diff && v !== null && means[c] !== null ? v - means[c]! : null;
       const fill = v === null ? '#132632' : gated ? '#3a1c1f' : dv !== null ? diffColor(dv) : scoreColor(v);
-      const wide = !!o.showUncertainty && wideFrom !== null && s.w[c] !== null && s.w[c]! >= wideFrom && s.w[c]! > 0;
+      const wide = !!o.showUncertainty && wideFrom !== null && s.w[c] !== null && s.w[c]! > wideFrom;
       const label = v === null ? 'puan yok' : gated ? 'güvenlik uyarısı' : dv !== null ? `${v} (saat ortalamasından ${dv >= 0 ? '+' : '−'}${Math.abs(Math.round(dv))})` : String(v);
       parts.push(`<rect class="hm-cell" data-id="${esc(s.id)}" data-c="${c}" x="${x(c) + 0.5}" y="${y + 1}" width="${cw - 1}" height="${rh - 2}" fill="${fill}"><title>${esc(s.name)} · ${label}${wide ? ' · belirsizlik geniş' : ''}</title></rect>`);
       if (wide && v !== null && !gated) parts.push(`<rect x="${x(c) + 0.5}" y="${y + 1}" width="${cw - 1}" height="${rh - 2}" fill="url(#hm-wide)" pointer-events="none"/>`);

@@ -369,7 +369,7 @@ import Base from '../layouts/Base.astro';
     const scale = hmMode === 'diff'
       ? `<span class="divramp" aria-hidden="true"></span> saat ortalamasının altında ← → üstünde (±${st.diffMax} puanda doyar)`
       : '<span class="ramp" aria-hidden="true"></span> düşük → yüksek puan';
-    const hatch = unc.checked && st.wideFrom !== null ? ` · <span class="hatchsw" aria-hidden="true"></span> bandı en geniş üçte bir (≥ ${Math.round(st.wideFrom)} puan)` : '';
+    const hatch = unc.checked && st.wideFrom !== null ? ` · <span class="hatchsw" aria-hidden="true"></span> bandı en geniş üçte bir (> ${Math.round(st.wideFrom)} puan)` : '';
     $('hm-legend').innerHTML = `${scale}${hatch}${band} · ${sky}`;
   }
 

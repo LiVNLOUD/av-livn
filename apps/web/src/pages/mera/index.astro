@@ -238,6 +238,7 @@ import Base from '../../layouts/Base.astro';
 
   function select(i: number): void {
     sel = i;
+    renderTackle(i);
     const h = H[i]!;
     const [ts, total, , p10, p90, gated, warnings, wNight] = h;
     const rank = d.ranks[i] ?? null;
@@ -417,7 +418,6 @@ import Base from '../../layouts/Base.astro';
     const ti = Number.isNaN(t) ? -1 : H.findIndex((h) => Math.floor(Date.parse(h[0]) / 3_600_000) === Math.floor(t / 3_600_000));
     select(ti >= 0 ? ti : 0);
     profileChart();
-    renderTackle(i);
     $('spot').setAttribute('aria-busy', 'false');
   }
 
