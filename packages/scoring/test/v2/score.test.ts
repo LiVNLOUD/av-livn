@@ -77,14 +77,14 @@ describe('scoreSeriesV2', () => {
     expect(c.derinlik!.reason).not.toContain('tahmini');
     expect(c.yapi!.reason).toBe('mendirek, 50 m');
     expect(c.taban!.reason).toBe('yosunlu');
-    expect(c.lamba!.reason).toBe('lamba yok');
+    expect(c.lamba!.reason).toBe('iskele aydınlatması yok');
     expect(c.lamba!.source).toBe('saha');
     const warm = series(140, (i) => ({ sstNormal: 15, sst: 16 + i * 0.02 }));
     const [w] = scoreSeriesV2({ spot: { ...spot, lamp: true, substrate: { eusm: null, conf: null, field: ['kaya'] } }, points: warm, from: FROM, hours: 1, profile: SAFETY });
     const cw = Object.fromEntries(w!.components.map((x) => [x.key, x]));
     expect(cw.su_degisim!.reason.startsWith('+')).toBe(true);
     expect(cw.su_sapma!.reason.startsWith('+')).toBe(true);
-    expect(cw.lamba!.reason).toBe('lamba var');
+    expect(cw.lamba!.reason).toBe('iskele aydınlatması var');
     expect(cw.taban!.reason).toBe('kaya');
 
     const sparse = [{ ts: FROM.toISOString(), cloud: 50 }];
@@ -129,7 +129,7 @@ describe('lamp source labels', () => {
   it('desk / remote lamp probability is labelled with its source', () => {
     const [h] = scoreSeriesV2({ spot: { ...SPOT, lamp: null, lampP: 0.95, lampSource: 'masabasi' }, points: series(140), from: FROM, hours: 1, profile: SAFETY });
     const c = h!.components.find((x) => x.key === 'lamba')!;
-    expect([c.source, c.reason, h!.lampP]).toEqual(['masa başı', 'lamba olasılığı 0.95', 0.95]);
+    expect([c.source, c.reason, h!.lampP]).toEqual(['masa başı', 'iskele aydınlatması olasılığı 0.95', 0.95]);
     const [k] = scoreSeriesV2({ spot: { ...SPOT, lamp: true, lampSource: 'uzaktan' }, points: series(140), from: FROM, hours: 1, profile: SAFETY });
     expect(k!.components.find((x) => x.key === 'lamba')!.source).toBe('uzaktan gözlem');
   });

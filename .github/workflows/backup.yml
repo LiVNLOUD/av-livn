@@ -43,5 +43,5 @@ jobs:
         with:
           name: av-livn-backup-${{ github.run_id }}
           path: out/*.json.gpg
-          retention-days: 90
+          retention-days: 7
           if-no-files-found: error

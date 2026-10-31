@@ -26,7 +26,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
       </fieldset>
 
       <fieldset>
-        <legend>Lamba</legend>
+        <legend>İskelenin mevcut aydınlatması</legend>
         <div class="seg" data-name="has_light" role="radiogroup">
           <button type="button" data-v="true">Var</button><button type="button" data-v="false">Yok</button><button type="button" data-v="null">Bilmiyorum</button>
         </div>
@@ -70,7 +70,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
       <fieldset>
         <legend>Not ve fotoğraf</legend>
-        <textarea id="note" rows="3" maxlength="1000" placeholder="Örn. lamba saat 22'de söndü, iskele ucu kapalı"></textarea>
+        <textarea id="note" rows="3" maxlength="1000" placeholder="Örn. iskele lambaları saat 22'de söndü, iskele ucu kapalı"></textarea>
         <label class="photo"><input type="file" id="photo" accept="image/*" capture="environment" /> <span id="photo-label">📷 Fotoğraf ekle (isteğe bağlı)</span></label>
       </fieldset>
 
@@ -312,7 +312,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
               const review = o.source_kind === 'masabasi' && o.status === 'onaysiz'
                 ? `<button type="button" class="ghost" data-ok="${o.id}">Onayla</button><button type="button" class="ghost" data-no="${o.id}">Reddet</button>`
                 : '';
-              return `<li><b>${KIND_TR[o.source_kind] ?? o.source_kind}</b> · ${STATUS_TR[o.status] ?? o.status} · ${new Date(o.observed_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}: ${o.depths.length} ölçüm${o.has_photo ? ', foto' : ''}${o.light_prob !== null ? `, lamba olasılığı ${o.light_prob}` : ''}${o.access ? `, erişim ${ACCESS_TR[o.access]}` : ''}${ev?.source ? ` [${ev.source.replace(/</g, '&lt;')}${ev.confidence ? `, güven ${ev.confidence}` : ''}]` : ''}${o.note ? ` — ${o.note.replace(/</g, '&lt;')}` : ''}
+              return `<li><b>${KIND_TR[o.source_kind] ?? o.source_kind}</b> · ${STATUS_TR[o.status] ?? o.status} · ${new Date(o.observed_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })}: ${o.depths.length} ölçüm${o.has_photo ? ', foto' : ''}${o.light_prob !== null ? `, aydınlatma olasılığı ${o.light_prob}` : ''}${o.access ? `, erişim ${ACCESS_TR[o.access]}` : ''}${ev?.source ? ` [${ev.source.replace(/</g, '&lt;')}${ev.confidence ? `, güven ${ev.confidence}` : ''}]` : ''}${o.note ? ` — ${o.note.replace(/</g, '&lt;')}` : ''}
                 <span class="acts">${review}<button type="button" class="ghost" data-edit="${o.id}">Düzenle</button><button type="button" class="ghost" data-del="${o.id}">Sil</button></span></li>`;
             })
             .join('')

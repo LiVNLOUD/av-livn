@@ -37,7 +37,7 @@ from av_pipeline.bathy.sample import dtm_normal, dtm_probe, features, sea_probe
 from av_pipeline.habitat import eusm
 from av_pipeline.spots.fetch_rose import rose_km
 from av_pipeline.spots.labels import labels as map_labels
-from av_pipeline.spots.naming import unique_names
+from av_pipeline.spots.naming import describe_singles, unique_names
 from av_pipeline.spots.geo import M_PER_DEG_LAT, M_PER_DEG_LON, bearing, offset, to_lonlat, to_xy
 
 KIND_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz"}
@@ -269,6 +269,7 @@ def main(argv: list[str]) -> int:
     harbours = [{"name": f["properties"]["name"], "lon": f["geometry"]["coordinates"][0], "lat": f["geometry"]["coordinates"][1]}
                 for f in map_labels(raw)["features"] if f["properties"]["kind"] == "harbour"]
     renamed = unique_names(fc["features"], harbours)
+    renamed += describe_singles(fc["features"], parse(raw)[2])
     if "--habitat" in argv:
         eusm.annotate(fc["features"])
     if "--check-marine" in argv:

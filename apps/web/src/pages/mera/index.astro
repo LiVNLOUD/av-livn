@@ -247,8 +247,8 @@ import Base from '../../layouts/Base.astro';
       : `Bilinmiyor (olasılık %${Math.round((lampP ?? 0) * 100)})`;
     const conds: [string, string, number | null, string][] = [
       ['Rüzgar × maruziyet', why(h, 'ruzgar_dalga'), val(h, 'ruzgar_dalga'), 'kıyıya vuran rüzgar açık yönlerde puanı düşürür'],
-      ['Bulut', cloud === undefined || cloud === '–' ? '–' : `%${cloud}`, val(h, 'diel'), 'ışığı değiştirir: gündüz yumuşatır, gece lamba kontrastını artırır'],
-      ['Lamba', lampLine, d.spot.lamp_known ? val(h, 'diel') : null, d.spot.lamp_known ? 'saha bilgisi; değer yalnız yöneticiye görünür' : 'var/yok karışımı; saha formundan girin'],
+      ['Bulut', cloud === undefined || cloud === '–' ? '–' : `%${cloud}`, val(h, 'diel'), 'ışığı değiştirir: gündüz yumuşatır, gece iskele aydınlatmasının kontrastını artırır'],
+      ['İskele aydınlatması (mevcut)', lampLine, d.spot.lamp_known ? val(h, 'diel') : null, d.spot.lamp_known ? 'saha bilgisi; değer yalnız yöneticiye görünür' : 'var/yok karışımı; saha formundan girin'],
       ['Su sıcaklığı (48 sa)', why(h, 'su_degisim'), val(h, 'su_degisim'), 'ani soğuma cezalandırılır'],
       ['Kısa normalden sapma', why(h, 'su_sapma'), val(h, 'su_sapma'), meta.ocean_normal ? `${Math.round(meta.ocean_normal.years)} yıllık kısa normal (kanıt C)` : 'normal yok'],
       ['Bulanıklık', why(h, 'bulaniklik'), val(h, 'bulaniklik'), 'yağış ve dalgadan'],
@@ -319,7 +319,7 @@ import Base from '../../layouts/Base.astro';
     const { spot } = d;
     document.title = `${spot.name} — av.livn`;
     $('name').textContent = spot.name;
-    const lampTxt = spot.lamp_known ? 'lamba: saha bilgisi var' : 'lamba bilinmiyor';
+    const lampTxt = spot.lamp_known ? 'iskele aydınlatması: saha bilgisi var' : 'iskele aydınlatması bilinmiyor';
     const facing = spot.shore_normal_deg === null ? null : `denize bakış ${compass(spot.shore_normal_deg)}`;
     $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt, spot.access ? ACCESS_TR[spot.access] : null, facing]
       .filter(Boolean)

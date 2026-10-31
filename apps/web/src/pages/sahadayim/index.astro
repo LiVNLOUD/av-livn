@@ -26,7 +26,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
       </div>
       <div class="two">
         <label class="lbl">Kamış<input id="rods" inputmode="numeric" value="1" /></label>
-        <label class="lbl">Lamba altında<select id="lamp"><option value="">bilinmiyor</option><option value="1">evet</option><option value="0">hayır</option></select></label>
+        <label class="lbl">İskele ışığı altında<select id="lamp"><option value="">bilinmiyor</option><option value="1">evet</option><option value="0">hayır</option></select></label>
       </div>
       <button type="button" id="start" class="primary big">Seansı başlat</button>
       <p class="msg" id="msg" role="status"></p>
@@ -50,11 +50,12 @@ import AdminLogin from '../../components/AdminLogin.astro';
     </button>
     <div class="sheet" id="species" hidden role="dialog" aria-label="Tür seç">
       <button type="button" data-sp="istavrit">istavrit</button>
-      <button type="button" data-sp="kolyoz">kolyoz</button>
+      <button type="button" data-sp="levrek">levrek</button>
+      <button type="button" data-sp="kalamar">kalamar</button>
       <button type="button" data-sp="lüfer">lüfer</button>
-      <button type="button" data-sp="sarpan">sarpan</button>
       <button type="button" data-sp="mırmır">mırmır</button>
-      <button type="button" data-sp="izmarit">izmarit</button>
+      <button type="button" data-sp="kolyoz">kolyoz</button>
+      <button type="button" data-sp="sarpan">sarpan</button>
       <button type="button" data-sp="diğer">diğer</button>
       <button type="button" data-sp="" class="cancel">Vazgeç</button>
     </div>
@@ -134,6 +135,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, mountLogin } from '../../scripts/admin';
+  import { LEGAL_MIN_CM } from '../../scripts/format';
 
   type Spot = { id: string; name: string; lat: number; lon: number; place: string | null };
   type Fish = { t: number; species: string; length_cm: number | null };
@@ -260,7 +262,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const min = Math.floor(ms / 60000);
     $('l-time').textContent = `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}${live!.pauseAt ? ' · mola' : ''}${min >= 10 && fish.length ? ` · ${(fish.length / (ms / 3_600_000)).toFixed(1).replace('.', ',')}/sa` : ''}`;
     $('pause').setAttribute('aria-pressed', String(!!live!.pauseAt));
-    $('log').innerHTML = [...fish].reverse().slice(0, 30).map((f) => `<li><span>${new Date(f.t).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} ${f.species}</span><span>${f.length_cm ? `${String(f.length_cm).replace('.', ',')} cm${f.species === 'istavrit' && f.length_cm < 13 ? ' ⚠ 13 cm altı' : ''}` : ''}</span></li>`).join('');
+    $('log').innerHTML = [...fish].reverse().slice(0, 30).map((f) => `<li><span>${new Date(f.t).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} ${f.species}</span><span>${f.length_cm ? `${String(f.length_cm).replace('.', ',')} cm${LEGAL_MIN_CM[f.species] && f.length_cm < LEGAL_MIN_CM[f.species]! ? ` ⚠ ${LEGAL_MIN_CM[f.species]} cm altı` : ''}` : ''}</span></li>`).join('');
   }
   setInterval(() => live && !$('live').hidden && draw(), 15000);
 

@@ -12,7 +12,7 @@ type Sub = { id: string; endpoint: string; p256dh: string; auth: string; fail_co
 
 const NTFY = 'https://ntfy.sh';
 
-async function viaPush(subs: Sub[], m: Message, query: Query, key: string): Promise<{ ok: number; failed: number }> {
+export async function viaPush(subs: Sub[], m: Message, query: Query, key: string): Promise<{ ok: number; failed: number }> {
   let ok = 0;
   let failed = 0;
   const payload = JSON.stringify({ title: m.title, body: m.body, url: m.url, tag: m.kind === 'opp' || m.kind === 'safe' ? m.key : m.kind });
@@ -34,7 +34,7 @@ async function viaPush(subs: Sub[], m: Message, query: Query, key: string): Prom
   return { ok, failed };
 }
 
-async function viaNtfy(topic: string, m: Message): Promise<boolean> {
+export async function viaNtfy(topic: string, m: Message): Promise<boolean> {
   const res = await fetch(NTFY, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -77,4 +77,33 @@ export async function runNotify(query: Query, opts: { spots: SpotHours[]; nowHou
         m.key, m.kind, m.spot_id ?? null, m.start_hour ?? null, m.end_hour ?? null, new Date().toISOString(), JSON.stringify(r),
       ]);
   }
+}
+
+/**
+ * E8 operations alert for the owner: scoring failed, or the newest score is older than 2 h. Goes to every
+ * registered PWA push subscription and to ntfy only when NTFY_TOPIC is set. At most once per 6 h per fault.
+ */
+export async function runWatchdog(query: Query, o: { failed: boolean; scoredAt: string | null; now?: Date }): Promise<string> {
+  const now = o.now ?? new Date();
+  const ageH = o.scoredAt ? (now.getTime() - Date.parse(o.scoredAt)) / 3_600_000 : Infinity;
+  const kind = o.failed ? 'failed' : ageH > 2 ? 'stale' : null;
+  if (!kind) return 'ok';
+  const metaKey = `alert_${kind}_at`;
+  const last = (await query<{ value: string }>('SELECT value FROM meta WHERE key = ?1', [metaKey]))[0]?.value;
+  if (last && now.getTime() - Date.parse(last) < 6 * 3_600_000) return `${kind}: already alerted at ${last}`;
+  const age = Number.isFinite(ageH) ? `${Math.floor(ageH)} saat` : 'bilinmeyen süre';
+  const m: Message = {
+    key: `ops:${kind}:${now.toISOString()}`, kind: 'test', ttl: 6 * 3600, url: 'https://github.com/LiVNLOUD/av-livn/actions/workflows/score.yml',
+    title: kind === 'failed' ? 'av.livn: puanlama işi başarısız' : 'av.livn: puanlar eski',
+    body: kind === 'failed' ? `Son puanlama çalışması hata verdi. En son puan ${age} önce.` : `En son puan ${age} önce hesaplandı (sınır 2 saat). Actions'ı kontrol edin.`,
+  };
+  const key = process.env.VAPID_PRIVATE_KEY ?? '';
+  const topic = process.env.NTFY_TOPIC ?? '';
+  const subs = await query<Sub>('SELECT id, endpoint, p256dh, auth, fail_count FROM push_subscription');
+  const r: Record<string, unknown> = {};
+  r.push = key && subs.length ? await viaPush(subs, m, query, key) : key ? 'abonelik yok' : 'VAPID_PRIVATE_KEY yok';
+  if (topic) r.ntfy = await viaNtfy(topic, m);
+  const delivered = (typeof r.push === 'object' && (r.push as { ok: number }).ok > 0) || r.ntfy === true;
+  if (delivered) await query("INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [metaKey, now.toISOString()]);
+  return `${kind}: ${JSON.stringify(r)}`;
 }

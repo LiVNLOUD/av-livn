@@ -311,10 +311,10 @@ export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hou
     case 'lamba':
       body =
         spot.lamp !== null && spot.lampSource !== null && spot.lampSource !== undefined
-          ? `lamba — ${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi (değer gizli)`
+          ? `iskele aydınlatması — ${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi (değer gizli)`
           : spot.lamp !== null
-          ? `lamba ${spot.lamp ? 'var' : 'yok'} — ${c('lamba').source}`
-          : `lamba olasılığı ${lampPrior(spot).toFixed(2).replace(".", ",")} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
+          ? `iskele aydınlatması ${spot.lamp ? 'var' : 'yok'} — ${c('lamba').source}`
+          : `iskele aydınlatması olasılığı ${lampPrior(spot).toFixed(2).replace(".", ",")} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
       break;
     case 'yapi':
       body = PRIVATE_SOURCES.has(c('yapi').source)

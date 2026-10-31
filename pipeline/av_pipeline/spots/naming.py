@@ -60,3 +60,31 @@ def unique_names(features: list[dict], harbours: list[dict]) -> int:
             f["properties"]["name"] = f"{prefix} – {lab} {noun}"
             renamed += 1
     return renamed
+
+
+FAR_M = 700.0
+POSS = ["kuzeyi", "kuzeydoğusu", "doğusu", "güneydoğusu", "güneyi", "güneybatısı", "batısı", "kuzeybatısı"]
+
+
+def describe_singles(features: list[dict], places: list[dict]) -> int:
+    """E6: generated names still in the generic form "İskele (Fıstıklı)" become "Fıstıklı İskelesi"; when the tip is
+    FAR_M or more from the settlement point, its side is added: "Fıstıklı İskelesi (Fıstıklı'nın batısı)".
+    Only `name_source == "generated"` changes; the admin can rename any spot (an admin name survives reseeding)."""
+    pxy = {p["name"]: p["xy"] for p in places if p.get("name")}
+    n = 0
+    for f in features:
+        pr = f["properties"]
+        noun = NOUN.get(pr.get("kind", ""))
+        place = pr.get("place")
+        if pr.get("name_source") != "generated" or not noun or not place or not pr["name"].endswith(f"({place})"):
+            continue
+        first = {"i": "İ", "ı": "I"}.get(noun[0], noun[0].upper())  # Turkish capitals
+        name = f"{place} {first}{noun[1:]}"
+        if place in pxy:
+            x, y = to_xy(*f["geometry"]["coordinates"])
+            dx, dy = x - pxy[place][0], y - pxy[place][1]
+            if math.hypot(dx, dy) >= FAR_M:
+                name += f" ({place} {POSS[round((math.degrees(math.atan2(dx, dy)) % 360) / 45) % 8]})"
+        pr["name"] = name
+        n += 1
+    return n

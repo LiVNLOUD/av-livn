@@ -1,0 +1,31 @@
+name: watchdog
+# E8: alert the owner (PWA push; ntfy too if NTFY_TOPIC is set) when the scoring job failed or the newest
+# score is older than 2 h. At most once per 6 h per fault (meta.alert_<kind>_at). Prints no secrets.
+on:
+  schedule:
+    - cron: '47 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: watchdog
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node_modules/.bin/esbuild scripts/watchdog.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/watchdog.mjs --log-level=warning
+      - run: node .score/watchdog.mjs

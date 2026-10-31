@@ -31,3 +31,13 @@ jobs:
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: node .score/job.mjs ${{ github.event.schedule == '8,38,53 * * * *' && '--pending' || '' }}
+      - name: Alert the owner on failure (E8)
+        if: failure()
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          node_modules/.bin/esbuild scripts/watchdog.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/watchdog.mjs --log-level=warning
+          node .score/watchdog.mjs --failed

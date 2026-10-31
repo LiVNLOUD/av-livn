@@ -58,11 +58,14 @@ export function esc(s: string | null | undefined): string {
 
 /**
  * E7: 6/2 Tebliğ md. 16(5) — 1 Nisan–15 Kasım arası şamandıralı yüzme alanlarında avcılık yasak (docs/REGULATION.md).
- * Shown on beach spots for dates in that range; the exact extent (200 m) is marked "doğrulanmalı" there.
+ * Shown on beach spots for dates in that range: a warning, since buoyed areas are not mapped.
  */
 export function swimRule(kind: string, iso: string | Date): string | null {
   if (kind !== 'beach') return null;
   const d = new Date(new Date(iso).getTime() + 3 * 3_600_000);
   const md = (d.getUTCMonth() + 1) * 100 + d.getUTCDate();
-  return md >= 401 && md <= 1115 ? 'Yüzme alanı: 1 Nis–15 Kas avcılık yasak' : null;
+  return md >= 401 && md <= 1115 ? 'Şamandıralı yüzme alanında avcılık yasak (1 Nis–15 Kas)' : null;
 }
+
+/** Asgari boy (cm), 6/2 Tebliğ Çizelge 7 — mirrors workers/api/src/routes/catch.ts LEGAL_MIN_CM. */
+export const LEGAL_MIN_CM: Record<string, number> = { istavrit: 13, levrek: 25, 'lüfer': 18, kolyoz: 18, 'karagöz': 18, sargos: 21, 'çipura': 20, mezgit: 13 };

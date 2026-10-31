@@ -9,7 +9,10 @@ import type { ListEntryV2 } from '../precompute_v2';
 export const catchRoutes = new Hono<{ Bindings: Env }>();
 
 const HOUR = 3_600_000;
-export const LEGAL_MIN_CM: Record<string, number> = { istavrit: 13 };
+export const LEGAL_MIN_CM: Record<string, number> = {
+  // 6/2 Tebliğ 2024/21 Çizelge 7 (docs/REGULATION.md)
+  istavrit: 13, levrek: 25, 'lüfer': 18, kolyoz: 18, 'karagöz': 18, sargos: 21, 'çipura': 20, mezgit: 13,
+};
 
 export interface CatchItem {
   species: string;

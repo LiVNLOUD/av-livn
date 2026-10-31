@@ -8,7 +8,7 @@ yeniden üretilebilir, yedeklenmez.
 **Nasıl:** `.github/workflows/backup.yml`, her gün 01:13 UTC (04:13 TSİ).
 1. `python -m av_pipeline.backup dump` D1 REST'ten JSON döker (runner'ın geçici dizinine, `umask 077`).
 2. `gpg --symmetric --cipher-algo AES256`, parola `BACKUP_PASSPHRASE` repo secret'ı (log'a yazılmaz).
-3. Düz metin `shred -u` ile silinir; yalnız `.json.gpg` 90 gün saklanan Actions artifact'ına yüklenir.
+3. Düz metin `shred -u` ile silinir; yalnız `.json.gpg` 7 gün saklanan Actions artifact'ına yüklenir (her gün yeni yedek; en düşük pratik süre).
 
 Repo public olduğu için artifact'ı GitHub'da oturum açmış herkes indirebilir; içerik şifreli olduğundan
 okunamaz. **Repoya hiçbir zaman düz metin yedek konmaz.** Parola kaybolursa yedekler açılamaz: parolayı

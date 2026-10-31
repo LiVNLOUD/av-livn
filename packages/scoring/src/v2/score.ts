@@ -87,7 +87,7 @@ function components(s: SpotV2, r: ReturnType<typeof rawScore>, w: Weather, sstSo
   const { st, dyn, lampP } = r;
   const d0 = dyn[0]!;
   const lampTxt =
-    s.lamp === true ? 'lamba var' : s.lamp === false ? 'lamba yok' : s.lampSource ? `lamba olasılığı ${f2(lampP!)}` : `lamba bilinmiyor (olasılık ${f2(lampP!)})`;
+    s.lamp === true ? 'iskele aydınlatması var' : s.lamp === false ? 'iskele aydınlatması yok' : s.lampSource ? `iskele aydınlatması olasılığı ${f2(lampP!)}` : `iskele aydınlatması bilinmiyor (olasılık ${f2(lampP!)})`;
   const lampSrc: Source = s.lampSource ? KIND_SOURCE[s.lampSource] : s.lamp === null ? 'önsel' : 'saha';
   const lightTxt = w.sunAlt > 0 ? 'gündüz' : w.sunAlt >= -12 ? 'alacakaranlık' : 'gece';
   const fieldDepth = st.sources.depth === 'saha';
@@ -95,7 +95,7 @@ function components(s: SpotV2, r: ReturnType<typeof rawScore>, w: Weather, sstSo
     { key: 'yapi', label: 'Yapı', group: 'statik', weight: DEFAULTS.w_struct, value: st.struct, source: st.sources.struct, evidence: 'C', reason: `${s.fieldStructure ?? s.kind}, ${Math.round(s.lengthM ?? 50)} m` },
     { key: 'taban', label: 'Taban', group: 'statik', weight: DEFAULTS.w_substrate, value: st.substrate, source: st.sources.substrate, evidence: 'C', reason: s.substrate.field?.join(', ') ?? s.substrate.hint ?? s.substrate.eusm ?? 'bilinmiyor' },
     { key: 'derinlik', label: 'Derinlik (atış mesafesi)', group: 'statik', weight: null, value: st.depth, source: st.sources.depth, evidence: 'C', reason: `${st.depthM.toFixed(1)} m${fieldDepth ? '' : ' (tahmini)'}; gündüz kolunu belirler` },
-    { key: 'lamba', label: 'Lamba', group: 'statik', weight: null, value: s.lamp === null ? lampP : s.lamp ? 1 : 0, source: lampSrc, evidence: 'C', reason: lampTxt },
+    { key: 'lamba', label: 'İskele aydınlatması', group: 'statik', weight: null, value: s.lamp === null ? lampP : s.lamp ? 1 : 0, source: lampSrc, evidence: 'C', reason: lampTxt },
     { key: 'diel', label: 'Gece/gündüz ışığı', group: 'dinamik', weight: DEFAULTS.w_diel, value: mixed(dyn, lampP, 'diel'), source: 'astronomi', evidence: 'C', reason: `${lightTxt}, gece ağırlığı ${f2(d0.wNight)}, bulut ${w.cloud ?? '–'} %` },
     { key: 'mevsim', label: 'Mevsim', group: 'dinamik', weight: DEFAULTS.w_season, value: d0.season, source: 'önsel', evidence: 'A/C', reason: `yılın ${w.doy}. günü` },
     { key: 'ruzgar_dalga', label: 'Rüzgar × maruziyet', group: 'dinamik', weight: DEFAULTS.w_wind, value: d0.wind, source: 'Open-Meteo', evidence: 'C', reason: w.windKmh === null ? 'veri yok' : `${Math.round(w.windKmh)} km/sa, dalga ${w.waveM?.toFixed(1) ?? '–'} m` },
