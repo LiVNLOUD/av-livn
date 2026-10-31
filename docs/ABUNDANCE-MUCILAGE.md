@@ -11,6 +11,10 @@
 | Kooperatif / BSGM duyuruları, yerel haber | "istavrit bolluğu", av yasağı başlangıç/bitişi gibi olay ve tarihler | Yalnız başlık + tarih + bağlantı. Metin kopyalanmaz; elle onaylanan olay listesi `data/abundance/events.yaml`. |
 | Av günlüğü (kendi) | haftalık ortalama adet/saat/kamış | zaten var |
 
+**Kanıt (F2):**
+- R20 (Kökçek 2016, Marmara Üniv.): İstanbul halinde 2014 haftalık verisinde istavritin fiyat–miktar ilişkisi anlamlı. Hal girişi pazar sinyali olarak tutarlı; kıyı avıyla bağı gösterilmedi. Kanıt B (yerel, dolaylı).
+- R22 (İBB Gürpınar): yıllık 9.381 t (2024), 8.008 t (2025). Kış tepesi (Ocak 2026: 1.928 t) ticari avın mevsimi. Bu yüzden B yüzdeliği **aynı haftaya** göre alınır, ham miktar değil.
+
 **Model:**
 - Haftalık bolluk indeksi B ∈ [0, 1] hesaplanır:
   - Hal giriş miktarının son 4 yılın aynı haftasına göre yüzdelik değeri.

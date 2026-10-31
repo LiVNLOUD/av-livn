@@ -95,6 +95,7 @@ mevsim(g) = clip( 0.30 + 0.45 · G(g; 210, 45) + 0.70 · G(g; 285, 35) )        
 - **Sonbahar beslenme tepesi Ekim ortası:** beslenme yoğunluğu en yüksek sonbaharda, en düşük kışın (R3).
 - **Kış tabanı 0.30.**
 - **Konumlar A, genlikler C.** R3'te yaz örneği yok; Temmuz–Eylül farkı bu yüzden ölçülü tutuldu.
+- **F2 mevsim serisi araması:** TÜİK/BSGM'de aylık Marmara istavrit av serisi **bulunamadı** (yalnız yıllık). İBB Gürpınar hal girişi (R22) değerlendirildi: Ocak 2026'da tek ayda 1.928 t (yıllık ~8.000 t'nin ~%24'ü). Ticari giriş kışın tepe yapıyor (gırgır/trol, Karadeniz göçü). Bu, kıyı LRF avının yaz–sonbahar tepesinin tersi. Ticari av ≠ kıyı avı olduğu için eğri bu seriye **uydurulmadı**. Genlikler av günlüğünden öğrenilecek (§8, ≥ 150 seans, iki mevsim).
 
 ### 3.5 Rüzgar ve dalga × maruziyet gülü
 
@@ -182,6 +183,8 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `w_substrate` | 0.25 | - | C | 0.5 | — |
 
 **Dağılım:** 45 parametre; A 3, B 1, C 41 (D1: struct_harbour, struct_beach, struct_river eklendi). Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
+
+**F2 (2026-10):** üç yeni kaynak (R20 hal fiyat–miktar, R21 Hoyle vd. 2024, R22 İBB hal girişleri) parametre değerlerini değiştirmedi. Aylık kıyı serisi yok; hal serisi ticari ve ters mevsimli. R20/R22 bolluk sinyaline (puan dışı), R21 kalibrasyon yöntemine (§8a) bağlandı. Dağılım aynı: A 3, B 1, C 41. Herkese açık özet: [av.livn.tr/model/](https://av.livn.tr/model/).
 
 ## 6. Belirsizlik: Monte Carlo %10–90 bandı
 - **Çekim sayısı:** N = 200 (B1'de 500).
@@ -340,6 +343,18 @@ Her bileşen değeriyle birlikte bir **kaynak** döner (UI rozeti):
 | Basınç, akıntı | etki belirsiz | > 300 | Yalnız sıfıra çekme testi |
 
 Kaba formül: `n ≈ (z₀.₉₇₅ + z₀.₈)² / (δ² · λ̄ · süre)` grup başına (λ̄ · süre ≈ 2 balık/seans).
+
+## 8a. Kalibrasyon yöntemi (F4, R21)
+
+Hoyle vd. 2024 (R21) CPUE standardizasyonu iyi uygulamalarından alınanlar:
+- **Yanıt ve bağ:** adet, log bağ; Poisson ile başlanır, aşırı yayılım (Pearson χ²/sd > 1,5) varsa negatif binom.
+- **Efor offset:** `log(aktif_saat × kamış)`. Katsayı 1'e sabit; efor model içinde tahmin edilmez.
+- **Sıfır av tutulur.** Atılırsa CPUE yukarı sapar.
+- **Ortak değişkenler:** kayıt anında dondurulmuş puan (log(puan/100)), ay evresi, bulut, bulanıklık. Gözlemci tek (`kaan`); ikinci gözlemci gelince rastgele etki.
+- **GAM:** puana B-spline (df 4). Eğri doğrusal değilse β tek sayı olarak yetmez.
+- **Tanılama:** artık/dağılım, AIC karşılaştırması, katsayının önsel bandına göre konumu.
+- **Eşikler:** n < 30 seans → "yetersiz veri" (model kurulmaz). 30 → β ve λ₀. 100 → diel ve lamba kolları. 300 → mera statik terimleri ve mevsim genlikleri.
+- **Uygulama:** `analysis/calibrate.py` (statsmodels), `calibrate.yml` (haftalık + elle). Rapor yalnız katsayı ve n içerir, D1 `meta.calibration_report`'a yazılır, yalnız yönetici görür. Repoya kişisel veri yazılmaz.
 
 ## 9. Saha formu (A4; B5'te uygulanır)
 
