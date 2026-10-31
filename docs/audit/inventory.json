@@ -28,7 +28,7 @@
    "osm-way-700323582 Karsak Çayı ağzı (dere ağzı)"
   ],
   "existing": [
-   "osm-way-77362926 İskele (Demirsubaşı)"
+   "osm-way-77362926 Demirsubaşı İskelesi"
   ],
   "osm_within_1km": [
    {
@@ -173,8 +173,8 @@
   "place": null
  },
  "dropped": {
-  "near_existing": 8,
-  "near_other": 7,
+  "near_existing": 10,
+  "near_other": 6,
   "forbidden": 1
  },
  "known_missing": [

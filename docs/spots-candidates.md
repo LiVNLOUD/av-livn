@@ -9,8 +9,8 @@ mevcut meralara katılır (sonraki saatlik puanlamada), **Reddet** ile elenir. K
 | Tip | Aday |
 |---|---|
 | kumsal | 24 |
-| liman / balıkçı barınağı | 7 |
-| dere ağzı | 6 |
+| dere ağzı | 7 |
+| liman / balıkçı barınağı | 6 |
 | bilinen yer (kullanıcı listesi) | 2 |
 | kayalık kıyı | 2 |
 
@@ -74,7 +74,7 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kumsal (Fıstıklı batısı) 3 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985743 |
 | Kumsal (Fıstıklı güneybatısı) | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985744 |
 | Fıstıklı Deresi ağzı | dere ağzı | Fıstıklı | acik (yerleşime 1487 m) | way/698849100 |
-| Güzelyalı Yat Limani | liman / balıkçı barınağı | Güzelyalı Burgaz | belirsiz (marina: giriş kısıtlı olabilir) | node/11450096002 |
+| Dere ağzı (Güzelyalı Burgaz) | dere ağzı | Güzelyalı Burgaz | acik (yerleşime 178 m) | way/1430949806 |
 | Kumsal (Güzelyalı Eğitim kuzeyi) | kumsal | Güzelyalı Eğitim | acik (yerleşime 200 m) | way/665674892 |
 | Kumsal (Güzelyalı Siteler kuzeyi) | kumsal | Güzelyalı Siteler | acik (yerleşime 628 m) | way/1305691029 |
 | Kumsal (Güzelyalı Yalı kuzeybatısı) | kumsal | Güzelyalı Yalı | acik (yerleşime 425 m) | way/1305691027 |
