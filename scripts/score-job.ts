@@ -2,7 +2,7 @@
 // runs the same pure engine as the Worker would, and writes spot_scores with bound parameters (the stored
 // JSON is larger than D1's 100 KB SQL-text limit, so it cannot be inlined into a .sql file).
 //
-// Bundle + run:  node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --outfile=.score/job.mjs
+// Bundle + run:  node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/job.mjs
 //                node .score/job.mjs [--dry-run] [--pending] [--compare-desk out.json]
 //   --pending       15-minute run: exit at once unless a field edit left a spot in pending_rescore; then a full v2 run
 //   --compare-desk  write the current-hour v2 ranking with and without desk (masabasi) findings to out.json
