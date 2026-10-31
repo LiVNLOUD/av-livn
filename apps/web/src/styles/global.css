@@ -164,6 +164,9 @@ label { display: grid; gap: var(--s1); font-size: var(--fs-2); line-height: var(
 .av-pop .maplibregl-popup-content p { margin: var(--s1) 0 var(--s2); color: var(--mist); }
 .av-pop .maplibregl-popup-content label { margin-top: var(--s2); }
 .av-pop .maplibregl-popup-tip { border-top-color: var(--swell) !important; border-bottom-color: var(--swell) !important; }
+.av-pop .pop-list { list-style: none; margin: var(--s2) 0 0; padding: 0; max-height: 50vh; overflow: auto; }
+.av-pop .pop-list button { width: 100%; display: flex; justify-content: space-between; gap: var(--s3); min-height: 36px; padding: 0 var(--s1); background: none; border: 0; border-top: 1px solid var(--swell); color: var(--foam); font: inherit; text-align: left; cursor: pointer; }
+.av-pop .pop-list button:hover { color: var(--sodium); }
 .av-pop .maplibregl-popup-close-button { color: var(--mist); font-size: var(--fs-4); width: 32px; height: 32px; }
 .add-spot { font-size: var(--fs-4) !important; color: var(--foam) !important; }
 .add-spot.on { background: var(--sodium) !important; color: #1a1205 !important; }

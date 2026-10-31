@@ -1,8 +1,9 @@
 """DTM → depth contours, depth bands and land mask → one vector PMTiles file (GDAL ≥ 3.8).
 
-Layers: `contours` (lines, attribute depth), `bands` (polygons, dmin/dmax), `interp` (polygons where the DTM
-is interpolated, no soundings: drawn hatched), `land` (OSM land polygons clipped to MAP_EXTENT when --land is
-given: a vector coastline; else the DTM no-data mask).
+Layers: `contours` (lines, attributes depth and q: 1 = measured cells, 0 = interpolated), `bands` (polygons,
+dmin/dmax), `interp` (polygons where the DTM is interpolated, no soundings: optional "belirsiz derinlik" layer),
+`survey` (polygons where the DTM has real soundings: drawn as a thin outline, G5), `land` (OSM land polygons
+clipped to MAP_EXTENT when --land is given: a vector coastline; else the DTM no-data mask).
 Usage: python -m av_pipeline.bathy.contours data/bathy/dtm.nc apps/web/public/tiles/bathy.pmtiles [--land data/osm/land_marmara.geojson]
 """
 
@@ -65,6 +66,21 @@ def smooth(values: np.ndarray, sigma: float = SMOOTH_SIGMA) -> np.ndarray:
     return np.where(ok, out, np.nan)
 
 
+def split_depth(depth: np.ndarray, interp_mask: np.ndarray, overlap: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    """G5: depth over measured cells and over interpolated cells (mask < / ≥ 0.5), each grown by `overlap` cells into
+    the other so the two contour sets meet without a gap at the boundary."""
+    m = np.nan_to_num(interp_mask, nan=1.0) < 0.5
+
+    def grow(a: np.ndarray) -> np.ndarray:  # 4-neighbour dilation without wrap-around
+        p = np.pad(a, 1)
+        return a | p[:-2, 1:-1] | p[2:, 1:-1] | p[1:-1, :-2] | p[1:-1, 2:]
+
+    meas, interp = m.copy(), ~m
+    for _ in range(overlap):
+        meas, interp = grow(meas), grow(interp)
+    return np.where(meas, depth, np.nan), np.where(interp, depth, np.nan)
+
+
 def build(dtm: Path, out: Path, max_zoom: int = MAX_ZOOM, land: Path | None = None) -> int:
     grid = Grid.from_netcdf(str(dtm))
     with tempfile.TemporaryDirectory() as tmp:
@@ -80,12 +96,26 @@ def build(dtm: Path, out: Path, max_zoom: int = MAX_ZOOM, land: Path | None = No
         names = ["depth", "bandsrc", "land"]
         if grid.interp is not None:
             sea = ~np.isnan(grid.elev)
-            # Smoothed mask contoured at 0.5: rounded hatch edges instead of the DTM cell staircase.
-            write_asc(t / "interp.asc", grid, np.where(sea, smooth((grid.interp >= 0.5).astype(float), 1.5), 0.0))
-            names.append("interp")
+            # Smoothed mask contoured at 0.5: rounded edges instead of the DTM cell staircase.
+            mask = np.where(sea, smooth((grid.interp >= 0.5).astype(float), 1.5), np.nan)
+            write_asc(t / "interp.asc", grid, np.nan_to_num(mask, nan=0.0))
+            # G5: measured area as its own positive polygons (no reliance on holes in the interp polygon)
+            write_asc(t / "survey.asc", grid, np.where(sea, 1.0 - np.nan_to_num(mask, nan=1.0), 0.0))
+            meas, interp = split_depth(depth, mask)
+            write_asc(t / "depth_m.asc", grid, meas)
+            write_asc(t / "depth_i.asc", grid, interp)
+            names += ["interp", "survey", "depth_m", "depth_i"]
         for name in names:
             run("gdal_translate", "-q", "-a_srs", "EPSG:4326", str(t / f"{name}.asc"), str(t / f"{name}.tif"))
-        run("gdal_contour", "-q", "-a", "depth", *sum((["-fl", str(v)] for v in LEVELS_M), []), str(t / "depth.tif"), str(t / "contours.gpkg"), "-nln", "contours")
+        levels = sum((["-fl", str(v)] for v in LEVELS_M), [])
+        if "depth_m" in names:
+            # G5: contours over measured cells (q = 1) and over interpolated cells (q = 0, drawn dashed and faint)
+            for src, q in (("depth_m", 1), ("depth_i", 0)):
+                run("gdal_contour", "-q", "-a", "depth", *levels, str(t / f"{src}.tif"), str(t / f"{src}.gpkg"), "-nln", "c")
+                run("ogr2ogr", "-f", "GPKG", *(["-update", "-append"] if q == 0 else []), str(t / "contours.gpkg"), str(t / f"{src}.gpkg"),
+                    "-nln", "contours", "-dialect", "SQLite", "-sql", f"SELECT geom, depth, {q} AS q FROM c")
+        else:
+            run("gdal_contour", "-q", "-a", "depth", *levels, str(t / "depth.tif"), str(t / "contours.gpkg"), "-nln", "contours")
         run("gdal_contour", "-q", "-p", "-amin", "dmin", "-amax", "dmax", *sum((["-fl", str(v)] for v in BAND_EDGES_M), []), str(t / "bandsrc.tif"), str(t / "bands.gpkg"), "-nln", "bands")
         run("gdal_contour", "-q", "-p", "-amin", "lmin", "-amax", "lmax", "-fl", "0.5", str(t / "land.tif"), str(t / "land.gpkg"), "-nln", "land")
         merged = t / "bathy.gpkg"
@@ -101,6 +131,8 @@ def build(dtm: Path, out: Path, max_zoom: int = MAX_ZOOM, land: Path | None = No
         if "interp" in names:
             run("gdal_contour", "-q", "-p", "-amin", "imin", "-amax", "imax", "-fl", "0.5", str(t / "interp.tif"), str(t / "interp.gpkg"), "-nln", "interp")
             run("ogr2ogr", "-update", "-f", "GPKG", str(merged), str(t / "interp.gpkg"), "-nln", "interp", "-where", "imin >= 0.5", "-nlt", "PROMOTE_TO_MULTI", "-simplify", "0.0003")
+            run("gdal_contour", "-q", "-p", "-amin", "smin", "-amax", "smax", "-fl", "0.5", str(t / "survey.tif"), str(t / "survey.gpkg"), "-nln", "survey")
+            run("ogr2ogr", "-update", "-f", "GPKG", str(merged), str(t / "survey.gpkg"), "-nln", "survey", "-where", "smin >= 0.5", "-nlt", "PROMOTE_TO_MULTI", "-simplify", "0.0003")
         out.parent.mkdir(parents=True, exist_ok=True)
         if out.exists():
             out.unlink()

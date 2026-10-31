@@ -32,6 +32,8 @@ jobs:
         run: python -m av_pipeline.ocean.static_bathy data/bathy/dtm.nc
       - name: Contours → PMTiles
         run: python -m av_pipeline.bathy.contours data/bathy/dtm.nc apps/web/public/tiles/bathy.pmtiles --land data/osm/land_marmara.geojson
+      - name: G5 check — measured / interpolated split correct at every zoom
+        run: python -m av_pipeline.bathy.check_tiles data/bathy/dtm.nc apps/web/public/tiles/bathy.pmtiles
       - name: Fetch OSM (Overpass)
         run: python -m av_pipeline.spots.fetch_osm data/osm/raw.json
       - name: Map labels (capes, harbours)

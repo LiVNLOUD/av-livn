@@ -6,7 +6,7 @@ requires-python = ">=3.11"
 dependencies = ["shapely>=2.0", "numpy>=1.26", "netCDF4>=1.6"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "statsmodels>=0.14"]
+dev = ["pytest>=8", "statsmodels>=0.14", "pmtiles>=3.4", "mapbox-vector-tile>=2.1"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

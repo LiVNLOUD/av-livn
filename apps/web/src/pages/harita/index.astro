@@ -8,8 +8,10 @@ import Base from '../../layouts/Base.astro';
     <details class="legend" id="legend">
       <summary>Lejant</summary>
       <ol class="scale" id="scale"></ol>
-      <p><span class="sw hatch"></span> Taralı alan: DTM enterpolasyonu (GEBCO dolgusu, yerinde ölçüm yok). Buradaki konturlar güvenilmez.</p>
-      <p><b>Ölçülmüş alan sınırı:</b> taralı alanın kenarı, EMODnet'in yerinde ölçüm bloğu ile GEBCO dolgusunun birleştiği yerdir. Burada görülen düz kenar ya da konturun aniden kırılması veri sınırıdır, gerçek bir şev değildir.</p>
+      <p><span class="sw survey"></span> <b>Ölçülmüş alan:</b> EMODnet'in yerinde ölçüm (sounding) olan bölgesi; ince çerçeve ve "ölçülmüş alan" yazısı. İçindeki konturlar düz çizgi.</p>
+      <p><span class="sw dash"></span> Ölçülmemiş bölge: derinlik GEBCO dolgusu / enterpolasyon. Konturlar kesikli ve soluk; buradaki derinlik tahmindir. Gemlik Körfezi'nin büyük kısmı bu sınıfta.</p>
+      <p><label class="lt"><input type="checkbox" id="show-interp" /> <span class="sw hatch"></span> Belirsiz derinlik katmanını göster (ölçülmemiş bölge taralı)</label></p>
+      <p>Meralar uzak görünümde yerleşim rozetinde toplanır ("Armutlu · 18 mera", en iyi puanın rengi); rozete dokununca liste açılır, yakınlaşınca her mera kendi yerinde görünür.</p>
       <p><span class="sw dot"></span> Meralar v2 puan rengiyle: <b class="g">≥ 65</b>, <b class="w">40–65</b>, <b class="b">&lt; 40</b>. Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir.</p>
       <p><label class="lt"><input type="checkbox" id="show-cand" checked /> <span class="sw cand"></span> Aday yerler (OSM envanteri, henüz puanlanmadı)</label></p>
       <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Erişim yasak: ticari liman, sanayi, askeri alan veya işaretlenmiş yasak alan</label></p>
@@ -35,6 +37,8 @@ import Base from '../../layouts/Base.astro';
   .legend b.g { color: var(--good); } .legend b.w { color: var(--warn); } .legend b.b { color: var(--bad); }
   .sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
   .sw.hatch { background: repeating-linear-gradient(135deg, rgb(219 230 234 / .7) 0 1.6px, transparent 1.6px 5.6px), #2f78a6; }
+  .sw.survey { background: transparent; border: 1.5px solid #e9d9a6; }
+  .sw.dash { height: 0; border-top: 2px dashed rgb(219 230 234 / .5); border-radius: 0; vertical-align: 3px; }
   .sw.dot { width: 10px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 2px var(--sea); }
   .scale { list-style: none; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 0; margin: 8px 0 0; }
   :global(.scale li) { height: 22px; display: grid; place-items: end start; padding: 0 3px; font-size: var(--fs-1); color: var(--foam); border-radius: 2px; }

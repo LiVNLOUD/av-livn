@@ -5,7 +5,7 @@ import { PMTiles, Protocol, type RangeResponse, type Source } from 'pmtiles';
 import { esc, KIND_TR, lampV2 } from './format';
 import { getToken } from './admin';
 import { PALETTE } from './palette';
-import { declutter } from './declutter';
+import { declutter, placeBadges } from './declutter';
 import { BANDS_V2 } from '@av-livn/scoring';
 
 // Sequential depth scale: shallow = light, deep = dark (blue). Edges match bathy/contours.py BAND_EDGES_M.
@@ -123,14 +123,30 @@ const map = new maplibregl.Map({
         id: 'bands', type: 'fill', source: 'bathy', 'source-layer': 'bands',
         paint: { 'fill-color': ['step', ['get', 'dmin'], DEPTH_STOPS[0]![1], ...DEPTH_STOPS.slice(1).flatMap(([d, c]) => [d, c])] as never, 'fill-antialias': false },
       },
-      { id: 'interp', type: 'fill', source: 'bathy', 'source-layer': 'interp', paint: { 'fill-pattern': 'hatch', 'fill-opacity': 0.8 } },
+      // G5: "belirsiz derinlik" (interpolated DTM) is optional, off by default; the hatch image is registered on
+      // load before the layer can be shown (tiles laid out before the image existed drew no hatch).
+      { id: 'interp', type: 'fill', source: 'bathy', 'source-layer': 'interp', layout: { visibility: 'none' }, paint: { 'fill-pattern': 'hatch', 'fill-opacity': 0.55 } },
       {
-        id: 'contours', type: 'line', source: 'bathy', 'source-layer': 'contours',
+        id: 'contours', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['!=', ['get', 'q'], 0],
         paint: {
           'line-color': '#dbe6ea',
           'line-opacity': ['match', ['get', 'depth'], [10, 20, 50, 100], 0.55, 0.28],
           'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1.2],
         },
+      },
+      {
+        // contours over interpolated (GEBCO-filled) cells: dashed and faint
+        id: 'contours-i', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['==', ['get', 'q'], 0],
+        paint: {
+          'line-color': '#dbe6ea',
+          'line-opacity': ['match', ['get', 'depth'], [10, 20, 50, 100], 0.3, 0.16],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1],
+          'line-dasharray': [3, 3],
+        },
+      },
+      {
+        id: 'survey-line', type: 'line', source: 'bathy', 'source-layer': 'survey',
+        paint: { 'line-color': '#e9d9a6', 'line-opacity': 0.75, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.8, 14, 1.4] },
       },
       { id: 'fade', type: 'fill', source: 'fade', paint: { 'fill-color': OPEN_WATER, 'fill-opacity': ['get', 'a'], 'fill-antialias': false } },
       { id: 'land', type: 'fill', source: 'bathy', 'source-layer': 'land', paint: { 'fill-color': LAND } },
@@ -163,6 +179,11 @@ const map = new maplibregl.Map({
         },
         paint: { 'text-color': ['match', ['get', 'kind'], 'cape', '#e7d7b0', '#9fc3d6'], 'text-halo-color': '#0e1c27', 'text-halo-width': 1.2 },
       },
+      {
+        id: 'survey-label', type: 'symbol', source: 'bathy', 'source-layer': 'survey',
+        layout: { 'symbol-placement': 'line', 'symbol-spacing': 420, 'text-field': 'ölçülmüş alan', 'text-font': ['Noto Sans Italic'], 'text-size': 11, 'text-offset': [0, 0.9] },
+        paint: { 'text-color': '#e9d9a6', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.2 },
+      },
     ],
   },
 });
@@ -173,9 +194,9 @@ map.addControl(
   'bottom-right',
 );
 
-// Diagonal hatch for interpolated (GEBCO-filled) areas.
-map.on('styleimagemissing', (e) => {
-  if (e.id !== 'hatch' || map.hasImage('hatch')) return;
+// Diagonal hatch for the optional "belirsiz derinlik" layer (interpolated, GEBCO-filled areas).
+const addHatch = () => {
+  if (map.hasImage('hatch')) return;
   const n = 8;
   const c = document.createElement('canvas');
   c.width = c.height = n;
@@ -191,7 +212,8 @@ map.on('styleimagemissing', (e) => {
   g.lineTo(n + n / 2, n / 2);
   g.stroke();
   map.addImage('hatch', g.getImageData(0, 0, n, n), { pixelRatio: 1 });
-});
+};
+map.on('styleimagemissing', (e) => e.id === 'hatch' && addHatch());
 
 const card = (ui('card') ?? document.createElement('aside')) as HTMLElement;
 function showCard(s: Spot) {
@@ -221,6 +243,9 @@ const spotsReady = fetchSpots();
 let layout: () => void = () => {};
 
 map.on('load', async () => {
+  addHatch();
+  const unc = ui('show-interp') as HTMLInputElement | null;
+  unc?.addEventListener('change', () => map.setLayoutProperty('interp', 'visibility', unc.checked ? 'visible' : 'none'));
   // D1/E4: forbidden commercial ports and inventory proposals (approved ones are already in the spot list).
   const [cand, forb, drawn] = await Promise.all(['/tiles/candidates.geojson', '/tiles/forbidden.geojson', '/api/forbidden'].map((u) => fetch(u).then((r) => (r.ok ? r.json() : empty)).catch(() => empty)));
   // F1: commercial ports from OSM plus owner-drawn areas (e.g. Gemport, Roda)
@@ -428,11 +453,52 @@ map.on('load', async () => {
     paint: { 'text-color': '#0e1c27' },
   });
 
-  /** Spread markers that overlap on screen at the current zoom; leader lines to their true positions. */
+  // G5: settlement badges at far zoom (visual grouping only; every spot keeps its own data and card).
+  const P = 24;
+  const pill = new ImageData(2 * P, 2 * P);
+  for (let y = 0; y < 2 * P; y++)
+    for (let x = 0; x < 2 * P; x++) {
+      const dx = Math.max(0, Math.abs(x + 0.5 - P) - P * 0.35);
+      const dy = Math.max(0, Math.abs(y + 0.5 - P) - P * 0.35);
+      const d = Math.hypot(dx, dy);
+      pill.data[(y * 2 * P + x) * 4 + 3] = Math.max(0, Math.min(255, Math.round(192 - (d - P * 0.5) * 24)));
+    }
+  map.addImage('pill', pill, { sdf: true, pixelRatio: 2, content: [P * 0.6, P * 0.6, P * 1.4, P * 1.4], stretchX: [[P * 0.9, P * 1.1]], stretchY: [[P * 0.9, P * 1.1]] });
+  map.addSource('badges', { type: 'geojson', data: empty });
+  map.addLayer({
+    id: 'badges', type: 'symbol', source: 'badges',
+    layout: {
+      'icon-image': 'pill', 'icon-text-fit': 'both', 'icon-text-fit-padding': [3, 7, 3, 7], 'icon-allow-overlap': true, 'text-allow-overlap': true,
+      'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': 12,
+    },
+    paint: { 'icon-color': color as never, 'icon-halo-color': '#0e1c27', 'icon-halo-width': 1.5, 'text-color': '#0e1c27' },
+  });
+
+  /**
+   * G5: below BADGE_ZOOM the spots of one settlement show as one badge ("Armutlu · 18 mera", best score colour);
+   * above it every spot sits at its true position. Overlapping markers are spread on a ring (leader lines to the
+   * true position) only at close zoom (≥ SPIDER_ZOOM) and for groups of at most SPIDER_MAX.
+   */
+  const BADGE_ZOOM = 12;
+  const SPIDER_ZOOM = 14;
+  const SPIDER_MAX = 8;
   layout = () => {
-    const px = spots.map((s) => map.project([s.lon, s.lat]));
-    const shown = declutter(px, 24);
-    const feats = spots.map((s, i) => {
+    const far = map.getZoom() < BADGE_ZOOM;
+    const { badges, single } = far
+      ? placeBadges(spots.map((s) => ({ id: s.id, place: s.place, lon: s.lon, lat: s.lat, total: s.score.total })))
+      : { badges: [], single: spots.map((s) => s.id) };
+    const keep = new Set(single);
+    const shownSpots = spots.filter((s) => keep.has(s.id));
+    (map.getSource('badges') as maplibregl.GeoJSONSource).setData({
+      type: 'FeatureCollection',
+      features: badges.map((b) => ({
+        type: 'Feature', geometry: { type: 'Point', coordinates: [b.lon, b.lat] },
+        properties: { place: b.place, ids: b.ids.join(','), total: b.best ?? -1, label: `${b.place} · ${b.count} mera` },
+      })),
+    });
+    const px = shownSpots.map((s) => map.project([s.lon, s.lat]));
+    const shown = map.getZoom() >= SPIDER_ZOOM ? declutter(px, 24, SPIDER_MAX) : px;
+    const feats = shownSpots.map((s, i) => {
       const ll = map.unproject([shown[i]!.x, shown[i]!.y]);
       return { s, ll, moved: Math.hypot(shown[i]!.x - px[i]!.x, shown[i]!.y - px[i]!.y) > 1 };
     });
@@ -451,6 +517,32 @@ map.on('load', async () => {
       ]),
     });
   };
+  // Badge click: the settlement's spots as a list (best first); a row flies to the spot and opens its card.
+  const listPop = new maplibregl.Popup({ closeButton: true, maxWidth: '320px', className: 'av-pop' });
+  map.on('click', 'badges', (e) => {
+    const f = e.features?.[0];
+    const p = f?.properties as { place: string; ids: string } | undefined;
+    if (!f || !p) return;
+    const rows = p.ids.split(',').map((id) => byId.get(id)!).filter(Boolean).sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1));
+    listPop
+      .setLngLat((f.geometry as GeoJSON.Point).coordinates as [number, number])
+      .setHTML(`<b>${esc(p.place)} · ${rows.length} mera</b><ol class="pop-list">${rows
+        .map((s) => `<li><button type="button" data-id="${esc(s.id)}"><span>${esc(s.name)}</span><b>${s.score.total === null ? '–' : Math.round(s.score.total)}</b></button></li>`)
+        .join('')}</ol>`)
+      .addTo(map);
+    listPop.getElement().querySelectorAll<HTMLButtonElement>('button[data-id]').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const s = byId.get(btn.dataset.id!);
+        if (!s) return;
+        listPop.remove();
+        map.easeTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 14.5) });
+        if (o.onSpot) o.onSpot(s.id);
+        else showCard(s);
+      }),
+    );
+  });
+  map.on('mouseenter', 'badges', () => (map.getCanvas().style.cursor = 'pointer'));
+  map.on('mouseleave', 'badges', () => (map.getCanvas().style.cursor = ''));
   layout();
   loading.hidden = true;
   map.on('zoomend', layout);
