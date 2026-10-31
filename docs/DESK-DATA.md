@@ -14,7 +14,7 @@ Kod: `pipeline/av_pipeline/desk/` — çalıştırma yalnız GitHub Actions'ta (
 
 | | Kaynak | Ne yazılır | Güven | Lisans/atıf |
 |---|---|---|---|---|
-| a | OSM Overpass: uç ±40 m `highway=street_lamp`, `man_made=lighthouse`, `seamark:light:*` | lamba p 0.95 | orta | ODbL, © OSM katkıcıları |
+| a | OSM Overpass: uç ±40 m `highway=street_lamp`, `man_made=lighthouse`, `seamark:light:*` | lamba p 0.95 (sokak lambası) / 0.6 (fener, seyir ışığı) | orta | ODbL, © OSM katkıcıları |
 | b | Mapillary Graph API, uç ±50 m görüntü listesi | yalnız kart bağlantısı (`/tiles/mapillary.json`); otomatik tespit yok | — | CC BY-SA 4.0 |
 | c | Sentinel-2 L2A (Planetary Computer STAC), son 3 yıl, bulut < %10 | taban sınıfı açık (kum) / koyu | düşük, en çok orta | Copernicus açık veri |
 | d | Literatür sediment noktaları | — (bulunamadı, aşağıda) | | |
@@ -22,7 +22,7 @@ Kod: `pipeline/av_pipeline/desk/` — çalıştırma yalnız GitHub Actions'ta (
 | f | OpenSeaMap derinlik | — (kapsam doğrulanamadı, aşağıda) | | |
 
 ## a) OSM lamba
-- Bulunursa lamba olasılığı 0.95 (masa başı). **Bulunmazsa hiçbir şey yazılmaz**: OSM'de eksik lamba yaygındır,
+- Sokak lambası bulunursa lamba olasılığı 0.95; yalnız deniz feneri ya da seyir ışığı (seamark) bulunursa 0.6 (yanıp sönen, gemiye yönelik ışık suyu iskele lambası gibi aydınlatmaz; ilk çalışmada 0.95 idi ve İskele (Demirsubaşı)'yı gece #3'ten #1'e taşıyordu). **Bulunmazsa hiçbir şey yazılmaz**: OSM'de eksik lamba yaygındır,
   "OSM'de yok" lambanın yokluğuna kanıt değildir.
 - Sınırlama: sokak lambası kıyıya bakmayabilir, kapalı olabilir; deniz feneri ışığı suya yakın balığı toplamaz
   (yüksek, dönen). Bu yüzden güven "orta", saha gözlemi her zaman üstündür.

@@ -314,7 +314,7 @@ export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hou
           ? `lamba — ${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi (değer gizli)`
           : spot.lamp !== null
           ? `lamba ${spot.lamp ? 'var' : 'yok'} — ${c('lamba').source}`
-          : `lamba olasılığı ${n1(lampPrior(spot))} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
+          : `lamba olasılığı ${lampPrior(spot).toFixed(2).replace(".", ",")} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
       break;
     case 'yapi':
       body = PRIVATE_SOURCES.has(c('yapi').source)

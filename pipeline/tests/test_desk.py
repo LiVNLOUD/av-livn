@@ -19,6 +19,8 @@ def test_osm_lamps_within_radius_only_and_no_negative_findings():
     ]
     f = osm_lamps.findings(SPOTS, els, "2026-10-31")
     assert len(f) == 1 and f[0].spot_id == "a" and f[0].light_prob == 0.95
+    nav = osm_lamps.findings(SPOTS, [els[2] | {"lat": 40.40020}], "d")
+    assert nav[0].light_prob == 0.6
     assert f[0].evidence["objects"] == ["way/2", "node/1"]
     assert "lighthouse 11 m" in f[0].note
     assert osm_lamps.kind({"seamark:type": "light_minor"}) == "seamark_light"

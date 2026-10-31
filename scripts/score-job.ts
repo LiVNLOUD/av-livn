@@ -74,12 +74,16 @@ for (const r of v2) {
 if (compareOut) {
   // Same weather, same hour: field table without and with desk findings (rejected ones never count).
   const withoutDesk = scoreRecordsV2(rows, snaps, now, fieldRecords(obs.filter((o) => (o.source_kind ?? 'saha') !== 'masabasi'), depths), undefined, oceanMap(oSeries, oNormal));
-  const at = (recs: typeof v2) => Object.fromEntries(recs.map((r) => [r.spot_id, (JSON.parse(r.list_json) as unknown[][])[now0 - r.start_hour]]));
-  const before = at(withoutDesk);
-  const after = at(v2);
-  const out = rows.map((r) => ({ spot_id: r.id, name: r.name, before: before[r.id], after: after[r.id] }));
+  // Current hour and the next 21:00 Europe/Istanbul (18 UTC): lamp findings only act at night.
+  const night = now0 + ((18 - (now0 % 24) + 24) % 24);
+  const at = (recs: typeof v2, h: number) => Object.fromEntries(recs.map((r) => [r.spot_id, (JSON.parse(r.list_json) as unknown[][])[h - r.start_hour]]));
+  const hours = [now0, night].map((h) => {
+    const before = at(withoutDesk, h);
+    const after = at(v2, h);
+    return { hour: new Date(h * 3_600_000).toISOString(), spots: rows.map((r) => ({ spot_id: r.id, name: r.name, before: before[r.id], after: after[r.id] })) };
+  });
   const { writeFileSync } = await import('node:fs');
-  writeFileSync(compareOut, JSON.stringify({ hour: new Date(now0 * 3_600_000).toISOString(), spots: out }, null, 1) + '\n');
+  writeFileSync(compareOut, JSON.stringify({ hour: hours[0]!.hour, spots: hours[0]!.spots, night: hours[1] }, null, 1) + '\n');
   console.log(`compare-desk → ${compareOut}`);
 }
 

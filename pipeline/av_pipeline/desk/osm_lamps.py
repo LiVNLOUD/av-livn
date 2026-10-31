@@ -1,6 +1,7 @@
 """a) Lamps from OSM within RADIUS_M of each spot tip: highway=street_lamp, man_made=lighthouse, seamark:light:*.
 
-A found lamp raises the lamp probability to 0.95 (desk data, unconfirmed). Nothing found writes nothing:
+A street lamp raises the lamp probability to 0.95; a lighthouse or seamark light only to 0.6 (a flashing
+navigation light does not light the water the way a pier lamp does). Desk data, unconfirmed. Nothing found writes nothing:
 missing OSM objects are common, so "not in OSM" is not evidence of no lamp. Runs in Actions (Overpass).
 """
 
@@ -12,7 +13,7 @@ from av_pipeline.desk.findings import Finding
 from av_pipeline.spots.fetch_osm import fetch
 
 RADIUS_M = 40.0
-LAMP_P = 0.95
+LAMP_P = {"street_lamp": 0.95, "lighthouse": 0.6, "seamark_light": 0.6}  # nav lights flash and are aimed at ships, not the water
 
 
 def query(spots: list[dict]) -> str:
@@ -51,7 +52,7 @@ def findings(spots: list[dict], elements: list[dict], date: str) -> list[Finding
         if hits:
             hits.sort()
             out.append(Finding(
-                spot_id=s["id"], source="osm_lamp", observed_at=date, light_prob=LAMP_P,
+                spot_id=s["id"], source="osm_lamp", observed_at=date, light_prob=max(LAMP_P[k] for _, k, _ in hits),
                 note=f"OSM: {len(hits)} lamba/fener ≤ {RADIUS_M:.0f} m ({', '.join(f'{k} {d} m' for d, k, _ in hits[:4])})",
                 evidence={"source": "OpenStreetMap (Overpass)", "date": date, "method": f"{RADIUS_M:.0f} m çevresinde highway=street_lamp, man_made=lighthouse, seamark:light", "confidence": "orta",
                           "license": "ODbL", "objects": [o for _, _, o in hits]},
