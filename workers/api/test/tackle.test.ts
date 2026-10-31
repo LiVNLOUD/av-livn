@@ -52,7 +52,7 @@ describe('tackle profiles (F0)', () => {
     const h = Math.floor(Date.now() / 3_600_000);
     const live = await Promise.all(['/api/spots', '/api/hours', '/api/windows'].map(async (u) => (await app.request(u, {}, env)).json()));
     const [list, hrs, win, fet] = await Promise.all([LIST_SQL, HOURS_SQL, WINDOWS_SQL, FETCHED_SQL].map(async (q) => (await env.DB.prepare(q).all()).results));
-    const bodies = preBodies(list as ListRow[], hrs as HoursRow[], win as WindowsRow[], fetchedAt(fet!), [h]);
+    const bodies = preBodies(list as unknown as ListRow[], hrs as unknown as HoursRow[], win as unknown as WindowsRow[], fetchedAt(fet!), [h]);
     expect(bodies.map(([k]) => k)).toEqual([`pub:list:${h}`, `pub:hours:${h}`, `pub:windows:${h}`]);
     bodies.forEach(([, v], i) => expect(JSON.parse(v)).toEqual(live[i]));
     for (const [k, v] of bodies) await env.DB.prepare('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(k, v).run();
