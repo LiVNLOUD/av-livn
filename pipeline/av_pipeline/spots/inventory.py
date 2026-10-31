@@ -1,4 +1,4 @@
-"""D1: wider spot inventory → proposals (status 'proposed', not scored until approved in /admin/).
+"""F1: wider spot inventory → active spots added automatically when they pass the checks (no approval step).
 
   python -m av_pipeline.spots.inventory fetch data/osm/inventory_raw.json          # Actions (Overpass)
   python -m av_pipeline.spots.inventory build data/osm/inventory_raw.json data/spots.geojson \\
@@ -34,6 +34,8 @@ COAST_NEAR_M = 30.0
 SEG_M = 400.0  # target segment; parts are split into n = round(L / SEG_M) pieces of 300–500 m
 MIN_SEG_M = 120.0
 MOUTH_M = 60.0
+DUP_M = 25.0
+COAST_MAX_M = 30.0
 CAPE_M = 200.0
 KNOWN_NEAR_M = 1500.0
 NEAR_EXISTING_M = 150.0
@@ -58,7 +60,9 @@ def build_query() -> str:
   nwr["harbour"]({b});
   nwr["seamark:type"~"^harbour"]({b});
   nwr["amenity"="ferry_terminal"]({b});
-  nwr["natural"~"^(beach|bare_rock|cliff)$"]({b});
+  nwr["natural"~"^(beach|bare_rock|cliff|reef)$"]({b});
+  nwr["military"]({b});
+  nwr["landuse"~"^(industrial|military)$"]({b});
   node["natural"="cape"]({b});
   way["waterway"~"^(river|stream)$"]({b});
   nwr["landuse"="port"]({b});
@@ -103,6 +107,30 @@ def ref(el: dict) -> str:
 PORTISH = ("harbour", "industrial", "man_made", "seamark:type", "waterway", "port")
 
 
+def exclusion(tags: dict) -> str | None:
+    """F1 b): areas where a spot is never added (reason text), besides commercial ports (is_forbidden)."""
+    if "military" in tags or tags.get("landuse") == "military":
+        return "askeri alan"
+    if tags.get("landuse") == "industrial" or tags.get("harbour") == "industrial":
+        return "sanayi alanı"
+    return None
+
+
+def exclusion_reason(pt, tags: dict, coast_d: float, forbidden: list[dict], excl_zones: list) -> str | None:
+    """F1 checks a) and b); None = passes."""
+    if coast_d > COAST_MAX_M:
+        return f"kıyı çizgisine {round(coast_d)} m (> {COAST_MAX_M:.0f} m): fiziksel kıyı nesnesi değil"
+    if tags.get("access") in ("private", "no"):
+        return f"OSM access={tags['access']}"
+    for f in forbidden:
+        if f["geom"].buffer(100).contains(pt):
+            return f"ticari liman sahası ({f['name']})"
+    for z, why, r in excl_zones:
+        if z.contains(pt):
+            return f"{why} ({r})"
+    return None
+
+
 def is_forbidden(tags: dict) -> bool:
     """Commercial port: tagged as one, or a company name on a port/industrial/structure object (a school or
     shop named after the company is not a port)."""
@@ -117,7 +145,7 @@ def classify(tags: dict) -> str | None:
         return "structure"
     if "harbour" in tags or tags.get("leisure") in ("marina", "slipway") or str(tags.get("seamark:type", "")).startswith("harbour") or tags.get("amenity") == "ferry_terminal":
         return "harbour"
-    if tags.get("natural") in ("bare_rock", "cliff", "cape"):
+    if tags.get("natural") in ("bare_rock", "cliff", "cape", "reef"):
         return "rocky"
     if tags.get("natural") == "beach":
         return "beach"
@@ -204,6 +232,7 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
     existing_xy = {f["properties"]["id"]: to_xy(*f["geometry"]["coordinates"]) for f in existing}
 
     forbidden, items = [], []
+    excl_zones: list = []
     for el in els:
         t = el.get("tags", {})
         g = geom(el)
@@ -212,10 +241,15 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
         if is_forbidden(t):
             forbidden.append({"name": t.get("name") or t.get("operator") or "liman sahası", "geom": g, "ref": ref(el), "tags": {k: v for k, v in t.items() if k in ("name", "operator", "landuse", "industrial", "harbour")}})
             continue
+        ex = exclusion(t)
+        if ex and not isinstance(g, Point):
+            excl_zones.append((g.buffer(30), ex, ref(el)))
+            if not classify(t):
+                continue
         typ = classify(t)
         if typ:
             items.append((typ, el, t, g))
-    zones = [f["geom"].buffer(100) for f in forbidden]
+    zones = [f["geom"].buffer(100) for f in forbidden] + [z for z, _, _ in excl_zones]
     structs = [g for typ, _, _, g in items if typ == "structure"]
 
     props_list: list[dict] = []
@@ -247,6 +281,7 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
             # capes: the coastline within CAPE_M of the point (the headland itself), others: within COAST_NEAR_M
             near = CAPE_M if t.get("natural") == "cape" else COAST_NEAR_M
             pts = [(seg.interpolate(0.5, normalized=True), round(seg.length), seg) for seg in segments(coast, g, near)]
+        coast_d = min(ln.distance(g) for ln in coast.lines)  # F1 a): the OSM object itself reaches the coastline
         for k, (pt, length, seg) in enumerate(pts):
             line, q, _ = coast.nearest(pt)
             normal = coast.smoothed_normal(line, q)
@@ -255,27 +290,29 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
             kind = t["man_made"] if typ == "structure" else KIND[typ]
             pid = f"osm-{el['type']}-{el['id']}" + (f"-{k + 1}" if len(pts) > 1 or typ in ("rocky", "beach") else "")
             props_list.append({
-                "_xy": (pt.x, pt.y), "_typ": typ, "_inside_forbidden": any(z.contains(pt) for z in zones),
+                "_xy": (pt.x, pt.y), "_typ": typ, "_inside_forbidden": any(z.contains(pt) for z in zones), "_coast_d": coast_d,
+                "_why_out": exclusion_reason(pt, t, coast_d, forbidden, excl_zones),
                 "id": pid, "osm_name": t.get("name"), "kind": kind, "type": typ, "type_tr": TYPE_TR[typ],
                 "length_m": round(length) if length else None, "shore_normal_deg": round(normal, 1), "place": place, "place_m": place_m,
                 "access": access, "access_note": why, "osm": [ref(el)], "osm_tags": {k2: v for k2, v in t.items() if k2 in ("man_made", "harbour", "leisure", "natural", "waterway", "amenity", "seamark:type", "name", "access")},
             })
 
-    # dedupe: existing spots first, then by type priority (and longer structures first)
+    # F1: no merging. A point is dropped only if it duplicates a spot (≤ DUP_M) or fails a check (reasons kept);
+    # same-type points within NEAR_EXISTING_M stay separate and link to each other ("yakın mera").
     kept: list[dict] = []
-    dropped: dict[str, int] = {"near_existing": 0, "near_other": 0, "forbidden": 0}
+    excluded: list[dict] = []
+    dropped: dict[str, int] = {"duplicate": 0, "excluded": 0}
     for pr in sorted(props_list, key=lambda p: (PRIORITY[p["_typ"]], -(p["length_m"] or 0), p["id"])):
-        if pr["_inside_forbidden"]:
-            dropped["forbidden"] += 1
+        if pr["_why_out"]:
+            dropped["excluded"] += 1
+            excluded.append({"id": pr["id"], "type": pr["type_tr"], "place": pr["place"], "osm": pr["osm"], "reason": pr["_why_out"], "lonlat": [round(v, 6) for v in to_lonlat(*pr["_xy"])]})
             continue
-        if any(math.dist(pr["_xy"], xy) < NEAR_EXISTING_M for xy in existing_xy.values()):
-            dropped["near_existing"] += 1
-            continue
-        lim = NEAR_STRUCT_M if pr["_typ"] == "structure" else NEAR_EXISTING_M
-        if any(math.dist(pr["_xy"], k["_xy"]) < (NEAR_STRUCT_M if k["_typ"] == "structure" and pr["_typ"] == "structure" else lim) for k in kept):
-            dropped["near_other"] += 1
+        if any(math.dist(pr["_xy"], xy) < DUP_M for xy in existing_xy.values()) or any(math.dist(pr["_xy"], k["_xy"]) < DUP_M for k in kept):
+            dropped["duplicate"] += 1
             continue
         kept.append(pr)
+    for pr in kept:
+        pr["near"] = [k["id"] for k in kept if k is not pr and k["kind"] == pr["kind"] and math.dist(pr["_xy"], k["_xy"]) < NEAR_EXISTING_M]
 
     known_missing = []
     for name in KNOWN:
@@ -286,19 +323,13 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
         xy = pl[0]["xy"]
         if any(math.dist(xy, k["_xy"]) <= KNOWN_NEAR_M for k in kept) or any(math.dist(xy, e) <= KNOWN_NEAR_M for e in existing_xy.values()):
             continue
-        line, q, _ = coast.nearest(Point(xy))
-        kept.append({
-            "_xy": (q.x, q.y), "_typ": "harbour", "_inside_forbidden": False, "id": f"known-{norm(name)}", "osm_name": None, "kind": "harbour", "type": "harbour",
-            "type_tr": "bilinen yer (kullanıcı listesi)", "length_m": None, "shore_normal_deg": round(coast.smoothed_normal(line, q), 1), "place": pl[0]["name"],
-            "place_m": round(math.dist(xy, (q.x, q.y))), "access": "acik", "access_note": "kullanıcı listesi; konum yerleşime en yakın kıyı noktası, sahada düzeltin",
-            "osm": [], "osm_tags": {},
-        })
+        known_missing.append(f"{name}: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)")
     name_props(kept, places)
     feats = []
     for pr in sorted(kept, key=lambda p: p["id"]):
         lon, lat = to_lonlat(*pr["_xy"])
         props = {k: v for k, v in pr.items() if not k.startswith("_")}
-        props.update(status="proposed", source=ATTRIBUTION, name_source="osm" if pr["osm_name"] and pr["_typ"] in ("structure", "harbour") else "generated")
+        props.update(status="candidate", auto_added=True, source=ATTRIBUTION, name_source="osm" if pr["osm_name"] and pr["_typ"] in ("structure", "harbour") else "generated")
         feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]}, "properties": props})
 
     forb = []
@@ -318,6 +349,7 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
     diag = diagnostics(raw, places, feats, existing)
     diag["dropped"] = dropped
     diag["known_missing"] = known_missing
+    diag["excluded"] = excluded
     return feats, forb, diag
 
 
@@ -401,14 +433,18 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
         by_type[p["type_tr"]] = by_type.get(p["type_tr"], 0) + 1
         by_place[p["place"] or "—"] = by_place.get(p["place"] or "—", 0) + 1
     lines = [
-        "# Mera adayları (D1)", "",
-        "Otomatik üretilir: `python -m av_pipeline.spots.inventory build` (geodata.yml). Adaylar `status = 'proposed'`:",
-        "puanlanmaz ve listede görünmez; haritada gri \"aday\" katmanında durur. `/admin/` sayfasında **Onayla** ile",
-        "mevcut meralara katılır (sonraki saatlik puanlamada), **Reddet** ile elenir. Kaynak © OpenStreetMap katkıcıları (ODbL).",
+        "# Otomatik eklenen meralar (F1)", "",
+        "Otomatik üretilir: `python -m av_pipeline.spots.inventory build` (geodata.yml). Onay adımı yok: kontrollerden geçen",
+        "her yer doğrudan aktif mera olur ve v2 modelle puanlanır; kartta \"otomatik eklendi — sahada doğrulanmadı\" yazar.",
+        "Yönetici bir merayı herkesten gizleyebilir ve `/admin/` \"Gizlenenler\" listesinden geri alabilir. Kaynak © OpenStreetMap katkıcıları (ODbL).",
         "",
-        f"**Toplam {len(feats)} aday.** Ticari liman/sanayi alanı (erişim yasak katmanı): {len(forb)}.", "",
-        "| Tip | Aday |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(by_type.items(), key=lambda kv: -kv[1])], "",
-        "| Yerleşim | Aday |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(by_place.items(), key=lambda kv: (-kv[1], kv[0]))], "",
+        "**Kontroller:** a) OSM nesnesi kıyı çizgisine ≤ 30 m; b) `access=private|no`, askeri alan, sanayi alanı, ticari liman ve",
+        "yönetici yasak alanları içinde değil; c) kumsala md. 16/5 tarihli uyarı rozeti (kesin yasak değil); d) 150 m içindeki aynı",
+        "tip meralar ayrı kalır, birbirine \"yakın mera\" bağlantısı alır. Yalnız aynı noktanın kopyası (≤ 25 m) atılır.",
+        "",
+        f"**Eklenen: {len(feats)} mera.** Elenen: {len(diag.get('excluded', []))}. Ticari liman (erişim yasak katmanı): {len(forb)}.", "",
+        "| Tip | Eklenen |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(by_type.items(), key=lambda kv: -kv[1])], "",
+        "| Yerleşim | Eklenen |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(by_place.items(), key=lambda kv: (-kv[1], kv[0]))], "",
         "## Yeni tipler için istavrit tercih değerleri (kanıt C, literatür yok)", "",
         "| Tip | Yapı terimi | Lamba önseli | Derinlik önseli |", "|---|---|---|---|",
         "| rıhtım (quay) | iskele ile aynı (0.75 × uzunluk) | 0.5 | iskele formülü |",
@@ -424,15 +460,22 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
         p = f["properties"]
         lines.append(f"| {p['name']} | {p['type_tr']} | {p['place'] or '—'} | {p['access']} ({p['access_note']}) | {', '.join(p['osm'])} |")
     lines += ["", "## Erişim yasak (ticari liman / sanayi)", "", "| Ad | OSM |", "|---|---|", *[f"| {f['properties']['name']} | {f['properties']['osm']} |" for f in forb]]
+    reasons: dict[str, int] = {}
+    for e in diag.get("excluded", []):
+        r = e["reason"].split(" (")[0].split(":")[0]
+        reasons[r] = reasons.get(r, 0) + 1
+    lines += ["", "## Elenen yerler", "", "| Neden | Sayı |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])], "",
+              "| Yer | Tip | Yerleşim | Neden | OSM |", "|---|---|---|---|---|",
+              *[f"| {e['id']} | {e['type']} | {e['place'] or '—'} | {e['reason']} | {', '.join(e['osm'])} |" for e in diag.get("excluded", [])]]
     lines += ["", "## Neden Karacaali ve Büyükkumla iskeleleri listede yoktu?", "",
               "İkisi de OpenStreetMap'te iskele *yolu* (`man_made=pier`) olarak değil, adı \"… İskelesi\" olan tek bir **nokta**",
               "(`leisure=marina`) olarak çizilmiş. Harita etiket katmanı adlı liman/marina noktalarını gösterdiği için haritada",
               "göründüler; mera listesi ise yalnız `man_made=pier|breakwater|groyne` **yollarından** üretiliyordu (uç noktası ve",
-              "uzunluk için çizgi gerekir). D1 envanteri nokta ve alan nesnelerini de alır; ikisi artık aday.", ""]
+              "uzunluk için çizgi gerekir). Envanter nokta ve alan nesnelerini de alır; ikisi artık mera.", ""]
     lines += ["## Bilinen yerler (kullanıcı listesi)", ""]
     lines += [f"- {m}" for m in diag.get("known_missing", [])]
     for k, v in diag.items():
-        if k in ("dropped", "known_missing"):
+        if k in ("dropped", "known_missing", "excluded"):
             continue
         if not v.get("place"):
             lines.append(f"- **{k}:** OSM'de yerleşim noktası yok.")

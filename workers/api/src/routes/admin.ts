@@ -3,6 +3,7 @@ import type { Env } from '../env';
 import { catchRoutes } from './catch';
 import { notifyRoutes } from './notify';
 import { validateProfiles } from '../lib/tackle';
+import { forbiddenUpdates, parseArea, validateArea, type SpotPos } from '../lib/forbidden';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
@@ -29,7 +30,7 @@ adminRoutes.use('*', async (c, next) => {
   await next();
 });
 
-type Fields = { name?: unknown; has_light?: unknown; status?: unknown; notes?: unknown };
+type Fields = { name?: unknown; has_light?: unknown; status?: unknown; notes?: unknown; hidden?: unknown };
 type Valid = { ok: true; set: Record<string, string | number | null> } | { ok: false; error: string };
 
 export function validateFields(body: Fields): Valid {
@@ -51,6 +52,11 @@ export function validateFields(body: Fields): Valid {
     if (body.notes !== null && (typeof body.notes !== 'string' || body.notes.length > 1000)) return { ok: false, error: 'invalid_notes' };
     set.notes = body.notes as string | null;
   }
+  if (body.hidden !== undefined) {
+    // F1: hide from everyone (lists, map, heat map, scoring); false restores (also a forbidden-area hide)
+    if (typeof body.hidden !== 'boolean') return { ok: false, error: 'invalid_hidden' };
+    set.hidden_reason = body.hidden ? 'admin' : null;
+  }
   if (Object.keys(set).length === 0) return { ok: false, error: 'empty_patch' };
   return { ok: true, set };
 }
@@ -58,6 +64,35 @@ export function validateFields(body: Fields): Valid {
 adminRoutes.get('/ping', (c) => c.json({ ok: true }));
 adminRoutes.route('/catch', catchRoutes);
 adminRoutes.route('/notify', notifyRoutes);
+
+/** Re-apply owner-drawn forbidden areas to every spot (cheap: a few polygons × ~100 points). */
+async function applyForbidden(db: D1Database): Promise<{ hide: string[]; unhide: string[] }> {
+  const [a, s] = await db.batch([db.prepare('SELECT id, name, geojson FROM forbidden_area'), db.prepare('SELECT id, lat, lon, hidden_reason FROM spots')]);
+  const u = forbiddenUpdates((a!.results as { id: string; name: string; geojson: string }[]).map(parseArea), s!.results as SpotPos[]);
+  const stmts = [
+    ...u.hide.map((id) => db.prepare("UPDATE spots SET hidden_reason = 'forbidden' WHERE id = ?1").bind(id)),
+    ...u.unhide.map((id) => db.prepare('UPDATE spots SET hidden_reason = NULL WHERE id = ?1').bind(id)),
+  ];
+  if (stmts.length) await db.batch(stmts);
+  return u;
+}
+
+adminRoutes.post('/forbidden', async (c) => {
+  const v = validateArea(await c.req.json().catch(() => null));
+  if (!v.ok) return c.json(v, 400);
+  const ring = v.ring[0]![0] === v.ring.at(-1)![0] && v.ring[0]![1] === v.ring.at(-1)![1] ? v.ring : [...v.ring, v.ring[0]!];
+  const id = `fa-${crypto.randomUUID().slice(0, 8)}`;
+  await c.env.DB.prepare('INSERT INTO forbidden_area (id, name, geojson, created_at) VALUES (?1, ?2, ?3, ?4)')
+    .bind(id, v.name, JSON.stringify({ type: 'Polygon', coordinates: [ring] }), new Date().toISOString())
+    .run();
+  return c.json({ ok: true, id, ...(await applyForbidden(c.env.DB)) }, 201);
+});
+
+adminRoutes.delete('/forbidden/:id', async (c) => {
+  const r = await c.env.DB.prepare('DELETE FROM forbidden_area WHERE id = ?1').bind(c.req.param('id')).run();
+  if (!r.meta.changes) return c.json({ ok: false, error: 'not_found' }, 404);
+  return c.json({ ok: true, ...(await applyForbidden(c.env.DB)) });
+});
 
 adminRoutes.put('/tackle', async (c) => {
   const b = await c.req.json().catch(() => null);

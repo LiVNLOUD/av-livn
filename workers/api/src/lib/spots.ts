@@ -30,6 +30,9 @@ export interface SpotRow {
   substrate_conf?: number | null;
   access?: string | null;
   lamp_admin?: number | null;
+  auto_added?: number | null;
+  hidden_reason?: string | null;
+  near_json?: string | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -45,7 +48,7 @@ export const STATUSES = ['candidate', 'verified', 'rejected', 'proposed'] as con
 
 /** The one definition of an active spot: lists, "N mera içinde", ranks and scoring all use it. */
 /** Scored and listed: not rejected and not a D1 inventory proposal awaiting approval ('proposed'). */
-export const ACTIVE = "status NOT IN ('rejected', 'proposed')";
+export const ACTIVE = "status NOT IN ('rejected', 'proposed') AND hidden_reason IS NULL";
 export const ACTIVE_COUNT_SQL = `SELECT count(*) AS n FROM spots WHERE ${ACTIVE}`;
 
 export function toSpotInput(r: SpotRow): SpotInput {
@@ -75,6 +78,10 @@ export function publicSpot(r: SpotRow) {
     lamp_known: r.has_light !== null,
     access: r.access ?? null,
     source: r.source,
+    /** F1: added from the OSM inventory without field verification. */
+    auto_added: r.auto_added === 1,
+    /** Same-type spots within 150 m (kept separate, linked). */
+    near: r.near_json ? (JSON.parse(r.near_json) as string[]) : [],
   };
 }
 
@@ -100,7 +107,7 @@ export async function loadSnapshots(db: D1Database, ids: string[]): Promise<Map<
 
 /** Admin view: public fields plus the field-verified lamp state and notes. */
 export function adminSpot(r: SpotRow) {
-  return { ...publicSpot(r), has_light: r.has_light === null ? null : r.has_light === 1, lamp_admin: r.lamp_admin ?? null, notes: r.notes };
+  return { ...publicSpot(r), hidden_reason: r.hidden_reason ?? null, has_light: r.has_light === null ? null : r.has_light === 1, lamp_admin: r.lamp_admin ?? null, notes: r.notes };
 }
 
 /** Spot with its 0–500 m depth profile (detail endpoint only; the list stays small). */

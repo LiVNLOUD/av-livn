@@ -159,7 +159,7 @@ import Base from '../layouts/Base.astro';
   import type { MapApi } from '../scripts/map';
 
   type Spot = {
-    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null;
+    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
   type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean };
@@ -267,7 +267,7 @@ import Base from '../layouts/Base.astro';
             ? '<p class="why">Puan henüz hesaplanmadı</p>'
             : `<p class="why"><b class="rk">${sc.rank}.</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
         const legal = swimRule(s.kind, at ?? new Date().toISOString());
-        const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '');
+        const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '');
         return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}" data-id="${esc(s.id)}">
           <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
           <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;

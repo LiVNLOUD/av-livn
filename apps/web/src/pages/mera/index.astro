@@ -6,6 +6,7 @@ import Base from '../../layouts/Base.astro';
     <a class="back" href="/">Tüm meralar</a>
     <h1 id="name">Mera yükleniyor…</h1>
     <p class="sub muted" id="sub"></p>
+    <p class="spot-badges" id="spot-badges"></p>
 
     <section class="now" aria-live="polite">
       <div class="lead" id="lead"></div>
@@ -73,6 +74,8 @@ import Base from '../../layouts/Base.astro';
   .reason-line:empty { display: none; }
   .warn:empty { display: none; }
   .warn { font-size: var(--fs-2); margin-top: 4px !important; color: var(--storm); }
+  .spot-badges { margin: var(--s2) 0 0; display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+  .spot-badges:empty { display: none; }
   .tackle { margin-top: var(--s4); }
   .tk-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
   .tk-head h2 { font-size: var(--fs-4); }
@@ -118,9 +121,9 @@ import Base from '../../layouts/Base.astro';
 </style>
 
 <script>
-  import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR } from '../../scripts/format';
+  import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR, swimRule } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
-  import { adminGet } from '../../scripts/admin';
+  import { adminGet, getToken } from '../../scripts/admin';
   import { bandOf, bandV2, DEFAULT_PROFILES, fieldBand, leadWithRank, RANK_FIRST_WIDTH, tackle, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
 
   type Hour = [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]];
@@ -135,6 +138,7 @@ import Base from '../../layouts/Base.astro';
     spot: {
       id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null;
       shore_normal_deg: number | null; length_m: number | null; profile: (number | null)[] | null; alt: { lat: number; lon: number } | null;
+      auto_added?: boolean; near?: string[];
     };
     /** Public: which kinds of field knowledge exist (badges), never values. */
     field: { observations: number; desk_pending: number; kinds: Record<'lamba' | 'derinlik' | 'taban' | 'yapi', string | null> } | null;
@@ -367,6 +371,24 @@ import Base from '../../layouts/Base.astro';
     $('name').textContent = spot.name;
     const lampTxt = spot.lamp_known ? 'iskele aydınlatması: saha bilgisi var' : 'iskele aydınlatması bilinmiyor';
     const facing = spot.shore_normal_deg === null ? null : `denize bakış ${compass(spot.shore_normal_deg)}`;
+    // F1 badges: automatic addition, assumed type preference, nearby same-type spots, owner hide
+    const SHORE = ['quay', 'harbour', 'rocky', 'beach', 'river_mouth'];
+    const legal = swimRule(spot.kind, new Date().toISOString());
+    $('spot-badges').innerHTML = [
+      spot.auto_added ? '<span class="badge warn">otomatik eklendi — sahada doğrulanmadı</span>' : '',
+      SHORE.includes(spot.kind) ? '<a class="badge assume" href="/model/#tip-tercihi">tip tercihi varsayım (C)</a>' : '',
+      legal ? `<span class="badge legal">${esc(legal)}</span>` : '',
+      priv ? '<button type="button" class="btn small secondary" id="hide-spot">Herkesten gizle</button>' : '',
+    ].join(' ');
+    if (spot.near?.length)
+      fetch('/api/spots').then((r) => r.json()).then((b: { spots: { id: string; name: string }[] }) => {
+        const names = new Map(b.spots.map((x) => [x.id, x.name]));
+        $('spot-badges').insertAdjacentHTML('beforeend', ` <span class="fs-2 muted">Yakın mera: ${spot.near!.map((nid) => `<a class="link" href="/mera/?id=${encodeURIComponent(nid)}">${esc(names.get(nid) ?? nid)}</a>`).join(', ')}</span>`);
+      }).catch(() => {});
+    document.getElementById('hide-spot')?.addEventListener('click', async (e) => {
+      const r = await fetch(`/api/admin/spots/${encodeURIComponent(spot.id)}`, { method: 'PATCH', headers: { authorization: `Bearer ${getToken()}`, 'content-type': 'application/json' }, body: JSON.stringify({ hidden: true }) });
+      (e.target as HTMLButtonElement).replaceWith(Object.assign(document.createElement('span'), { className: 'fs-2', textContent: r.ok ? 'Gizlendi: listeden, haritadan ve puanlamadan kalktı. /admin/ Gizlenenler listesinden geri alınır.' : `Gizlenemedi (${r.status}).` }));
+    });
     $('sub').textContent = [KIND_TR[spot.kind] ?? spot.kind, spot.place, STATUS_TR[spot.status]?.toLowerCase(), lampTxt, spot.access ? ACCESS_TR[spot.access] : null, facing]
       .filter(Boolean)
       .join(', ');

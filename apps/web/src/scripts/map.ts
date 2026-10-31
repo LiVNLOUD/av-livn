@@ -222,7 +222,9 @@ let layout: () => void = () => {};
 
 map.on('load', async () => {
   // D1/E4: forbidden commercial ports and inventory proposals (approved ones are already in the spot list).
-  const [cand, forb] = await Promise.all(['/tiles/candidates.geojson', '/tiles/forbidden.geojson'].map((u) => fetch(u).then((r) => (r.ok ? r.json() : empty)).catch(() => empty)));
+  const [cand, forb, drawn] = await Promise.all(['/tiles/candidates.geojson', '/tiles/forbidden.geojson', '/api/forbidden'].map((u) => fetch(u).then((r) => (r.ok ? r.json() : empty)).catch(() => empty)));
+  // F1: commercial ports from OSM plus owner-drawn areas (e.g. Gemport, Roda)
+  forb.features = [...(forb.features ?? []), ...(drawn.features ?? [])];
   await spotsReady;
   cand.features = (cand.features ?? []).filter((f: { properties: { id: string } }) => !byId.has(f.properties.id));
   map.addSource('forbidden', { type: 'geojson', data: forb });
@@ -291,6 +293,69 @@ map.on('load', async () => {
   });
   map.on('mouseenter', 'cands', () => (map.getCanvas().style.cursor = 'pointer'));
   map.on('mouseleave', 'cands', () => (map.getCanvas().style.cursor = ''));
+
+  // F1: owner draws a forbidden area (polygon): tap the corners, name it, save. Spots inside are hidden.
+  if (getToken()) {
+    const ctl = document.createElement('div');
+    ctl.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+    ctl.innerHTML = '<button type="button" class="add-spot" title="Erişim yasak alan çiz" aria-label="Erişim yasak alan çiz">▱</button>';
+    map.addControl({ onAdd: () => ctl, onRemove: () => ctl.remove() }, 'top-right');
+    const pts: [number, number][] = [];
+    map.addSource('draw', { type: 'geojson', data: empty });
+    map.addLayer({ id: 'draw-line', type: 'line', source: 'draw', paint: { 'line-color': '#f5a83c', 'line-width': 2, 'line-dasharray': [2, 1] } });
+    map.addLayer({ id: 'draw-pts', type: 'circle', source: 'draw', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 4, 'circle-color': '#f5a83c' } });
+    const panel = document.createElement('div');
+    panel.className = 'draw-panel';
+    panel.hidden = true;
+    panel.innerHTML = `<p class="fs-2"><b>Erişim yasak alan</b> · köşelere dokunun (<span data-n>0</span> nokta)</p>
+      <label>Ad<input data-name maxlength="80" placeholder="Gemport" /></label>
+      <div class="actions"><button type="button" class="btn small" data-save disabled>Kaydet</button><button type="button" class="btn small secondary" data-cancel>İptal</button></div><p class="fs-2" data-msg role="status"></p>`;
+    o.container.append(panel);
+    let drawing = false;
+    const redraw = () => {
+      const ring = pts.length > 2 ? [...pts, pts[0]!] : pts;
+      (map.getSource('draw') as maplibregl.GeoJSONSource).setData({
+        type: 'FeatureCollection',
+        features: [
+          ...(ring.length > 1 ? [{ type: 'Feature' as const, properties: {}, geometry: { type: 'LineString' as const, coordinates: ring } }] : []),
+          ...pts.map((c) => ({ type: 'Feature' as const, properties: {}, geometry: { type: 'Point' as const, coordinates: c } })),
+        ],
+      });
+      panel.querySelector('[data-n]')!.textContent = String(pts.length);
+      (panel.querySelector('[data-save]') as HTMLButtonElement).disabled = pts.length < 3;
+    };
+    const stop = () => { drawing = false; pts.length = 0; redraw(); panel.hidden = true; map.getCanvas().style.cursor = ''; map.doubleClickZoom.enable(); };
+    ctl.querySelector('button')!.addEventListener('click', () => {
+      if (drawing) return stop();
+      drawing = true;
+      panel.hidden = false;
+      map.doubleClickZoom.disable();
+      map.getCanvas().style.cursor = 'crosshair';
+    });
+    map.on('click', (e) => {
+      if (!drawing) return;
+      pts.push([+e.lngLat.lng.toFixed(6), +e.lngLat.lat.toFixed(6)]);
+      redraw();
+    });
+    panel.querySelector('[data-cancel]')!.addEventListener('click', stop);
+    panel.querySelector('[data-save]')!.addEventListener('click', async () => {
+      const name = (panel.querySelector('[data-name]') as HTMLInputElement).value.trim();
+      const msg = panel.querySelector('[data-msg]')!;
+      if (name.length < 2) return void (msg.textContent = 'Ad girin.');
+      const r = await fetch('/api/admin/forbidden', { method: 'POST', headers: { authorization: `Bearer ${getToken()}`, 'content-type': 'application/json' }, body: JSON.stringify({ name, ring: pts }) });
+      const b = await r.json().catch(() => ({}));
+      if (!r.ok) return void (msg.textContent = `Kaydedilmedi (${r.status}).`);
+      forb.features.push({ type: 'Feature', properties: { id: b.id, name }, geometry: { type: 'Polygon', coordinates: [[...pts, pts[0]]] } });
+      (map.getSource('forbidden') as maplibregl.GeoJSONSource).setData(forb);
+      msg.textContent = `Kaydedildi; ${b.hide?.length ?? 0} mera gizlendi.`;
+      drawing = false;
+      pts.length = 0;
+      redraw();
+      map.getCanvas().style.cursor = '';
+      map.doubleClickZoom.enable();
+      setTimeout(() => (panel.hidden = true), 2500);
+    });
+  }
 
   // E4: owner adds a spot by tapping the map (e.g. a harbour missing in OSM).
   if (getToken()) {

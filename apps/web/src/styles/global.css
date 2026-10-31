@@ -179,3 +179,7 @@ body.fullscreen footer.site { display: none; }
 /* Card shown inside the home page drawer (/mera/?embed=1): no site chrome. */
 html.embed header.site, html.embed footer.site, html.embed nav.tabbar, html.embed .stale { display: none !important; }
 html.embed body { padding-bottom: 0; }
+
+/* F1: forbidden-area drawing panel (owner) */
+.draw-panel { position: absolute; z-index: 4; left: var(--s3); top: var(--s3); width: min(300px, calc(100% - 24px)); padding: var(--s3); background: var(--deep); border: 1px solid var(--sodium); border-radius: 12px; display: grid; gap: var(--s2); }
+.draw-panel p { margin: 0; }

@@ -19,6 +19,15 @@ publicRoutes.get('/spots', (c) => (c.req.query('species') && c.req.query('specie
 publicRoutes.get('/spots/:id', (c) => detailV2(c));
 publicRoutes.get('/windows', (c) => windowsV2(c));
 publicRoutes.get('/hours', (c) => hoursV2(c));
+/** F1: owner-drawn forbidden areas as GeoJSON (names and shapes are public map info). */
+publicRoutes.get('/forbidden', async (c) => {
+  const r = await c.env.DB.prepare('SELECT id, name, geojson FROM forbidden_area ORDER BY created_at').all<{ id: string; name: string; geojson: string }>();
+  return c.json(
+    { type: 'FeatureCollection', features: r.results.map((a) => ({ type: 'Feature', geometry: JSON.parse(a.geojson), properties: { id: a.id, name: a.name, source: 'yönetici' } })) },
+    200,
+    NO_CACHE,
+  );
+});
 publicRoutes.get('/tackle', async (c) => {
   const r = await c.env.DB.prepare("SELECT value FROM meta WHERE key = 'tackle_profiles'").first<{ value: string }>();
   return c.json({ ok: true, profiles: parseProfiles(r?.value) }, 200, NO_CACHE);

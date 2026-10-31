@@ -14,6 +14,7 @@ import { DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, re
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
 import { runNotify } from './notify-send';
+import { forbiddenUpdates, parseArea, type SpotPos } from '../workers/api/src/lib/forbidden';
 
 const dryRun = process.argv.includes('--dry-run');
 const pendingOnly = process.argv.includes('--pending');
@@ -50,6 +51,14 @@ if (pendingOnly) {
     process.exit(0);
   }
   console.log(`pending: ${pending.map((p) => p.spot_id).join(', ')}`);
+}
+// F1: owner-drawn forbidden areas hide the spots inside them (and release those no longer covered).
+if (!dryRun) {
+  const areas = (await query<{ id: string; name: string; geojson: string }>('SELECT id, name, geojson FROM forbidden_area')).map(parseArea);
+  const u = forbiddenUpdates(areas, await query<SpotPos>('SELECT id, lat, lon, hidden_reason FROM spots'));
+  for (const id of u.hide) await query("UPDATE spots SET hidden_reason = 'forbidden' WHERE id = ?1", [id]);
+  for (const id of u.unhide) await query('UPDATE spots SET hidden_reason = NULL WHERE id = ?1', [id]);
+  if (u.hide.length || u.unhide.length) console.log(`forbidden areas: hid ${u.hide.length}, released ${u.unhide.length}`);
 }
 const rows = await query<SpotRow>(`SELECT * FROM spots WHERE ${ACTIVE} ORDER BY id`);
 const snapRows = await query<{ cell_id: string; fetched_at: string; json: string }>('SELECT cell_id, fetched_at, json FROM forecast_snapshots');

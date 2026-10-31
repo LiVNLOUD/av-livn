@@ -10,6 +10,10 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
     <section id="panel" hidden>
       <p><a href="/sahadayim/" class="go">Sahadayım</a> · <a href="/admin/tahmin/" class="go">Tahmin ve gerçek</a> · <a href="/ayarlar/" class="go">Bildirimler</a> · <a href="/saha/" class="go">Saha formu</a> · <a href="/gunluk/" class="go">Av günlüğü</a> · <button type="button" id="logout" class="linkish">Çıkış (anahtarı bu cihazdan sil)</button></p>
+      <h2>Gizlenenler <span class="muted" id="hid-n"></span></h2>
+      <p class="muted small">Herkesten gizlenen meralar: listede, haritada, ısı haritasında yok ve puanlanmıyor. "Yasak alan" gizlemesi çizilen alan silinince kendiliğinden kalkar.</p>
+      <ol class="cands" id="hidden-list"></ol>
+
       <h2>Adaylar <span class="muted" id="cand-n"></span></h2>
       <p class="muted small">OpenStreetMap envanterinden önerilen yerler (docs/spots-candidates.md). Onaylanan aday bir sonraki saatlik puanlamada listeye girer; reddedilen haritadan kalkar.</p>
       <label class="toggle"><input type="text" id="cand-filter" placeholder="Ara: yerleşim, tip, ad" /></label>
@@ -83,7 +87,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, logout, mountLogin } from '../../scripts/admin';
-  type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null; kind: string; place: string | null; access: string | null };
+  type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null; kind: string; place: string | null; access: string | null; hidden_reason?: string | null; auto_added?: boolean };
   const KIND_TR: Record<string, string> = { pier: 'iskele', breakwater: 'mendirek', groyne: 'mahmuz', quay: 'rıhtım', harbour: 'liman / barınak', rocky: 'kayalık kıyı', beach: 'kumsal', river_mouth: 'dere ağzı', manual: 'elle' };
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık (tahmin)', belirsiz: 'erişim belirsiz', kisitli_feribot: 'kısıtlı olabilir' };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -109,9 +113,31 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const b = await (await fetch('/api/admin/spots', { headers: { authorization: `Bearer ${token}` }, cache: 'no-cache' })).json();
     spots = b.spots;
     renderCands();
+    renderHidden();
     $('pick').innerHTML = spots.filter((s) => s.status !== 'proposed').map((s) => `<option value="${s.id}">${s.name.replace(/</g, '&lt;')}</option>`).join('');
     fill();
   }
+
+  function renderHidden() {
+    const hid = spots.filter((s) => s.hidden_reason);
+    $('hid-n').textContent = `(${hid.length})`;
+    const e = (t: string) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    $('hidden-list').innerHTML = hid.length
+      ? hid.map((s) => `<li><div><b>${e(s.name)}</b><span>${s.hidden_reason === 'forbidden' ? 'yasak alan içinde' : 'yönetici gizledi'}${s.auto_added ? ' · otomatik eklendi' : ''}</span></div>
+          <button type="button" class="btn small secondary" data-unhide="${e(s.id)}">Geri al</button><span></span></li>`).join('')
+      : '<li class="muted">Gizlenen mera yok.</li>';
+  }
+  $('hidden-list').addEventListener('click', async (ev) => {
+    const b = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-unhide]');
+    if (!b) return;
+    try {
+      await api(`/api/admin/spots/${encodeURIComponent(b.dataset.unhide!)}`, 'PATCH', { hidden: false });
+      say('Geri alındı: sonraki saatlik puanlamada listeye döner.');
+      await load();
+    } catch (err) {
+      say((err as Error).message, true);
+    }
+  });
 
   function renderCands() {
     const q = $<HTMLInputElement>('cand-filter').value.trim().toLocaleLowerCase('tr');
