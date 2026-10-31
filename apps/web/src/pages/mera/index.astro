@@ -99,9 +99,6 @@ import Base from '../../layouts/Base.astro';
   :global(.part .row) { display: flex; justify-content: space-between; gap: 10px; font-size: var(--fs-3); align-items: baseline; }
   :global(.part .tags) { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
   :global(.tag) { font-size: var(--fs-1); padding: 1px 6px; border-radius: 999px; border: 1px solid var(--swell); color: var(--mist); white-space: nowrap; }
-  :global(.tag.ev) { font-weight: 700; color: var(--foam); }
-  :global(.tag.ev-A) { border-color: var(--good); color: var(--good); }
-  :global(.tag.ev-B) { border-color: var(--warn); color: var(--warn); }
   :global(.tag.src-saha) { border-color: var(--good); color: var(--good); }
   :global(.tag.src-est) { border-color: var(--warn); color: var(--warn); }
   :global(.part .bar) { position: relative; height: 6px; margin: 6px 0 4px; border-radius: 3px; background: var(--deep); overflow: hidden; }
@@ -283,7 +280,7 @@ import Base from '../../layouts/Base.astro';
         const srcCls = source === 'saha' ? 'src-saha' : isEstimate(source) ? 'src-est' : '';
         const w = weight === null ? (key === 'derinlik' ? 'gündüz kolunda' : 'gece kolunda') : `ağırlık ${weight}`;
         return `<li class="part band-${band}${v === null ? ' na' : ''}"><div class="row"><span style="color:var(--foam)">${esc(label)} <span class="w">· ${group}, ${w}</span></span>
-            <span class="tags"><span class="tag ev ev-${ev.charAt(0)}" title="Kanıt düzeyi">${ev}</span><span class="tag ${srcCls}" title="Veri kaynağı">${esc(SRC_TR[source] ?? source)}</span></span></div>
+            <span class="tags"><a class="tag ev ev-${ev.charAt(0)}" href="/model/#kanit-${ev.charAt(0)}" title="Kanıt düzeyi: ne demek?">${ev}</a><span class="tag ${srcCls}" title="Veri kaynağı">${esc(SRC_TR[source] ?? source)}</span></span></div>
           <div class="bar" aria-hidden="true"><i style="width:${((v ?? 0) * 100).toFixed(0)}%"></i></div>
           <p class="reason">${v === null ? '' : `${v.toLocaleString('tr-TR', { maximumFractionDigits: 2 })} · `}${esc(h[10][k] ?? '')}</p></li>`;
       })

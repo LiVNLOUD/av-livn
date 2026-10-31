@@ -4,7 +4,7 @@ interface Props { title: string; description?: string; fullscreen?: boolean; app
 const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false, app = false } = Astro.props;
 const path = Astro.url.pathname;
 const cur = (p: string) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined;
-const NAV: [string, string][] = [['/', 'Liste'], ['/harita/', 'Harita'], ['/sahadayim/', 'Sahadayım'], ['/gunluk/', 'Günlük'], ['/ayarlar/', 'Ayarlar']];
+const NAV: [string, string][] = [['/', 'Liste'], ['/harita/', 'Harita'], ['/sahadayim/', 'Sahadayım'], ['/gunluk/', 'Günlük'], ['/model/', 'Model'], ['/ayarlar/', 'Ayarlar']];
 const TABS: [string, string, string][] = [
   ['/', 'Liste', 'M4 6h16M4 12h16M4 18h10'],
   ['/harita/', 'Harita', 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zm0 0v14m6-12v14'],
@@ -41,7 +41,7 @@ const TABS: [string, string, string][] = [
     <main><slot /></main>
     <footer class="site">
       <div class="wrap">
-        <p>Model v2.0: habitat uygunluk indeksi (HSI). Kanıt: 45 parametreden A 3, B 1, C 41; çoğu sezgisel ve av günlüğüyle kalibre edilecek. Ayrıntı: <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/MODEL.md">MODEL.md</a>, <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/RESEARCH.md">kaynaklar</a>. Denize çıkmadan önce hava durumunu ve güvenliği kendiniz kontrol edin. Lamba = iskele/limanın mevcut aydınlatması; kendi ışığınızla balık toplamak yasaktır (6/2 Tebliğ md. 8/8).</p>
+        <p>Model v2.0: habitat uygunluk indeksi (HSI). Kanıt: 45 parametreden A 3, B 1, C 41; çoğu sezgisel ve av günlüğüyle kalibre edilecek. Ayrıntı: <a href="/model/">Model nasıl çalışıyor?</a>, <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/MODEL.md">MODEL.md</a>, <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/RESEARCH.md">kaynaklar</a>. Denize çıkmadan önce hava durumunu ve güvenliği kendiniz kontrol edin. Lamba = iskele/limanın mevcut aydınlatması; kendi ışığınızla balık toplamak yasaktır (6/2 Tebliğ md. 8/8).</p>
         <p>Tür: istavrit, LRF. Veri: <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ve DWD ICON, <a href="https://marine.copernicus.eu/">Copernicus Marine Service</a> (Karadeniz/Marmara 500 m), <a href="https://emodnet.ec.europa.eu/en/bathymetry">EMODnet Bathymetry Consortium (2024): EMODnet Digital Bathymetry (DTM 2024)</a>, EMODnet Seabed Habitats (EUSeaMap 2025), © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları, <a href="https://openfreemap.org">OpenFreeMap</a>.</p>
       </div>
     </footer>

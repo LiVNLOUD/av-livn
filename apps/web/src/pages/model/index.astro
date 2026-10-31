@@ -1,0 +1,317 @@
+---
+// F3: public model page in plain Turkish. The parameter table is generated at build time from PARAMS, so it
+// cannot drift from the engine; the worked example is computed in the browser from the live API.
+import Base from '../../layouts/Base.astro';
+import { PARAMS, SIGMA, LEGAL_MIN_ISTAVRIT_CM, type Evidence } from '@av-livn/scoring';
+
+const RESEARCH = 'https://github.com/LiVNLOUD/av-livn/blob/main/docs/RESEARCH.md';
+const MODEL = 'https://github.com/LiVNLOUD/av-livn/blob/main/docs/MODEL.md';
+const ROWS = Object.entries(PARAMS) as [string, { value: number; unit: string; evidence: Evidence; ref: string }][];
+const COUNT = { A: 0, B: 0, C: 0 } as Record<Evidence, number>;
+for (const [, p] of ROWS) COUNT[p.evidence]++;
+
+/** Plain-language name of each parameter. */
+const DESC: Record<string, string> = {
+  night_theta: 'Gece kolunun başladığı ışık düzeyi',
+  night_slope: 'Gündüzden geceye geçişin keskinliği',
+  lamp_lux: 'İskele aydınlatmasının suya düşen ışığı',
+  contrast_mid: 'Lamba ile çevre arasındaki ışık farkının etkili olduğu orta nokta',
+  contrast_slope: 'Işık farkı etkisinin keskinliği',
+  dark_base: 'Lambasız karanlık gecenin tabanı',
+  moon_gain: 'Ay ışığının lambasız geceye katkısı',
+  twilight_centre: 'Alacakaranlık tepesinin güneş yüksekliği',
+  twilight_width: 'Alacakaranlık tepesinin genişliği',
+  twilight_gain: 'Alacakaranlık tepesinin yüksekliği',
+  bright_k: 'Parlak gündüzde sığ suyun cezası',
+  struct_pier: 'Yapı tercihi: iskele',
+  struct_breakwater: 'Yapı tercihi: mendirek',
+  struct_rock: 'Yapı tercihi: kayalık kıyı',
+  struct_harbour: 'Yapı tercihi: liman içi',
+  struct_beach: 'Yapı tercihi: kumsal',
+  struct_river: 'Yapı tercihi: dere ağzı',
+  struct_len_km: 'Yapı uzunluğunun yarı etki noktası',
+  depth_mid: 'Gündüz için yeterli derinliğin orta noktası',
+  depth_slope: 'Derinlik etkisinin yayılımı',
+  dtm_weight_interp: 'Tahmini (enterpolasyon) derinliğe verilen güven',
+  fetch_ref_km: 'Açık deniz mesafesinin (fetch) ölçeği',
+  wind_ref_kmh: 'Kıyıya vuran rüzgarın etkili olduğu hız',
+  wave_ref_m: 'Dalga yüksekliği ölçeği',
+  turb_rain_mm: 'Bulanıklık için 48 saatlik yağış ölçeği',
+  turb_wave_m: 'Bulanıklık için dalga ölçeği',
+  turb_max_loss: 'Bulanıklığın en fazla kaybettirdiği pay',
+  sst_drop_tol: 'Önemsenmeyen su soğuması (48 sa)',
+  sst_drop_scale: 'Su soğumasının etki ölçeği',
+  sst_dev_scale: 'Kısa normalden sapmanın ölçeği',
+  press_rate: 'Hızlı basınç değişiminin eşiği',
+  press_loss: 'Basınç değişiminin en fazla kaybettirdiği pay',
+  season_base: 'Mevsim: kış tabanı',
+  season_spawn_amp: 'Mevsim: üreme tepesinin yüksekliği',
+  season_spawn_doy: 'Mevsim: üreme tepesinin günü (Temmuz sonu)',
+  season_spawn_w: 'Mevsim: üreme tepesinin genişliği',
+  season_autumn_amp: 'Mevsim: sonbahar beslenme tepesinin yüksekliği',
+  season_autumn_doy: 'Mevsim: sonbahar tepesinin günü (Ekim ortası)',
+  season_autumn_w: 'Mevsim: sonbahar tepesinin genişliği',
+  w_diel: 'Ağırlık: gece/gündüz ışığı',
+  w_season: 'Ağırlık: mevsim',
+  w_wind: 'Ağırlık: rüzgar × maruziyet',
+  w_sst: 'Ağırlık: su sıcaklığı değişimi',
+  w_sst_dev: 'Ağırlık: su sıcaklığı sapması',
+  w_turb: 'Ağırlık: bulanıklık',
+  w_press: 'Ağırlık: basınç',
+  w_current: 'Ağırlık: akıntı',
+  w_struct: 'Ağırlık: yapı (statik)',
+  w_substrate: 'Ağırlık: taban (statik)',
+};
+const W = (k: string) => (PARAMS as Record<string, { value: number }>)[k]!.value;
+const DYN: [string, string, string][] = [
+  ['Gece/gündüz ışığı', 'w_diel', 'Güneş, ay, bulut ve iskele aydınlatması. Gece lamba altı, gündüz yeterli derinlik ister; arada alacakaranlık tepesi.'],
+  ['Mevsim', 'w_season', 'Yılın günü: kış tabanı, Temmuz sonu üreme ve Ekim ortası beslenme tepesi.'],
+  ['Rüzgar × maruziyet', 'w_wind', 'Kıyıya vuran rüzgar ve dalga, meranın o yöne açıklığıyla çarpılır.'],
+  ['Su sıcaklığı değişimi', 'w_sst', 'Son 48 saatte ani soğuma puanı düşürür.'],
+  ['Su sıcaklığı sapması', 'w_sst_dev', 'Suyun 5 yıllık kısa normalden ne kadar farklı olduğu.'],
+  ['Bulanıklık', 'w_turb', 'Yağış ve dalgadan tahmin; bulanık su görmeyi zorlaştırır.'],
+  ['Basınç', 'w_press', 'Hızlı basınç değişimi. Kanıtı en zayıf terim, ağırlığı en düşük.'],
+  ['Akıntı', 'w_current', 'Copernicus yüzey akıntısı; orta akıntı iyi, çok güçlü akıntı kötü.'],
+];
+const anchor = (ref: string) => {
+  const m = /R(\d+)/.exec(ref);
+  return m ? `${RESEARCH}#kaynak-tablosu` : null;
+};
+---
+<Base title="Model nasıl çalışıyor — av.livn" description="Puan nasıl hesaplanıyor, neyi biliyoruz, neyi bilmiyoruz, model nasıl öğrenecek.">
+  <div class="wrap md">
+    <h1>Model nasıl çalışıyor?</h1>
+    <p class="lead">Her mera için her saat 0–100 arası bir puan hesaplanır. Puan "o saatte o yer istavrit için ne kadar uygun" sorusunun tahminidir; av garantisi değildir. Aşağıda puanın nasıl kurulduğu, hangi kısmın kanıta, hangi kısmın varsayıma dayandığı ve modelin av günlüğünden nasıl öğreneceği anlatılıyor.</p>
+
+    <nav class="toc card" aria-label="Bu sayfada">
+      <a href="#nasil">Puan nasıl hesaplanıyor?</a>
+      <a href="#ornek">Örnek hesap (canlı)</a>
+      <a href="#kanit">Kanıt düzeyleri</a>
+      <a href="#takim">Takım kutusu</a>
+      <a href="#biliyoruz">Ne biliyoruz, ne bilmiyoruz</a>
+      <a href="#ogrenme">Model nasıl öğrenecek?</a>
+      <a href="#parametreler">Tüm parametreler</a>
+    </nav>
+
+    <section id="nasil">
+      <h2>Puan nasıl hesaplanıyor?</h2>
+      <p>Puan iki parçanın çarpımıdır:</p>
+      <ol>
+        <li><b>Yerin kendisi (statik):</b> yapı (iskele, mendirek, kayalık…) ve taban (kaya, kum, çamur). Saatten saate değişmez. Derinlik gündüz kolunu, iskele aydınlatması gece kolunu belirler.</li>
+        <li><b>O saatin koşulları (dinamik):</b> ışık, mevsim, rüzgar, su sıcaklığı, bulanıklık, basınç, akıntı.</li>
+      </ol>
+      <p>Her bileşen 0 ile 1 arasında bir değer alır. Parçalar <b>ağırlıklı geometrik ortalamayla</b> birleşir: kötü bir bileşen puanı aşağı çeker, iyi bileşenler onu tamamen telafi edemez. Tek bir bileşen de puanı sıfırlayamaz; her değerin tabanı 0,05'tir.</p>
+      <p class="formula">puan ≈ ölçek( statik × dinamik )<br />parça = e<sup>Σ ağırlık · ln(değer) / Σ ağırlık</sup></p>
+      <p>Son adımda ham sonuç 0–100'e çevrilir. "En iyi" ve "en kötü" iki örnek senaryo 92 ve 8'e sabitlenir. Bu ölçek sıralamayı değiştirmez.</p>
+      <p>Lamba bilinmiyorsa iki olasılık (var / yok) hesaplanır ve tipine göre bir olasılıkla karıştırılır. Örneğin feribot iskelesinde %85.</p>
+      <p><b>Güvenlik kapısı:</b> rüzgar veya dalga eşiği aşılırsa puan en fazla 30 gösterilir. Bu bir uyarıdır, balığın orada olmadığı anlamına gelmez.</p>
+      <p><b>Bant:</b> puanın yanındaki aralık (%10–90) Monte Carlo ile hesaplanır. Her parametre kanıt düzeyine göre oynatılır: A az, C çok. Bant genişse tahmin belirsizdir.</p>
+
+      <h3>Dinamik bileşenler ve ağırlıkları</h3>
+      <table class="t">
+        <thead><tr><th>Bileşen</th><th>Ağırlık</th><th>Ne ölçer</th></tr></thead>
+        <tbody>
+          {DYN.map(([label, key, what]) => <tr><td>{label}</td><td class="num"><a href={`#p-${key}`}>{W(key).toLocaleString('tr-TR')}</a></td><td>{what}</td></tr>)}
+        </tbody>
+      </table>
+      <h3>Statik bileşenler</h3>
+      <table class="t">
+        <thead><tr><th>Bileşen</th><th>Ağırlık</th><th>Ne ölçer</th></tr></thead>
+        <tbody>
+          <tr><td>Yapı</td><td class="num"><a href="#p-w_struct">{W('w_struct').toLocaleString('tr-TR')}</a></td><td>Tip ve uzunluk. Uzun mendirek kısa iskeleden iyidir.</td></tr>
+          <tr><td>Taban</td><td class="num"><a href="#p-w_substrate">{W('w_substrate').toLocaleString('tr-TR')}</a></td><td>Kaya/midye iyi, çamur kötü. EMODnet habitat haritası veya saha gözlemi.</td></tr>
+          <tr><td>Derinlik</td><td class="num">gündüz kolu</td><td>Atış mesafesinde derinlik. Gündüz balık derine çekilir.</td></tr>
+          <tr><td>İskele aydınlatması</td><td class="num">gece kolu</td><td>Mevcut lamba yemi (planktonu) toplar. Kendi ışığınızla balık toplamak yasak (md. 8/8).</td></tr>
+        </tbody>
+      </table>
+      <p id="tip-tercihi" class="note card"><b>Tip tercihi varsayım (C):</b> kumsal, dere ağzı, kayalık ve liman içi gibi yeni mera tiplerinde yapı değeri ölçülmüş bir tercihe değil, balıkçı bilgisine dayanır (<a href="#p-struct_beach">kumsal {W('struct_beach').toLocaleString('tr-TR')}</a>, <a href="#p-struct_river">dere ağzı {W('struct_river').toLocaleString('tr-TR')}</a>, <a href="#p-struct_rock">kayalık {W('struct_rock').toLocaleString('tr-TR')}</a>, <a href="#p-struct_harbour">liman içi {W('struct_harbour').toLocaleString('tr-TR')}</a>). Otomatik eklenen meralar sahada doğrulanmadı.</p>
+    </section>
+
+    <section id="ornek">
+      <h2>Örnek hesap (canlı)</h2>
+      <p class="muted" id="ex-status">Şu anki en yüksek puanlı mera yükleniyor…</p>
+      <div id="ex" hidden>
+        <p id="ex-head"></p>
+        <table class="t">
+          <thead><tr><th>Bileşen</th><th>Değer</th><th>Ağırlık</th><th>Neden</th></tr></thead>
+          <tbody id="ex-rows"></tbody>
+        </table>
+        <ol class="steps" id="ex-steps"></ol>
+        <p class="muted small">Elle hesap yaklaşıktır: lamba olasılığı bileşen düzeyinde karıştırılmış gösterilir; motor iki senaryoyu ayrı hesaplayıp karıştırır. Saha ölçümünden gelen değerler herkese açık değildir.</p>
+      </div>
+    </section>
+
+    <section id="kanit">
+      <h2>Kanıt düzeyleri</h2>
+      <p>Her parametre ve her takım önerisi satırı bir kanıt rozeti taşır. Kaynakların tam listesi: <a href={RESEARCH}>RESEARCH.md</a>.</p>
+      <dl class="ev-list">
+        <dt id="kanit-A"><span class="tag ev ev-A">A</span> Yerel yayın</dt>
+        <dd>Marmara veya Karadeniz'de, aynı tür (<i>Trachurus mediterraneus</i>) üzerine hakemli çalışma ya da yasal metin. Örnek: üreme dönemi (Temmuz sonu tepe), #8 iğne ve 13 cm asgari boy. Bantta en az oynatılan düzey (σ {SIGMA.A}).</dd>
+        <dt id="kanit-B"><span class="tag ev ev-B">B</span> Başka bölge veya dolaylı</dt>
+        <dd>Aynı tür başka bölgede, yakın tür ya da dolaylı yerel veri. Örnek: hal fiyat–miktar ilişkisi (bolluk sinyali). σ {SIGMA.B}.</dd>
+        <dt id="kanit-C"><span class="tag ev">C</span> Varsayım</dt>
+        <dd>Balıkçı bilgisi veya fiziksel sezgi; sayısal kanıt yok. Bant en çok bunlarla genişler (σ {SIGMA.C}). Av günlüğü bu parametreleri düzeltmek için tutuluyor.</dd>
+      </dl>
+      <p><b>Bugünkü dağılım:</b> {ROWS.length} parametreden A {COUNT.A}, B {COUNT.B}, C {COUNT.C}. Model büyük ölçüde varsayıma dayanıyor; bunu saklamıyoruz.</p>
+    </section>
+
+    <section id="takim">
+      <h2>Takım kutusu</h2>
+      <p>Mera kartında seçili saat için takım (LRF/spin), jighead gramı ve tipi, iğne, silikon, renk ve saydırma süresi önerilir. Hesap herkese açık veriyle yapılır: derinlik tahmini, rüzgar, hamle, kıyıya paralel rüzgar, akıntı, ışık ve bulanıklık.</p>
+      <ul>
+        <li><b>İğne #8 (A):</b> İstanbul Boğazı'nda #10 iğnenin en sık yakaladığı boy ~13,4 cm, yani yasal sınırda. #8'de bu boy ~17,7 cm (Peksu vd. 2020). Küçük balığı seçen kombinasyon önerilmez.</li>
+        <li><b>Yasal asgari boy {LEGAL_MIN_ISTAVRIT_CM} cm (A):</b> 6/2 Tebliğ Çizelge 7. Altındaki balık denize geri bırakılır.</li>
+        <li><b>Gram, renk, boy, saydırma (C):</b> balıkçı bilgisine dayanan kurallar.</li>
+        <li><b>Işık:</b> öneri yalnız iskelenin mevcut aydınlatmasını hesaba katar; ışık götürmek önerilmez (md. 8/8).</li>
+      </ul>
+    </section>
+
+    <section id="biliyoruz">
+      <h2>Ne biliyoruz, ne bilmiyoruz</h2>
+      <div class="two">
+        <div class="card">
+          <h3>Biliyoruz</h3>
+          <ul>
+            <li>İstavrit Marmara'da yıl boyu var. Üreme Mayıs–Ağustos, tepe Temmuz sonu.</li>
+            <li>Beslenme sonbaharda en yoğun, kışın en düşük.</li>
+            <li>İskele lambası planktonu toplar; istavrit ışık–gölge sınırında avlanır.</li>
+            <li>Bulut ışığı ne kadar azaltır (fizik).</li>
+            <li>LRF'nin İstanbul Boğazı'ndaki verimi ve boy aralığı (9–16 cm).</li>
+            <li>Yasal asgari boy, ışıkla balık toplama yasağı.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Bilmiyoruz</h3>
+          <ul>
+            <li>Lambanın etkisi sayısal olarak ne kadar? Yerel ölçüm yok.</li>
+            <li>Rüzgar, basınç ve akıntının kıyı avına etkisi: kanıt yok.</li>
+            <li>Mevsim tepelerinin yüksekliği. Aylık kıyı av serisi <b>bulunamadı</b>. Hal girişi kışın tepe yapıyor; bu ticari av, kıyı avı değil.</li>
+            <li>Her meranın gerçek derinliği ve tabanı. Çoğu tahmin; saha ölçümüyle düzelir.</li>
+            <li>Otomatik eklenen meralara gerçekten erişilebiliyor mu?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="ogrenme">
+      <h2>Model nasıl öğrenecek?</h2>
+      <p>Av günlüğüne her seansta süre, kamış sayısı ve av (sıfır da) yazılır. Puan kayıt anında dondurulur. Böylece "yüksek puanlı saatlerde gerçekten daha çok balık çıktı mı?" sorusu sayıyla cevaplanır. Yöntem balıkçılık biliminde standart: av adedi, efor (saat × kamış) offset'li Poisson veya negatif binom modeliyle açıklanır (Hoyle vd. 2024).</p>
+      <ol class="steps">
+        <li><b>30 seans:</b> ilk test. Puan avla ilişkili mi, eğim ne? Bu eşiğin altında sonuç "yetersiz veri" olarak raporlanır.</li>
+        <li><b>100 seans:</b> gece/gündüz ve lamba kolları.</li>
+        <li><b>300 seans:</b> meraya özgü terimler (yapı, derinlik) ve mevsim tepelerinin yüksekliği. En az iki mevsim gerekir.</li>
+      </ol>
+      <p>Bir parametre veriyle değişirse kanıt düzeyi C'den yukarı çıkar ve bu sayfadaki tablo kendiliğinden güncellenir.</p>
+    </section>
+
+    <section id="parametreler">
+      <h2>Tüm parametreler</h2>
+      <p class="muted">Kaynak numaraları (R1…) <a href={RESEARCH}>RESEARCH.md</a>'de; formüller <a href={MODEL}>MODEL.md</a>'de.</p>
+      <div class="scroll">
+        <table class="t params">
+          <thead><tr><th>Parametre</th><th>Değer</th><th>Kanıt</th><th>Kaynak</th></tr></thead>
+          <tbody>
+            {ROWS.map(([k, p]) => (
+              <tr id={`p-${k}`}>
+                <td>{DESC[k] ?? k}<br /><code>{k}</code></td>
+                <td class="num">{p.value.toLocaleString('tr-TR')} {p.unit === '-' ? '' : p.unit}</td>
+                <td><a class={`tag ev ev-${p.evidence}`} href={`#kanit-${p.evidence}`}>{p.evidence}</a></td>
+                <td>{p.ref && p.ref !== '—' ? (anchor(p.ref) ? <a href={anchor(p.ref)!}>{p.ref}</a> : p.ref) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .md { padding-top: var(--s5); padding-bottom: var(--s7); }
+  .md section { margin-top: var(--s7); scroll-margin-top: calc(var(--header-h) + var(--s3)); }
+  .md h2 { margin-bottom: var(--s3); }
+  .md h3 { font-size: var(--fs-3); margin: var(--s5) 0 var(--s2); }
+  .md p, .md li { max-width: 68ch; }
+  .lead { color: var(--mist); margin-top: var(--s3); }
+  .toc { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); margin-top: var(--s5); font-size: var(--fs-2); }
+  .formula { font-family: ui-monospace, monospace; font-size: var(--fs-2); background: var(--deep); border: 1px solid var(--swell); border-radius: var(--radius); padding: var(--s3); }
+  .t { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
+  .t th, .t td { text-align: left; padding: var(--s2); border-bottom: 1px solid var(--swell); vertical-align: top; }
+  .t th { color: var(--mist); font-weight: 600; }
+  .t .num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .t code { color: var(--mist); font-size: var(--fs-1); }
+  .params tr:target { background: color-mix(in srgb, var(--sodium) 14%, transparent); }
+  .scroll { overflow-x: auto; }
+  .note { margin-top: var(--s4); font-size: var(--fs-2); scroll-margin-top: calc(var(--header-h) + var(--s3)); }
+  .ev-list dt { font-weight: 650; margin-top: var(--s4); scroll-margin-top: calc(var(--header-h) + var(--s3)); }
+  .ev-list dt:target { color: var(--sodium); }
+  .ev-list dd { margin: var(--s1) 0 0; color: var(--mist); }
+  .two { display: grid; gap: var(--s4); }
+  @media (min-width: 720px) { .two { grid-template-columns: 1fr 1fr; } }
+  .two h3 { margin-top: 0; }
+  .two ul { padding-left: 1.1em; margin: 0; }
+  .two li + li { margin-top: var(--s2); }
+  .steps li + li { margin-top: var(--s2); }
+  .small { font-size: var(--fs-1); }
+  @media (max-width: 480px) { .t th:nth-child(4), .t td:nth-child(4) { display: none; } .params th:nth-child(4), .params td:nth-child(4) { display: table-cell; } }
+</style>
+
+<script>
+  import { calibrate } from '@av-livn/scoring';
+  import { esc, fmtDay, fmtTime } from '../../scripts/format';
+
+  type Comp = [string, string, string, number | null, string, string];
+  const $ = (id: string) => document.getElementById(id)!;
+  const n = (x: number, d = 2) => x.toLocaleString('tr-TR', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const geo = (parts: [number, number][]) => {
+    const sw = parts.reduce((a, [, w]) => a + w, 0);
+    return Math.exp(parts.reduce((a, [v, w]) => a + w * Math.log(Math.max(0.05, v)), 0) / sw);
+  };
+
+  async function example() {
+    try {
+      const list = await (await fetch('/api/spots')).json();
+      const spots = (list.spots as { id: string; name: string; score: { total: number | null; gated: boolean } | null }[])
+        .filter((s) => s.score?.total != null && !s.score.gated)
+        .sort((a, b) => b.score!.total! - a.score!.total!);
+      for (const s of spots.slice(0, 8)) {
+        const d = await (await fetch(`/api/spots/${encodeURIComponent(s.id)}?model=v2`)).json();
+        const meta = d.packed?.meta;
+        const h = d.packed?.h?.[d.from ?? 0];
+        if (!meta || !h) continue;
+        const comps = meta.comps as Comp[];
+        const vals = h[9] as (number | null)[];
+        const weighted = comps.map((c, i) => [c, vals[i]] as const).filter(([c]) => c[3] !== null);
+        if (weighted.some(([, v]) => v === null)) continue; // field value hidden: pick a spot whose parts are public
+        render(s.name, s.id, h, comps, vals);
+        return;
+      }
+      $('ex-status').textContent = 'Şu an bileşenleri tamamen açık bir mera bulunamadı.';
+    } catch {
+      $('ex-status').textContent = 'Canlı veri alınamadı.';
+    }
+  }
+
+  function render(name: string, id: string, h: unknown[], comps: Comp[], vals: (number | null)[]) {
+    const ts = h[0] as string;
+    const total = h[1] as number;
+    $('ex-head').innerHTML = `<a href="/mera/?id=${encodeURIComponent(id)}">${esc(name)}</a>, ${fmtDay(ts)} ${fmtTime(ts)}. Yayımlanan puan: <b>${Math.round(total)}</b>.`;
+    $('ex-rows').innerHTML = comps
+      .map((c, i) => `<tr><td>${esc(c[1])}</td><td class="num">${vals[i] === null ? '–' : n(vals[i]!)}</td><td class="num">${c[3] === null ? (c[0] === 'derinlik' ? 'gündüz kolu' : 'gece kolu') : n(c[3])}</td><td>${esc((h[10] as string[])[i] ?? '')}</td></tr>`)
+      .join('');
+    const pick = (g: string) => comps.map((c, i) => [c, vals[i]] as const).filter(([c, v]) => c[2] === g && c[3] !== null && v !== null).map(([c, v]) => [v!, c[3]!] as [number, number]);
+    const s = geo(pick('statik'));
+    const dyn = geo(pick('dinamik'));
+    const raw = s * dyn;
+    const score = calibrate(raw);
+    $('ex-steps').innerHTML = [
+      `Statik parça: yapı ve tabanın ağırlıklı geometrik ortalaması = <b>${n(s, 3)}</b>`,
+      `Dinamik parça: sekiz koşulun ağırlıklı geometrik ortalaması = <b>${n(dyn, 3)}</b> (ışık değeri derinlik ve lamba kollarını içerir)`,
+      `Ham sonuç: ${n(s, 3)} × ${n(dyn, 3)} = <b>${n(raw, 3)}</b>`,
+      `Ölçek (en kötü senaryo 8, en iyi 92): <b>${Math.round(score)}</b>; yayımlanan ${Math.round(total)}`,
+    ].map((x) => `<li>${x}</li>`).join('');
+    $('ex-status').hidden = true;
+    $('ex').hidden = false;
+  }
+  example();
+</script>

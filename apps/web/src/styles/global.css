@@ -131,6 +131,9 @@ footer.site p { margin: 0 0 var(--s1); max-width: 68ch; }
 .badge.warn { border-color: var(--warn); color: var(--warn); }
 .badge.legal { border-color: var(--storm); color: var(--storm); }
 .badge.assume { border-style: dashed; }
+.tag.ev { font-weight: 700; color: var(--foam); text-decoration: none; }
+.tag.ev-A { border-color: var(--good); color: var(--good); }
+.tag.ev-B { border-color: var(--warn); color: var(--warn); }
 
 /* Components (docs/DESIGN.md): one definition each */
 button, .button, .btn {
