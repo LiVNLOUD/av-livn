@@ -1,6 +1,8 @@
-// F0: tackle and lure suggestion for istavrit (docs/TACKLE.md). Pure: the score job stores the open-data inputs
+// F0/G2: tackle and lure suggestion for istavrit (docs/TACKLE.md). Pure: the score job stores the open-data inputs
 // per hour; the card turns them into rows with this function. Rules are C-level heuristics, except the hook
-// size (Peksu et al. 2020, A, local) and the legal minimum size (6/2 Tebliğ Çizelge 7, A).
+// size (R19, Peksu et al. 2020, A, local) and the legal minimum size (6/2 Tebliğ Çizelge 7, A).
+// G2: the target depth follows the model's diel arm (night: mid-water/near the surface under the light, twilight:
+// mid-water, day: near the bottom); fixed (non-articulated) ajing heads by default; LRF up to 5 g, then spin.
 // md. 8/8: never suggests bringing light; "light" here is only the pier's existing lighting.
 
 export type Evidence = 'A' | 'B' | 'C';
@@ -17,9 +19,14 @@ export interface TackleProfile {
 }
 
 export const DEFAULT_PROFILES: TackleProfile[] = [
-  { id: 'lrf', name: 'LRF: Ares Blue Porter AJ-S 6.3 + Vanford FA C2000S', jigMin: 0.6, jigMax: 3, maxGustKmh: 25, line: 'Gosen PE 0.2 + FC 0,8–1,2 lb' },
+  { id: 'lrf', name: 'LRF: Ares Blue Porter AJ-S 6.3 + Vanford FA C2000S', jigMin: 0.6, jigMax: 5, maxGustKmh: 25, line: 'Gosen PE 0.2 + FC 0.8–1.2 numara (≈3–5 lb)' },
   { id: 'spin', name: 'Spin: Bassterra XT+ 274 + Nasci FD C3000 HG', jigMin: 5, jigMax: 20, maxGustKmh: 50, line: 'Kairiki 8 + Daiwa Prorex FC' },
 ];
+
+/** RESEARCH.md R19, cited verbatim on the hook row (a test checks it against RESEARCH.md). */
+export const R19_CITE = 'Peksu M., Uzer U., Yıldız T., Ayaz A., Karakulak F.S. (2020). J. Appl. Ichthyol. 36(6):893–900';
+/** Ajing jighead sizes on the market (g). */
+export const JIG_SIZES = [0.6, 0.8, 1, 1.2, 1.5, 2, 2.5, 3, 4, 5];
 
 /** Per-hour inputs (all public data). */
 export interface TackleInput {
@@ -36,6 +43,8 @@ export interface TackleInput {
   turbidity: number | null;
   /** Water temperature deviation from the short normal (°C). */
   sstDev: number | null;
+  /** Spot kind (rocky shore: bottom target). */
+  kind?: string | null;
 }
 
 export interface TackleRow {
@@ -53,6 +62,9 @@ export interface Tackle {
   hook: number;
   lureCm: number;
   color: 'şeffaf-simli' | 'koyu siluet' | 'doğal' | 'parlak';
+  /** Where the lure should fish this hour (diel arm). */
+  zone: 'yüzeye yakın' | 'orta su' | 'dibe yakın';
+  targetM: number;
   sinkS: number;
   rows: TackleRow[];
   /** Information only, never a suggestion (md. 8/8). */
@@ -61,13 +73,28 @@ export interface Tackle {
 
 export const LEGAL_MIN_ISTAVRIT_CM = 13;
 const n1 = (x: number) => x.toFixed(1).replace('.', ',').replace(',0', '');
-const round05 = (x: number) => Math.round(x * 2) / 2;
+const nearestSize = (g: number) => JIG_SIZES.reduce((best, s) => (Math.abs(s - g) < Math.abs(best - g) ? s : best), JIG_SIZES[0]!);
 
 /** Hour category from the sun and the pier's lighting. */
 export function lightCase(sunAlt: number, lampP: number | null): 'gündüz' | 'alacakaranlık' | 'aydınlık gece' | 'karanlık gece' {
   if (sunAlt > 0) return 'gündüz';
   if (sunAlt > -6) return 'alacakaranlık';
   return (lampP ?? 0) >= 0.5 ? 'aydınlık gece' : 'karanlık gece';
+}
+
+/**
+ * Unit check for tackle texts (G2): line sizes are Japanese numbers or PE, pounds only as an approximation
+ * after a number ("≈3–5 lb"), speeds in km/sa (km/s means per second in Turkish). Returns the problems found.
+ */
+export function unitIssues(text: string): string[] {
+  const out: string[] = [];
+  for (const m of text.matchAll(/(\S*)\s*lb\b/g)) {
+    const before = text.slice(0, m.index! + m[0].length);
+    if (!/≈\s*[\d.,]+(?:[–-][\d.,]+)?\s*lb$/.test(before)) out.push(`lb yalnız "≈… lb" yaklaşık değeri olarak: "${m[0].trim()}"`);
+  }
+  if (/\bFC\s*[\d.,]/.test(text) && !/\bFC\s*[\d.,]+(?:[–-][\d.,]+)?\s*numara/.test(text)) out.push('FC kalınlığı numara ile yazılır');
+  if (/\bkm\/s\b/.test(text)) out.push('hız km/sa ile yazılır');
+  return out;
 }
 
 export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFILES, legalMinCm = LEGAL_MIN_ISTAVRIT_CM): Tackle {
@@ -77,30 +104,35 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
   const gust = i.gustKmh ?? i.windKmh ?? 0;
   const cross = i.crossKmh ?? 0;
   const depth = Math.max(0.5, i.depthM);
+  const light = lightCase(i.sunAlt, i.lampP);
+  const night = light === 'aydınlık gece' || light === 'karanlık gece';
 
-  // jighead: ~1 m per 2–4 s and still touching bottom (TACKLE.md)
-  let lrfG = (0.8 + 0.25 * depth) * (1 + 2 * cur) + (cross >= 15 ? 0.5 : 0);
-  lrfG = round05(lrfG);
+  // target depth from the diel arm: night fish rise to the light/plankton, day fish hold near the bottom
+  const zone: Tackle['zone'] = night ? 'yüzeye yakın' : light === 'alacakaranlık' ? 'orta su' : 'dibe yakın';
+  const targetM = Math.round((night ? Math.min(1.5, 0.3 * depth) : light === 'alacakaranlık' ? 0.5 * depth : depth) * 10) / 10;
+  const bottom = zone === 'dibe yakın' || i.kind === 'rocky';
+
+  // weight: night calm water 0.8–1.5 g; heavier with the target depth, the current and the cross wind
+  const need = (0.8 + 0.2 * targetM) * (1 + 2 * cur) + (cross >= 25 ? 1 : cross >= 15 ? 0.5 : 0);
   const why: string[] = [];
-  if (gust > lrf.maxGustKmh) why.push(`hamle ${Math.round(gust)} km/sa`);
-  if (cross >= 20) why.push(`yan rüzgar ${Math.round(cross)} km/sa`);
-  if (cur >= 0.25) why.push(`akıntı ${n1(cur)} m/s`);
-  if (lrfG > lrf.jigMax) why.push(`gereken ağırlık ${n1(lrfG)} g > LRF üst sınırı ${n1(lrf.jigMax)} g`);
+  if (gust > lrf.maxGustKmh) why.push(`hamle ${Math.round(gust)} km/sa > LRF sınırı ${Math.round(lrf.maxGustKmh)} km/sa`);
+  if (need > lrf.jigMax) why.push(`gereken ağırlık ${n1(need)} g > LRF üst sınırı ${n1(lrf.jigMax)} g`);
   const useSpin = why.length > 0;
   const profile = useSpin ? spin : lrf;
-  const jigG = useSpin ? Math.min(spin.jigMax, Math.max(spin.jigMin, Math.round(spin.jigMin + 0.8 * depth + 20 * cur))) : Math.min(lrf.jigMax, Math.max(lrf.jigMin, lrfG));
+  const jigG = useSpin ? Math.min(spin.jigMax, Math.max(spin.jigMin, Math.round(need))) : Math.min(lrf.jigMax, Math.max(lrf.jigMin, nearestSize(need)));
 
   const calm = cur < 0.15 && cross < 10;
-  const jigType = calm && !useSpin ? 'mafsallı' : 'sabit';
-  const light = lightCase(i.sunAlt, i.lampP);
+  const jigType = bottom && calm && !useSpin ? 'mafsallı' : 'sabit';
   const turbid = (i.turbidity ?? 1) < 0.8;
   const cold = (i.sstDev ?? 0) <= -1.5;
   const lureCm = cold ? 4 : turbid ? 6 : 5;
   const color = turbid ? 'parlak' : light === 'aydınlık gece' ? 'şeffaf-simli' : light === 'karanlık gece' ? 'koyu siluet' : 'doğal';
   const shape = turbid || light === 'karanlık gece' ? 'kürek kuyruk (titreşim)' : 'iğne kuyruk (doğal düşüş)';
-  // sink rate (m/s) grows with weight; count to the bottom, then lift
+  // sink rate (m/s) grows with weight; count to the target depth (night: short, 2–4 s)
   const rate = useSpin ? 0.9 : 0.25 + 0.12 * jigG;
-  const sinkS = Math.max(2, Math.round(depth / rate));
+  const raw = Math.round(targetM / rate);
+  const sinkS = night ? Math.min(4, Math.max(2, raw)) : Math.max(2, raw);
+  const arm = night ? `modelin gece kolu (${light})` : light === 'alacakaranlık' ? 'modelin alacakaranlık tepesi' : 'modelin gündüz kolu: derinlik';
 
   const rows: TackleRow[] = [
     {
@@ -109,11 +141,11 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
     },
     {
       key: 'jighead', label: 'Jighead', value: `${n1(jigG)} g ${jigType}`, evidence: 'C',
-      why: `uçta ~${n1(depth)} m${cur ? `, akıntı ${n1(cur)} m/s` : ''}${cross >= 15 ? ', yan rüzgar' : ''}; ${jigType === 'mafsallı' ? 'sakin suda daha doğal düşüş' : 'akıntı/rüzgarda dibe temas için sabit'}`,
+      why: `hedef ${zone} (~${n1(targetM)} m, ${arm})${cur ? `, akıntı ${n1(cur)} m/s` : ''}${cross >= 15 ? `, yan rüzgar ${Math.round(cross)} km/sa` : ''}; ${jigType === 'mafsallı' ? 'dip/kaya hedefinde sakin suda mafsallı' : 'istavritte varsayılan sabit ajing kafası'}`,
     },
     {
       key: 'igne', label: 'İğne', value: '#8', evidence: 'A',
-      why: `Peksu vd. 2020 (İstanbul Boğazı): #8'de modal boy 17,7 cm, #10'da 13,4 cm; #10 yasal ${legalMinCm} cm sınırında küçük balığı artırır`,
+      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, ${legalMinCm} cm altı oranı yüksek, geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm (R19: ${R19_CITE})`,
     },
     {
       key: 'silikon', label: 'Silikon', value: `${lureCm} cm, ${shape}`, evidence: 'C',
@@ -121,17 +153,21 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
     },
     {
       key: 'renk', label: 'Renk', value: color, evidence: 'C',
-      why: turbid ? 'bulanıkta görünürlük' : light === 'aydınlık gece' ? "iskelenin mevcut aydınlatması altında ışık–gölge sınırı" : light === 'karanlık gece' ? 'karanlıkta siluet' : 'gün ışığında doğal görünüm',
+      why: turbid ? 'bulanıkta görünürlük' : light === 'aydınlık gece' ? 'iskelenin mevcut aydınlatması altında ışık–gölge sınırı' : light === 'karanlık gece' ? 'karanlıkta siluet' : 'gün ışığında doğal görünüm',
     },
     {
       key: 'saydirma', label: 'Saydırma', value: `${sinkS} s`, evidence: 'C',
-      why: `${n1(depth)} m dibe ~${n1(rate)} m/s düşüş; dibe değince 2–3 sarım, düşüşte bekle`,
+      why: night
+        ? `yüzeye yakın: kısa say (2–4 s), ~${n1(rate)} m/s düşüş; ışık–gölge sınırında düşüşte bekle`
+        : zone === 'orta su'
+        ? `orta su (~${n1(targetM)} m): ~${n1(rate)} m/s düşüş, sonra yavaş sarım`
+        : `dibe yakın (~${n1(depth)} m): ~${n1(rate)} m/s düşüş; dibe değince 2–3 sarım, düşüşte bekle`,
     },
     { key: 'yasal', label: 'Yasal asgari boy', value: `${legalMinCm} cm`, evidence: 'A', why: '6/2 Tebliğ Çizelge 7; altındakini denize geri bırakın' },
   ];
-  const notes = ["Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın."];
+  const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
   if (color === 'koyu siluet') notes.push('Fosforlu (glow) silikon bir boyadır; onu şarj etmek için ışık kullanmanın kapsamı doğrulanmalı.');
-  return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, sinkS, rows, notes };
+  return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, rows, notes };
 }
 
 /** One-line version (Sahadayım, home page). */

@@ -16,7 +16,8 @@ export { rawScore, staticTerms, dynamicTerms, ambientLogLux, season, exposure, d
 export { calibrate, R_IDEAL, R_WORST, SCALE, IDEAL_SPOT, IDEAL_WEATHER, WORST_SPOT, WORST_WEATHER } from './v2/calibrate';
 export { PARAMS, DEFAULTS, SIGMA, drawParams, rng, type Evidence, type ParamKey, type Params } from './v2/params';
 export { skyAt, dayOfYear } from './v2/astro';
-export { tackle, tackleShort, crossWind, lightCase, DEFAULT_PROFILES, LEGAL_MIN_ISTAVRIT_CM, type Tackle, type TackleInput, type TackleProfile, type TackleRow } from './tackle';
+export { tackle, tackleShort, crossWind, lightCase, unitIssues, DEFAULT_PROFILES, JIG_SIZES, R19_CITE, LEGAL_MIN_ISTAVRIT_CM, type Tackle, type TackleInput, type TackleProfile, type TackleRow } from './tackle';
 export { sinkSpeed, calibrateSink, fieldDepths, PAIR_M, PRIOR_REL_SD, type SinkObs, type PlumbObs, type ConvertedDepth, type SinkCalibration } from './v2/sink';
 export { BANDS_V2, bandV2, RANK_FIRST_WIDTH, leadWithRank } from './v2/display';
 export { explain, DRIVERS, type DriverKey, type Reason } from './v2/explain';
+export { KIND_LABEL_TR, kindLabel, kindTitle } from './labels';

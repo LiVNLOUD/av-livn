@@ -155,7 +155,7 @@ import Base from '../../layouts/Base.astro';
   fetch('/api/tackle').then((r) => (r.ok ? r.json() : null)).then((b) => { if (b?.profiles?.length) profiles = b.profiles; }).catch(() => {});
   const tkInput = (v: (number | null)[]): TackleInput => ({
     depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null,
-    sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null,
+    sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, kind: d.spot.kind,
   });
   /** F0 box: open-data version for everyone; the owner also sees the field-depth version and the difference. */
   function renderTackle(i: number) {

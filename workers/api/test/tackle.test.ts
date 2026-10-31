@@ -23,6 +23,8 @@ describe('tackle profiles (F0)', () => {
     expect(validateProfiles([{ ...DEFAULT_PROFILES[0], jigMin: 5, jigMax: 1 }, DEFAULT_PROFILES[1]])).toMatchObject({ error: 'invalid_lrf_jig' });
     expect(validateProfiles([DEFAULT_PROFILES[0], { ...DEFAULT_PROFILES[1], maxGustKmh: 500 }])).toMatchObject({ error: 'invalid_spin_gust' });
     expect(validateProfiles([DEFAULT_PROFILES[0], { ...DEFAULT_PROFILES[1], line: 3 }])).toMatchObject({ error: 'invalid_spin_line' });
+    expect(validateProfiles([{ ...DEFAULT_PROFILES[0], line: 'Gosen PE 0.2 + FC 0,8–1,2 lb' }, DEFAULT_PROFILES[1]])).toMatchObject({ ok: false, error: 'invalid_lrf_units' });
+    expect(parseProfiles(JSON.stringify([{ ...DEFAULT_PROFILES[0], line: 'FC 3 lb' }, DEFAULT_PROFILES[1]]))).toEqual(DEFAULT_PROFILES);
     expect(parseProfiles(null)).toEqual(DEFAULT_PROFILES);
     expect(parseProfiles('{bad')).toEqual(DEFAULT_PROFILES);
     expect(parseProfiles('[]')).toEqual(DEFAULT_PROFILES);

@@ -252,7 +252,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     fetch(`/api/spots/${encodeURIComponent(live!.spot.id)}`).then((r) => (r.ok ? r.json() : null)).then((b) => {
       const v = b?.packed?.tk?.[b.from];
       if (!v) return;
-      $('l-tk').textContent = tackleShort(tackle({ depthM: v[0] ?? 3, currentMs: v[1], windKmh: v[2], gustKmh: v[3], crossKmh: v[4], sunAlt: v[5] ?? 0, lampP: v[6], turbidity: v[7], sstDev: v[8] }));
+      $('l-tk').textContent = tackleShort(tackle({ depthM: v[0] ?? 3, currentMs: v[1], windKmh: v[2], gustKmh: v[3], crossKmh: v[4], sunAlt: v[5] ?? 0, lampP: v[6], turbidity: v[7], sstDev: v[8], kind: b?.spot?.kind }));
     }).catch(() => {});
     lock();
     draw();
