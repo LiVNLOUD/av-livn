@@ -333,7 +333,7 @@
    },
    "properties": {
     "id": "osm-way-1364814104",
-    "name": "Armutlu Devlet Limanı – doğu 4 mendireği",
+    "name": "Armutlu Devlet Limanı – doğu mendireği",
     "name_source": "generated",
     "kind": "breakwater",
     "length_m": 64,
@@ -413,7 +413,7 @@
    },
    "properties": {
     "id": "osm-way-1394208144",
-    "name": "Armutlu Devlet Limanı – batı iç 3 mendireği",
+    "name": "Armutlu Devlet Limanı – kısa batı mendireği",
     "name_source": "generated",
     "kind": "breakwater",
     "length_m": 112,
@@ -493,7 +493,7 @@
    },
    "properties": {
     "id": "osm-way-1413355181",
-    "name": "Armutlu Devlet Limanı – batı iç 1 mendireği",
+    "name": "Armutlu Devlet Limanı – uzun batı mendireği",
     "name_source": "generated",
     "kind": "breakwater",
     "length_m": 930,
@@ -653,7 +653,7 @@
    },
    "properties": {
     "id": "osm-way-1422122108",
-    "name": "Armutlu Devlet Limanı – batı dış 2 mendireği",
+    "name": "Armutlu Devlet Limanı – orta batı mendireği",
     "name_source": "generated",
     "kind": "breakwater",
     "length_m": 292,
@@ -813,7 +813,7 @@
    },
    "properties": {
     "id": "osm-way-252356832",
-    "name": "Güzelyalı Yat Limani – doğu mendireği",
+    "name": "Güzelyalı Yat Limanı – doğu mendireği",
     "name_source": "generated",
     "kind": "breakwater",
     "length_m": 1067,
@@ -893,7 +893,7 @@
    },
    "properties": {
     "id": "osm-way-252356833",
-    "name": "Güzelyalı Yat Limani – batı mendireği",
+    "name": "Güzelyalı Yat Limanı – batı mendireği",
     "name_source": "generated",
     "kind": "breakwater",
     "length_m": 204,
