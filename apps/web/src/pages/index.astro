@@ -158,6 +158,10 @@ import Base from '../layouts/Base.astro';
   .toggle { display: flex; gap: var(--s2); align-items: center; grid-auto-flow: column; justify-content: start; min-height: 44px; }
   .toggle input { width: 20px; height: 20px; }
   .spots { list-style: none; margin: var(--s2) 0 0; padding: 0; }
+  :global(.grp-btn) { width: 100%; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s3) 0; border: 0; border-top: 1px solid var(--swell); background: none; color: var(--foam); font: inherit; font-size: var(--fs-2); text-align: left; cursor: pointer; min-height: 52px; }
+  :global(.grp-btn:hover) { color: var(--sodium); }
+  :global(.grp.beach .grp-btn) { font-weight: 650; }
+  :global(.heatmap .hm-grp text) { fill: var(--sodium); font-weight: 650; cursor: pointer; }
   :global(.spot) { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s3) 0; border-top: 1px solid var(--swell); text-decoration: none; cursor: pointer; }
   :global(.spot h3) { font-size: var(--fs-3); line-height: var(--lh-3); font-weight: 620; }
   :global(.spot .sub), :global(.spot .why), :global(.spot .reason) { margin: 2px 0 0; font-size: var(--fs-2); line-height: var(--lh-2); color: var(--mist); }
@@ -176,8 +180,9 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2, swimRule } from '../scripts/format';
-  import { DEFAULT_PROFILES, leadWithRank, tackle, tackleShort, type TackleProfile } from '@av-livn/scoring';
-  import { renderHeatmap, type HoursData, type HourSpot } from '../scripts/heatmap';
+  import { DEFAULT_PROFILES, kindLabel, leadWithRank, tackle, tackleShort, type TackleProfile } from '@av-livn/scoring';
+  import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
+  import { columnMax, groupSame, isGroup, rankLabel, splitBeaches, tieCounts } from '../scripts/grouping';
   import type { MapApi } from '../scripts/map';
 
   type Spot = {
@@ -273,30 +278,65 @@ import Base from '../layouts/Base.astro';
   hourSel.addEventListener('change', () => setCol(Number(hourSel.value) - nowHour));
 
   // ---------------------------------------------------------------- list
+  // G3: structures first, beaches in one collapsible group; identical score+band as one expandable row.
+  const BEACH = 'av-livn-beaches';
+  let beachesOpen = false;
+  try { beachesOpen = localStorage.getItem(BEACH) === '1'; } catch {}
+  const openGroups = new Set<string>();
+  const toggleGroup = (key: string) => {
+    if (key === 'beaches') {
+      beachesOpen = !beachesOpen;
+      try { localStorage.setItem(BEACH, beachesOpen ? '1' : '0'); } catch {}
+    } else if (!openGroups.delete(key)) openGroups.add(key);
+    render();
+    heat();
+  };
+  const sameLabel = (kinds: string[], n: number) => `${n} ${new Set(kinds).size === 1 ? kindLabel(kinds[0]!) : 'mera'} aynı puan`;
+
   function render() {
     const spots = all.filter((s) => !hidden(s));
     const at = atIso();
     $('meta').textContent = `${spots.length}${spots.length !== all.length ? ` / ${all.length}` : ''} mera, ${at ? `${fmtDay(at)} ${fmtTime(at)} için sıra` : 'şu anki sıra'}. ${fmtAgo(fetched)}.`;
     $('empty').hidden = spots.length > 0;
     if (!spots.length) $('empty').textContent = all.length ? 'Filtreye uyan mera yok.' : 'Henüz mera yok.';
-    $('spots').innerHTML = spots
-      .map((s) => {
-        const sc = s.score;
-        const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
-        const band = sc.p10 !== null && sc.p90 !== null ? ` · bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
-        const why = sc.gated
-          ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
-          : sc.total === null
-            ? '<p class="why">Puan henüz hesaplanmadı</p>'
-            : `<p class="why"><b class="rk">${sc.rank}.</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
-        const legal = swimRule(s.kind, at ?? new Date().toISOString());
-        const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '');
-        return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}" data-id="${esc(s.id)}">
+    const ties = tieCounts(all.map((s) => s.score.rank));
+    const row = (s: Spot) => {
+      const sc = s.score;
+      const sub = [KIND_TR[s.kind] ?? s.kind, s.place, s.status === 'verified' ? 'sahada doğrulandı' : 'doğrulanmadı'].filter(Boolean).join(', ');
+      const band = sc.p10 !== null && sc.p90 !== null ? ` · bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
+      const why = sc.gated
+        ? `<p class="why warn">${esc(sc.warnings[0])}</p>`
+        : sc.total === null || sc.rank === null
+          ? '<p class="why">Puan henüz hesaplanmadı</p>'
+          : `<p class="why"><b class="rk">${rankLabel(sc.rank, ties.get(sc.rank) ?? 1)}</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
+      const legal = swimRule(s.kind, at ?? new Date().toISOString());
+      const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '');
+      return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}" data-id="${esc(s.id)}">
           <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
           <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;
-      })
-      .join('');
+    };
+    const section = (list: Spot[], prefix: string) =>
+      groupSame(list, (s) => (s.score.gated || s.score.total === null ? null : `${s.score.total}|${s.score.p10}|${s.score.p90}`))
+        .map((x) => {
+          if (!isGroup(x)) return row(x);
+          const key = `${prefix}:${x.sig}`;
+          const open = openGroups.has(key);
+          const sc = x.group[0]!.score;
+          const band = sc.p10 !== null && sc.p90 !== null ? `, bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : '';
+          const head = `<li class="grp"><button type="button" class="grp-btn" data-grp="${esc(key)}" aria-expanded="${open}"><span class="lamp" data-total="${sc.total ?? ''}" data-gated="false"></span><span>${sameLabel(x.group.map((g) => g.kind), x.group.length)} (${Math.round(sc.total!)}${band}) — ${open ? 'daralt' : 'genişlet'}</span></button></li>`;
+          return head + (open ? x.group.map(row).join('') : '');
+        })
+        .join('');
+    const { main, beaches } = splitBeaches(spots);
+    const best = beaches.reduce<number | null>((m, s) => (s.score.total !== null && (m === null || s.score.total > m) ? s.score.total : m), null);
+    $('spots').innerHTML =
+      section(main, 'm') +
+      (beaches.length
+        ? `<li class="grp beach"><button type="button" class="grp-btn" data-grp="beaches" aria-expanded="${beachesOpen}"><span class="lamp" data-total="${best ?? ''}" data-gated="false"></span><span>Kumsallar (${beaches.length})${best !== null ? ` — en iyi ${Math.round(best)}` : ''} · ${beachesOpen ? 'daralt' : 'genişlet'}</span></button></li>` +
+          (beachesOpen ? section(beaches, 'b') : '')
+        : '');
     $('spots').querySelectorAll<HTMLElement>('.lamp').forEach((el) => lampV2(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'));
+    $('spots').querySelectorAll<HTMLButtonElement>('[data-grp]').forEach((b) => b.addEventListener('click', () => toggleGroup(b.dataset.grp!)));
     $('spots').querySelectorAll<HTMLAnchorElement>('a.spot').forEach((a) => a.addEventListener('click', (e) => {
       if (!wide.matches) return;
       e.preventDefault();
@@ -351,6 +391,25 @@ import Base from '../layouts/Base.astro';
       mode: hmMode,
       showUncertainty: unc.checked,
       focus: focusId(),
+      onGroup: toggleGroup,
+      compose: (rows: HourSpot[]): HeatRow[] => {
+        const same = (list: HourSpot[], prefix: string): HeatRow[] =>
+          groupSame(list, (s) => JSON.stringify([s.t, s.w, s.g])).flatMap((x) => {
+            if (!isGroup(x)) return [x];
+            const key = `h${prefix}:${x.group.map((g) => g.id).sort().join(',')}`;
+            const open = openGroups.has(key);
+            const head: HeatRow = { ...x.group[0]!, name: `${sameLabel(x.group.map((g) => g.kind), x.group.length)} — ${open ? 'daralt' : 'genişlet'}`, group: { key, ids: x.group.map((g) => g.id), open } };
+            return open ? [head, ...x.group] : [head];
+          });
+        const { main, beaches } = splitBeaches(rows);
+        if (!beaches.length) return same(main, 'm');
+        const head: HeatRow = {
+          ...beaches[0]!, name: `Kumsallar (${beaches.length}) — ${beachesOpen ? 'daralt' : 'genişlet'}`,
+          t: columnMax(beaches.map((b) => b.t), hours!.hours), w: beaches[0]!.t.map(() => null), g: [],
+          group: { key: 'beaches', ids: beaches.map((b) => b.id), open: beachesOpen },
+        };
+        return [...same(main, 'm'), head, ...(beachesOpen ? same(beaches, 'b') : [])];
+      },
       hide: (s) => hidden(s),
       badges: (s: HourSpot) => {
         const a = s.access && s.access !== 'acik' ? `<tspan class="hm-b" dx="6">▲</tspan>` : '';
@@ -406,7 +465,7 @@ import Base from '../layouts/Base.astro';
     ].join('');
     const band = sc.p10 !== null && sc.p90 !== null ? `bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : 'bant yok';
     const head = `<h3><span class="big">${sc.total === null ? '–' : Math.round(sc.total)}</span> ${esc(s.name)}</h3>
-      <p>${sc.gated ? esc(sc.warnings[0] ?? 'güvenlik uyarısı') : `${sc.rank}. / ${all.length} · ${band}`} · ${at === atIso() ? `${fmtDay(at)} ${fmtTime(at)}` : 'şimdi'}</p>
+      <p>${sc.gated ? esc(sc.warnings[0] ?? 'güvenlik uyarısı') : `${sc.rank === null ? '–' : rankLabel(sc.rank, tieCounts(all.map((x) => x.score.rank)).get(sc.rank) ?? 1)} / ${all.length} · ${band}`} · ${at === atIso() ? `${fmtDay(at)} ${fmtTime(at)}` : 'şimdi'}</p>
       ${sc.reason ? `<p>${esc(sc.reason)}</p>` : ''}${badges ? `<p>${badges}</p>` : ''}`;
     box.innerHTML = `${head}<p class="tk" id="sum-tk">Takım: hesaplanıyor…</p><p><a class="link" href="/mera/?id=${encodeURIComponent(s.id)}">Mera kartı ve takım kutusu →</a></p>`;
     box.hidden = false;
@@ -416,7 +475,7 @@ import Base from '../layouts/Base.astro';
     const tkEl = document.getElementById('sum-tk');
     if (!tkEl) return;
     if (!v || sc.gated) { tkEl.textContent = sc.gated ? 'Takım: güvenlik uyarısı varken öneri yok.' : 'Takım: veri yok.'; return; }
-    const t = tackle({ depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null }, profiles);
+    const t = tackle({ depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, kind: s.kind }, profiles);
     tkEl.innerHTML = `Takım: <b>${esc(tackleShort(t))}</b> · yasal asgari boy 13 cm`;
   }
   fetch('/api/hours', { cache: 'no-cache' })

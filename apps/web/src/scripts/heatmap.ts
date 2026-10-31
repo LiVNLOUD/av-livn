@@ -21,7 +21,12 @@ export interface HeatOpts {
   showUncertainty?: boolean;
   /** Row drawn with an outline (summary below the map). */
   focus?: string | null;
+  /** G3: turn the sorted rows into display rows (beach group, identical rows); group rows carry `group`. */
+  compose?: (rows: HourSpot[]) => HeatRow[];
+  onGroup?: (key: string) => void;
 }
+/** A display row: one spot, or a collapsed group (name = group label, values = group summary). */
+export type HeatRow = HourSpot & { group?: { key: string; ids: string[]; open: boolean } };
 export interface HeatStats { meanBand: number | null; wideFrom: number | null; diffMax: number }
 
 /** Value at quantile q (0..1) of a sorted copy, linear interpolation. */
@@ -90,7 +95,8 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatS
   const rh = 26;
   const top = 40; // day labels + sky strip
   const W = L + cw * d.hours;
-  const H = top + rows.length * rh + 4;
+  const view: HeatRow[] = o.compose ? o.compose(rows) : rows;
+  const H = top + view.length * rh + 4;
   const x = (c: number) => L + c * cw;
   const parts: string[] = [];
   parts.push(`<defs><pattern id="hm-wide" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.2" height="4" fill="#0e1c27" opacity="0.5"/></pattern></defs>`);
@@ -109,10 +115,16 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatS
       if (c > 0) parts.push(`<line class="hm-sep" x1="${x(c)}" x2="${x(c)}" y1="2" y2="${H}"/>`);
     } else if (lh % 6 === 0 && !narrow) parts.push(`<text class="hm-tick" x="${x(c) + 2}" y="13">${String(lh).padStart(2, '0')}</text>`);
   }
-  rows.forEach((s, r) => {
+  view.forEach((s, r) => {
     const y = top + r * rh;
     if (s.id === o.focus) parts.push(`<rect class="hm-focus" x="0.5" y="${y + 0.5}" width="${W - 1}" height="${rh - 1}" pointer-events="none"/>`);
-    parts.push(`<a href="/mera/?id=${encodeURIComponent(s.id)}" class="hm-name" data-id="${esc(s.id)}"><text x="0" y="${y + rh / 2 + 4}">${esc(s.name.length > (narrow ? 17 : 28) ? s.name.slice(0, narrow ? 16 : 27) + '…' : s.name)}<title>${esc(s.name)}</title></text></a>`);
+    const max = narrow ? 17 : 28;
+    const nm = s.name.length > max ? s.name.slice(0, max - 1) + '…' : s.name;
+    parts.push(
+      s.group
+        ? `<a href="#" class="hm-name hm-grp" data-group="${esc(s.group.key)}" role="button" aria-expanded="${s.group.open}"><text x="0" y="${y + rh / 2 + 4}">${s.group.open ? '▾' : '▸'} ${esc(nm)}<title>${esc(s.name)}</title></text></a>`
+        : `<a href="/mera/?id=${encodeURIComponent(s.id)}" class="hm-name" data-id="${esc(s.id)}"><text x="0" y="${y + rh / 2 + 4}">${esc(nm)}<title>${esc(s.name)}</title></text></a>`,
+    );
     for (let c = 0; c < d.hours; c++) {
       const v = s.t[c];
       const gated = s.g.includes(c);
@@ -128,18 +140,20 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatS
   parts.push(`<rect class="hm-sel" x="${x(o.selected)}" y="18" width="${cw}" height="${H - 18}" pointer-events="none"/>`);
   const nowX = x(0) + cw * ((Date.now() / 3_600_000) % 1);
   parts.push(`<line class="hm-now" x1="${nowX}" x2="${nowX}" y1="16" y2="${H}"/><text class="hm-nowl" x="${nowX + 3}" y="${H - 4}">şimdi</text>`);
-  el.innerHTML = `<svg class="heatmap" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mera ve saat ısı haritası: ${rows.length} mera, ${d.hours} saat">${parts.join('')}</svg>`;
+  el.innerHTML = `<svg class="heatmap" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mera ve saat ısı haritası: ${rows.length} mera, ${view.length} satır, ${d.hours} saat">${parts.join('')}</svg>`;
   el.querySelectorAll<SVGRectElement>('.hm-cell').forEach((r) =>
     r.addEventListener('click', () => o.onCell(r.dataset.id!, Number(r.dataset.c))),
   );
   el.querySelectorAll<SVGAElement>('.hm-name').forEach((a) =>
     a.addEventListener('click', (e) => {
       e.preventDefault();
-      o.onCell(a.dataset.id!, o.selected);
+      if (a.dataset.group) o.onGroup?.(a.dataset.group);
+      else o.onCell(a.dataset.id!, o.selected);
     }),
   );
   if (o.badges)
-    rows.forEach((s, r) => {
+    view.forEach((s, r) => {
+      if (s.group) return;
       const b = o.badges!(s);
       if (b) {
         const t = el.querySelectorAll('.hm-name text')[r]!;
