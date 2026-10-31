@@ -63,6 +63,8 @@ def build_query() -> str:
   way["waterway"~"^(river|stream)$"]({b});
   nwr["landuse"="port"]({b});
   nwr["industrial"="port"]({b});
+  nwr["name"~"gemport|roda|borusan|limak|marport",i]({b});
+  nwr["operator"~"gemport|roda|borusan|limak|marport",i]({b});
   way["natural"="coastline"]({p});
   node["place"~"^(town|village|suburb|neighbourhood|quarter|hamlet)$"]({b});
 );
@@ -292,8 +294,16 @@ def build_inventory(raw: dict, existing: list[dict]) -> tuple[list[dict], list[d
         feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [round(lon, 6), round(lat, 6)]}, "properties": props})
 
     forb = []
+    merged: dict[str, dict] = {}
     for f in forbidden:
-        g = f["geom"] if isinstance(f["geom"], Polygon) else f["geom"].buffer(60)
+        m = merged.get(f["name"])
+        if m:
+            m["geom"] = m["geom"].union(f["geom"])
+            m["ref"] += f", {f['ref']}"
+        else:
+            merged[f["name"]] = dict(f)
+    for f in merged.values():
+        g = f["geom"] if isinstance(f["geom"], Polygon) else f["geom"].buffer(60).convex_hull
         ring = [list(map(lambda v: round(v, 6), to_lonlat(x, y))) for x, y in g.exterior.coords] if isinstance(g, Polygon) else []
         if ring:
             forb.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]}, "properties": {"name": f["name"], "osm": f["ref"], **f["tags"]}})
