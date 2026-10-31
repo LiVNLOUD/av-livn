@@ -1,0 +1,65 @@
+name: desk
+# C6 desk data: OSM lamps (Overpass), Mapillary image links (if MAPILLARY_TOKEN), Sentinel-2 bottom brightness
+# (Planetary Computer, anonymous), curated data/desk/manual.json → D1 field_obs (masabasi, onaysiz).
+# Then a dry-run score comparison without/with desk findings, public outputs committed to main.
+on:
+  workflow_dispatch:
+    inputs:
+      skip_s2:
+        description: Skip Sentinel-2 (faster)
+        type: boolean
+        default: false
+  schedule:
+    - cron: '47 2 5 * *' # monthly
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: desk
+jobs:
+  desk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      MAPILLARY_TOKEN: ${{ secrets.MAPILLARY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e './pipeline[dev]' pystac-client planetary-computer rasterio
+      - run: pytest pipeline -q
+      - name: Desk findings → D1
+        run: python -m av_pipeline.desk.run ${{ inputs.skip_s2 && '--skip-s2' || '' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --outfile=.score/job.mjs --log-level=warning
+      - name: Ranking without / with desk findings (dry run, same hour and weather)
+        run: node .score/job.mjs --dry-run --compare-desk docs/audit/rank_desk_compare.json
+      - name: Commit public outputs to main if changed
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/audit/desk_findings.json docs/audit/rank_desk_compare.json apps/web/public/tiles/mapillary.json
+          [ -f apps/web/public/tiles/s2_substrate.geojson ] && git add apps/web/public/tiles/s2_substrate.geojson
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: desk findings (OSM lamps, Mapillary links, Sentinel-2) and ranking comparison"
+            for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep $((i * 10)); done
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Rescore and deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run score.yml --ref main
+          if [ "${{ steps.commit.outputs.changed }}" = "true" ]; then gh workflow run deploy.yml --ref main; fi
