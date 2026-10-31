@@ -1,3 +1,5 @@
+from shapely.geometry import box
+
 from av_pipeline.spots import inventory as inv
 from av_pipeline.spots.geo import to_lonlat, to_xy
 
@@ -60,7 +62,7 @@ def test_inventory_types_dedupe_forbidden_and_names():
     assert diag["Karacaali"]["proposals"] and diag["Eşkel"] == {"place": None}
     assert "Eşkel: OSM'de yerleşim noktası yok" in diag["known_missing"]
     assert any(o["ref"] == "node/12" for o in diag["Karacaali"]["osm_within_1km"])
-    assert set(diag["dropped"]) == {"duplicate", "excluded"}
+    assert set(diag["dropped"]) == {"duplicate", "excluded", "not_spot", "same_object"}
     md = inv.report_md(feats, forb, diag)
     assert "Eklenen:" in md and "Elenen yerler" in md and "Gemport" in md and "Eşkel:** OSM'de" in md
 
@@ -115,3 +117,83 @@ def test_helpers():
     assert inv.geom(rel).geom_type == "Polygon"
     assert inv.geom({"type": "relation", "id": 6, "members": []}) is None
     assert "nwr[\"harbour\"]" in inv.build_query()
+
+
+LAND = box(-3000, 0, 3000, 1000)  # planar xy relative to ll(0, 0): land north of the coastline
+
+
+def _land():
+    x0, y0 = to_xy(28.90, LAT)
+    return box(x0 - 3000, y0, x0 + 3000, y0 + 1000)
+
+
+def test_g1_wrong_objects_are_not_spots():
+    raw = {"elements": [
+        RAW["elements"][0],
+        node(50, (0, 40), amenity="ferry_terminal", name="Eski Turyol Armutlu Şubesi"),                # branch office
+        way(51, [(100, 5), (140, 5), (140, 30), (100, 30), (100, 5)], amenity="ferry_terminal", building="yes", name="BUDO"),  # building on land
+        node(52, (300, 20), amenity="ferry_terminal", name="Kara terminal"),                            # point on land
+        node(53, (600, -15), amenity="ferry_terminal", name="İskele terminali"),                        # point on the water
+        node(54, (900, 10), shop="fishing", name="Olta dükkanı", harbour="yes"),                       # shop on land
+        way(55, [(1200, 10), (1260, 10), (1260, -40), (1200, -40), (1200, 10)], building="boathouse", harbour="yes", name="Kayıkhane"),  # touches water
+    ]}
+    feats, _, diag = inv.build_inventory(raw, [], _land())
+    by = {f["properties"]["id"] for f in feats}
+    why = {e["id"]: e["reason"] for e in diag["not_spot"]}
+    assert why["osm-node-50"].startswith("işletme şubesi")
+    assert why["osm-way-51"].startswith("şirket/bina")
+    assert why["osm-node-52"].startswith("feribot terminali karada")
+    assert why["osm-node-54"].startswith("şirket/bina")
+    assert {"osm-node-53", "osm-way-55"} <= by
+    assert diag["dropped"]["not_spot"] == 4
+    md = inv.report_md(feats, [], diag)
+    assert "Mera olmayan nesneler" in md and "BUDO" in md
+    # without land polygons a ferry terminal point is not judged; a shop near the shore touches the water
+    assert inv.not_a_spot({"amenity": "ferry_terminal"}, inv.Point(0, 0), None, inv.Coast([inv.LineString([(0, 0), (10, 0)])])) is None
+    assert inv.not_a_spot({"shop": "x"}, inv.Point(0, 50), None, inv.Coast([inv.LineString([(0, 0), (10, 0)])])) == "şirket/bina nesnesi, suyla teması yok"
+
+
+def test_g1_same_object_and_name_normalisation():
+    assert inv.name_key("Güzelyalı Yat Limanı") == inv.name_key("Güzelyalı Yat Limani") == "guzelyali yat limani"
+    raw = {"elements": [
+        RAW["elements"][0],
+        way(60, [(0, 0), (0, -120)], man_made="pier", name="Mudanya İskelesi"),
+        node(61, (90, -30), amenity="ferry_terminal", name="Mudanya İskelesi"),                                 # terminal of the pier
+        # marina basin with its own breakwaters (both already spots): small basin → no own record
+        way(62, [(1000, 0), (1100, 0), (1100, -60), (1000, -60), (1000, 0)], leisure="marina", name="Güzelyalı Yat Limanı"),
+        node(63, (1050, -30), leisure="marina", name="Güzelyalı Yat Limani"),                                   # same, spelling
+        way(64, [(1000, 0), (1000, -60)], man_made="breakwater"), way(65, [(1100, 0), (1100, -60)], man_made="breakwater"),
+        # big basin with breakwaters: one "liman içi" record
+        way(66, [(2000, 0), (2300, 0), (2300, -200), (2000, -200), (2000, 0)], harbour="yes", name="Armutlu Devlet Limanı"),
+        way(67, [(2000, 0), (2000, -200)], man_made="breakwater"),
+        node(68, (2150, -100), leisure="marina", name="Armutlu Devlet Limani"),
+        # lone harbour node on the water, 40 m out: basin centre, kept (≤ 150 m)
+        node(69, (-1500, -40), leisure="marina", name="Tirilye Limanı"),
+        node(70, (-2500, 30), leisure="marina", name="Karada marina"),                                         # on land, 30 m: kept by 30 m rule
+        node(71, (-2000, -400), leisure="marina", name="Açıkta"),                                              # 400 m out: excluded
+    ]}
+    feats, _, diag = inv.build_inventory(raw, [], _land())
+    by = {f["properties"]["id"]: f["properties"] for f in feats}
+    same = {e["id"]: e["reason"] for e in diag["same_object"]}
+    assert "osm-way-60" in by and same["osm-node-61"].startswith("aynı nesnenin tekrarı: osm-way-60")
+    assert "osm-way-64" in by and "osm-way-65" in by
+    assert same["osm-way-62"].startswith("limanın kendi yapıları zaten mera")
+    assert "osm-node-63" in same  # spelling twin or own-structure duplicate, never a second record
+    assert by["osm-way-66"]["name"] == "Armutlu Devlet Limanı – liman içi" and by["osm-way-66"]["kind"] == "harbour"
+    assert same["osm-node-68"].startswith("aynı nesnenin tekrarı: osm-way-66")
+    assert "osm-node-69" in by and "osm-node-70" in by
+    assert "kıyı çizgisine 400 m (> 150 m)" in {e["id"]: e["reason"] for e in diag["excluded"]}["osm-node-71"]
+    md = inv.report_md(feats, [], diag)
+    assert "Aynı fiziksel nesnenin tekrarı" in md and "liman içi" in md
+
+
+def test_g1_harbour_node_inside_polygon_uses_polygon_edge():
+    raw = {"elements": [
+        RAW["elements"][0],
+        way(80, [(0, 0), (200, 0), (200, -150), (0, -150), (0, 0)], harbour="yes", name="Barınak"),
+        node(81, (100, -100), leisure="marina", name="Barınak Marina"),     # 100 m from the coast, inside the polygon
+    ]}
+    feats, _, diag = inv.build_inventory(raw, [])
+    ids = {f["properties"]["id"] for f in feats}
+    assert "osm-node-81" not in {e["id"] for e in diag["excluded"]}
+    assert "osm-way-80" in ids

@@ -1,9 +1,7 @@
-import { bandOf, bandV2 } from '@av-livn/scoring';
+import { bandOf, bandV2, KIND_LABEL_TR, kindTitle } from '@av-livn/scoring';
 
-export const KIND_TR: Record<string, string> = {
-  pier: 'İskele', breakwater: 'Mendirek', groyne: 'Mahmuz', manual: 'Elle eklenen',
-  quay: 'Rıhtım', harbour: 'Liman / balıkçı barınağı', rocky: 'Kayalık kıyı', beach: 'Kumsal', river_mouth: 'Dere ağzı',
-};
+/** Spot type titles (G1: one source in @av-livn/scoring, no "undefined"). */
+export const KIND_TR: Record<string, string> = Object.fromEntries(Object.keys(KIND_LABEL_TR).map((k) => [k, kindTitle(k)]));
 export const STATUS_TR: Record<string, string> = { candidate: 'Doğrulanmadı', verified: 'Sahada doğrulandı', rejected: 'Elendi', proposed: 'Aday (onay bekliyor)' };
 
 export const COMPONENT_TR: Record<string, string> = {

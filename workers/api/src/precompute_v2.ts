@@ -1,8 +1,8 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  crossWind, DEFAULTS, explain, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt,
-  type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour,
+  crossWind, DEFAULTS, explain, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
+  type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour, type ShoreKind,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
 import type { Snapshot } from './lib/openmeteo';
@@ -308,7 +308,6 @@ export type ReasonEntry = [DriverKey, number, string];
 /** [total, p10, p90, rank, gated, first warning, main reason] — p10/p90 null while the band is being recomputed. */
 export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null, ReasonEntry | null];
 
-const KIND_TR: Record<string, string> = { pier: 'iskele', breakwater: 'mendirek', groyne: 'mahmuz', manual: 'yapı' };
 const COMPASS_TR = ['kuzey', 'kuzeydoğu', 'doğu', 'güneydoğu', 'güney', 'güneybatı', 'batı', 'kuzeybatı'];
 const n1 = (x: number) => (Math.round(x * 10) / 10).toString().replace('.', ',');
 
@@ -329,7 +328,9 @@ export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hou
     case 'yapi':
       body = PRIVATE_SOURCES.has(c('yapi').source)
         ? `yapı — ${c('yapi').source} bilgisi (değer gizli)`
-        : `${KIND_TR[spot.kind]} ${Math.round(spot.lengthM ?? 50)} m — ${c('yapi').source}, kanıt C`;
+        : SHORE_KINDS.includes(spot.kind as ShoreKind)
+          ? `${kindLabel(spot.kind)} — tip tercihi varsayım, kanıt C`
+          : `${kindLabel(spot.kind)} ${Math.round(spot.lengthM ?? 50)} m — ${c('yapi').source}, kanıt C`;
       break;
     case 'derinlik': {
       const src = c('derinlik').source;

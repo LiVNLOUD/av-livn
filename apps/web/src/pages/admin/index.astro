@@ -87,8 +87,9 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, logout, mountLogin } from '../../scripts/admin';
+  import { KIND_LABEL_TR } from '@av-livn/scoring';
   type Spot = { id: string; name: string; status: string; has_light: boolean | null; notes: string | null; kind: string; place: string | null; access: string | null; hidden_reason?: string | null; auto_added?: boolean };
-  const KIND_TR: Record<string, string> = { pier: 'iskele', breakwater: 'mendirek', groyne: 'mahmuz', quay: 'rıhtım', harbour: 'liman / barınak', rocky: 'kayalık kıyı', beach: 'kumsal', river_mouth: 'dere ağzı', manual: 'elle' };
+  const KIND_TR: Record<string, string> = KIND_LABEL_TR;
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık (tahmin)', belirsiz: 'erişim belirsiz', kisitli_feribot: 'kısıtlı olabilir' };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   let token = getToken();
