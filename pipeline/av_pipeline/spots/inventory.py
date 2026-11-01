@@ -243,7 +243,7 @@ def struct_point(g, coast: Coast) -> tuple[Point, float]:
     from av_pipeline.spots.build_spots import structure_length
 
     lens = structure_length(list(line.coords), coast)
-    return max(pts, key=lambda p: coast.nearest(p)[2]), float(lens["seaward_m"] or line.length)
+    return max(pts, key=lambda p: coast.nearest(p)[2]), float(max(lens["seaward_m"], lens["reach_m"]))
 
 
 def nearest_place(xy: tuple[float, float], places: list[dict], max_m: float = 4000.0) -> tuple[str | None, float | None]:

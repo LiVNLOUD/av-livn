@@ -46,7 +46,7 @@ EXISTING = [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [ll
 def test_inventory_types_dedupe_forbidden_and_names():
     feats, forb, diag = inv.build_inventory(RAW, EXISTING)
     by = {f["properties"]["id"]: f["properties"] for f in feats}
-    assert "osm-way-10" in by and by["osm-way-10"]["kind"] == "pier" and by["osm-way-10"]["length_m"] == 105  # H2: seaward of the 15 m shore band
+    assert "osm-way-10" in by and by["osm-way-10"]["kind"] == "pier" and by["osm-way-10"]["length_m"] == 120  # H2: max(seaward 105 m, tip reach 120 m)
     assert "osm-way-11" not in by and "osm-way-20" not in by
     assert by["osm-node-12"]["name"] == "Karacaali İskelesi" and by["osm-node-12"]["kind"] == "harbour"
     assert by["osm-node-12"]["access"] == "acik"
@@ -252,3 +252,18 @@ def test_h6_kordon_segments_lamps_exclusions_report():
     assert "Kordon parçası bulunamayan odak yerleşimler" in md and "Kurşunlu" in md
     assert inv.classify({"highway": "secondary", "name": "Sahil Yolu"}) == "promenade"
     assert inv.classify({"highway": "secondary", "name": "Atatürk Cd."}) is None
+
+
+def test_h2_with_land_uses_eroded_mainland():
+    from types import SimpleNamespace
+
+    from av_pipeline.spots.build_spots import Coast, structure_length
+    from shapely.geometry import LineString as L, box as B
+
+    # the coastline is traced around a 300 m pier (as OSM often does); the eroded mainland ignores the pier
+    coast = Coast([L([(-1000, 0), (-5, 0), (-5, -300), (5, -300), (5, 0), (1000, 0)])])
+    land = SimpleNamespace(mainland=B(-1000, 0, 1000, 500), full=B(-1000, 0, 1000, 500))
+    r = structure_length([(0, 0), (0, -300)], coast, land)
+    assert r["seaward_m"] == 285 and r["reach_m"] == 300
+    # without land the traced coastline hides the pier: seaward 0, the reach is short too
+    assert structure_length([(0, 0), (0, -300)], coast)["seaward_m"] == 0

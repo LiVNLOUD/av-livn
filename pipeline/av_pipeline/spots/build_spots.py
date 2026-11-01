@@ -141,13 +141,13 @@ FERRY_PIER_MAX_M = 400
 
 def structure_length(xy: list[tuple[float, float]], coast: "Coast", land: "Land | None" = None) -> dict:
     """{length_osm_m, seaward_m, reach_m}: raw OSM length (perimeter for a closed way), the length reaching out to
-    sea (outside a SHORE_BUFFER_M band around the coastline and outside the land; a closed outline counts with the
-    long side of its minimum rotated rectangle), and the tip's distance from the coastline."""
+    sea and the tip's distance from the shore. With land polygons the shore is the *eroded mainland* (piers and
+    moles removed: OSM often traces the coastline around them); without, a SHORE_BUFFER_M band of the coastline.
+    A closed outline counts with the long side of its minimum rotated rectangle."""
     line = LineString(xy)
     closed = len(xy) >= 4 and xy[0] == xy[-1]
-    shore = unary_union(coast.lines).buffer(SHORE_BUFFER_M)
-    if land is not None:
-        shore = shore.union(land.full)
+    base = land.mainland if land is not None else unary_union(coast.lines)
+    shore = base.buffer(SHORE_BUFFER_M)
     if closed:
         poly = Polygon(xy).buffer(0)
         sea = poly.difference(shore)
@@ -157,7 +157,7 @@ def structure_length(xy: list[tuple[float, float]], coast: "Coast", land: "Land 
         seaward = max(edges) if not sea.is_empty else 0.0
     else:
         seaward = line.difference(shore).length
-    reach = max(coast.nearest(Point(c))[2] for c in xy)
+    reach = max(base.distance(Point(c)) for c in xy)
     return {"length_osm_m": round(line.length), "seaward_m": round(seaward), "reach_m": round(reach)}
 
 
@@ -216,7 +216,8 @@ def build_candidate(
         "kind": kind,
         **(lens := structure_length(s["xy"], coast, land)),
         # H2: the model uses the seaward part; the raw OSM length stays for the audit
-        "length_m": lens["seaward_m"] if lens["seaward_m"] > 0 else round(line.length),
+        # (the larger of the seaward length and the tip's reach: a shore-parallel quay stays short, never the perimeter)
+        "length_m": max(lens["seaward_m"], lens["reach_m"]),
         "length_flag": length_flag(kind, lens["seaward_m"], lens["length_osm_m"], ferry=bool(re.search(r"feribot|ferry|İDO|BUDO|deniz otobüs", s["tags"].get("name", ""), re.I))),
         "shore_normal_deg": round(normal, 1),
         "probe_lat": None,
