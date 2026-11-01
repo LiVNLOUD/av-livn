@@ -9,7 +9,7 @@ Uydu görüntüsüyle karşılaştırma otomatik yapılmaz (kural): şüpheliler
 
 | Yapı | Tip | OSM ham (m) | Denize uzanan (m) | Uç erişimi (m) | Bayrak | OSM |
 |---|---|---|---|---|---|---|
-| Güzelyalı Yat Limanı – doğu mendireği | breakwater | 1067 | 459 | 189 |  | [way/252356832](https://www.openstreetmap.org/way/252356832) |
+| Güzelyalı Yat Limanı – doğu mendireği | breakwater | 1067 | 459 | 172 |  | [way/252356832](https://www.openstreetmap.org/way/252356832) |
 | İDO Güzelyalı Feribot İskelesi | pier | 960 | 222 | 121 | OSM uzunluğu 960 m, denize uzanan yalnız 222 m (dış hat çevresi ya da kıyı boyunca rıhtım) | [way/503770078](https://www.openstreetmap.org/way/503770078) |
 | Armutlu Devlet Limanı – uzun batı mendireği | breakwater | 930 | 353 | 214 |  | [way/1413355181](https://www.openstreetmap.org/way/1413355181) |
 | Mudanya İskelesi | pier | 353 | 139 | 126 | OSM uzunluğu 353 m, denize uzanan yalnız 139 m (dış hat çevresi ya da kıyı boyunca rıhtım) | [way/1233883494](https://www.openstreetmap.org/way/1233883494) |
