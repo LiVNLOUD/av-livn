@@ -352,10 +352,15 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                 continue
             items.append((typ, el, t, g))
     zones = [f["geom"].buffer(100) for f in forbidden] + [z for z, _, _ in excl_zones]
+    counts: dict[str, int] = {}
+    for typ, _, _, _ in items:
+        counts[typ] = counts.get(typ, 0) + 1
+    print(f"inventory items by type: {counts}; street lamps: {len(lamps)}", file=sys.stderr)
     structs = [g for typ, _, _, g in items if typ == "structure"]
     harbour_polys = [g for typ, _, _, g in items if typ == "harbour" and isinstance(g, Polygon)]
     natural_shore = [g for typ, _, _, g in items if typ in ("beach", "rocky")]
     prom_log: list[dict] = []  # H6: every kordon piece found, with what happened to it (per-settlement report)
+    prom_far = 0
 
     props_list: list[dict] = []
     seen_struct = {k.split("-")[-1] for k in existing_xy}
@@ -387,7 +392,10 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                     break
         elif typ == "promenade":
             pts = []
-            for seg in segments(coast, g, PROM_NEAR_M):
+            segs = segments(coast, g, PROM_NEAR_M)
+            if not segs:
+                prom_far += 1  # no coastline piece of ≥ MIN_SEG_M within PROM_NEAR_M of this way
+            for seg in segs:
                 mid = seg.interpolate(0.5, normalized=True)
                 place0, _ = nearest_place((mid.x, mid.y), places)
                 if any(n.distance(mid) <= 40 for n in natural_shore):
@@ -507,6 +515,8 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     diag["not_spot"] = not_spots
     diag["same_object"] = same_object
     diag["promenade_log"] = prom_log
+    diag["promenade_ways_not_along_shore"] = prom_far
+    print(f"kordon: {counts.get('promenade', 0)} ways, {prom_far} not along the shore, {len(prom_log)} pieces", file=sys.stderr)
     return feats, forb, diag
 
 
@@ -672,7 +682,7 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
     lines += ["## Bilinen yerler (kullanıcı listesi)", ""]
     lines += [f"- {m}" for m in diag.get("known_missing", [])]
     for k, v in diag.items():
-        if k in ("dropped", "known_missing", "excluded", "not_spot", "same_object", "promenade_log"):
+        if k in ("dropped", "known_missing", "excluded", "not_spot", "same_object", "promenade_log", "promenade_ways_not_along_shore"):
             continue
         if not v.get("place"):
             lines.append(f"- **{k}:** OSM'de yerleşim noktası yok.")
@@ -685,7 +695,14 @@ def main(argv: list[str]) -> int:  # pragma: no cover - CLI
     if argv[1] == "fetch":
         from av_pipeline.spots.fetch_osm import fetch
 
-        Path(argv[2]).write_text(json.dumps(fetch(build_query()), ensure_ascii=False))
+        raw = fetch(build_query())
+        Path(argv[2]).write_text(json.dumps(raw, ensure_ascii=False))
+        kinds: dict[str, int] = {}
+        for el in raw.get("elements", []):
+            t = el.get("tags", {})
+            k = next((f"{key}={t[key]}" for key in ("man_made", "natural", "barrier", "leisure", "highway", "harbour", "amenity", "waterway", "landuse") if key in t), "?")
+            kinds[k] = kinds.get(k, 0) + 1
+        print("inventory elements:", dict(sorted(kinds.items(), key=lambda kv: -kv[1])[:40]))
         return 0
     raw = json.loads(Path(argv[2]).read_text())
     dst = Path(argv[3])
