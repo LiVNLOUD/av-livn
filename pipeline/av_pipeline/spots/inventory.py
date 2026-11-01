@@ -65,14 +65,14 @@ def build_query() -> str:
     b = f"{s},{w},{n},{e}"
     p = f"{s - 0.05},{w - 0.05},{n + 0.05},{e + 0.05}"
     return f"""[out:json][timeout:240];
-way["natural"="coastline"]({b})->.c;
 (
-  way(around.c:{PROM_NEAR_M:.0f})["man_made"~"^(embankment|seawall)$"];
-  way(around.c:{PROM_NEAR_M:.0f})["barrier"~"^(wall|retaining_wall)$"];
-  way(around.c:{PROM_NEAR_M:.0f})["leisure"="promenade"];
-  way(around.c:{PROM_NEAR_M:.0f})["highway"~"^(footway|pedestrian|path|cycleway)$"];
-  way(around.c:{PROM_NEAR_M:.0f})["highway"]["name"~"sahil|kordon|kıyı",i];
-  node(around.c:{LAMP_NEAR_M:.0f})["highway"="street_lamp"];
+  way["natural"="coastline"]({b});
+  way["man_made"~"^(embankment|seawall)$"]({b});
+  way["barrier"~"^(wall|retaining_wall)$"]({b});
+  way["leisure"="promenade"]({b});
+  way["highway"~"^(footway|pedestrian|path|cycleway)$"]({b});
+  way["highway"]["name"~"sahil|kordon|kıyı",i]({b});
+  node["highway"="street_lamp"]({b});
   nwr["man_made"~"^(pier|breakwater|groyne|quay)$"]({b});
   nwr["leisure"~"^(marina|slipway|fishing)$"]({b});
   nwr["harbour"]({b});
@@ -395,6 +395,9 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                     break
         elif typ == "promenade":
             pts = []
+            # fetched by bbox (Overpass mirrors differ on around.c): ways not within PROM_NEAR_M of the coast are skipped
+            if min(ln.distance(g) for ln in coast.lines) > PROM_NEAR_M:
+                continue
             segs = segments(coast, g, PROM_NEAR_M)
             if not segs:
                 prom_far += 1  # no coastline piece of ≥ MIN_SEG_M within PROM_NEAR_M of this way
