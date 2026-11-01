@@ -111,11 +111,12 @@ if (dryRun) {
     await query(UPSERT_HISTORY_SQL, [r.spot_id, r.start_hour, r.history_json]);
   }
   await query(DELETE_STALE_V2_SQL);
-  // Phase F CPU: default /api/spots, /api/hours, /api/windows bodies for this and the next two hours.
+  // Phase F CPU: default /api/spots, /api/hours, /api/windows bodies for this and the next five hours (GitHub
+  // schedules can be late or skipped; past the last stored hour the Worker builds the bodies live, which costs CPU).
   {
     const h0 = Math.floor(Date.now() / 3_600_000);
     const [list, hrs, win, fet] = await Promise.all([query<ListRow>(LIST_SQL), query<HoursRow>(HOURS_SQL), query<WindowsRow>(WINDOWS_SQL), query(FETCHED_SQL)]);
-    const bodies = preBodies(list, hrs, win, fetchedAt(fet), [h0, h0 + 1, h0 + 2]);
+    const bodies = preBodies(list, hrs, win, fetchedAt(fet), Array.from({ length: 6 }, (_, k) => h0 + k));
     await query(CLEAR_PRE_SQL);
     for (const [k, v] of bodies) await query('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value', [k, v]);
     console.log(`public bodies: ${bodies.length} (${Math.round(bodies.reduce((a, [, v]) => a + v.length, 0) / 1024)} KB)`);

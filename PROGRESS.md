@@ -155,3 +155,37 @@
 - Düzeltme: F0 takım kutusu yanlış fonksiyondan çağrılıyordu; canlıda gizli kalıyor ve saat değişince yenilenmiyordu. Artık her saat seçiminde çiziliyor.
 - CPU: 63 merada canlı ölçüm /api/hours p50 14 ms, /api/windows 15 ms, /api/spots p50 9 / max 31 ms çıktı (sınır ~10 ms). Score job artık bu üç varsayılan yanıtı her saat için hazırlayıp D1 `meta` (`pub:*`) satırına yazıyor; Worker metni parse etmeden döndürüyor. Yönetici değişikliği ve seed bu satırları siliyor (canlı hesaba düşer). Sonra: isteklerin çoğu 0–2 ms; 5–14 ms'lik birkaç istek soğuk başlangıç.
 - **Açık:** Hal tablosu (tarim.ibb.istanbul) ve Kökçek tezinin tam metni oturumdan indirilemedi (bağlantı kesildi / 503).
+
+## Faz G — veri kalitesi, takım kutusu, liste düzeni, harita kalite katmanı, levrek Bölüm A (2026-10-31/11-01) ✅ DUR
+- **G1 envanter:** aktif mera 63 → 60, otomatik eklenen 47 → 44.
+  - Mera olmayan nesneler çıkarıldı:
+    - Eski Turyol Armutlu Şubesi (şube);
+    - BUDO (bina, suyla teması yok);
+    - Mudanya İskelesi ve İDO Armutlu Merkez Terminali (karadaki feribot terminali noktaları).
+  - Aynı nesnenin tekrarı (birleştirme değil):
+    - Güzelyalı Yat Limani (yazım farkı) → tek kayıt "Güzelyalı Yat Limanı – liman içi";
+    - Armutlu Devlet Limanı noktası (mendirekleri mera);
+    - Armutlu İhlas Tatil Köyü İskelesi.
+  - Liman eşiği: elenen 3 liman noktası suyun üzerinde ve havza ortası olarak yeniden değerlendirildi. Tirilye Limanı ve Büyükkumla İskelesi eklendi; üçüncüsü tekrar çıktı.
+  - Her tip için Türkçe etiket tek kaynakta (`kindLabel`), "undefined" testle engellendi. Canlı `/api/spots` nedenlerinde 0.
+- **G2 takım kutusu:**
+  - "FC 0.8–1.2 numara (≈3–5 lb)"; tüm metin ve kayıtlı profil için birim denetimi.
+  - Hedef derinlik diel koluna bağlı: gece yüzeye yakın (2–4 s), alacakaranlık orta su, gündüz dibe yakın.
+  - Varsayılan sabit ajing kafası; gerçek jighead boyları; LRF 5 g'ye kadar, sonra spin.
+  - İğne bedeli (#8 / #10) R19 künyesiyle; 6 senaryo test olarak sabit (TACKLE.md).
+- **G3 liste ve ısı haritası:** önce yapılar; "Kumsallar (28)" daraltılabilir grup; aynı puan+bant tek satır ("2 dere ağzı aynı puan — genişlet"); eşit sıralar "30.–32. eşit".
+- **G5 harita:**
+  - Kök neden: "ölçülmüş blok" sanılan dikdörtgen, hatch görseli kaydedilmeden çizilen merkez karolardı. Veride Gemlik Körfezi'nin neredeyse tamamı EMODnet'te enterpolasyon; ölçülmüş alan açık Marmara tarafında.
+  - Yeni gösterim:
+    - ölçülmüş alan ince çerçeve + "ölçülmüş alan" yazısı;
+    - ölçülmemiş bölgede kesikli soluk konturlar;
+    - "Belirsiz derinlik" taraması isteğe bağlı (varsayılan kapalı);
+    - lejant buna göre.
+  - `check_tiles.py` tüm zoom seviyelerinde (8–14) ayrımı DTM'ye karşı denetliyor (0 hata); geodata'da zorunlu adım.
+  - Kalabalık: zoom < 12'de yerleşim rozeti ("Armutlu · 23 mera", en iyi puan rengi, dokununca liste); halka yayma yalnız zoom ≥ 14 ve ≤ 8 mera.
+- **G4 levrek Bölüm A** (`docs/species/levrek/`):
+  - 22 kaynak (A 1, B 21), DOI'ler Crossref'le doğrulandı.
+  - Veri denetimi; model taslağı (34 skaler parametre: B 3, geri kalanı C).
+  - 5 yön testi geçti (`analysis/levrek_draft.py`, mock hava).
+  - Takım kuralları; asgari boy 25 cm.
+- **CPU:** önceden hazırlanan yanıtlar 3 saat ilerisini kapsıyordu. GitHub zamanlayıcısı gecikince canlı hesaba düşüyordu (p50 ~11–13 ms); artık 6 saat yazılıyor.
