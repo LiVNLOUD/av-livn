@@ -9,14 +9,14 @@ yönetici yasak alanları içinde değil; c) kumsala md. 16/5 tarihli uyarı roz
 tip meralar ayrı kalır, birbirine "yakın mera" bağlantısı alır. Yalnız aynı noktanın kopyası (≤ 25 m) atılır.
 G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası suyun üzerindeyse havza ortası sayılır (≤ 150 m).
 
-**Eklenen: 73 mera.** Elenen: 4. Ticari liman (erişim yasak katmanı): 28.
+**Eklenen: 74 mera.** Elenen: 4. Ticari liman (erişim yasak katmanı): 28.
 
 | Tip | Eklenen |
 |---|---|
 | kordon (taş tahkimat) | 30 |
 | kumsal | 28 |
 | dere ağzı | 8 |
-| liman / balıkçı barınağı | 5 |
+| liman / balıkçı barınağı | 6 |
 | kayalık kıyı | 2 |
 
 | Yerleşim | Eklenen |
@@ -30,6 +30,7 @@ G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası
 | Cumhuriyet | 2 |
 | Demirsubaşı | 2 |
 | Dr.Ziya Kaya | 2 |
+| Güzelyalı Burgaz | 2 |
 | Güzelyalı Siteler | 2 |
 | Güzelyalı Yalı | 2 |
 | Hasanbey | 2 |
@@ -38,7 +39,6 @@ G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası
 | Tirilye | 2 |
 | Ömerbey Mah. | 2 |
 | Balıkpazarı | 1 |
-| Güzelyalı Burgaz | 1 |
 | Güzelyalı Eğitim | 1 |
 | Hisar | 1 |
 | Karacaali | 1 |
@@ -102,6 +102,7 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kumsal (Fıstıklı güneybatısı) 2 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985744 |
 | Kordon (Fıstıklı batısı) | kordon (taş tahkimat) | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1445587670 |
 | Fıstıklı Deresi ağzı | dere ağzı | Fıstıklı | acik (yerleşime 1487 m) | way/698849100 |
+| Güzelyalı Yat Limanı – liman içi | liman / balıkçı barınağı | Güzelyalı Burgaz | belirsiz (marina: giriş kısıtlı olabilir) | way/1552615726 |
 | Dere ağzı (Güzelyalı Burgaz) | dere ağzı | Güzelyalı Burgaz | acik (yerleşime 178 m) | way/1430949806 |
 | Kumsal (Güzelyalı Eğitim kuzeyi) | kumsal | Güzelyalı Eğitim | acik (yerleşime 200 m) | way/665674892 |
 | Kumsal (Güzelyalı Siteler kuzeyi) | kumsal | Güzelyalı Siteler | acik (yerleşime 584 m) | way/1305691028 |
@@ -199,7 +200,7 @@ Lamba olasılığı: bölgede OSM'de hiç `highway=street_lamp` yok; parçalar k
 | Gemlik | Balıkpazarı, Cumhuriyet, Demirsubaşı, Dr.Ziya Kaya, Hisar, Kayhan, Orhaniye | 12 | 10 | 0 | 2 | — |
 | Kurşunlu | Kumsaz, Kurşunlu | 9 | 9 | 0 | 0 | — |
 | Mudanya | Hasanbey, Kumyaka, Ömerbey Mah. | 5 | 5 | 0 | 0 | — |
-| diğer (odak yerleşimlere > 4 km) | Armutlu, Fıstıklı | 17 | 6 | 11 | 0 | zaten kumsal/kayalık (10); OSM access=no (1) |
+| diğer (odak yerleşimlere > 4 km) | Armutlu, Fıstıklı | 21 | 6 | 14 | 1 | zaten kumsal/kayalık (13); OSM access=no (1) |
 
 Kordon parçası bulunamayan odak yerleşimler: Kumla, Narlı, Umurbey, Güzelyalı — OSM'de kıyı çizgisine ≤ 25 m paralel tahkimat, deniz duvarı, sahil yolu ya da yaya yolu etiketi yok.
 
@@ -223,7 +224,7 @@ kayıtlıysa ayrı mera olmaz. Liman çokgeninin su alanı ≥ 1 ha ise tek bir 
 
 | Yer | Ad | Neden | OSM |
 |---|---|---|---|
-| osm-node-11450096002 | Güzelyalı Yat Limani | aynı nesnenin tekrarı: osm-way-252356832 (146 m) | node/11450096002 |
+| osm-node-11450096002 | Güzelyalı Yat Limani | aynı nesnenin tekrarı: osm-way-1552615726 (Güzelyalı Yat Limanı) | node/11450096002 |
 | osm-node-12451494394 | Armutlu Devlet Limanı | aynı nesnenin tekrarı: osm-way-1422122108 (66 m) | node/12451494394 |
 | osm-node-3493263849 | Armutlu İhlas Tatil Köyü İskelesi | aynı nesnenin tekrarı: osm-way-1170373161 (0 m) | node/3493263849 |
 

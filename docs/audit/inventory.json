@@ -440,7 +440,7 @@
   "duplicate": 2,
   "excluded": 4,
   "not_spot": 6,
-  "same_object": 5
+  "same_object": 6
  },
  "known_missing": [
   "Narlı: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)",
@@ -558,7 +558,7 @@
    "osm": [
     "node/11450096002"
    ],
-   "reason": "aynı nesnenin tekrarı: osm-way-252356832 (146 m)"
+   "reason": "aynı nesnenin tekrarı: osm-way-1552615726 (Güzelyalı Yat Limanı)"
   },
   {
    "id": "osm-node-12451494394",
@@ -647,6 +647,27 @@
    "status": "elendi",
    "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
    "osm": "way/1540343486"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1550175583"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1550175583"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1550175583"
   },
   {
    "place": "Kurşunlu",
@@ -838,6 +859,13 @@
    "osm": "way/1217216676"
   },
   {
+   "place": "Armutlu",
+   "town": null,
+   "status": "tekrar",
+   "reason": "aynı kıyı kesimi: osm-way-1413355183-1",
+   "osm": "way/1550175583"
+  },
+  {
    "place": "Fıstıklı",
    "town": null,
    "status": "eklendi",
@@ -881,5 +909,5 @@
   }
  ],
  "street_lamps": 0,
- "promenade_ways_not_along_shore": 56
+ "promenade_ways_not_along_shore": 58
 }
