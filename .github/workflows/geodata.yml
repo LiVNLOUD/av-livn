@@ -50,7 +50,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles apps/web/public/tiles/labels.geojson apps/web/public/tiles/candidates.geojson apps/web/public/tiles/forbidden.geojson docs/spots-candidates.md docs/audit/inventory.json
+          git add data/spots.geojson apps/web/public/tiles/bathy.pmtiles apps/web/public/tiles/labels.geojson apps/web/public/tiles/candidates.geojson apps/web/public/tiles/forbidden.geojson docs/spots-candidates.md docs/audit/inventory.json docs/audit/length-audit.md
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
