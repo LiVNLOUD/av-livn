@@ -5,10 +5,28 @@
    40.36037
   ],
   "proposals": [
-   "osm-way-1165497962 Kurşunlu Yat Limanı (liman / balıkçı barınağı)"
+   "osm-way-1165497962 Kurşunlu Yat Limanı (liman / balıkçı barınağı)",
+   "osm-way-24825429-4 Kordon (Kurşunlu doğusu) (kordon (taş tahkimat))",
+   "osm-way-24825429-5 Kordon (Kurşunlu doğusu) 2 (kordon (taş tahkimat))",
+   "osm-way-24825429-6 Kordon (Kurşunlu doğusu) 3 (kordon (taş tahkimat))",
+   "osm-way-24825429-7 Kordon (Kurşunlu doğusu) 4 (kordon (taş tahkimat))",
+   "osm-way-24825429-8 Kordon (Kurşunlu kuzeydoğusu) (kordon (taş tahkimat))",
+   "osm-way-24825429-9 Kordon (Kurşunlu kuzeydoğusu) 2 (kordon (taş tahkimat))"
   ],
   "existing": [],
   "osm_within_1km": [
+   {
+    "ref": "way/24825429",
+    "tags": {
+     "name": "Sahil Yolu Caddesi"
+    }
+   },
+   {
+    "ref": "way/861271971",
+    "tags": {
+     "name": "Sahil Çıkmazı"
+    }
+   },
    {
     "ref": "way/1165497962",
     "tags": {
@@ -25,6 +43,16 @@
    40.43017
   ],
   "proposals": [
+   "osm-way-1217216668-1 Kordon (Dr.Ziya Kaya batısı) (kordon (taş tahkimat))",
+   "osm-way-1217216668-2 Kordon (Demirsubaşı güneyi) (kordon (taş tahkimat))",
+   "osm-way-1217216676-1 Kordon (Cumhuriyet batısı) (kordon (taş tahkimat))",
+   "osm-way-1217216676-2 Kordon (Cumhuriyet güneyi) (kordon (taş tahkimat))",
+   "osm-way-1217216676-3 Kordon (Orhaniye batısı) (kordon (taş tahkimat))",
+   "osm-way-1217216676-6 Kordon (Kayhan güneybatısı) (kordon (taş tahkimat))",
+   "osm-way-1217216676-7 Kordon (Balıkpazarı güneybatısı) (kordon (taş tahkimat))",
+   "osm-way-1336893175-1 Kordon (Orhaniye güneybatısı) (kordon (taş tahkimat))",
+   "osm-way-1336893184-1 Kordon (Hisar kuzeybatısı) (kordon (taş tahkimat))",
+   "osm-way-1500766926-1 Kordon (Demirsubaşı güneybatısı) (kordon (taş tahkimat))",
    "osm-way-700323582 Karsak Çayı ağzı (dere ağzı)"
   ],
   "existing": [
@@ -32,10 +60,28 @@
   ],
   "osm_within_1km": [
    {
+    "ref": "way/23034760",
+    "tags": {}
+   },
+   {
     "ref": "way/77362926",
     "tags": {
      "man_made": "pier"
     }
+   },
+   {
+    "ref": "way/260920447",
+    "tags": {
+     "name": "Mustafa Kemal Atatürk Kordonu Bulvarı"
+    }
+   },
+   {
+    "ref": "way/600351002",
+    "tags": {}
+   },
+   {
+    "ref": "way/600351004",
+    "tags": {}
    },
    {
     "ref": "way/700323582",
@@ -45,6 +91,110 @@
     }
    },
    {
+    "ref": "way/1055326547",
+    "tags": {
+     "name": "Semerciler Yokuşu Sokak"
+    }
+   },
+   {
+    "ref": "way/1055326548",
+    "tags": {}
+   },
+   {
+    "ref": "way/1055326913",
+    "tags": {
+     "name": "Gazino Sokak"
+    }
+   },
+   {
+    "ref": "way/1055327074",
+    "tags": {}
+   },
+   {
+    "ref": "way/1055331442",
+    "tags": {}
+   },
+   {
+    "ref": "way/1217216667",
+    "tags": {}
+   },
+   {
+    "ref": "way/1217216668",
+    "tags": {}
+   },
+   {
+    "ref": "way/1217216670",
+    "tags": {}
+   },
+   {
+    "ref": "way/1217216676",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336889045",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336889046",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893169",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893170",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893171",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893172",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893173",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893174",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893175",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893180",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893181",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893184",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893185",
+    "tags": {}
+   },
+   {
+    "ref": "way/1336893186",
+    "tags": {}
+   },
+   {
+    "ref": "way/1351117869",
+    "tags": {}
+   },
+   {
+    "ref": "way/1351117870",
+    "tags": {}
+   },
+   {
     "ref": "way/1378074376",
     "tags": {
      "amenity": "school",
@@ -52,11 +202,36 @@
     }
    },
    {
-    "ref": "way/1501002525",
-    "tags": {
-     "landuse": "military",
-     "name": "Gemlik Askerlik Şubesi"
-    }
+    "ref": "way/1378881430",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427906785",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427906786",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427906787",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427912556",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427912557",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427912558",
+    "tags": {}
+   },
+   {
+    "ref": "way/1427912559",
+    "tags": {}
    }
   ]
  },
@@ -115,6 +290,10 @@
      "name": "Büyükkumla Deresi",
      "waterway": "stream"
     }
+   },
+   {
+    "ref": "way/1134427223",
+    "tags": {}
    }
   ]
  },
@@ -132,7 +311,12 @@
    28.88379,
    40.37526
   ],
-  "proposals": [],
+  "proposals": [
+   "osm-way-1073087871-1 Kordon (Ömerbey Mah. güneydoğusu) (kordon (taş tahkimat))",
+   "osm-way-639389497-1 Kordon (Ömerbey Mah. doğusu) (kordon (taş tahkimat))",
+   "osm-way-639389497-2 Kordon (Hasanbey kuzeydoğusu) (kordon (taş tahkimat))",
+   "osm-way-639389497-3 Kordon (Hasanbey kuzeyi) (kordon (taş tahkimat))"
+  ],
   "existing": [
    "osm-way-1233883494 Mudanya İskelesi"
   ],
@@ -145,6 +329,10 @@
     }
    },
    {
+    "ref": "way/133391377",
+    "tags": {}
+   },
+   {
     "ref": "way/503796445",
     "tags": {
      "landuse": "military",
@@ -152,10 +340,22 @@
     }
    },
    {
+    "ref": "way/639389497",
+    "tags": {
+     "name": "İsmet İnönü Bulvarı"
+    }
+   },
+   {
     "ref": "way/862153219",
     "tags": {
      "amenity": "ferry_terminal",
      "name": "Bursa Deniz Otobüsleri/BUDO"
+    }
+   },
+   {
+    "ref": "way/1073087871",
+    "tags": {
+     "name": "İstasyon Caddesi"
     }
    },
    {
@@ -182,6 +382,40 @@
     "tags": {
      "name": "Sahil Güvenlik Komutanlığı"
     }
+   },
+   {
+    "ref": "way/1377885333",
+    "tags": {
+     "name": "12 Eylül Caddesi"
+    }
+   },
+   {
+    "ref": "way/1377885334",
+    "tags": {}
+   },
+   {
+    "ref": "way/1377885335",
+    "tags": {}
+   },
+   {
+    "ref": "way/1377885336",
+    "tags": {}
+   },
+   {
+    "ref": "way/1377885337",
+    "tags": {}
+   },
+   {
+    "ref": "way/1377885338",
+    "tags": {}
+   },
+   {
+    "ref": "way/1377885339",
+    "tags": {}
+   },
+   {
+    "ref": "way/1486514360",
+    "tags": {}
    }
   ]
  },
@@ -191,7 +425,8 @@
    40.38506
   ],
   "proposals": [
-   "osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)"
+   "osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı)",
+   "osm-way-534210128-1 Kordon (Kumyaka doğusu) (kordon (taş tahkimat))"
   ],
   "existing": [
    "osm-way-1456975486 Petek Sitesi İskele"
@@ -203,9 +438,9 @@
  },
  "dropped": {
   "duplicate": 2,
-  "excluded": 3,
-  "not_spot": 4,
-  "same_object": 3
+  "excluded": 4,
+  "not_spot": 6,
+  "same_object": 5
  },
  "known_missing": [
   "Narlı: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)",
@@ -251,6 +486,19 @@
     29.090982,
     40.41697
    ]
+  },
+  {
+   "id": "osm-way-940722066-1",
+   "type": "kordon (taş tahkimat)",
+   "place": "Armutlu",
+   "osm": [
+    "way/940722066"
+   ],
+   "reason": "OSM access=no",
+   "lonlat": [
+    28.839146,
+    40.509225
+   ]
   }
  ],
  "not_spot": [
@@ -279,6 +527,22 @@
    "reason": "şirket/bina nesnesi, suyla teması yok"
   },
   {
+   "id": "osm-way-1363811911",
+   "name": "Mudanya Kaymakamlık Lojmanı",
+   "osm": [
+    "way/1363811911"
+   ],
+   "reason": "şirket/bina nesnesi, suyla teması yok"
+  },
+  {
+   "id": "osm-way-1363811919",
+   "name": "Gemlik Kaymakamlık Lojmanı",
+   "osm": [
+    "way/1363811919"
+   ],
+   "reason": "şirket/bina nesnesi, suyla teması yok"
+  },
+  {
    "id": "osm-way-1391978145",
    "name": "İDO Armutlu Merkez Terminali",
    "osm": [
@@ -294,7 +558,7 @@
    "osm": [
     "node/11450096002"
    ],
-   "reason": "aynı nesnenin tekrarı: osm-way-1552615726 (Güzelyalı Yat Limanı)"
+   "reason": "aynı nesnenin tekrarı: osm-way-252356832 (146 m)"
   },
   {
    "id": "osm-node-12451494394",
@@ -313,7 +577,309 @@
    "reason": "aynı nesnenin tekrarı: osm-way-1170373161 (0 m)"
   }
  ],
- "promenade_log": [],
+ "promenade_log": [
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/940722065"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/940722066"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1392719113"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1392719113"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1392719113"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1408615555"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1408615555"
+  },
+  {
+   "place": "Fıstıklı",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1408615555"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1538499897"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1540343486"
+  },
+  {
+   "place": "Kurşunlu",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1170373160"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1170373160"
+  },
+  {
+   "place": "Dr.Ziya Kaya",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216668"
+  },
+  {
+   "place": "Kurşunlu",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1413355183"
+  },
+  {
+   "place": "Cumhuriyet",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216676"
+  },
+  {
+   "place": "Cumhuriyet",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216676"
+  },
+  {
+   "place": "Orhaniye",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216676"
+  },
+  {
+   "place": "Kumsaz",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Kumsaz",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Kumsaz",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1170373160"
+  },
+  {
+   "place": "Ömerbey Mah.",
+   "town": "Mudanya",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/639389497"
+  },
+  {
+   "place": "Hasanbey",
+   "town": "Mudanya",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/639389497"
+  },
+  {
+   "place": "Kurşunlu",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Ömerbey Mah.",
+   "town": "Mudanya",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1073087871"
+  },
+  {
+   "place": "Orhaniye",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1336893175"
+  },
+  {
+   "place": "Kurşunlu",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Hisar",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1336893184"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "elendi",
+   "reason": "OSM access=no",
+   "osm": "way/940722066"
+  },
+  {
+   "place": "Hasanbey",
+   "town": "Mudanya",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/639389497"
+  },
+  {
+   "place": "Kumyaka",
+   "town": "Mudanya",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/534210128"
+  },
+  {
+   "place": "Demirsubaşı",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1500766926"
+  },
+  {
+   "place": "Demirsubaşı",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216668"
+  },
+  {
+   "place": "Armutlu",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/428743002"
+  },
+  {
+   "place": "Balıkpazarı",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216676"
+  },
+  {
+   "place": "Fıstıklı",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1445587670"
+  },
+  {
+   "place": "Orhaniye",
+   "town": "Gemlik",
+   "status": "tekrar",
+   "reason": "aynı kıyı kesimi: osm-way-1336893175-1",
+   "osm": "way/1217216676"
+  },
+  {
+   "place": "Kayhan",
+   "town": "Gemlik",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/1217216676"
+  },
+  {
+   "place": "Kurşunlu",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Kurşunlu",
+   "town": "Kurşunlu",
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/24825429"
+  },
+  {
+   "place": "Orhaniye",
+   "town": "Gemlik",
+   "status": "tekrar",
+   "reason": "aynı kıyı kesimi: osm-way-1336893175-1",
+   "osm": "way/1217216676"
+  }
+ ],
  "street_lamps": 0,
- "promenade_ways_not_along_shore": 0
+ "promenade_ways_not_along_shore": 56
 }
