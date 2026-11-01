@@ -342,7 +342,9 @@ def main(argv: list[str]) -> int:
     if "--check-marine" in argv:
         check_marine(fc)
     dst.write_text(json.dumps(fc, ensure_ascii=False, indent=1) + "\n")
-    (Path(__file__).resolve().parents[3] / "docs/audit/length-audit.md").write_text(length_audit_md(fc["features"]))
+    # the audit report is written next to the repo's own spots file only (tests write to a temp dir)
+    if dst.resolve() == (Path(__file__).resolve().parents[3] / "data/spots.geojson").resolve():
+        (Path(__file__).resolve().parents[3] / "docs/audit/length-audit.md").write_text(length_audit_md(fc["features"]))
     ok = sum(1 for f in fc["features"] if f["properties"]["probe_ok"])
     dtm = sum(1 for f in fc["features"] if f["properties"]["probe_source"] == "dtm")
     none = sum(1 for f in fc["features"] if f["properties"]["probe_lat"] is None)
