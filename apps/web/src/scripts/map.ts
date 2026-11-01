@@ -262,7 +262,7 @@ map.on('load', async () => {
   map.addLayer({ id: 'forb-line', type: 'line', source: 'forbidden', paint: { 'line-color': '#d65048', 'line-width': 1.4 } });
   map.addLayer({
     id: 'forb-label', type: 'symbol', source: 'forbidden', minzoom: 11,
-    layout: { 'text-field': ['concat', ['get', 'name'], '\nerişim yasak'], 'text-font': ['Noto Sans Bold'], 'text-size': 10.5 },
+    layout: { 'text-field': ['concat', ['get', 'name'], '\n', ['coalesce', ['get', 'kind'], ['match', ['get', 'source'], 'yönetici', 'işaretlenmiş yasak alan', 'ticari liman']], ' · mera eklenmez'], 'text-font': ['Noto Sans Bold'], 'text-size': 10.5 },
     paint: { 'text-color': '#f2a29c', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.4 },
   });
   // Candidates: hollow diamonds (shape differs from the scored discs, not only colour), 14–22 px.
