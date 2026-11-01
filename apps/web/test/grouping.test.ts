@@ -20,3 +20,26 @@ describe('G3 grouping', () => {
     expect(columnMax([[1, null, 3], [2, null, null]], 3)).toEqual([2, null, 3]);
   });
 });
+
+describe('H5 date labels', async () => {
+  const { fmtDay } = await import('../src/scripts/format');
+  const { dayLabel, hourStep } = await import('../src/scripts/heatmap');
+  it('full weekday first, never two-letter days', () => {
+    expect(fmtDay('2026-11-01T12:00:00Z')).toBe('Pazar 1 Kas');
+    expect(fmtDay('2026-11-02T12:00:00Z')).toBe('Pazartesi 2 Kas');
+    const d = new Date(Date.UTC(2026, 10, 1, 0));
+    expect(dayLabel(d, 400)).toBe('Pazar 1 Kasım');
+    expect(dayLabel(d, 85)).toBe('Pazar 1 Kas');
+    expect(dayLabel(d, 60)).toBe('Pazar 1');
+    expect(dayLabel(d, 50)).toBe('1 Kas');
+    expect(dayLabel(d, 20)).toBe('');
+    for (const px of [20, 50, 60, 85, 400]) expect(dayLabel(d, px)).not.toMatch(/^(Paz|Pzt|Pa|Pt) /);
+  });
+  it('hour ticks thin out so labels never touch', () => {
+    expect(hourStep(16)).toBe(3);
+    expect(hourStep(6)).toBe(6);
+    expect(hourStep(3)).toBe(12);
+    expect(hourStep(1)).toBe(24);
+    for (const cw of [1, 2, 4, 6, 9, 12, 16, 24]) expect(hourStep(cw) * cw >= 26 || hourStep(cw) === 24).toBe(true);
+  });
+});

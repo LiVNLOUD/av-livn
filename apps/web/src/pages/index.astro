@@ -23,6 +23,7 @@ import Base from '../layouts/Base.astro';
       <div class="heat-head">
         <h2 id="t-heat">Mera × saat</h2>
         <div class="heat-ctl">
+          <button type="button" class="btn small secondary map-toggle" id="map-toggle" hidden>Haritayı göster</button>
           <div class="seg-sm" role="radiogroup" aria-label="Isı haritası görünümü">
             <button type="button" role="radio" aria-checked="true" data-mode="score">Puan</button>
             <button type="button" role="radio" aria-checked="false" data-mode="diff">Meraya özgü fark</button>
@@ -96,9 +97,13 @@ import Base from '../layouts/Base.astro';
     .r-card:not([hidden]) { position: static; height: auto; width: 420px; border-left: 1px solid var(--swell); }
   }
   @media (min-width: 1920px) {
-    .app { grid-template-columns: 360px minmax(0, 1.1fr) minmax(0, 1fr) auto; grid-template-areas: 'win heat map card' 'spots heat map card'; }
+    /* H5: the heat map gets ≥ 16 px per hour (72 h ≈ 1150 px + 260 px names); the map narrows and can be folded */
+    .app { grid-template-columns: 340px minmax(1460px, 1fr) minmax(360px, 0.8fr) auto; grid-template-areas: 'win heat map card' 'spots heat map card'; }
+    .app.map-off { grid-template-columns: 340px minmax(0, 1fr) 0 auto; }
+    .app.map-off .r-map { display: none !important; }
     .r-heat { grid-area: heat; padding-top: var(--s5); border-right: 1px solid var(--swell); }
     .r-map { grid-area: map; }
+    .map-toggle { display: inline-flex !important; }
     .app[data-tab] .r-heat, .app[data-tab] .mapbox { display: block; }
     .app[data-tab] .r-map { height: auto; }
     .tabs { display: none !important; }
@@ -121,6 +126,7 @@ import Base from '../layouts/Base.astro';
   :global(.win .actions) { grid-column: 1 / -1; margin-top: var(--s2); }
   .heat-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2); margin-bottom: var(--s3); }
   .legend-line { margin: 0 0 var(--s2); display: flex; align-items: center; gap: var(--s1); flex-wrap: wrap; }
+  .map-toggle { display: none; }
   .heat-ctl { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
   .seg-sm { display: inline-flex; border: 1px solid var(--swell); border-radius: 999px; padding: 2px; }
   .seg-sm button { border: 0; background: none; color: var(--mist); font: inherit; font-size: var(--fs-1); font-weight: 600; padding: 0 var(--s3); min-height: 32px; border-radius: 999px; cursor: pointer; }
@@ -134,18 +140,19 @@ import Base from '../layouts/Base.astro';
   :global(.heat-sum p) { margin: 0; color: var(--mist); }
   :global(.heat-sum .tk) { color: var(--foam); }
   :global(.heat-sum .tk b) { color: var(--sodium); font-weight: 650; }
-  :global(.heatmap .hm-focus) { fill: none; stroke: var(--sodium); stroke-width: 1; opacity: 0.8; }
+  :global(.heatmap .hm-focus) { fill: none; stroke: var(--foam); stroke-width: 1; opacity: 0.45; }
   :global(.ramp) { display: inline-block; width: 56px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(57 50 52), rgb(185 126 80), rgb(71 157 109)); }
   :global(.hatchsw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #0e1c27 0 1.5px, #5d9a76 1.5px 4px); }
   .heat { overflow-x: auto; }
   :global(.heatmap) { display: block; font-family: inherit; }
   :global(.heatmap text) { fill: var(--foam); font-size: var(--fs-1); }
-  :global(.heatmap .hm-day) { font-weight: 650; }
+  :global(.heatmap .hm-day) { font-weight: 650; font-size: var(--fs-1); }
   :global(.heatmap .hm-tick), :global(.heatmap .hm-nowl) { fill: var(--mist); font-size: var(--fs-1); }
-  :global(.heatmap .hm-sep) { stroke: var(--mist); stroke-width: 1; opacity: 0.5; }
-  :global(.heatmap .hm-now) { stroke: var(--sodium); stroke-width: 2; }
+  :global(.heatmap .hm-sep) { stroke: var(--foam); stroke-width: 1.5; opacity: 0.75; }
+  :global(.heatmap .hm-now) { stroke: var(--sodium); stroke-width: 1; }
   :global(.heatmap .hm-nowl) { fill: var(--sodium); }
-  :global(.heatmap .hm-sel) { fill: none; stroke: var(--foam); stroke-width: 1.5; }
+  :global(.heatmap .hm-selcol) { fill: var(--foam); opacity: 0.12; }
+  :global(.heatmap .hm-nowl) { font-size: 10px; }
   :global(.heatmap .hm-cell) { cursor: pointer; }
   :global(.heatmap .hm-cell:hover) { stroke: var(--foam); stroke-width: 1; }
   :global(.heatmap .hm-name text) { cursor: pointer; }
@@ -232,7 +239,7 @@ import Base from '../layouts/Base.astro';
   // ---------------------------------------------------------------- map (only where it is visible: ≥768 px)
   let mapApi: MapApi | null = null;
   async function ensureMap() {
-    if (mapApi || !wide.matches || app.dataset.tab === 'heat' && innerWidth < 1920 && innerWidth >= 1200) return;
+    if (mapApi || !wide.matches || app.classList.contains('map-off') || app.dataset.tab === 'heat' && innerWidth < 1920 && innerWidth >= 1200) return;
     const { mountMap } = await import('../scripts/map');
     mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id) });
   }
@@ -243,6 +250,26 @@ import Base from '../layouts/Base.astro';
     if (t === 'map') ensureMap().then(() => mapApi?.resize());
     else heat();
   };
+  // H5: from 1920 px the map column can be folded so the heat map keeps ≥ 16 px per hour; folded by default < 2400 px
+  const MAPK = 'av-livn-map-off';
+  const xl = matchMedia('(min-width: 1920px)');
+  const mt = $<HTMLButtonElement>('map-toggle');
+  let mapOff = innerWidth < 2400;
+  try { const v = localStorage.getItem(MAPK); if (v !== null) mapOff = v === '1'; } catch {}
+  const applyMap = () => {
+    app.classList.toggle('map-off', xl.matches && mapOff);
+    mt.hidden = !xl.matches;
+    mt.textContent = mapOff ? 'Haritayı göster' : 'Haritayı gizle';
+    requestAnimationFrame(() => { mapApi?.resize(); heat(); });
+  };
+  mt.addEventListener('click', () => {
+    mapOff = !mapOff;
+    try { localStorage.setItem(MAPK, mapOff ? '1' : '0'); } catch {}
+    applyMap();
+    if (!mapOff) ensureMap();
+  });
+  xl.addEventListener('change', applyMap);
+  applyMap();
   $('tab-map').addEventListener('click', () => tab('map'));
   $('tab-heat').addEventListener('click', () => tab('heat'));
   wide.addEventListener('change', () => ensureMap());

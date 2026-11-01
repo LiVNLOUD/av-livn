@@ -18,7 +18,11 @@ const df = new Intl.DateTimeFormat('tr-TR', { timeZone: 'Europe/Istanbul', weekd
 const wf = new Intl.DateTimeFormat('tr-TR', { timeZone: 'Europe/Istanbul', weekday: 'long' });
 
 export const fmtTime = (iso: string) => tf.format(new Date(iso));
-export const fmtDay = (iso: string) => df.format(new Date(iso));
+/** H5: full weekday first, then the date: "Pazar 1 Kas" (never "Paz"/"Pzt"). */
+export const fmtDay = (iso: string) => {
+  const parts = Object.fromEntries(df.formatToParts(new Date(iso)).map((p) => [p.type, p.value]));
+  return `${wf.format(new Date(iso))} ${parts.day} ${parts.month}`;
+};
 export const fmtWeekday = (iso: string) => wf.format(new Date(iso));
 
 export function fmtAgo(iso: string | null): string {
