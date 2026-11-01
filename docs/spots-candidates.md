@@ -9,7 +9,7 @@ yönetici yasak alanları içinde değil; c) kumsala md. 16/5 tarihli uyarı roz
 tip meralar ayrı kalır, birbirine "yakın mera" bağlantısı alır. Yalnız aynı noktanın kopyası (≤ 25 m) atılır.
 G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası suyun üzerindeyse havza ortası sayılır (≤ 150 m).
 
-**Eklenen: 44 mera.** Elenen: 3. Ticari liman (erişim yasak katmanı): 1.
+**Eklenen: 44 mera.** Elenen: 3. Ticari liman (erişim yasak katmanı): 28.
 
 | Tip | Eklenen |
 |---|---|
@@ -46,6 +46,7 @@ G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası
 | kayalık kıyı | 0.80 (doğal kaya) | 0.1 | 2.5 m |
 | dere ağzı | 0.60 | 0.15 | 1 m |
 | kumsal | 0.45 | 0.2 | 1.2 m |
+| kordon (taş tahkimat) | 0.70 (levrek 0.65) | OSM sokak lambası yoğunluğu, 0.2–0.85 | 2 m |
 
 Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapınınkine sabitlenir. Değerler sezgiseldir
 (istavrit yapı/sert zemin ve ışık çevresinde toplanır; kumsalda açık su). Av günlüğüyle kalibre edilecek.
@@ -104,6 +105,33 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Ad | OSM |
 |---|---|
 | Borusan Port | node/825452158, way/588510511 |
+| sanayi alanı | way/131982028 |
+| Gemlik Küçük Sanayi Sitesi | way/478691235 |
+| sanayi alanı | way/479047503 |
+| sanayi alanı | way/479047513 |
+| sanayi alanı | way/479047514 |
+| sanayi alanı | way/479051750 |
+| T.C. Mudanya Kaymakamlığı İlçe Jandarma Komutanlığı | way/503796445 |
+| Borçelik Çelik Sanayii Ticaret A.Ş | way/588510512 |
+| BURSA SERBEST BÖLGE | way/597831950 |
+| Togg Gemlik Kampüsü | way/888889309 |
+| sanayi alanı | way/901718629 |
+| Cimtas Celik İmalat Montaj ve Tesisat A.Ş. | way/1038697387 |
+| Marmara Entegre Kimya Sanayi | way/1038697388 |
+| sanayi alanı | way/1091677946 |
+| Kar Boru Sanayi | way/1115544718 |
+| Gemlik Küçük Sanayi Sitesi | way/1272209648 |
+| Jandarma Komutanlığı | way/1377877328 |
+| Askeri İrtibat Bürosu | way/1377878675 |
+| Sahil Güvenlik Komutanlığı | way/1377879263 |
+| askeri alan | way/1393123414 |
+| sanayi alanı | way/1467351864 |
+| sanayi alanı | way/1467351865 |
+| sanayi alanı | way/1467351866 |
+| sanayi alanı | way/1467351871 |
+| Gemlik Askerlik Şubesi | way/1501002525 |
+| Tuğgeneral Orhan Öncül Kışlası | relation/2871688 |
+| sanayi alanı | relation/18096373 |
 
 ## Elenen yerler
 
@@ -117,6 +145,17 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | osm-node-11981834876-1 | kayalık kıyı | Armutlu | kıyı çizgisine 52 m (> 30 m): fiziksel kıyı nesnesi değil | node/11981834876 |
 | osm-node-11981834876-2 | kayalık kıyı | Armutlu | kıyı çizgisine 52 m (> 30 m): fiziksel kıyı nesnesi değil | node/11981834876 |
 | osm-way-479047533-1 | kumsal | İslamköy | ticari liman sahası (Borusan Port) | way/479047533 |
+
+## Kordon (taş tahkimat) — yerleşim raporu (H6)
+
+Kıyı çizgisine ≤ 25 m paralel giden tahkimat, deniz duvarı, kordon/sahil yolu ya da yaya yolu 300–500 m parçalara bölünür.
+Kumsal/kayalık üstündeki parçalar, aynı kesimin tekrarları ve erişim süzgecine (sanayi, liman, askeri, özel) takılanlar elenir.
+Lamba olasılığı: parça boyunca OSM sokak lambası yoğunluğu (kanıt C).
+
+| Yerleşim | Bulunan | Eklenen | Elenen | Tekrar | Elenme nedenleri |
+|---|---|---|---|---|---|
+
+Kordon parçası bulunamayan odak yerleşimler: Gemlik, Kumla, Kurşunlu, Narlı, Umurbey, Mudanya, Güzelyalı (OSM'de kıyıya paralel tahkimat/yol etiketi yok ya da yerleşim noktası farklı adla).
 
 ## Mera olmayan nesneler (G1)
 
