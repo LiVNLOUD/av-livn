@@ -21,6 +21,7 @@ Usage: python -m av_pipeline.spots.build_spots data/osm/raw.json data/spots.geoj
 from __future__ import annotations
 
 import json
+import re
 import math
 import sys
 import urllib.request
@@ -28,7 +29,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import shapely
-from shapely.geometry import LineString, Point, box, shape
+from shapely.geometry import LineString, Point, Polygon, box, shape
 from shapely.ops import nearest_points, unary_union
 
 from av_pipeline import BBOX
@@ -131,6 +132,49 @@ def nearest_place(xy: tuple[float, float], places: list[dict]) -> str | None:
     return min(named, key=lambda p: math.dist(p["xy"], xy))["name"]
 
 
+# H2: structure length. OSM draws some piers as a closed outline (length = perimeter) or as one line with the quay
+# along the shore; only the part reaching out to sea says something about the depth at the tip.
+SHORE_BUFFER_M = 15.0
+EXPECTED_LENGTH_M = {"pier": (10, 300), "breakwater": (20, 1200), "groyne": (5, 150), "quay": (10, 600)}
+FERRY_PIER_MAX_M = 400
+
+
+def structure_length(xy: list[tuple[float, float]], coast: "Coast", land: "Land | None" = None) -> dict:
+    """{length_osm_m, seaward_m, reach_m}: raw OSM length (perimeter for a closed way), the length reaching out to
+    sea (outside a SHORE_BUFFER_M band around the coastline and outside the land; a closed outline counts with the
+    long side of its minimum rotated rectangle), and the tip's distance from the coastline."""
+    line = LineString(xy)
+    closed = len(xy) >= 4 and xy[0] == xy[-1]
+    shore = unary_union(coast.lines).buffer(SHORE_BUFFER_M)
+    if land is not None:
+        shore = shore.union(land.full)
+    if closed:
+        poly = Polygon(xy).buffer(0)
+        sea = poly.difference(shore)
+        part = sea if not sea.is_empty else poly
+        rect = part.minimum_rotated_rectangle
+        edges = [LineString(list(rect.exterior.coords)[i : i + 2]).length for i in range(4)] if rect.geom_type == "Polygon" else [part.length]
+        seaward = max(edges) if not sea.is_empty else 0.0
+    else:
+        seaward = line.difference(shore).length
+    reach = max(coast.nearest(Point(c))[2] for c in xy)
+    return {"length_osm_m": round(line.length), "seaward_m": round(seaward), "reach_m": round(reach)}
+
+
+def length_flag(kind: str, seaward_m: float, length_osm_m: float, ferry: bool = False) -> str | None:
+    """Reason text when the length is outside the expected range for the structure type (None = plausible)."""
+    lo, hi = EXPECTED_LENGTH_M.get(kind, (5, 1200))
+    if ferry and kind == "pier":
+        hi = FERRY_PIER_MAX_M
+    if seaward_m > hi:
+        return f"denize uzanan {round(seaward_m)} m > {kind} için beklenen üst sınır {hi} m"
+    if length_osm_m > 1.5 * max(seaward_m, 1) and length_osm_m > hi:
+        return f"OSM uzunluğu {round(length_osm_m)} m, denize uzanan yalnız {round(seaward_m)} m (dış hat çevresi ya da kıyı boyunca rıhtım)"
+    if seaward_m < lo:
+        return f"denize uzanan {round(seaward_m)} m < beklenen alt sınır {lo} m"
+    return None
+
+
 def build_candidate(
     s: dict, coast: Coast, places: list[dict], grid: Grid | None = None, land: Land | None = None, shared: frozenset = frozenset()
 ) -> dict | None:
@@ -170,7 +214,10 @@ def build_candidate(
         "name": name,
         "name_source": "osm" if s["tags"].get("name") else "generated",
         "kind": kind,
-        "length_m": round(line.length),
+        **(lens := structure_length(s["xy"], coast, land)),
+        # H2: the model uses the seaward part; the raw OSM length stays for the audit
+        "length_m": lens["seaward_m"] if lens["seaward_m"] > 0 else round(line.length),
+        "length_flag": length_flag(kind, lens["seaward_m"], lens["length_osm_m"], ferry=bool(re.search(r"feribot|ferry|İDO|BUDO|deniz otobüs", s["tags"].get("name", ""), re.I))),
         "shore_normal_deg": round(normal, 1),
         "probe_lat": None,
         "probe_lon": None,
@@ -259,6 +306,25 @@ def check_marine(fc: dict, batch: int = 50) -> None:
             f["properties"]["probe_ok"] = d.get("current", {}).get("wave_height") is not None
 
 
+def length_audit_md(features: list[dict]) -> str:
+    """H2 report: raw OSM length vs the part reaching out to sea, tip reach, flags (for a visual check on the map)."""
+    rows = sorted((f["properties"] for f in features), key=lambda p: -(p.get("length_osm_m") or 0))
+    flagged = [p for p in rows if p.get("length_flag")]
+    out = [
+        "# Yapı uzunlukları denetimi (H2)", "",
+        "Otomatik üretilir: `python -m av_pipeline.spots.build_spots` (geodata.yml). Model artık **denize uzanan** uzunluğu kullanır",
+        f"(kıyı çizgisinin {SHORE_BUFFER_M:.0f} m bandı ve kara dışında kalan kısım; kapalı dış hatta en küçük dönmüş dikdörtgenin uzun kenarı).",
+        "Ham OSM uzunluğu kapalı yolda çevre uzunluğudur. Uzunluğun derinliğe etkisi 300 m'den sonra doyar (MODEL.md, `len_sat_m`, kanıt C).",
+        "Uydu görüntüsüyle karşılaştırma otomatik yapılmaz (kural): şüphelileri OSM bağlantısından görsel kontrol edin.", "",
+        f"**Şüpheli: {len(flagged)} / {len(rows)} yapı.**", "",
+        "| Yapı | Tip | OSM ham (m) | Denize uzanan (m) | Uç erişimi (m) | Bayrak | OSM |", "|---|---|---|---|---|---|---|",
+    ]
+    for p in rows:
+        osm = p["id"].replace("osm-way-", "")
+        out.append(f"| {p['name']} | {p['kind']} | {p.get('length_osm_m', '—')} | {p.get('seaward_m', '—')} | {p.get('reach_m', '—')} | {p.get('length_flag') or ''} | [way/{osm}](https://www.openstreetmap.org/way/{osm}) |")
+    return "\n".join(out) + "\n"
+
+
 def main(argv: list[str]) -> int:
     src = Path(argv[1] if len(argv) > 1 else "data/osm/raw.json")
     dst = Path(argv[2] if len(argv) > 2 else "data/spots.geojson")
@@ -275,6 +341,7 @@ def main(argv: list[str]) -> int:
     if "--check-marine" in argv:
         check_marine(fc)
     dst.write_text(json.dumps(fc, ensure_ascii=False, indent=1) + "\n")
+    (Path(__file__).resolve().parents[3] / "docs/audit/length-audit.md").write_text(length_audit_md(fc["features"]))
     ok = sum(1 for f in fc["features"] if f["properties"]["probe_ok"])
     dtm = sum(1 for f in fc["features"] if f["properties"]["probe_source"] == "dtm")
     none = sum(1 for f in fc["features"] if f["properties"]["probe_lat"] is None)

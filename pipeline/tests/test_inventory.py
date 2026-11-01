@@ -46,7 +46,7 @@ EXISTING = [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [ll
 def test_inventory_types_dedupe_forbidden_and_names():
     feats, forb, diag = inv.build_inventory(RAW, EXISTING)
     by = {f["properties"]["id"]: f["properties"] for f in feats}
-    assert "osm-way-10" in by and by["osm-way-10"]["kind"] == "pier" and by["osm-way-10"]["length_m"] == 120
+    assert "osm-way-10" in by and by["osm-way-10"]["kind"] == "pier" and by["osm-way-10"]["length_m"] == 105  # H2: seaward of the 15 m shore band
     assert "osm-way-11" not in by and "osm-way-20" not in by
     assert by["osm-node-12"]["name"] == "Karacaali İskelesi" and by["osm-node-12"]["kind"] == "harbour"
     assert by["osm-node-12"]["access"] == "acik"
@@ -197,3 +197,26 @@ def test_g1_harbour_node_inside_polygon_uses_polygon_edge():
     ids = {f["properties"]["id"] for f in feats}
     assert "osm-node-81" not in {e["id"] for e in diag["excluded"]}
     assert "osm-way-80" in ids
+
+
+def test_h2_structure_length_seaward_part_and_flags():
+    from av_pipeline.spots.build_spots import Coast, length_flag, structure_length
+    from shapely.geometry import LineString as L
+
+    coast = Coast([L([(-1000, 0), (1000, 0)])])
+    # straight pier 200 m out to sea: 185 m beyond the 15 m band, tip 200 m off the coast
+    r = structure_length([(0, 0), (0, -200)], coast)
+    assert r == {"length_osm_m": 200, "seaward_m": 185, "reach_m": 200}
+    # closed outline 20 × 300 m: perimeter 640 m, seaward long side ≈ 285 m
+    ring = [(0, 0), (20, 0), (20, -300), (0, -300), (0, 0)]
+    r = structure_length(ring, coast)
+    assert r["length_osm_m"] == 640 and 280 <= r["seaward_m"] <= 290 and r["reach_m"] == 300
+    # a quay along the shore (inside the 15 m band): no seaward part
+    r = structure_length([(-300, -5), (300, -5)], coast)
+    assert r["seaward_m"] == 0 and r["length_osm_m"] == 600
+    # flags by type
+    assert length_flag("pier", 960, 960, ferry=True).startswith("denize uzanan 960 m > pier için beklenen üst sınır 400 m")
+    assert length_flag("pier", 250, 250) is None
+    assert length_flag("pier", 200, 640).startswith("OSM uzunluğu 640 m")
+    assert length_flag("groyne", 3, 3).startswith("denize uzanan 3 m < beklenen alt sınır 5 m")
+    assert length_flag("breakwater", 900, 930) is None

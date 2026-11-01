@@ -219,7 +219,11 @@ def struct_point(g, coast: Coast) -> tuple[Point, float]:
         return g, 0.0
     line = g.exterior if isinstance(g, Polygon) else g
     pts = [Point(c) for c in line.coords]
-    return max(pts, key=lambda p: coast.nearest(p)[2]), line.length
+    # H2: the part reaching out to sea, not the perimeter of a closed outline
+    from av_pipeline.spots.build_spots import structure_length
+
+    lens = structure_length(list(line.coords), coast)
+    return max(pts, key=lambda p: coast.nearest(p)[2]), float(lens["seaward_m"] or line.length)
 
 
 def nearest_place(xy: tuple[float, float], places: list[dict], max_m: float = 4000.0) -> tuple[str | None, float | None]:

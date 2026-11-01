@@ -152,6 +152,7 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `struct_pier` | 0.75 | - | C | 0.5 | — |
 | `struct_breakwater` | 0.85 | - | C | 0.5 | — |
 | `struct_len_km` | 0.15 | km | C | 0.5 | — |
+| `len_sat_m` | 300 | m | C | 0.5 | H2: etkin uzunluk 300 m'den sonra en çok +60 m (doymalı) |
 | `depth_mid` | 3.5 | m | C | 0.5 | R10 |
 | `depth_slope` | 1.2 | m | C | 0.5 | R10 |
 | `dtm_weight_interp` | 0.3 | - | C | 0.5 | DATA-AUDIT |
@@ -182,9 +183,9 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `w_struct` | 0.75 | - | C | 0.5 | — |
 | `w_substrate` | 0.25 | - | C | 0.5 | — |
 
-**Dağılım:** 45 parametre; A 3, B 1, C 41 (D1: struct_harbour, struct_beach, struct_river eklendi). Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
+**Dağılım:** 46 parametre; A 3, B 1, C 42 (D1: struct_harbour, struct_beach, struct_river; H2: len_sat_m eklendi). Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
 
-**F2 (2026-10):** üç yeni kaynak (R20 hal fiyat–miktar, R21 Hoyle vd. 2024, R22 İBB hal girişleri) parametre değerlerini değiştirmedi. Aylık kıyı serisi yok; hal serisi ticari ve ters mevsimli. R20/R22 bolluk sinyaline (puan dışı), R21 kalibrasyon yöntemine (§8a) bağlandı. Dağılım aynı: A 3, B 1, C 41. Herkese açık özet: [av.livn.tr/model/](https://av.livn.tr/model/).
+**F2 (2026-10):** üç yeni kaynak (R20 hal fiyat–miktar, R21 Hoyle vd. 2024, R22 İBB hal girişleri) parametre değerlerini değiştirmedi. Aylık kıyı serisi yok; hal serisi ticari ve ters mevsimli. R20/R22 bolluk sinyaline (puan dışı), R21 kalibrasyon yöntemine (§8a) bağlandı. Dağılım o sırada: A 3, B 1, C 41 (H2 ile 46 parametre: C 42). Herkese açık özet: [av.livn.tr/model/](https://av.livn.tr/model/).
 
 ## 6. Belirsizlik: Monte Carlo %10–90 bandı
 - **Çekim sayısı:** N = 200 (B1'de 500).
@@ -445,3 +446,17 @@ CREATE TABLE catch_log (id TEXT PRIMARY KEY, spot_id TEXT NOT NULL, start_at TEX
 **Koşullar paneli:** v2 dinamik bileşenleri; bulut artık puanı etkiler (ışık indeksi). Lamba üç durumlu: var / yok / bilinmiyor (önsel olasılık %).
 
 **Harita:** OpenFreeMap altlık (Türkçe ad), OSM kara poligonu (vektör kıyı), EMODnet DTM bantları kenarda soldurulur, enterpolasyonlu (GEBCO dolgusu) alan taralı. Yakın işaretler zoom'a göre halka üzerine yayılır, ince çizgi gerçek konuma gider; kümeleme/birleştirme yok.
+
+## 12. Yapı uzunluğu ve derinlik önseli (H2)
+- OSM uzunluğu kapalı dış hatta **çevre uzunluğu**dur. Kıyı boyunca rıhtımla birleşik çizilmiş iskelede de denize uzanmayan kısmı içerir.
+  - Örnek: İDO Güzelyalı Feribot İskelesi 960 m.
+- Pipeline artık **denize uzanan** uzunluğu (`seaward_m`) ölçer: kıyı çizgisinin 15 m bandı ve kara dışında kalan kısım; kapalı dış hatta en küçük dönmüş dikdörtgenin uzun kenarı.
+- `length_m` bu değerdir; ham değer `length_osm_m`.
+- Tipe göre beklenen aralık dışındakiler `length_flag` alır; rapor `docs/audit/length-audit.md`.
+- Model etkin uzunluğu doyurur:
+  ```
+  L_eff = L                                    L ≤ len_sat_m (300 m)
+  L_eff = 300 + 60 · (1 − e^(−(L − 300)/300))  L > 300 m        (en çok ~360 m)
+  ```
+  Hem yapı terimi (`lenF`) hem derinlik önseli (`depthPrior`) `L_eff` kullanır.
+- Kanıt C: uzunluk derinliğin zayıf bir vekilidir; DTM ölçümü ve saha derinliği onun önündedir (§13).

@@ -20,7 +20,7 @@ export interface TackleProfile {
 
 export const DEFAULT_PROFILES: TackleProfile[] = [
   { id: 'lrf', name: 'LRF: Ares Blue Porter AJ-S 6.3 + Vanford FA C2000S', jigMin: 0.6, jigMax: 5, maxGustKmh: 25, line: 'Gosen PE 0.2 + FC 0.8–1.2 numara (≈3–5 lb)' },
-  { id: 'spin', name: 'Spin: Bassterra XT+ 274 + Nasci FD C3000 HG', jigMin: 5, jigMax: 20, maxGustKmh: 50, line: 'Kairiki 8 + Daiwa Prorex FC' },
+  { id: 'spin', name: 'Spin: Bassterra XT+ 274 + Nasci FD C3000 HG', jigMin: 6, jigMax: 32, maxGustKmh: 50, line: 'Kairiki 8 + Daiwa Prorex FC' },
 ];
 
 /** RESEARCH.md R19, cited verbatim on the hook row (a test checks it against RESEARCH.md). */
@@ -112,14 +112,15 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
   const targetM = Math.round((night ? Math.min(1.5, 0.3 * depth) : light === 'alacakaranlık' ? 0.5 * depth : depth) * 10) / 10;
   const bottom = zone === 'dibe yakın' || i.kind === 'rocky';
 
-  // weight: night calm water 0.8–1.5 g; heavier with the target depth, the current and the cross wind
-  const need = (0.8 + 0.2 * targetM) * (1 + 2 * cur) + (cross >= 25 ? 1 : cross >= 15 ? 0.5 : 0);
-  const why: string[] = [];
-  if (gust > lrf.maxGustKmh) why.push(`hamle ${Math.round(gust)} km/sa > LRF sınırı ${Math.round(lrf.maxGustKmh)} km/sa`);
-  if (need > lrf.jigMax) why.push(`gereken ağırlık ${n1(need)} g > LRF üst sınırı ${n1(lrf.jigMax)} g`);
-  const useSpin = why.length > 0;
+  // weight: night calm water 0.8–1.5 g; heavier with the target depth, the current, the cross wind (line belly)
+  // and strong gusts. H1: the set is chosen by the weight alone — LRF up to its upper limit (5 g), spin only when
+  // at least the spin rod's lower limit (6 g) is needed; between the two, LRF at its limit. Gusts only add a note.
+  const need = (0.8 + 0.2 * targetM) * (1 + 2 * cur) + 0.12 * Math.max(0, cross - 10) + 0.04 * Math.max(0, gust - 20);
+  const useSpin = need >= spin.jigMin;
   const profile = useSpin ? spin : lrf;
-  const jigG = useSpin ? Math.min(spin.jigMax, Math.max(spin.jigMin, Math.round(need))) : Math.min(lrf.jigMax, Math.max(lrf.jigMin, nearestSize(need)));
+  const SPIN_ISTAVRIT_MAX = 10; // micro metal jig / heavy jighead for istavrit
+  const jigG = useSpin ? Math.min(SPIN_ISTAVRIT_MAX, Math.max(spin.jigMin, Math.round(need))) : Math.min(lrf.jigMax, Math.max(lrf.jigMin, nearestSize(need)));
+  const gustNote = gust > lrf.maxGustKmh ? `hamle ${Math.round(gust)} km/sa: atışta misinayı elle frenle, rüzgara yan at` : null;
 
   const calm = cur < 0.15 && cross < 10;
   const jigType = bottom && calm && !useSpin ? 'mafsallı' : 'sabit';
@@ -137,11 +138,13 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
   const rows: TackleRow[] = [
     {
       key: 'takim', label: 'Takım', value: profile.id === 'lrf' ? 'LRF' : 'Spin', evidence: 'C',
-      why: useSpin ? `${why.join(', ')}: hafif takım kontrolü kaybeder` : `rüzgar ve akıntı hafif takıma uygun (${profile.line})`,
+      why: useSpin
+        ? `gereken ağırlık ${n1(need)} g ≥ spin alt sınırı ${n1(spin.jigMin)} g: ${jigG >= 8 ? 'mikro metal jig' : 'ağır jighead ya da mikro metal jig'} 6–10 g (derin uç ve akıntıda dikine)${need > SPIN_ISTAVRIT_MAX ? '; koşul istavrit için zor' : ''}`
+        : `${need > lrf.jigMax ? `gereken ağırlık ${n1(need)} g, spin alt sınırı ${n1(spin.jigMin)} g'ın altında: LRF üst sınırında (${n1(lrf.jigMax)} g) kal, saydırmayı uzat` : `gereken ağırlık ${n1(need)} g ≤ LRF üst sınırı ${n1(lrf.jigMax)} g`} (${profile.line})${gustNote ? `; ${gustNote}` : ''}`,
     },
     {
       key: 'jighead', label: 'Jighead', value: `${n1(jigG)} g ${jigType}`, evidence: 'C',
-      why: `hedef ${zone} (~${n1(targetM)} m, ${arm})${cur ? `, akıntı ${n1(cur)} m/s` : ''}${cross >= 15 ? `, yan rüzgar ${Math.round(cross)} km/sa` : ''}; ${jigType === 'mafsallı' ? 'dip/kaya hedefinde sakin suda mafsallı' : 'istavritte varsayılan sabit ajing kafası'}`,
+      why: `hedef ${zone} (~${n1(targetM)} m, ${arm})${cur ? `, akıntı ${n1(cur)} m/s` : ''}${cross > 10 ? `, yan rüzgar ${Math.round(cross)} km/sa` : ''}; ${useSpin ? (jigG >= 8 ? 'mikro metal jig' : 'ağır jighead') : jigType === 'mafsallı' ? 'dip/kaya hedefinde sakin suda mafsallı' : 'istavritte varsayılan sabit ajing kafası'}`,
     },
     {
       key: 'igne', label: 'İğne', value: '#8', evidence: 'A',
@@ -166,6 +169,7 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
     { key: 'yasal', label: 'Yasal asgari boy', value: `${legalMinCm} cm`, evidence: 'A', why: '6/2 Tebliğ Çizelge 7; altındakini denize geri bırakın' },
   ];
   const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
+  if (gustNote) notes.push(`${gustNote.charAt(0).toLocaleUpperCase('tr')}${gustNote.slice(1)}.`);
   if (color === 'koyu siluet') notes.push('Fosforlu (glow) silikon bir boyadır; onu şarj etmek için ışık kullanmanın kapsamı doğrulanmalı.');
   return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, rows, notes };
 }

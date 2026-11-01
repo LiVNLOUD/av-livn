@@ -108,9 +108,17 @@ export function lampPrior(s: SpotV2): number {
   return s.ferry ? LAMP_PRIOR.ferry : LAMP_PRIOR[s.kind];
 }
 
-export function depthPrior(s: SpotV2): number {
+/**
+ * H2: effective structure length (m). Up to `sat` metres as given; beyond it the gain is very slow (at most +60 m),
+ * so a long or mis-drawn OSM line (closed outline, quay along the shore) cannot carry the depth prior on its own (C).
+ */
+export function effLength(L: number, sat = 300): number {
+  return L <= sat ? L : sat + 60 * (1 - Math.exp(-(L - sat) / sat));
+}
+
+export function depthPrior(s: SpotV2, sat = 300): number {
   if (s.kind !== 'quay' && s.kind in SHORE_DEPTH) return SHORE_DEPTH[s.kind as keyof typeof SHORE_DEPTH];
-  const L = s.lengthM ?? 50;
+  const L = effLength(s.lengthM ?? 50, sat);
   const d = s.kind === 'breakwater' ? 2 + 4 * (1 - Math.exp(-L / 400)) : 1 + 4 * (1 - Math.exp(-L / 250));
   return s.ferry ? Math.max(d, 5) : d;
 }
@@ -146,7 +154,7 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   const shore: Partial<Record<StructureKind, number>> = { harbour: p.struct_harbour, rocky: p.struct_rock, beach: p.struct_beach, river_mouth: p.struct_river };
   const base =
     fs === 'mendirek' || (!fs && s.kind === 'breakwater') ? p.struct_breakwater : fs === 'dogal_kaya' ? p.struct_rock : (!fs && shore[s.kind]) || p.struct_pier;
-  const L = s.lengthM ?? 50;
+  const L = effLength(s.lengthM ?? 50, p.len_sat_m);
   // Shore types have no structure length: a fixed share (a 150 m structure's) stands in for it.
   const lenF = !fs && s.kind in shore ? 0.4 + 0.6 * (1 - Math.exp(-1)) : 0.4 + 0.6 * (1 - Math.exp(-L / 1000 / p.struct_len_km));
   const struct = base * lenF;
@@ -155,12 +163,12 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   let depthSrc: Source;
   if (s.fieldDepths && s.fieldDepths.length > 0) {
     // Field pairs dominate; the prior share keeps a single bad entry from saturating the term.
-    const prior = depthPrior(s);
+    const prior = depthPrior(s, p.len_sat_m);
     const fw = fieldWeight(s.fieldDepths);
     depthM = fw * (0.4 * fieldBand(s.fieldDepths, 0, 50) + 0.6 * fieldBand(s.fieldDepths, 50, 150)) + (1 - fw) * prior;
     depthSrc = KIND_SOURCE[s.fieldDepthKind ?? 'saha'];
   } else {
-    const prior = depthPrior(s);
+    const prior = depthPrior(s, p.len_sat_m);
     const w = s.dtm.interpolated ? p.dtm_weight_interp : 0.9;
     const est = (d: number | null) => (d === null || Number.isNaN(d) ? prior : w * d + (1 - w) * prior);
     depthM = 0.4 * est(s.dtm.d0_50) + 0.6 * est(s.dtm.d50_150);

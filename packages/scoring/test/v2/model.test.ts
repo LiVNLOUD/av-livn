@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  ambientLogLux, calibrate, DEFAULTS, depthPrior, drawParams, dynamicTerms, exposure, fieldBand, fieldWeight, IDEAL_SPOT, IDEAL_WEATHER, lampPrior,
+  ambientLogLux, calibrate, DEFAULTS, depthPrior, effLength, drawParams, dynamicTerms, exposure, fieldBand, fieldWeight, IDEAL_SPOT, IDEAL_WEATHER, lampPrior,
   PARAMS, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, SHORE_KINDS, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type StructureKind, type Weather,
 } from '../../src';
 import { BASE, CALM } from './fixtures';
@@ -76,7 +76,9 @@ describe('v2 static terms and sources', () => {
   });
 
   it('depth priors by kind, ferry floor, missing length', () => {
-    expect(depthPrior({ ...BASE, kind: 'breakwater', lengthM: 400 })).toBeCloseTo(2 + 4 * (1 - Math.exp(-1)), 6);
+    expect(depthPrior({ ...BASE, kind: 'breakwater', lengthM: 280 })).toBeCloseTo(2 + 4 * (1 - Math.exp(-280 / 400)), 6);
+    const l400 = 300 + 60 * (1 - Math.exp(-100 / 300)); // H2: 400 m saturates to ~317 m
+    expect(depthPrior({ ...BASE, kind: 'breakwater', lengthM: 400 })).toBeCloseTo(2 + 4 * (1 - Math.exp(-l400 / 400)), 6);
     expect(depthPrior({ ...BASE, lengthM: 20, ferry: true })).toBe(5);
     expect(depthPrior({ ...BASE, lengthM: null })).toBeCloseTo(1 + 4 * (1 - Math.exp(-0.2)), 6);
     expect(depthPrior({ ...BASE, kind: 'beach' })).toBe(1.2);
@@ -223,5 +225,23 @@ describe('shore types (D1, evidence C)', () => {
     expect(lampPrior({ ...BASE, kind: 'harbour' })).toBe(0.6);
     expect(lampPrior({ ...BASE, kind: 'rocky' })).toBe(0.1);
     expect(SHORE_KINDS).toContain('river_mouth');
+  });
+});
+
+describe('H2: saturating structure length', () => {
+  it('as given up to 300 m, then at most +60 m', () => {
+    expect(effLength(120)).toBe(120);
+    expect(effLength(300)).toBe(300);
+    expect(effLength(960)).toBeGreaterThan(345);
+    expect(effLength(960)).toBeLessThan(360);
+    expect(effLength(5000)).toBeLessThan(360);
+    expect(effLength(960) - effLength(600)).toBeLessThan(20); // vs 360 m of raw difference
+  });
+  it('a 960 m and a 360 m pier get almost the same depth prior', () => {
+    const pier = { kind: 'pier', ferry: false } as unknown as SpotV2;
+    const a = depthPrior({ ...pier, lengthM: 960 });
+    const b = depthPrior({ ...pier, lengthM: 360 });
+    expect(a - b).toBeLessThan(0.25); // m, vs 0.9 m without saturation
+    expect(depthPrior({ ...pier, lengthM: 960 }, 2000)).toBeGreaterThan(a); // without saturation it was larger
   });
 });

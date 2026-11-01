@@ -15,14 +15,9 @@ export const SCENARIOS: { name: string; input: TackleInput; expect: { profile: '
     expect: { profile: 'lrf', jig: '1,2 g sabit', zone: 'yüzeye yakın', sink: 3, color: 'şeffaf-simli' },
   },
   {
-    name: 'Gece, 25 km/sa yan rüzgar (hamle 30)',
+    name: 'Gece, 25 km/sa yan rüzgar, hamle 30',
     input: { ...base, windKmh: 25, gustKmh: 30, crossKmh: 25 },
-    expect: { profile: 'spin', jig: '5 g sabit', zone: 'yüzeye yakın', sink: 2, color: 'şeffaf-simli' },
-  },
-  {
-    name: 'Gece, 25 km/sa yan rüzgar, hamle 25 içinde',
-    input: { ...base, windKmh: 22, gustKmh: 25, crossKmh: 25 },
-    expect: { profile: 'lrf', jig: '2 g sabit', zone: 'yüzeye yakın', sink: 2, color: 'şeffaf-simli' },
+    expect: { profile: 'lrf', jig: '3 g sabit', zone: 'yüzeye yakın', sink: 2, color: 'şeffaf-simli' },
   },
   {
     name: 'Gündüz, derin mendirek (10 m), sakin',
@@ -35,9 +30,19 @@ export const SCENARIOS: { name: string; input: TackleInput; expect: { profile: '
     expect: { profile: 'lrf', jig: '2 g sabit', zone: 'orta su', sink: 6, color: 'doğal' },
   },
   {
-    name: '6 g gerektiren: gündüz 12 m, akıntı 0,4 m/s',
-    input: { ...base, depthM: 12, sunAlt: 30, lampP: null, currentMs: 0.4 },
+    name: '5–6 g arası: gündüz 12 m, akıntı 0,3 m/s → LRF sınırında',
+    input: { ...base, depthM: 12, sunAlt: 30, lampP: null, currentMs: 0.3 },
+    expect: { profile: 'lrf', jig: '5 g sabit', zone: 'dibe yakın', sink: 14, color: 'doğal' },
+  },
+  {
+    name: '6 g gerektiren: gündüz 12 m, akıntı 0,45 m/s',
+    input: { ...base, depthM: 12, sunAlt: 30, lampP: null, currentMs: 0.45 },
     expect: { profile: 'spin', jig: '6 g sabit', zone: 'dibe yakın', sink: 13, color: 'doğal' },
+  },
+  {
+    name: '8 g gerektiren: gündüz 14 m, akıntı 0,6 m/s',
+    input: { ...base, depthM: 14, sunAlt: 30, lampP: null, currentMs: 0.6 },
+    expect: { profile: 'spin', jig: '8 g sabit', zone: 'dibe yakın', sink: 16, color: 'doğal' },
   },
 ];
 
@@ -80,7 +85,30 @@ describe('tackle (F0/G2)', () => {
       expect(JIG_SIZES).toContain(t.jigG);
     }
     expect(DEFAULT_PROFILES[0]!.jigMax).toBe(5);
-    expect(tackle({ ...base, depthM: 40, currentMs: 0.9, sunAlt: 20 }).jigG).toBe(20);
+    expect(tackle({ ...base, depthM: 40, currentMs: 0.9, sunAlt: 20 }).jigG).toBe(10); // istavrit spin: 6–10 g
+    expect(tackle({ ...base, depthM: 40, currentMs: 0.9, sunAlt: 20 }).rows[0]!.why).toMatch(/koşul istavrit için zor/);
+  });
+
+  it('H1: set chosen by weight only — never spin under 6 g, never LRF over 5 g (random inputs)', () => {
+    let seed = 1;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    let spins = 0;
+    for (let k = 0; k < 2000; k++) {
+      const t = tackle({
+        depthM: rnd() * 25, currentMs: rnd() * 0.8, windKmh: rnd() * 50, gustKmh: rnd() * 70, crossKmh: rnd() * 45,
+        sunAlt: rnd() * 120 - 60, lampP: rnd(), turbidity: rnd(), sstDev: rnd() * 6 - 3, kind: rnd() < 0.3 ? 'rocky' : 'pier',
+      });
+      if (t.profile === 'spin') {
+        spins++;
+        expect(t.jigG).toBeGreaterThanOrEqual(6);
+      } else expect(t.jigG).toBeLessThanOrEqual(5);
+    }
+    expect(spins).toBeGreaterThan(0);
+    // gusts never switch the set; they add a casting note
+    const g = tackle({ ...base, gustKmh: 45 });
+    expect(g.profile).toBe('lrf');
+    expect(g.notes.join(' ')).toMatch(/Hamle 45 km\/sa: atışta misinayı elle frenle, rüzgara yan at/);
+    expect(DEFAULT_PROFILES[1]).toMatchObject({ jigMin: 6, jigMax: 32 });
   });
 
   it('units in every text (G2)', () => {
@@ -111,20 +139,20 @@ describe('tackle (F0/G2)', () => {
     expect(tackle({ ...base, kind: 'rocky' }).jigType).toBe('mafsallı'); // rocky bottom target, calm
     expect(tackle({ ...base, kind: 'rocky', currentMs: 0.3 }).jigType).toBe('sabit');
     const x = tackle({ ...base, crossKmh: 16, currentMs: null, windKmh: null, gustKmh: null, turbidity: null, sstDev: null });
-    expect([x.jigType, x.jigG]).toEqual(['sabit', 1.5]);
+    expect([x.jigType, x.jigG]).toEqual(['sabit', 2]); // 1.04 + 0.12 × 6 = 1.76 → 2 g
     expect(x.rows[1]!.why).toMatch(/yan rüzgar 16 km\/sa/);
     expect(tackle({ ...base, depthM: 0 }).sinkS).toBe(2);
   });
 
   it('custom profiles and helpers', () => {
     const t = tackle(base, [{ ...DEFAULT_PROFILES[0]!, jigMax: 0.8 }], 15);
-    expect(t.profile).toBe('spin'); // 1.1 g needed > 0.8 g, falls back to the default spin profile
-    expect(t.rows[0]!.why).toMatch(/üst sınırı 0,8 g/);
+    expect([t.profile, t.jigG]).toEqual(['lrf', 0.8]); // 1.1 g needed, below spin's 6 g: LRF at its limit
+    expect(t.rows[0]!.why).toMatch(/LRF üst sınırında \(0,8 g\) kal/);
     expect(t.rows.at(-1)!.value).toBe('15 cm');
     expect(tackle(base, []).profile).toBe('lrf');
     expect(tackle({ ...base, crossKmh: null }).jigType).toBe('sabit');
-    expect(tackleShort(tackle({ ...base, gustKmh: 40 }))).toMatch(/^Spin · /);
-    expect(tackle({ ...base, gustKmh: 40 }).rows[0]!.why).toMatch(/hamle 40 km\/sa > LRF sınırı 25 km\/sa/);
+    expect(tackleShort(tackle({ ...base, depthM: 14, sunAlt: 30, currentMs: 0.6 }))).toMatch(/^Spin · 8 g/);
+    expect(tackle({ ...base, gustKmh: 40 }).rows[0]!.why).toMatch(/hamle 40 km\/sa: atışta misinayı elle frenle/);
     expect(lightCase(-10, null)).toBe('karanlık gece');
     expect(lightCase(5, 1)).toBe('gündüz');
     expect(crossWind(20, 90, 0)).toBe(20);
