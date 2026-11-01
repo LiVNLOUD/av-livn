@@ -220,3 +220,35 @@ def test_h2_structure_length_seaward_part_and_flags():
     assert length_flag("pier", 200, 640).startswith("OSM uzunluğu 640 m")
     assert length_flag("groyne", 3, 3).startswith("denize uzanan 3 m < beklenen alt sınır 5 m")
     assert length_flag("breakwater", 900, 930) is None
+
+
+def test_h6_kordon_segments_lamps_exclusions_report():
+    raw = {"elements": [
+        RAW["elements"][0],
+        node(90, (0, 300), place="town", name="Gemlik"),
+        node(91, (2500, 300), place="village", name="Narlı"),
+        way(92, [(-1500, 10), (1500, 10)], highway="pedestrian", name="Gemlik Kordonu"),        # 3 km promenade along the shore
+        way(93, [(-1500, 5), (1500, 5)], man_made="embankment"),                                  # same stretch drawn twice
+        way(94, [(400, 40), (900, 40), (900, -10), (400, -10), (400, 40)], natural="beach"),      # a beach on part of it
+        way(95, [(-1600, 60), (-900, 60), (-900, -60), (-1600, -60), (-1600, 60)], landuse="industrial", name="Fabrika"),
+        way(96, [(2200, 200), (2800, 200)], highway="footway"),                                    # 200 m inland: not along the shore
+        *[node(200 + i, (-800 + 25 * i, 15), highway="street_lamp") for i in range(16)],          # lamps every 25 m on 400 m
+    ]}
+    feats, forb, diag = inv.build_inventory(raw, [])
+    kordon = [f["properties"] for f in feats if f["properties"]["kind"] == "promenade"]
+    assert kordon and all(p["type_tr"] == "kordon (taş tahkimat)" and p["name"].startswith("Kordon (") for p in kordon)
+    log = diag["promenade_log"]
+    assert any(e["status"] == "elendi" and "kumsal" in e["reason"] for e in log)
+    assert any(e["status"] == "elendi" and e["reason"].startswith("sanayi alanı") for e in log)
+    assert any(e["status"] == "tekrar" for e in log)
+    lit = max(kordon, key=lambda p: p["lamp_prior"])
+    assert lit["lamps_n"] >= 10 and lit["lamp_prior"] >= 0.6
+    assert min(p["lamp_prior"] for p in kordon) == 0.2
+    assert not any("way-96" in p["id"] for p in kordon)
+    # industrial area exported for the map
+    assert any(f["properties"].get("kind") == "sanayi alanı" and f["properties"]["name"] == "Fabrika" for f in forb)
+    md = inv.report_md(feats, forb, diag)
+    assert "Kordon (taş tahkimat) — yerleşim raporu" in md and "| Gemlik |" in md
+    assert "Kordon parçası bulunamayan odak yerleşimler" in md and "Kurşunlu" in md
+    assert inv.classify({"highway": "secondary", "name": "Sahil Yolu"}) == "promenade"
+    assert inv.classify({"highway": "secondary", "name": "Atatürk Cd."}) is None

@@ -40,6 +40,11 @@ CAPE_M = 200.0
 KNOWN_NEAR_M = 1500.0
 NEAR_EXISTING_M = 150.0
 NEAR_STRUCT_M = 40.0
+# H6: city promenade / stone revetment ("kordon"): a revetment, sea wall or a shore path/road running along the
+# coastline within PROM_NEAR_M; split like beaches into 300–500 m pieces. Street lamps along it give the lamp prior.
+PROM_NEAR_M = 25.0
+LAMP_NEAR_M = 40.0
+PROM_NAMES = re.compile(r"sahil|kordon|kıyı", re.I)
 HARBOUR_POINT_MAX_M = 150.0  # G1: a harbour/marina node on the water is the basin centre, not the shore object
 HARBOUR_DUP_M = 150.0  # G1: a harbour/terminal node this close to a structure spot is the same physical object
 SAME_NAME_M = 500.0  # G1: same normalised harbour name within this distance = one record
@@ -47,9 +52,9 @@ INNER_MIN_M2 = 10_000.0  # G1: harbour polygon kept as one "liman içi" record w
 TOUCH_M = 3.0
 BRANCH_NAMES = re.compile(r"\bşube(si)?\b|acente|gişe|bilet", re.I)
 FORBIDDEN_NAMES = re.compile(r"gemport|borusan|roda|limak|marport|gemlik liman|tüpraş|aygaz|petrol ofisi|opet|shell", re.I)
-PRIORITY = {"structure": 0, "harbour": 1, "river_mouth": 2, "rocky": 3, "beach": 4}
-KIND = {"structure": None, "harbour": "harbour", "river_mouth": "river_mouth", "rocky": "rocky", "beach": "beach"}
-TYPE_TR = {"structure": "yapı", "harbour": "liman / balıkçı barınağı", "rocky": "kayalık kıyı", "beach": "kumsal", "river_mouth": "dere ağzı"}
+PRIORITY = {"structure": 0, "harbour": 1, "river_mouth": 2, "rocky": 3, "beach": 4, "promenade": 5}
+KIND = {"structure": None, "harbour": "harbour", "river_mouth": "river_mouth", "rocky": "rocky", "beach": "beach", "promenade": "promenade"}
+TYPE_TR = {"structure": "yapı", "harbour": "liman / balıkçı barınağı", "rocky": "kayalık kıyı", "beach": "kumsal", "river_mouth": "dere ağzı", "promenade": "kordon (taş tahkimat)"}
 STRUCT_TR = {"pier": "İskele", "breakwater": "Mendirek", "groyne": "Mahmuz", "quay": "Rıhtım"}
 # The user's known places (D1): checked in the report; the OSM objects around each are listed for diagnosis.
 KNOWN = ["Kurşunlu", "Gemlik", "Karacaali", "Büyükkumla", "Narlı", "Mudanya", "Kumyaka", "Eşkel"]
@@ -60,7 +65,14 @@ def build_query() -> str:
     b = f"{s},{w},{n},{e}"
     p = f"{s - 0.05},{w - 0.05},{n + 0.05},{e + 0.05}"
     return f"""[out:json][timeout:240];
+way["natural"="coastline"]({b})->.c;
 (
+  way(around.c:{PROM_NEAR_M:.0f})["man_made"~"^(embankment|seawall)$"];
+  way(around.c:{PROM_NEAR_M:.0f})["barrier"~"^(wall|retaining_wall)$"];
+  way(around.c:{PROM_NEAR_M:.0f})["leisure"="promenade"];
+  way(around.c:{PROM_NEAR_M:.0f})["highway"~"^(footway|pedestrian|path|cycleway)$"];
+  way(around.c:{PROM_NEAR_M:.0f})["highway"]["name"~"sahil|kordon|kıyı",i];
+  node(around.c:{LAMP_NEAR_M:.0f})["highway"="street_lamp"];
   nwr["man_made"~"^(pier|breakwater|groyne|quay)$"]({b});
   nwr["leisure"~"^(marina|slipway|fishing)$"]({b});
   nwr["harbour"]({b});
@@ -189,6 +201,14 @@ def classify(tags: dict) -> str | None:
         return "river_mouth"
     if tags.get("leisure") == "fishing":
         return "fishing"
+    if (
+        tags.get("man_made") in ("embankment", "seawall")
+        or tags.get("barrier") in ("wall", "retaining_wall")
+        or tags.get("leisure") == "promenade"
+        or tags.get("highway") in ("footway", "pedestrian", "path", "cycleway")
+        or ("highway" in tags and PROM_NAMES.search(tags.get("name", "")))
+    ):
+        return "promenade"
     return None
 
 
@@ -253,6 +273,15 @@ def access_estimate(typ: str, tags: dict, place_m: float | None) -> tuple[str, s
     return "belirsiz", "yerleşimden uzak (> 1,5 km)"
 
 
+def lamp_props(seg: LineString, lamps: list[tuple[float, float]]) -> dict:
+    """H6: street lamps (OSM highway=street_lamp) within LAMP_NEAR_M of a kordon piece → lamp prior (C).
+    0 lamps → 0.2; about one lamp per 25 m → 0.85 (cap)."""
+    zone = seg.buffer(LAMP_NEAR_M)
+    n = sum(1 for xy in lamps if zone.contains(Point(xy)))
+    per100 = n / max(seg.length, 1) * 100
+    return {"lamps_n": n, "lamp_prior": round(min(0.85, 0.2 + 0.16 * per100), 2)}
+
+
 def same_object_reason(pr: dict, kept: list[dict], struct_xy: dict[str, tuple[float, float]], land) -> str | None:
     """G1: a harbour/marina/terminal record that repeats a physical object already listed (None = keep).
     Different physical structures are never merged; only the harbour record that duplicates them goes."""
@@ -279,9 +308,12 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     """Proposals (point features without depth features yet), forbidden areas, diagnostics. `land`: planar land
     polygons (build_spots.Land.full) for the G1 water checks; None in unit tests without land."""
     coast_lines, places, els = [], [], []
+    lamps: list[tuple[float, float]] = []
     for el in raw.get("elements", []):
         t = el.get("tags", {})
-        if el["type"] == "node" and "place" in t:
+        if el["type"] == "node" and t.get("highway") == "street_lamp":
+            lamps.append(to_xy(el["lon"], el["lat"]))
+        elif el["type"] == "node" and "place" in t:
             places.append({"name": t.get("name"), "xy": to_xy(el["lon"], el["lat"])})
         elif el["type"] == "way" and t.get("natural") == "coastline":
             xy = element_xy(el)
@@ -297,6 +329,7 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     forbidden, items = [], []
     not_spots: list[dict] = []
     excl_zones: list = []
+    excl_shapes: list[dict] = []  # H6: industrial / military areas drawn on the map ("why is this left out")
     for el in els:
         t = el.get("tags", {})
         g = geom(el)
@@ -308,6 +341,7 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
         ex = exclusion(t)
         if ex and not isinstance(g, Point):
             excl_zones.append((g.buffer(30), ex, ref(el)))
+            excl_shapes.append({"name": t.get("name") or ex, "geom": g, "ref": ref(el), "kind": ex})
             if not classify(t):
                 continue
         typ = classify(t)
@@ -320,6 +354,8 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     zones = [f["geom"].buffer(100) for f in forbidden] + [z for z, _, _ in excl_zones]
     structs = [g for typ, _, _, g in items if typ == "structure"]
     harbour_polys = [g for typ, _, _, g in items if typ == "harbour" and isinstance(g, Polygon)]
+    natural_shore = [g for typ, _, _, g in items if typ in ("beach", "rocky")]
+    prom_log: list[dict] = []  # H6: every kordon piece found, with what happened to it (per-settlement report)
 
     props_list: list[dict] = []
     seen_struct = {k.split("-")[-1] for k in existing_xy}
@@ -349,6 +385,15 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                 if d <= MOUTH_M:
                     pts.append((q, None, None))
                     break
+        elif typ == "promenade":
+            pts = []
+            for seg in segments(coast, g, PROM_NEAR_M):
+                mid = seg.interpolate(0.5, normalized=True)
+                place0, _ = nearest_place((mid.x, mid.y), places)
+                if any(n.distance(mid) <= 40 for n in natural_shore):
+                    prom_log.append({"place": place0, "status": "elendi", "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)", "osm": ref(el)})
+                    continue
+                pts.append((mid, round(seg.length), seg))
         else:
             # capes: the coastline within CAPE_M of the point (the headland itself), others: within COAST_NEAR_M
             near = CAPE_M if t.get("natural") == "cape" else COAST_NEAR_M
@@ -369,12 +414,13 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
             place, place_m = nearest_place((pt.x, pt.y), places)
             access, why = access_estimate(typ, t, place_m)
             kind = t["man_made"] if typ == "structure" else KIND[typ]
-            pid = f"osm-{el['type']}-{el['id']}" + (f"-{k + 1}" if len(pts) > 1 or typ in ("rocky", "beach") else "")
+            pid = f"osm-{el['type']}-{el['id']}" + (f"-{k + 1}" if len(pts) > 1 or typ in ("rocky", "beach", "promenade") else "")
             props_list.append({
                 "_xy": (pt.x, pt.y), "_typ": typ, "_inside_forbidden": any(z.contains(pt) for z in zones), "_coast_d": coast_d,
                 "_why_out": exclusion_reason(pt, t, coast_d, forbidden, excl_zones, coast_max), "_g": g, "_name_key": name_key(t.get("name")),
                 "id": pid, "osm_name": t.get("name"), "kind": kind, "type": typ, "type_tr": TYPE_TR[typ],
                 "length_m": round(length) if length else None, "shore_normal_deg": round(normal, 1), "place": place, "place_m": place_m,
+                **(lamp_props(seg, lamps) if typ == "promenade" else {}),
                 "access": access, "access_note": why, "osm": [ref(el)], "osm_tags": {k2: v for k2, v in t.items() if k2 in ("man_made", "harbour", "leisure", "natural", "waterway", "amenity", "seamark:type", "name", "access")},
             })
 
@@ -388,6 +434,8 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     # polygons before points among harbours, so the polygon keeps the name when both exist (G1)
     order = lambda p: (PRIORITY[p["_typ"]], 0 if isinstance(p["_g"], Polygon) else 1, -(p["length_m"] or 0), p["id"])  # noqa: E731
     for pr in sorted(props_list, key=order):
+        if pr["_typ"] == "promenade" and pr["_why_out"]:
+            prom_log.append({"place": pr["place"], "status": "elendi", "reason": pr["_why_out"], "osm": pr["osm"][0]})
         if pr["_why_out"]:
             dropped["excluded"] += 1
             excluded.append({"id": pr["id"], "type": pr["type_tr"], "place": pr["place"], "osm": pr["osm"], "reason": pr["_why_out"], "lonlat": [round(v, 6) for v in to_lonlat(*pr["_xy"])]})
@@ -398,9 +446,17 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                 dropped["same_object"] += 1
                 same_object.append({"id": pr["id"], "name": pr["osm_name"], "osm": pr["osm"], "reason": why})
                 continue
+        if pr["_typ"] == "promenade":
+            twin = next((k for k in kept if k["_typ"] == "promenade" and math.dist(k["_xy"], pr["_xy"]) < NEAR_EXISTING_M), None)
+            if twin:  # the same stretch of shore drawn twice (path + wall + road): one record
+                dropped["same_object"] += 1
+                prom_log.append({"place": pr["place"], "status": "tekrar", "reason": f"aynı kıyı kesimi: {twin['id']}", "osm": pr["osm"][0]})
+                continue
         if any(math.dist(pr["_xy"], xy) < DUP_M for xy in existing_xy.values()) or any(math.dist(pr["_xy"], k["_xy"]) < DUP_M for k in kept):
             dropped["duplicate"] += 1
             continue
+        if pr["_typ"] == "promenade":
+            prom_log.append({"place": pr["place"], "status": "eklendi", "reason": f"{pr.get('lamps_n', 0)} sokak lambası, lamba olasılığı {pr.get('lamp_prior')}", "osm": pr["osm"][0]})
         kept.append(pr)
         if pr["_typ"] == "structure":
             struct_xy[pr["id"]] = pr["_xy"]
@@ -439,12 +495,18 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
         ring = [list(map(lambda v: round(v, 6), to_lonlat(x, y))) for x, y in g.exterior.coords] if isinstance(g, Polygon) else []
         if ring:
             forb.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]}, "properties": {"name": f["name"], "osm": f["ref"], **f["tags"]}})
+    for z in excl_shapes:
+        g = z["geom"] if isinstance(z["geom"], Polygon) else z["geom"].buffer(30)
+        if isinstance(g, Polygon):
+            ring = [list(map(lambda v: round(v, 6), to_lonlat(x, y))) for x, y in g.exterior.coords]
+            forb.append({"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [ring]}, "properties": {"name": z["name"], "osm": z["ref"], "kind": z["kind"]}})
     diag = diagnostics(raw, places, feats, existing)
     diag["dropped"] = dropped
     diag["known_missing"] = known_missing
     diag["excluded"] = excluded
     diag["not_spot"] = not_spots
     diag["same_object"] = same_object
+    diag["promenade_log"] = prom_log
     return feats, forb, diag
 
 
@@ -462,9 +524,9 @@ def name_props(kept: list[dict], places: list[dict]) -> None:
         elif typ == "river_mouth" and pr["osm_name"]:
             base = f"{pr['osm_name']} ağzı"
         else:
-            what = STRUCT_TR.get(pr["kind"], "Yapı") if typ == "structure" else {"harbour": "Liman", "rocky": "Kayalık kıyı", "beach": "Kumsal", "river_mouth": "Dere ağzı"}[typ]
+            what = STRUCT_TR.get(pr["kind"], "Yapı") if typ == "structure" else {"harbour": "Liman", "rocky": "Kayalık kıyı", "beach": "Kumsal", "river_mouth": "Dere ağzı", "promenade": "Kordon"}[typ]
             base = f"{what} ({pr['place']})" if pr["place"] else what
-            if pr["place"] and typ in ("rocky", "beach") and not pr["id"].startswith("known-"):
+            if pr["place"] and typ in ("rocky", "beach", "promenade") and not pr["id"].startswith("known-"):
                 pxy = next(p["xy"] for p in places if p["name"] == pr["place"])
                 b = bearing(pxy, pr["_xy"])
                 base = f"{what} ({pr['place']} {COMPASS[round(b / 45) % 8]})"
@@ -520,6 +582,34 @@ def enrich(feats: list[dict], grid=None, land=None) -> None:  # pragma: no cover
             p.update(features(grid, lat, lon, normal))
 
 
+KORDON_FOCUS = ["Gemlik", "Kumla", "Kurşunlu", "Narlı", "Umurbey", "Mudanya", "Güzelyalı"]
+
+
+def kordon_report(log: list[dict]) -> list[str]:
+    """H6: kordon pieces per settlement — found, added, left out and why (focus settlements first)."""
+    by: dict[str, list[dict]] = {}
+    for e in log:
+        by.setdefault(e["place"] or "—", []).append(e)
+    focus = lambda name: next((i for i, f in enumerate(KORDON_FOCUS) if norm(f) in norm(name)), len(KORDON_FOCUS))  # noqa: E731
+    out = ["", "## Kordon (taş tahkimat) — yerleşim raporu (H6)", "",
+           "Kıyı çizgisine ≤ 25 m paralel giden tahkimat, deniz duvarı, kordon/sahil yolu ya da yaya yolu 300–500 m parçalara bölünür.",
+           "Kumsal/kayalık üstündeki parçalar, aynı kesimin tekrarları ve erişim süzgecine (sanayi, liman, askeri, özel) takılanlar elenir.",
+           "Lamba olasılığı: parça boyunca OSM sokak lambası yoğunluğu (kanıt C).", "",
+           "| Yerleşim | Bulunan | Eklenen | Elenen | Tekrar | Elenme nedenleri |", "|---|---|---|---|---|---|"]
+    for place in sorted(by, key=lambda p: (focus(p), p)):
+        es = by[place]
+        reasons: dict[str, int] = {}
+        for e in es:
+            if e["status"] == "elendi":
+                r = e["reason"].split(" (")[0].split(":")[0]
+                reasons[r] = reasons.get(r, 0) + 1
+        out.append(f"| {place} | {len(es)} | {sum(e['status'] == 'eklendi' for e in es)} | {sum(e['status'] == 'elendi' for e in es)} | {sum(e['status'] == 'tekrar' for e in es)} | {'; '.join(f'{k} ({v})' for k, v in reasons.items()) or '—'} |")
+    missing = [f for f in KORDON_FOCUS if not any(norm(f) in norm(p) for p in by)]
+    if missing:
+        out += ["", f"Kordon parçası bulunamayan odak yerleşimler: {', '.join(missing)} (OSM'de kıyıya paralel tahkimat/yol etiketi yok ya da yerleşim noktası farklı adla)."]
+    return out
+
+
 def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
     by_type: dict[str, int] = {}
     by_place: dict[str, int] = {}
@@ -547,7 +637,8 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
         "| liman / balıkçı barınağı | 0.80 | 0.6 | 3 m |",
         "| kayalık kıyı | 0.80 (doğal kaya) | 0.1 | 2.5 m |",
         "| dere ağzı | 0.60 | 0.15 | 1 m |",
-        "| kumsal | 0.45 | 0.2 | 1.2 m |", "",
+        "| kumsal | 0.45 | 0.2 | 1.2 m |",
+        "| kordon (taş tahkimat) | 0.70 (levrek 0.65) | OSM sokak lambası yoğunluğu, 0.2–0.85 | 2 m |", "",
         "Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapınınkine sabitlenir. Değerler sezgiseldir",
         "(istavrit yapı/sert zemin ve ışık çevresinde toplanır; kumsalda açık su). Av günlüğüyle kalibre edilecek.", "",
         "## Adaylar", "", "| Ad | Tip | Yerleşim | Erişim tahmini | OSM |", "|---|---|---|---|---|",
@@ -563,6 +654,7 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
     lines += ["", "## Elenen yerler", "", "| Neden | Sayı |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])], "",
               "| Yer | Tip | Yerleşim | Neden | OSM |", "|---|---|---|---|---|",
               *[f"| {e['id']} | {e['type']} | {e['place'] or '—'} | {e['reason']} | {', '.join(e['osm'])} |" for e in diag.get("excluded", [])]]
+    lines += kordon_report(diag.get("promenade_log", []))
     lines += ["", "## Mera olmayan nesneler (G1)", "",
               "Şirket şubesi, gişe, suyla teması olmayan bina/ofis/dükkân ve karadaki feribot terminali noktaları aday olamaz.", "",
               "| Yer | Ad | Neden | OSM |", "|---|---|---|---|",
@@ -580,7 +672,7 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
     lines += ["## Bilinen yerler (kullanıcı listesi)", ""]
     lines += [f"- {m}" for m in diag.get("known_missing", [])]
     for k, v in diag.items():
-        if k in ("dropped", "known_missing", "excluded", "not_spot", "same_object"):
+        if k in ("dropped", "known_missing", "excluded", "not_spot", "same_object", "promenade_log"):
             continue
         if not v.get("place"):
             lines.append(f"- **{k}:** OSM'de yerleşim noktası yok.")

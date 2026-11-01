@@ -12,6 +12,7 @@ export const KIND_LABEL_TR: Record<StructureKind, string> = {
   rocky: 'kayalık kıyı',
   beach: 'kumsal',
   river_mouth: 'dere ağzı',
+  promenade: 'kordon (taş tahkimat)',
 };
 
 /** Lower-case label; unknown kinds read "yapı", never "undefined". */

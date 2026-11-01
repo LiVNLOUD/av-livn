@@ -9,8 +9,8 @@ export type Source = 'saha' | 'uzaktan gözlem' | 'masa başı' | 'Copernicus' |
 
 export type StructureKind = 'pier' | 'breakwater' | 'groyne' | 'manual' | ShoreKind;
 /** D1 inventory types without a single structure tip (docs/spots-candidates.md); static preferences, evidence C. */
-export type ShoreKind = 'quay' | 'harbour' | 'rocky' | 'beach' | 'river_mouth';
-export const SHORE_KINDS: readonly ShoreKind[] = ['quay', 'harbour', 'rocky', 'beach', 'river_mouth'];
+export type ShoreKind = 'quay' | 'harbour' | 'rocky' | 'beach' | 'river_mouth' | 'promenade';
+export const SHORE_KINDS: readonly ShoreKind[] = ['quay', 'harbour', 'rocky', 'beach', 'river_mouth', 'promenade'];
 /** Where a field-table value comes from (priority saha > uzaktan > masabasi > DTM > prior). */
 export type FieldKind = 'saha' | 'uzaktan' | 'masabasi';
 export const KIND_SOURCE: Record<FieldKind, Source> = { saha: 'saha', uzaktan: 'uzaktan gözlem', masabasi: 'masa başı' };
@@ -75,6 +75,9 @@ export interface Weather {
   pressD3: number | null;
   currentMs: number | null;
   doy: number;
+  /** H3 (levrek): highest wave of the last 48 h and 72 h rain (m, mm); istavrit does not use them. */
+  waveMax48?: number | null;
+  rain72?: number | null;
 }
 
 export const clip = (x: number) => Math.min(1, Math.max(FLOOR, x));
@@ -98,10 +101,12 @@ export const LAMP_PRIOR = {
   ferry: 0.85, pier: 0.5, breakwater: 0.3, groyne: 0.3, manual: 0.5,
   // C: quays and harbours are usually lit (working areas); shores only by a promenade, if at all
   quay: 0.5, harbour: 0.6, rocky: 0.1, beach: 0.2, river_mouth: 0.15,
+  // H6: city promenades are usually lit; the per-spot OSM street-lamp density replaces this when present
+  promenade: 0.5,
 } as const;
 
 /** Depth prior (m) for shore types: what is typically in reach of a cast from the shore (C). */
-const SHORE_DEPTH: Record<Exclude<ShoreKind, 'quay'>, number> = { harbour: 3, rocky: 2.5, beach: 1.2, river_mouth: 1 };
+const SHORE_DEPTH: Record<Exclude<ShoreKind, 'quay'>, number> = { harbour: 3, rocky: 2.5, beach: 1.2, river_mouth: 1, promenade: 2 };
 
 export function lampPrior(s: SpotV2): number {
   if (s.lampP !== undefined && s.lampP !== null) return s.lampP;
@@ -151,7 +156,7 @@ export interface StaticTerms {
 
 export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   const fs = s.fieldStructure;
-  const shore: Partial<Record<StructureKind, number>> = { harbour: p.struct_harbour, rocky: p.struct_rock, beach: p.struct_beach, river_mouth: p.struct_river };
+  const shore: Partial<Record<StructureKind, number>> = { harbour: p.struct_harbour, rocky: p.struct_rock, beach: p.struct_beach, river_mouth: p.struct_river, promenade: p.struct_promenade };
   const base =
     fs === 'mendirek' || (!fs && s.kind === 'breakwater') ? p.struct_breakwater : fs === 'dogal_kaya' ? p.struct_rock : (!fs && shore[s.kind]) || p.struct_pier;
   const L = effLength(s.lengthM ?? 50, p.len_sat_m);

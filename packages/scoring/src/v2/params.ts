@@ -34,6 +34,7 @@ export const PARAMS = {
   struct_harbour: { value: 0.8, unit: '-', evidence: 'C', ref: 'docs/spots-candidates.md' },
   struct_beach: { value: 0.45, unit: '-', evidence: 'C', ref: 'docs/spots-candidates.md' },
   struct_river: { value: 0.6, unit: '-', evidence: 'C', ref: 'docs/spots-candidates.md' },
+  struct_promenade: { value: 0.7, unit: '-', evidence: 'C', ref: 'H6' },
   struct_len_km: { value: 0.15, unit: 'km', evidence: 'C', ref: '—' },
   len_sat_m: { value: 300, unit: 'm', evidence: 'C', ref: 'H2' },
   depth_mid: { value: 3.5, unit: 'm', evidence: 'C', ref: 'R10' },
