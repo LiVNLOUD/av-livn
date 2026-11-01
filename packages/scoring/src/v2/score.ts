@@ -46,12 +46,21 @@ export function weatherAt(points: ReturnType<typeof indexSeries>, at: Date, lat:
   const num = (x: number | null | undefined) => (isNum(x) ? x : null);
   let rain = 0;
   let rainN = 0;
-  for (let h = -47; h <= 0; h++) {
-    const r = v.offset(h)?.precip;
+  let rain72 = 0;
+  let rain72N = 0;
+  let waveMax: number | null = null;
+  for (let h = -71; h <= 0; h++) {
+    const q = v.offset(h);
+    const r = q?.precip;
     if (isNum(r)) {
-      rain += r;
-      rainN++;
+      rain72 += r;
+      rain72N++;
+      if (h >= -47) {
+        rain += r;
+        rainN++;
+      }
     }
+    if (h >= -47 && isNum(q?.waveH)) waveMax = Math.max(waveMax ?? 0, q.waveH);
   }
   const sst = num(n?.sst);
   const sst48 = num(v.offset(-48)?.sst);
@@ -72,6 +81,8 @@ export function weatherAt(points: ReturnType<typeof indexSeries>, at: Date, lat:
     pressD3: p !== null && p3 !== null ? p - p3 : null,
     currentMs: num(n?.curVel),
     doy: dayOfYear(at),
+    waveMax48: waveMax,
+    rain72: rain72N >= 36 ? (rain72 * 72) / rain72N : null,
   };
 }
 

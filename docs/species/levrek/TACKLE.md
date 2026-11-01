@@ -1,4 +1,4 @@
-# Levrek — takım ve yem kuralları (G4 tasarım)
+# Levrek — takım ve yem kuralları (G4 tasarım → H3 uygulama, `tackleLevrek()`)
 
 İstavrit takım kutusuyla aynı yapı: satır başına değer, kısa neden, kanıt rozeti. **Asgari boy 25 cm** (6/2 Tebliğ Çizelge 7; REGULATION.md), altındaki denize geri bırakılır. Işıkla balık toplamak yasak (md. 8/8); kendi ışığınla yem/balık toplama önerilmez.
 
@@ -29,6 +29,24 @@
   - Dere ağzında: akıntıyla sürükle, tatlı-tuzlu su sınırı.
   - Gece: yavaş, düzgün sarım (yem yakalama görsel ve zor, L20).
 - **Yasal:** "yasal asgari boy: 25 cm" satırı her zaman görünür (A, Çizelge 7). Ölçü cetveli önerisi.
+
+## Örnek senaryolar (H3, test olarak sabit: `packages/scoring/test/tackle.test.ts`)
+Ortak: derinlik 4 m, akıntı 0,05 m/s, rüzgar 8 km/sa, hamle 12, berrak su, dalga 0,3 m, kayalık, lamba olasılığı 0,2.
+
+| Senaryo | Takım | Ağırlık | Yem | Renk |
+|---|---|---|---|---|
+| Fırtına ertesi bulanık gece, kayalık (dalga 0,8) | Spin | 14 g | silikon shad 10–12 cm | chartreuse / beyaz |
+| Sakin berrak gece, lambalı iskele (3 m, dalga 0,15) | LRF (hafif levrek) | 3 g | LRF shad 5–7 cm | beyaz-gümüş (ışık–gölge sınırı) |
+| Yağış sonrası alacakaranlık, dere ağzı | Spin | 10 g | silikon shad 10–12 cm (akıntıyla sürükle) | chartreuse / beyaz |
+| Gündüz, derin mendirek (9 m), akıntı 0,3 | Spin | 28 g | metal jig 28 g | doğal, ince profil |
+| Kış ani soğuma gecesi, kumsal | Spin | 14 g | minnow 7–9 cm | koyu siluet |
+| Alacakaranlık, sığ berrak kayalık | Spin | 14 g | minnow 9–12 cm | doğal gümüş |
+
+Değişmezler (test):
+- Spin her zaman 6–32 g.
+- LRF ≤ 5 g yalnız sakin (dalga < 0,3 m), sığ (≤ 4 m) ve korunaklı tiplerde (iskele, liman, rıhtım, kordon).
+- Yasal asgari boy 25 cm satırı her zaman var (A).
+- Hiçbir satır ışık götürmeyi önermez.
 
 ## Uygulama notu
 - Fonksiyon `packages/scoring/src/tackle.ts` içine tür parametresiyle eklenir (`tackle(input, profiles, species)`).

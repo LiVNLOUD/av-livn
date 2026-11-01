@@ -89,4 +89,4 @@ Durum: v2 Bölüm A, 2026-10-30. Hedef: `docs/MODEL.md`'deki her parametrenin da
   - **B:** 3 (R8, R9, R14). R7 B adayı (künye).
   - **C:** 2 (R11 aktarım, R12 mekanizma) + fizik 1 (R17).
 - **Modelde dayanak olarak kullanılanlar:** yalnız içeriği okunanlar (R1, R2, R3, R8, R9, R12, R16, R17).
-- **Parametre tablosu kanıt dağılımı** (`packages/scoring/src/v2/params.ts`, 46 parametre, H2 sonrası): A 3, B 1, C 42. F2'de yeni kaynaklar parametre **değerlerini** değiştirmedi: aylık kıyı serisi yok, hal serisi ticari ve ters mevsimli. Takım kutusunda iğne no ve yasal boy A (R19, Tebliğ). Model büyük ölçüde C düzeyinde. Bu, MODEL.md'deki kalibrasyon planının (av günlüğü) neden zorunlu olduğunun gerekçesidir.
+- **Parametre tablosu kanıt dağılımı** (`packages/scoring/src/v2/params.ts`, 47 parametre, H6 sonrası): A 3, B 1, C 43. F2'de yeni kaynaklar parametre **değerlerini** değiştirmedi: aylık kıyı serisi yok, hal serisi ticari ve ters mevsimli. Takım kutusunda iğne no ve yasal boy A (R19, Tebliğ). Model büyük ölçüde C düzeyinde. Bu, MODEL.md'deki kalibrasyon planının (av günlüğü) neden zorunlu olduğunun gerekçesidir.

@@ -38,7 +38,7 @@ describe('tackle profiles (F0)', () => {
     expect((await (await app.request('/api/tackle', {}, env)).json<{ profiles: { jigMax: number }[] }>()).profiles[0]!.jigMax).toBe(2.5);
     const d = await (await app.request('/api/spots/osm-way-1', {}, env)).json<{ packed: { h: unknown[]; tk: (number | null)[][] } }>();
     expect(d.packed.tk).toHaveLength(d.packed.h.length);
-    expect(d.packed.tk[0]).toHaveLength(9);
+    expect(d.packed.tk[0]).toHaveLength(10); // H3: + wave height
     expect(typeof d.packed.tk[0]![0]).toBe('number');
   });
   it('calibration status (F4): count, next threshold, last report', async () => {
@@ -47,15 +47,19 @@ describe('tackle profiles (F0)', () => {
     expect(a).toMatchObject({ sessions: 0, next_threshold: 30, report: null });
     await env.DB.prepare("INSERT INTO meta (key, value) VALUES ('calibration_report', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind('{"status":"yetersiz veri","n":0}').run();
     expect((await (await app.request('/api/admin/calibration', { headers: auth }, env)).json<{ report: { status: string } }>()).report.status).toBe('yetersiz veri');
+    await env.DB.prepare("INSERT INTO meta (key, value) VALUES ('calibration_report:levrek', ?1)").bind('{"status":"yetersiz veri","n":0,"species":"levrek"}').run();
+    const both = await (await app.request('/api/admin/calibration', { headers: auth }, env)).json<{ reports: Record<string, { species?: string } | null> }>();
+    expect(Object.keys(both.reports)).toEqual(['istavrit', 'levrek']);
+    expect(both.reports.levrek!.species).toBe('levrek');
     await env.DB.prepare("UPDATE meta SET value = '{bad' WHERE key = 'calibration_report'").run();
     expect((await (await app.request('/api/admin/calibration', { headers: auth }, env)).json<{ report: unknown }>()).report).toBeNull();
   });
   it('precomputed public bodies (F CPU): same as live, served raw, cleared by owner changes', async () => {
     const h = Math.floor(Date.now() / 3_600_000);
     const live = await Promise.all(['/api/spots', '/api/hours', '/api/windows'].map(async (u) => (await app.request(u, {}, env)).json()));
-    const [list, hrs, win, fet] = await Promise.all([LIST_SQL, HOURS_SQL, WINDOWS_SQL, FETCHED_SQL].map(async (q) => (await env.DB.prepare(q).all()).results));
+    const [list, hrs, win, fet] = await Promise.all([LIST_SQL, HOURS_SQL, WINDOWS_SQL, FETCHED_SQL].map(async (q) => (await (q === FETCHED_SQL ? env.DB.prepare(q) : env.DB.prepare(q).bind('istavrit')).all()).results));
     const bodies = preBodies(list as unknown as ListRow[], hrs as unknown as HoursRow[], win as unknown as WindowsRow[], fetchedAt(fet!), [h]);
-    expect(bodies.map(([k]) => k)).toEqual([`pub:list:${h}`, `pub:hours:${h}`, `pub:windows:${h}`]);
+    expect(bodies.map(([k]) => k)).toEqual([`pub:list:istavrit:${h}`, `pub:hours:istavrit:${h}`, `pub:windows:istavrit:${h}`]);
     bodies.forEach(([, v], i) => expect(JSON.parse(v)).toEqual(live[i]));
     for (const [k, v] of bodies) await env.DB.prepare('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(k, v).run();
     for (const u of ['/api/spots', '/api/hours', '/api/windows']) {

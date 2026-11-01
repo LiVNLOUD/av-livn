@@ -44,14 +44,14 @@ export async function viaNtfy(topic: string, m: Message): Promise<boolean> {
   return !!res?.ok;
 }
 
-export async function runNotify(query: Query, opts: { spots: SpotHours[]; nowHour: number; testOnly: boolean }): Promise<void> {
+export async function runNotify(query: Query, opts: { spots: SpotHours[]; bySpecies?: Record<string, SpotHours[]>; nowHour: number; testOnly: boolean }): Promise<void> {
   const key = process.env.VAPID_PRIVATE_KEY ?? '';
   const topic = process.env.NTFY_TOPIC ?? '';
   const meta = Object.fromEntries((await query<{ key: string; value: string }>("SELECT key, value FROM meta WHERE key IN ('notify_test_at', 'notify_test_done')")).map((r) => [r.key, r.value]));
   const settings = parseSettings((await query<{ json: string }>('SELECT json FROM notify_settings WHERE id = 1'))[0]?.json);
   const sent = await query<SentRow>('SELECT key, kind, spot_id, start_hour, end_hour FROM notify_sent WHERE sent_at >= ?1', [new Date(Date.now() - 3 * 86_400_000).toISOString()]);
   await query("INSERT INTO meta (key, value) VALUES ('notify_secrets', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [JSON.stringify({ push: !!key, ntfy: !!topic })]);
-  const msgs = decide({ nowHour: opts.nowHour, settings, spots: opts.spots, sent, testAt: meta.notify_test_at, testDone: meta.notify_test_done, testOnly: opts.testOnly });
+  const msgs = decide({ nowHour: opts.nowHour, settings, spots: opts.spots, bySpecies: opts.bySpecies, sent, testAt: meta.notify_test_at, testDone: meta.notify_test_done, testOnly: opts.testOnly });
   if (!msgs.length) {
     console.log('notify: nothing to send');
     return;

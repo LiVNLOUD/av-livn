@@ -135,7 +135,8 @@ import AdminLogin from '../../components/AdminLogin.astro';
 <script>
   import { getToken, mountLogin } from '../../scripts/admin';
   import { LEGAL_MIN_CM } from '../../scripts/format';
-  import { tackle, tackleShort } from '@av-livn/scoring';
+  import { tackle, tackleLevrek, tackleLevrekShort, tackleShort } from '@av-livn/scoring';
+  import { api, currentSpecies } from '../../scripts/species';
 
   type Spot = { id: string; name: string; lat: number; lon: number; place: string | null };
   type Fish = { t: number; species: string; length_cm: number | null };
@@ -249,10 +250,13 @@ import AdminLogin from '../../components/AdminLogin.astro';
     document.body.style.overflow = 'hidden';
     $('l-spot').textContent = live!.spot.name;
     // F0 short tackle line for this hour (open data; the full box is on the spot card)
-    fetch(`/api/spots/${encodeURIComponent(live!.spot.id)}`).then((r) => (r.ok ? r.json() : null)).then((b) => {
+    // H3: the tackle line follows the selected species (home page choice / ?tur=)
+    const sp = currentSpecies();
+    fetch(api(`/api/spots/${encodeURIComponent(live!.spot.id)}`, sp)).then((r) => (r.ok ? r.json() : null)).then((b) => {
       const v = b?.packed?.tk?.[b.from];
       if (!v) return;
-      $('l-tk').textContent = tackleShort(tackle({ depthM: v[0] ?? 3, currentMs: v[1], windKmh: v[2], gustKmh: v[3], crossKmh: v[4], sunAlt: v[5] ?? 0, lampP: v[6], turbidity: v[7], sstDev: v[8], kind: b?.spot?.kind }));
+      const input = { depthM: v[0] ?? 3, currentMs: v[1], windKmh: v[2], gustKmh: v[3], crossKmh: v[4], sunAlt: v[5] ?? 0, lampP: v[6], turbidity: v[7], sstDev: v[8], waveM: v[9] ?? null, kind: b?.spot?.kind };
+      $('l-tk').textContent = sp === 'levrek' ? `Levrek: ${tackleLevrekShort(tackleLevrek(input))}` : tackleShort(tackle(input));
     }).catch(() => {});
     lock();
     draw();

@@ -33,6 +33,7 @@ export interface SpotRow {
   auto_added?: number | null;
   hidden_reason?: string | null;
   near_json?: string | null;
+  lamp_prior?: number | null;
   has_light: number | null;
   status: string;
   place: string | null;

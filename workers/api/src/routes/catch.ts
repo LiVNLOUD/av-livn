@@ -4,7 +4,7 @@
 // hours). Hours older than the history are filled by score.yml from the hourly observations ("recomputed").
 import { Hono } from 'hono';
 import type { Env } from '../env';
-import type { ListEntryV2 } from '../precompute_v2';
+import { SPECIES, type ListEntryV2 } from '../precompute_v2';
 
 export const catchRoutes = new Hono<{ Bindings: Env }>();
 
@@ -127,13 +127,19 @@ export function cpue(items: CatchItem[], activeMin: number, rods: number, specie
 async function saveSession(env: Env, id: string, v: SessionInput, now: Date, replace: boolean): Promise<{ freeze_status: string; missing: number }> {
   const hours = sessionHours(v.start_at, v.end_at);
   const [hist, live] = await env.DB.batch([
-    env.DB.prepare(`SELECT hour, json FROM spot_scores_v2_history WHERE spot_id = ?1 AND hour BETWEEN ?2 AND ?3`).bind(v.spot_id, hours[0], hours[hours.length - 1]),
-    env.DB.prepare('SELECT start_hour, list_json FROM spot_scores_v2 WHERE spot_id = ?1').bind(v.spot_id),
+    env.DB.prepare(`SELECT species, hour, json FROM spot_scores_v2_history WHERE spot_id = ?1 AND hour BETWEEN ?2 AND ?3`).bind(v.spot_id, hours[0], hours[hours.length - 1]),
+    env.DB.prepare('SELECT species, start_hour, list_json FROM spot_scores_v2 WHERE spot_id = ?1').bind(v.spot_id),
   ]);
-  const l = live!.results[0] as { start_hour: number; list_json: string } | undefined;
-  const f = freeze(hours, hist!.results as { hour: number; json: string }[], l ? { start_hour: l.start_hour, list: JSON.parse(l.list_json) as ListEntryV2[] } : null);
+  // H3: the model output is frozen for every species (istavrit at the top level as before, others under `species`)
+  const frozen = (species: string) => {
+    const l = (live!.results as { species: string; start_hour: number; list_json: string }[]).find((r) => r.species === species);
+    const h = (hist!.results as { species: string; hour: number; json: string }[]).filter((r) => r.species === species);
+    return freeze(hours, h, l ? { start_hour: l.start_hour, list: JSON.parse(l.list_json) as ListEntryV2[] } : null);
+  };
+  const f = frozen('istavrit');
+  const others = Object.fromEntries(SPECIES.filter((s) => s !== 'istavrit').map((s) => [s, frozen(s)]));
   const status = f.missing.length ? 'partial' : 'complete';
-  const model = JSON.stringify({ frozen_at: now.toISOString(), hours: f.hours, missing: f.missing });
+  const model = JSON.stringify({ frozen_at: now.toISOString(), hours: f.hours, missing: f.missing, species: others });
   await env.DB.batch([
     ...(replace ? [env.DB.prepare('DELETE FROM catch_item WHERE session_id = ?1').bind(id)] : []),
     env.DB.prepare(

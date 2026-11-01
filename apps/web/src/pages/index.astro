@@ -6,13 +6,13 @@ import Base from '../layouts/Base.astro';
     <section class="r-win" aria-labelledby="t-main">
       <h1 id="t-main">Nereye, ne zaman?</h1>
       <div class="species" role="radiogroup" aria-label="Tür">
-        <button type="button" role="radio" aria-checked="true" class="sp on">İstavrit</button>
-        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Levrek</button>
+        <button type="button" role="radio" aria-checked="true" class="sp on" data-sp="istavrit">İstavrit</button>
+        <button type="button" role="radio" aria-checked="false" class="sp" data-sp="levrek" title="Deneysel: kanıtın çoğu C (docs/species/levrek)">Levrek</button>
         <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Lüfer / çinekop</button>
         <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Mırmır / karagöz</button>
         <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Kolyoz</button>
       </div>
-      <p class="fs-1 muted sp-note">Diğer türler araştırma aşamasında.</p>
+      <p class="fs-1 muted sp-note" id="sp-note">Levrek deneysel (kanıtın çoğu varsayım); diğer türler araştırma aşamasında.</p>
 
       <h2 class="sec">En iyi pencereler <span class="muted fs-2">önümüzdeki 72 saat</span></h2>
       <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
@@ -187,7 +187,8 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2, swimRule } from '../scripts/format';
-  import { DEFAULT_PROFILES, kindLabel, leadWithRank, tackle, tackleShort, type TackleProfile } from '@av-livn/scoring';
+  import { DEFAULT_PROFILES, kindLabel, leadWithRank, tackle, tackleLevrek, tackleLevrekShort, tackleShort, type TackleProfile } from '@av-livn/scoring';
+  import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
   import { columnMax, groupSame, isGroup, rankLabel, splitBeaches, tieCounts } from '../scripts/grouping';
   import type { MapApi } from '../scripts/map';
@@ -200,6 +201,7 @@ import Base from '../layouts/Base.astro';
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const app = $('app');
+  let species: Species = currentSpecies();
   const HOUR = 3_600_000;
   const TZ_OFF = 3;
   const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
@@ -224,7 +226,7 @@ import Base from '../layouts/Base.astro';
   const wide = matchMedia('(min-width: 768px)');
   function openSpot(id: string, col = sel) {
     const t = new Date((nowHour + col) * HOUR).toISOString();
-    const url = `/mera/?id=${encodeURIComponent(id)}&t=${encodeURIComponent(t)}`;
+    const url = link(`/mera/?id=${encodeURIComponent(id)}&t=${encodeURIComponent(t)}`, species);
     if (!wide.matches) { location.href = url; return; }
     $<HTMLIFrameElement>('drawer-frame').src = `${url}&embed=1`;
     $<HTMLAnchorElement>('drawer-open').href = url;
@@ -241,7 +243,7 @@ import Base from '../layouts/Base.astro';
   async function ensureMap() {
     if (mapApi || !wide.matches || app.classList.contains('map-off') || app.dataset.tab === 'heat' && innerWidth < 1920 && innerWidth >= 1200) return;
     const { mountMap } = await import('../scripts/map');
-    mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id) });
+    mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id), species });
   }
   const tab = (t: 'map' | 'heat') => {
     app.dataset.tab = t;
@@ -338,7 +340,7 @@ import Base from '../layouts/Base.astro';
           : `<p class="why"><b class="rk">${rankLabel(sc.rank, ties.get(sc.rank) ?? 1)}</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
       const legal = swimRule(s.kind, at ?? new Date().toISOString());
       const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '');
-      return `<li><a class="spot" href="/mera/?id=${encodeURIComponent(s.id)}" data-id="${esc(s.id)}">
+      return `<li><a class="spot" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}" data-id="${esc(s.id)}">
           <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
           <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;
     };
@@ -374,7 +376,7 @@ import Base from '../layouts/Base.astro';
   function load() {
     const my = ++seq;
     const at = atIso();
-    fetch(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, { cache: 'no-cache' })
+    fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
         if (my !== seq) return;
@@ -471,7 +473,7 @@ import Base from '../layouts/Base.astro';
   type Detail = { from: number; packed: { tk?: (number | null)[][] } | null };
   const details = new Map<string, Promise<Detail | null>>();
   const detail = (id: string) => {
-    if (!details.has(id)) details.set(id, fetch(`/api/spots/${encodeURIComponent(id)}?model=v2`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    if (!details.has(id)) details.set(id, fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species)).then((r) => (r.ok ? r.json() : null)).catch(() => null));
     return details.get(id)!;
   };
   let sumSeq = 0;
@@ -494,7 +496,7 @@ import Base from '../layouts/Base.astro';
     const head = `<h3><span class="big">${sc.total === null ? '–' : Math.round(sc.total)}</span> ${esc(s.name)}</h3>
       <p>${sc.gated ? esc(sc.warnings[0] ?? 'güvenlik uyarısı') : `${sc.rank === null ? '–' : rankLabel(sc.rank, tieCounts(all.map((x) => x.score.rank)).get(sc.rank) ?? 1)} / ${all.length} · ${band}`} · ${at === atIso() ? `${fmtDay(at)} ${fmtTime(at)}` : 'şimdi'}</p>
       ${sc.reason ? `<p>${esc(sc.reason)}</p>` : ''}${badges ? `<p>${badges}</p>` : ''}`;
-    box.innerHTML = `${head}<p class="tk" id="sum-tk">Takım: hesaplanıyor…</p><p><a class="link" href="/mera/?id=${encodeURIComponent(s.id)}">Mera kartı ve takım kutusu →</a></p>`;
+    box.innerHTML = `${head}<p class="tk" id="sum-tk">Takım: hesaplanıyor…</p><p><a class="link" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}">Mera kartı ve takım kutusu →</a></p>`;
     box.hidden = false;
     const d = await detail(s.id);
     if (my !== sumSeq) return;
@@ -502,18 +504,21 @@ import Base from '../layouts/Base.astro';
     const tkEl = document.getElementById('sum-tk');
     if (!tkEl) return;
     if (!v || sc.gated) { tkEl.textContent = sc.gated ? 'Takım: güvenlik uyarısı varken öneri yok.' : 'Takım: veri yok.'; return; }
-    const t = tackle({ depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, kind: s.kind }, profiles);
-    tkEl.innerHTML = `Takım: <b>${esc(tackleShort(t))}</b> · yasal asgari boy 13 cm`;
+    const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: s.kind };
+    const short = species === 'levrek' ? tackleLevrekShort(tackleLevrek(input, profiles)) : tackleShort(tackle(input, profiles));
+    tkEl.innerHTML = `Takım (${SPECIES_TR[species]}): <b>${esc(short)}</b> · yasal asgari boy ${LEGAL_MIN[species]} cm`;
   }
-  fetch('/api/hours', { cache: 'no-cache' })
-    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-    .then((b: HoursData) => { hours = b; heat(); })
-    .catch(() => { $('heat').innerHTML = '<p class="muted fs-2">Isı haritası alınamadı.</p>'; });
+  const loadHours = () =>
+    fetch(api('/api/hours', species), { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((b: HoursData) => { hours = b; heat(); })
+      .catch(() => { $('heat').innerHTML = '<p class="muted fs-2">Isı haritası alınamadı.</p>'; });
+  loadHours();
   let rz = 0;
   addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(heat); });
 
   // ---------------------------------------------------------------- best windows (E3)
-  fetch('/api/windows', { cache: 'no-cache' })
+  const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: { windows: Win[]; threshold: number }) => {
       const ol = $('windows');
@@ -542,6 +547,34 @@ import Base from '../layouts/Base.astro';
         : 'Pencere: zirve saatin çevresinde puanın 65 ve zirve − 8\'in üstünde kaldığı en çok 4 saat; mera başına bir pencere.';
     })
     .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; });
+  loadWindows();
+
+  // ---------------------------------------------------------------- species (H3)
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.species .sp[data-sp]')];
+  const showSpecies = () => {
+    chips.forEach((c) => {
+      const on = c.dataset.sp === species;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-checked', String(on));
+    });
+    document.title = `av.livn — ${SPECIES_TR[species]}: nereye, ne zaman?`;
+  };
+  showSpecies();
+  chips.forEach((c) => c.addEventListener('click', () => {
+    if (c.dataset.sp === species) return;
+    species = c.dataset.sp as Species;
+    saveSpecies(species);
+    const u = new URL(location.href);
+    if (species === 'istavrit') u.searchParams.delete('tur'); else u.searchParams.set('tur', species);
+    history.replaceState(null, '', u);
+    showSpecies();
+    details.clear();
+    focus = null;
+    load();
+    loadHours();
+    loadWindows();
+    mapApi?.setSpecies(species);
+  }));
 
   setCol(0);
   ensureMap();

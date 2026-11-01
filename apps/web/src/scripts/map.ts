@@ -6,6 +6,7 @@ import { esc, KIND_TR, lampV2 } from './format';
 import { getToken } from './admin';
 import { PALETTE } from './palette';
 import { declutter, placeBadges } from './declutter';
+import { api, link, type Species } from './species';
 import { BANDS_V2 } from '@av-livn/scoring';
 
 // Sequential depth scale: shallow = light, deep = dark (blue). Edges match bathy/contours.py BAND_EDGES_M.
@@ -59,9 +60,12 @@ export interface MapOpts {
   onSpot?: (id: string) => void;
   focusId?: string | null;
   bounds?: [[number, number], [number, number]];
+  /** H3: species whose scores colour the markers. */
+  species?: Species;
 }
 export interface MapApi {
   setHour(at: string | null): Promise<void>;
+  setSpecies(s: Species): Promise<void>;
   resize(): void;
   flyTo(id: string): void;
 }
@@ -75,6 +79,7 @@ loading.setAttribute('role', 'status');
 loading.textContent = 'Meralar yükleniyor…';
 o.container.append(loading);
 let at: string | null = o.at ?? null;
+let species: Species = o.species ?? 'istavrit';
 
 const scaleEl = ui('scale');
 if (scaleEl) scaleEl.innerHTML = DEPTH_STOPS.filter((_, i) => i % 2 === 0)
@@ -224,7 +229,7 @@ function showCard(s: Spot) {
     <div><h2>${esc(s.name)}</h2><p>${esc([KIND_TR[s.kind] ?? s.kind, s.place].filter(Boolean).join(', '))}</p>
     <p>${sc.rank ? `Bu saatte ${spotCount} mera içinde <b>${sc.rank}.</b>` : 'Puan yok'}${band ? ` · ${band}` : ''}</p></div>
     <button class="x" type="button" aria-label="Kartı kapat">×</button>
-    <a class="go button" href="/mera/?id=${encodeURIComponent(s.id)}">Ayrıntılar ve 72 saat</a>`;
+    <a class="go button" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}">Ayrıntılar ve 72 saat</a>`;
   lampV2(card.querySelector<HTMLElement>('#card-lamp')!, sc.total, sc.gated);
   card.querySelector('button.x')!.addEventListener('click', () => (card.hidden = true));
 }
@@ -234,7 +239,7 @@ let spots: Spot[] = [];
 let byId = new Map<string, Spot>();
 const empty = { type: 'FeatureCollection' as const, features: [] };
 const fetchSpots = async () => {
-  const res = await fetch(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] }));
+  const res = await fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] }));
   spots = res.spots ?? [];
   spotCount = spots.length;
   byId = new Map(spots.map((s) => [s.id, s]));
@@ -566,6 +571,13 @@ map.on('load', async () => {
 });
 
 return {
+  async setSpecies(next) {
+    species = next;
+    loading.hidden = false;
+    await fetchSpots();
+    layout();
+    loading.hidden = true;
+  },
   async setHour(next) {
     at = next;
     loading.hidden = false;

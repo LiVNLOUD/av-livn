@@ -88,14 +88,17 @@ import AdminLogin from '../../../components/AdminLogin.astro';
     const r = await fetch('/api/admin/calibration', { headers: { authorization: `Bearer ${token}` }, cache: 'no-cache' }).catch(() => null);
     if (!r?.ok) { $('calib-n').textContent = 'alınamadı'; return; }
     type Rep = { status: string; n: number; computed_at: string; family?: string; summary?: string; dispersion?: number };
-    const b = (await r.json()) as { sessions: number; next_threshold: number | null; report: Rep | null };
+    const b = (await r.json()) as { sessions: number; next_threshold: number | null; reports?: Record<string, Rep | null>; report: Rep | null };
     $('calib-n').textContent = `${b.sessions} seans, ${b.next_threshold ? `sonraki eşik ${b.next_threshold}` : 'tüm eşikler geçildi'}${b.sessions < 30 ? ' (30 altında model kurulmaz: yetersiz veri)' : ''}.`;
-    const rep = b.report;
-    $('calib-rep').textContent = !rep
-      ? 'Henüz rapor yok (haftalık calibrate.yml).'
-      : rep.status === 'tamam'
-        ? `Son rapor ${rep.computed_at.slice(0, 10)}, n ${rep.n}: ${rep.family}, dağılım ${rep.dispersion}; ${rep.summary}.`
-        : `Son rapor ${rep.computed_at?.slice(0, 10) ?? ''}, n ${rep.n}: ${rep.status}.`;
+    // H3: one line per species
+    const line = (name: string, rep: Rep | null | undefined) =>
+      !rep
+        ? `${name}: henüz rapor yok (haftalık calibrate.yml).`
+        : rep.status === 'tamam'
+          ? `${name}: son rapor ${rep.computed_at.slice(0, 10)}, n ${rep.n}: ${rep.family}, dağılım ${rep.dispersion}; ${rep.summary}.`
+          : `${name}: son rapor ${rep.computed_at?.slice(0, 10) ?? ''}, n ${rep.n}: ${rep.status}.`;
+    const reps = b.reports ?? { istavrit: b.report };
+    $('calib-rep').innerHTML = Object.entries(reps).map(([sp, rep]) => `<span class="cl">${line(sp === 'istavrit' ? 'İstavrit' : 'Levrek', rep)}</span>`).join('<br />');
   }
 
   async function load() {

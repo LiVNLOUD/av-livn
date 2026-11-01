@@ -82,9 +82,11 @@ describe('catch API (admin only)', () => {
     const b = await r.json<{ id: string; warnings: string[]; freeze_status: string; cpue: number }>();
     expect(b.warnings).toHaveLength(1);
     expect(b.freeze_status).toBe('complete');
-    const list = await (await app.request('/api/admin/catch', { headers: AUTH }, env)).json<{ sessions: { id: string; items: unknown[]; model: { hours: { source: string }[] }; cpue: number }[] }>();
+    const list = await (await app.request('/api/admin/catch', { headers: AUTH }, env)).json<{ sessions: { id: string; items: unknown[]; model: { hours: { source: string }[]; species: Record<string, { hours: { source: string }[] }> }; cpue: number }[] }>();
     const s = list.sessions.find((x) => x.id === b.id)!;
     expect(s.model.hours.map((h) => h.source)).toEqual(['history', 'forecast']);
+    // H3: the levrek model is frozen too (no levrek history row here: forecast for the scored hour only)
+    expect(Object.keys(s.model.species)).toEqual(['levrek']);
     expect(s.items).toHaveLength(1);
     const put = await app.request(`/api/admin/catch/${b.id}`, { method: 'PUT', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: start, end_at: now.toISOString(), zero_catch: true, note: 'boş, düzeltildi' }) }, env);
     expect(await put.json()).toMatchObject({ ok: true, cpue: 0 });

@@ -45,10 +45,12 @@ export interface TackleInput {
   sstDev: number | null;
   /** Spot kind (rocky shore: bottom target). */
   kind?: string | null;
+  /** H3 (levrek): wave height at the spot's sea cell (m). */
+  waveM?: number | null;
 }
 
 export interface TackleRow {
-  key: 'takim' | 'jighead' | 'igne' | 'silikon' | 'renk' | 'saydirma' | 'yasal';
+  key: 'takim' | 'jighead' | 'igne' | 'silikon' | 'renk' | 'saydirma' | 'yasal' | 'agirlik' | 'yem' | 'teknik';
   label: string;
   value: string;
   why: string;
@@ -183,4 +185,79 @@ export function tackleShort(t: Tackle): string {
 export function crossWind(windKmh: number | null, windDir: number | null, normalDeg: number | null): number | null {
   if (windKmh === null || windDir === null || normalDeg === null) return null;
   return Math.round(Math.abs(windKmh * Math.sin(((windDir - normalDeg) * Math.PI) / 180)) * 10) / 10;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// H3: levrek tackle (docs/species/levrek/TACKLE.md). Spin by default (Bassterra XT+ 274, 6–32 g); light levrek on the
+// LRF set only in calm, shallow, sheltered water. All rules C except the legal size (A).
+export const LEGAL_MIN_LEVREK_CM = 25;
+export const SPIN_SIZES = [7, 10, 14, 18, 21, 24, 28, 32];
+
+export interface LevrekTackle {
+  profile: 'lrf' | 'spin';
+  weightG: number;
+  lure: 'silikon shad' | 'silikon kum balığı' | 'minnow' | 'metal jig' | 'LRF shad';
+  lureCm: string;
+  color: string;
+  rows: TackleRow[];
+  notes: string[];
+}
+
+export function tackleLevrek(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFILES, legalMinCm = LEGAL_MIN_LEVREK_CM): LevrekTackle {
+  const lrf = profiles.find((p) => p.id === 'lrf') ?? DEFAULT_PROFILES[0]!;
+  const spin = profiles.find((p) => p.id === 'spin') ?? DEFAULT_PROFILES[1]!;
+  const wave = i.waveM ?? 0;
+  const cur = i.currentMs ?? 0;
+  const gust = i.gustKmh ?? i.windKmh ?? 0;
+  const depth = Math.max(0.5, i.depthM);
+  const light = lightCase(i.sunAlt, i.lampP);
+  const night = light === 'aydınlık gece' || light === 'karanlık gece';
+  const turbid = (i.turbidity ?? 1) < 0.8;
+  const cold = (i.sstDev ?? 0) <= -1.5;
+  const sheltered = ['harbour', 'pier', 'quay', 'promenade', 'manual'].includes(i.kind ?? '');
+
+  // light levrek on LRF: calm, shallow, sheltered
+  const useLrf = wave < 0.3 && gust < 20 && cur < 0.2 && depth <= 4 && sheltered;
+  let weightG: number;
+  let lure: LevrekTackle['lure'];
+  if (useLrf) {
+    weightG = Math.min(lrf.jigMax, Math.max(3, nearestSize(1.5 + 0.5 * depth)));
+    lure = 'LRF shad';
+  } else {
+    const base = wave < 0.5 ? 10 : wave <= 1 ? 15 : 24;
+    const want = base * (cur >= 0.25 ? 1.4 : 1) * (depth >= 8 ? 1.3 : 1);
+    weightG = SPIN_SIZES.reduce((b, x) => (Math.abs(x - want) < Math.abs(b - want) ? x : b), SPIN_SIZES[0]!);
+    weightG = Math.min(spin.jigMax, Math.max(spin.jigMin, weightG));
+    lure = turbid ? 'silikon shad' : (night || light === 'alacakaranlık') && depth <= 3 ? 'minnow' : light === 'gündüz' && (depth >= 6 || cur >= 0.25) ? 'metal jig' : 'silikon kum balığı';
+  }
+  const lureCm = useLrf ? '5–7 cm' : cold ? '7–9 cm' : turbid ? '10–12 cm' : lure === 'metal jig' ? `${weightG} g` : '9–12 cm';
+  const color = turbid ? 'chartreuse / beyaz' : light === 'karanlık gece' ? 'koyu siluet (siyah, mor)' : light === 'aydınlık gece' ? 'beyaz-gümüş (ışık–gölge sınırı)' : light === 'alacakaranlık' ? 'doğal gümüş (sardalya)' : 'doğal, ince profil';
+  const technique = i.kind === 'river_mouth'
+    ? 'akıntıyla sürükle; tatlı–tuzlu su sınırında yavaşla'
+    : turbid
+      ? 'köpük hattına ve dalga kırılımının arkasına at; yavaş, dibe yakın sarım'
+      : lure === 'metal jig'
+        ? 'uzun atış, dibe indir, kısa sıçratma ve düşüşte bekle'
+        : night
+          ? 'yavaş, düzgün sarım (gece görsel av zor); ışık–gölge sınırına paralel'
+          : 'orta hızda sarım, arada duruş';
+  const rows: TackleRow[] = [
+    {
+      key: 'takim', label: 'Takım', value: useLrf ? 'LRF (hafif levrek)' : 'Spin', evidence: 'C',
+      why: useLrf ? `sakin (dalga ${n1(wave)} m), sığ (${n1(depth)} m) ve korunaklı: hafif levrek; FC'yi 1.5–2 numaraya (≈6–8 lb) çıkar` : `${spin.name.replace(/^Spin: /, '')}, atış ${n1(spin.jigMin)}–${n1(spin.jigMax)} g; dalga ${n1(wave)} m`,
+    },
+    { key: 'agirlik', label: 'Ağırlık', value: `${n1(weightG)} g`, evidence: 'C', why: useLrf ? 'kısa atış, yavaş düşüş' : `dalga ${n1(wave)} m${cur >= 0.25 ? `, akıntı ${n1(cur)} m/s` : ''}${depth >= 8 ? `, derin uç ${n1(depth)} m` : ''}: kıyıdan atış mesafesi ve dibe temas` },
+    { key: 'yem', label: 'Yem', value: `${lure}, ${lureCm}`, evidence: 'C', why: turbid ? 'bulanık su: titreşimli kürek kuyruk, bir boy büyük' : cold ? 'su normalden soğuk: küçük ve yavaş' : lure === 'minnow' ? 'sığ suda alacakaranlık/gece yüzeye yakın av' : lure === 'metal jig' ? 'gündüz derin uç ya da akıntı' : 'yem balığı taklidi' },
+    { key: 'renk', label: 'Renk', value: color, evidence: 'C', why: turbid ? 'bulanıkta görünürlük' : night ? 'gece siluet ya da ışık–gölge kontrastı' : 'doğal görünüm' },
+    { key: 'teknik', label: 'Teknik', value: technique.split(';')[0]!, evidence: 'C', why: technique },
+    { key: 'yasal', label: 'Yasal asgari boy', value: `${legalMinCm} cm`, evidence: 'A', why: '6/2 Tebliğ Çizelge 7; altındakini denize geri bırakın' },
+  ];
+  const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
+  if (gust > spin.maxGustKmh * 0.6) notes.push(`Hamle ${Math.round(gust)} km/sa: rüzgarı arkana ya da yana al, misinayı elle frenle.`);
+  return { profile: useLrf ? 'lrf' : 'spin', weightG, lure, lureCm, color, rows, notes };
+}
+
+/** One-line levrek version. */
+export function tackleLevrekShort(t: LevrekTackle): string {
+  return `${t.profile === 'lrf' ? 'LRF' : 'Spin'} · ${n1(t.weightG)} g · ${t.lure} ${t.lureCm} · ${t.color}`;
 }

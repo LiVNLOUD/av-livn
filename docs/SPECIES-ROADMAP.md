@@ -12,7 +12,7 @@ Kış mevsimi önde olduğu için sıra mevsime ve kullanıcının takımlarına
 
 | Sıra | Tür | Neden bu sırada | Takım | Mevsim (Marmara; kaynakla doğrulanacak) | Model farkı | Asgari boy (REGULATION.md) | Kanıt durumu |
 |---|---|---|---|---|---|---|---|
-| 1 | **Levrek** (*Dicentrarchus labrax*) | Kış (Ara–Mar) türü; şimdi başlayan sezonun ana hedefi. D1'deki 6 dere ağzı adayı doğrudan işe yarar. | Spin (Bassterra 274 + C3000, Kairiki 8, Prorex FC) | kış, gece ve dalga sonrası | dere ağzı + bulanıklık (+) + dalga; ışık ağırlığı ↓ | 25 cm | B — **Bölüm A tamam (G4)**: `docs/species/levrek/` (22 kaynak: A 1, B 21; model taslağı, 5 yön testi geçti) |
+| 1 | **Levrek** (*Dicentrarchus labrax*) | Kış (Ara–Mar) türü; şimdi başlayan sezonun ana hedefi. D1'deki 6 dere ağzı adayı doğrudan işe yarar. | Spin (Bassterra 274 + C3000, Kairiki 8, Prorex FC) | kış, gece ve dalga sonrası | dere ağzı + bulanıklık (+) + dalga; ışık ağırlığı ↓ | 25 cm | B — **Bölüm B uygulandı (H3): tür çipinde deneysel olarak açık**; Bölüm A (G4): `docs/species/levrek/` (22 kaynak: A 1, B 21; model taslağı, 5 yön testi geçti) |
 | 2 | **Lüfer / çinekop** (*Pomatomus saltatrix*) | Sonbahar göçünün kuyruğu Aralık'a uzanır. | Spin, kaşık / rapala 10–30 g | Eyl–Ara, alacakaranlık | yem balığı (istavrit) puanı girdi; akıntı + alacakaranlık ↑ | 18 cm | B |
 | 3 | **Mırmır / karagöz** (Sparidae) | Yıl boyu, gece; kış dip avı. | LRF ağır jighead / dip | yıl boyu, gece | kaya + dalga sonrası bulanıklık (+), 3–8 m | mırmır: yok; karagöz 18 cm | C |
 | 4 | **Kolyoz** (*Scomber japonicus*) | Yaz–sonbahar; istavrite en yakın model, kışın düşük öncelik. | LRF / sabiki | yaz–sonbahar | ışık + yapı; sıcaklık tercihi yüksek | 18 cm | C |

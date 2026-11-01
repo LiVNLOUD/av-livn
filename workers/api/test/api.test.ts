@@ -16,7 +16,7 @@ beforeAll(async () => {
 describe('GET /api/health', () => {
   it('reports the current schema', async () => {
     const body = await (await app.request('/api/health', {}, env)).json<{ ok: boolean; schema: string }>();
-    expect(body).toMatchObject({ ok: true, schema: 'v2.7' });
+    expect(body).toMatchObject({ ok: true, schema: 'v2.8' });
   });
 
   it('JSON 404 for unknown routes', async () => {
@@ -30,7 +30,15 @@ describe('public spot API (v2 only)', () => {
     const b = await (await app.request('/api/spots', {}, env)).json<{ model: string; spots: { score: object }[] }>();
     expect(b.model).toBe('v2.0');
     expect(b.spots).toHaveLength(3);
-    expect((await app.request('/api/spots?species=levrek', {}, env)).status).toBe(400);
+    const l = await (await app.request('/api/spots?species=levrek', {}, env)).json<{ species: string; model: string; spots: { score: { total: number | null } }[] }>();
+    expect([l.species, l.model, l.spots.length]).toEqual(['levrek', 'levrek-v1.0', 3]);
+    expect(l.spots.every((s) => s.score.total !== null)).toBe(true);
+    expect((await app.request('/api/spots?species=kalkan', {}, env)).status).toBe(400);
+    expect((await app.request('/api/hours?species=kalkan', {}, env)).status).toBe(400);
+    expect((await (await app.request('/api/windows?species=levrek', {}, env)).json<{ species: string }>()).species).toBe('levrek');
+    const d = await (await app.request('/api/spots/osm-way-1?species=levrek', {}, env)).json<{ species: string; packed: { meta: { model_version: string; comps: string[][] } } }>();
+    expect(d.species).toBe('levrek');
+    expect(d.packed.meta.comps.map((c) => c[0])).toContain('dere');
   });
 
   it('includes DTM depth features and the 0–500 m profile; 404s unknown spots', async () => {

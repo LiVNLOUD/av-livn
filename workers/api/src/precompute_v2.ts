@@ -1,7 +1,7 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  crossWind, DEFAULTS, explain, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
+  crossWind, DEFAULTS, explain, explainLevrek, scoreSeriesLevrek, LEVREK_VERSION, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
   type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour, type ShoreKind,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
@@ -133,6 +133,12 @@ function bandMean(profile: (number | null)[] | null, a: number, b: number): numb
 }
 
 /** Spot row (+ field record) → v2 model input. */
+/** Scored species (H3). */
+export const SPECIES = ['istavrit', 'levrek'] as const;
+export type Species = (typeof SPECIES)[number];
+export const isSpecies = (x: unknown): x is Species => typeof x === 'string' && (SPECIES as readonly string[]).includes(x);
+export const modelVersion = (sp: Species) => (sp === 'levrek' ? LEVREK_VERSION : MODEL_VERSION);
+
 export function spotV2(row: SpotRow, field?: FieldRecord): SpotV2 & { lat: number; lon: number } {
   const profile = row.profile_json ? (JSON.parse(row.profile_json) as (number | null)[]) : null;
   return {
@@ -158,7 +164,8 @@ export function spotV2(row: SpotRow, field?: FieldRecord): SpotV2 & { lat: numbe
     fetchKm: row.fetch_json ? (JSON.parse(row.fetch_json) as number[]) : null,
     // A known lamp (saha form or admin) wins; otherwise a remote/desk probability; otherwise the prior.
     lamp: row.has_light === null ? null : row.has_light === 1,
-    lampP: row.has_light === null && field?.lamp && field.lamp.kind !== 'saha' ? field.lamp.p : null,
+    // H6: OSM street-lamp density along a promenade (C) when nothing better is known
+    lampP: row.has_light === null && field?.lamp && field.lamp.kind !== 'saha' ? field.lamp.p : row.has_light === null ? (row.lamp_prior ?? null) : null,
     lampSource: row.has_light !== null ? (field?.lamp?.kind === 'saha' ? 'saha' : null) : field?.lamp && field.lamp.kind !== 'saha' ? field.lamp.kind : null,
   };
 }
@@ -229,7 +236,7 @@ export interface PackedV2 {
     ocean_normal: { years: number; from: string; to: string } | null;
     comps: [string, string, string, number | null, string, string][];
   };
-  /** F0: open-data tackle inputs per hour [depth, current m/s, wind, gust, cross wind, sun alt, lampP, turbidity, sstDev]. */
+  /** F0: open-data tackle inputs per hour [depth, current m/s, wind, gust, cross wind, sun alt, lampP, turbidity, sstDev, wave m]. */
   tk?: (number | null)[][];
   /** [ts, total, raw, p10, p90, gated, warnings, wNight, lampP, values[], reasons[]] */
   h: [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]][];
@@ -258,11 +265,11 @@ export function packV2(hours: V2Hour[], meta: Omit<PackedV2['meta'], 'comps' | '
   };
 }
 
-export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | undefined, now: Date, field?: FieldRecord, draws = DRAWS, ocean?: Ocean) {
+export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | undefined, now: Date, field?: FieldRecord, draws = DRAWS, ocean?: Ocean, species: Species = 'istavrit') {
   const spot = spotV2(row, field);
   const points = applyOcean(mergeSnapshots(wx?.snap, sea?.snap), ocean);
   const startHour = Math.floor(now.getTime() / HOUR);
-  const hours = scoreSeriesV2({ spot, points, from: now, hours: HOURS_V2, profile: SAFETY, draws });
+  const hours = species === 'levrek' ? scoreSeriesLevrek({ spot, points, from: now, hours: HOURS_V2, draws }) : scoreSeriesV2({ spot, points, from: now, hours: HOURS_V2, profile: SAFETY, draws });
   const index = indexSeries(points);
   const weather = hours.map((_, i) => weatherAt(index, new Date((startHour + i) * HOUR), row.lat, row.lon));
   const seaGrid =
@@ -287,13 +294,14 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
   packed.tk = hours.map((h, i) => {
     const w = weather[i]!;
     const r = (x: number | null, k = 10) => (x === null ? null : Math.round(x * k) / k);
-    return [depthPub, r(w.currentMs, 100), r(w.windKmh), r(w.gustKmh), crossWind(w.windKmh, w.windDir, row.shore_normal_deg), Math.round(w.sunAlt), packed.h[i]![8] as number | null, turbIdx >= 0 ? r(h.components[turbIdx]!.value, 100) : null, r(w.sstDev)];
+    return [depthPub, r(w.currentMs, 100), r(w.windKmh), r(w.gustKmh), crossWind(w.windKmh, w.windDir, row.shore_normal_deg), Math.round(w.sunAlt), packed.h[i]![8] as number | null, turbIdx >= 0 ? r(h.components[turbIdx]!.value, 100) : null, r(w.sstDev), r(w.waveM)];
   });
   return { startHour, hours, packed, spot, weather };
 }
 
 export interface ScoreRecordV2 {
   spot_id: string;
+  species: Species;
   model_version: string;
   computed_at: string;
   start_hour: number;
@@ -351,10 +359,12 @@ export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hou
 }
 
 /** Main reason per spot for every hour (term ablation across spots, explain.ts). */
-export function reasonsFor(res: { hours: V2Hour[]; spot: SpotV2; weather: Weather[] }[]): (ReasonEntry | null)[][] {
+export function reasonsFor(res: { hours: V2Hour[]; spot: SpotV2; weather: Weather[] }[], species: Species = 'istavrit'): (ReasonEntry | null)[][] {
   const out: (ReasonEntry | null)[][] = res.map(() => []);
   for (let i = 0; i < HOURS_V2; i++) {
-    const r = explain(res.map((x) => x.spot), res.map((x) => x.weather[i]!), DEFAULTS);
+    const spots = res.map((x) => x.spot);
+    const w = res.map((x) => x.weather[i]!);
+    const r = species === 'levrek' ? explainLevrek(spots, w) : explain(spots, w, DEFAULTS);
     r.forEach((e, k) => out[k]!.push(e && res[k]!.hours[i]!.total !== null ? [e.key, e.delta, reasonText(e.key, e.delta, res[k]!.spot, res[k]!.hours[i]!, res[k]!.weather[i]!)] : null));
   }
   return out;
@@ -368,22 +378,24 @@ export function scoreRecordsV2(
   fields: Map<string, FieldRecord>,
   draws = DRAWS,
   oceans: Map<string, Ocean> = new Map(),
+  species: Species = 'istavrit',
 ): ScoreRecordV2[] {
-  const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fields.get(r.id), draws, oceans.get(r.id)));
+  const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fields.get(r.id), draws, oceans.get(r.id), species));
   const rankAt = Array.from({ length: HOURS_V2 }, (_, i) => ranks(res.map((x) => x.hours[i]!.total)));
-  const reasons = reasonsFor(res);
+  const reasons = reasonsFor(res, species);
   return rows.map((r, k) => {
     const list = res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null, reasons[k]![i]!]);
     const h0 = res[k]!.hours[0]!;
     return {
       spot_id: r.id,
-      model_version: MODEL_VERSION,
+      species,
+      model_version: modelVersion(species),
       computed_at: now.toISOString(),
       start_hour: res[k]!.startHour,
       list_json: JSON.stringify(list),
       detail_json: JSON.stringify(res[k]!.packed),
       history_json: JSON.stringify({
-        model_version: MODEL_VERSION,
+        model_version: modelVersion(species),
         total: h0.total,
         p10: h0.p10,
         p90: h0.p90,
@@ -411,8 +423,9 @@ export function rescoreSpot(
   prev: { start_hour: number; list: ListEntryV2[] } | null,
   others: { start_hour: number; list: ListEntryV2[] }[],
   ocean?: Ocean,
+  species: Species = 'istavrit',
 ): ScoreRecordV2 {
-  const r = computeSpotV2(row, wx, sea, now, field, 0, ocean);
+  const r = computeSpotV2(row, wx, sea, now, field, 0, ocean, species);
   const list = r.hours.map((h, i): ListEntryV2 => {
     const hour = r.startHour + i;
     const old = prev?.list[hour - prev.start_hour];
@@ -421,7 +434,8 @@ export function rescoreSpot(
   });
   return {
     spot_id: row.id,
-    model_version: MODEL_VERSION,
+    species,
+    model_version: modelVersion(species),
     computed_at: now.toISOString(),
     start_hour: r.startHour,
     list_json: JSON.stringify(list),
@@ -429,8 +443,9 @@ export function rescoreSpot(
   };
 }
 
-export const UPSERT_V2_SQL = `INSERT INTO spot_scores_v2 (spot_id, model_version, computed_at, start_hour, list_json, detail_json, partial) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
-ON CONFLICT(spot_id) DO UPDATE SET model_version = excluded.model_version, computed_at = excluded.computed_at, start_hour = excluded.start_hour,
+/** ?1 spot, ?2 model version, ?3 computed at, ?4 start hour, ?5 list, ?6 detail, ?7 partial, ?8 species. */
+export const UPSERT_V2_SQL = `INSERT INTO spot_scores_v2 (spot_id, model_version, computed_at, start_hour, list_json, detail_json, partial, species) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, COALESCE(?8, 'istavrit'))
+ON CONFLICT(spot_id, species) DO UPDATE SET model_version = excluded.model_version, computed_at = excluded.computed_at, start_hour = excluded.start_hour,
 list_json = excluded.list_json, detail_json = excluded.detail_json, partial = excluded.partial`;
 
 export const DELETE_STALE_V2_SQL = `DELETE FROM spot_scores_v2 WHERE spot_id NOT IN (SELECT id FROM spots WHERE ${ACTIVE})`;
@@ -443,8 +458,9 @@ export function oceanMap(series: { spot_id: string; fetched_at: string; json: st
   return out;
 }
 
-export const UPSERT_HISTORY_SQL = `INSERT INTO spot_scores_v2_history (spot_id, hour, json) VALUES (?1, ?2, ?3)
-ON CONFLICT(spot_id, hour) DO UPDATE SET json = excluded.json`;
+/** ?1 spot, ?2 hour, ?3 json, ?4 species. */
+export const UPSERT_HISTORY_SQL = `INSERT INTO spot_scores_v2_history (spot_id, hour, json, species) VALUES (?1, ?2, ?3, COALESCE(?4, 'istavrit'))
+ON CONFLICT(spot_id, species, hour) DO UPDATE SET json = excluded.json`;
 
 /** Hourly observations row (observations table: the value valid at each fetch hour, since F1). */
 export interface ObservationRow {

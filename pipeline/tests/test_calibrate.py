@@ -77,3 +77,13 @@ def test_cli_fake(capsys):
     assert cal.main(["--fake", "40"]) == 0
     out = json.loads(capsys.readouterr().out)
     assert out["n"] == 40 and out["status"] == "tamam"
+
+
+def test_h3_species_frozen_model_and_report_keys():
+    model = {"hours": [{"total": 60}], "species": {"levrek": {"hours": [{"total": 40, "inputs": {"cloud": 80}}]}}}
+    row = {"active_min": 60, "rods": 1, "count": 2, "model_json": json.dumps(model)}
+    assert cal.session_from_row(row).score == 60
+    lv = cal.session_from_row(row, "levrek")
+    assert lv.score == 40 and lv.cloud == 0.8
+    assert cal.session_from_row({"active_min": 60, "model_json": json.dumps({"hours": [{"total": 50}]})}, "levrek") is None
+    assert cal.report_key("istavrit") == "calibration_report" and cal.report_key("levrek") == "calibration_report:levrek"

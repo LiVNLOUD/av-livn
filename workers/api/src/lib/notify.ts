@@ -14,9 +14,13 @@ export interface NotifySettings {
   quiet: [number, number];
   favourites: string[];
   channels: Channel;
+  /** H3: species to notify about (daily summary and opportunities). */
+  species: string[];
 }
 
-export const DEFAULT_SETTINGS: NotifySettings = { daily: true, opportunity: true, safety: true, threshold: 80, quiet: [23, 7], favourites: [], channels: 'push' };
+export const DEFAULT_SETTINGS: NotifySettings = { daily: true, opportunity: true, safety: true, threshold: 80, quiet: [23, 7], favourites: [], channels: 'push', species: ['istavrit'] };
+export const NOTIFY_SPECIES = ['istavrit', 'levrek'];
+const SPECIES_TR: Record<string, string> = { istavrit: 'İstavrit', levrek: 'Levrek' };
 export const DAILY_LOCAL_HOUR = 17;
 export const NARROW_BAND = 30; // same width at which the list leads with rank instead of score
 const TZ = 3; // Europe/Istanbul, UTC+3 all year
@@ -40,7 +44,8 @@ export function validateSettings(b: Record<string, unknown>): { ok: true; value:
   if (!Array.isArray(v.quiet) || v.quiet.length !== 2 || !v.quiet.every(hourOk)) return { ok: false, error: 'invalid_quiet' };
   if (!Array.isArray(v.favourites) || v.favourites.length > 50 || !v.favourites.every((f) => typeof f === 'string' && f.length <= 80)) return { ok: false, error: 'invalid_favourites' };
   if (!['push', 'ntfy', 'both'].includes(v.channels)) return { ok: false, error: 'invalid_channels' };
-  return { ok: true, value: { daily: v.daily, opportunity: v.opportunity, safety: v.safety, threshold: v.threshold, quiet: [v.quiet[0], v.quiet[1]], favourites: v.favourites, channels: v.channels } };
+  if (!Array.isArray(v.species) || !v.species.every((x) => NOTIFY_SPECIES.includes(x))) return { ok: false, error: 'invalid_species' };
+  return { ok: true, value: { daily: v.daily, opportunity: v.opportunity, safety: v.safety, threshold: v.threshold, quiet: [v.quiet[0], v.quiet[1]], favourites: v.favourites, channels: v.channels, species: [...new Set(v.species)] } };
 }
 
 export const localHour = (h: number) => (((h + TZ) % 24) + 24) % 24;
@@ -81,13 +86,15 @@ function when(h: number): string {
 }
 const until = (h: number) => `${String(localHour(h)).padStart(2, '0')}:00`;
 const range = (w: Window) => `${when(w.start)}–${until(w.end)}`;
-const url = (id: string, h: number) => `${SITE}/mera/?id=${encodeURIComponent(id)}&t=${new Date(h * 3_600_000).toISOString()}`;
+const url = (id: string, h: number, sp = 'istavrit') => `${SITE}/mera/?id=${encodeURIComponent(id)}&t=${new Date(h * 3_600_000).toISOString()}${sp === 'istavrit' ? '' : `&tur=${sp}`}`;
 const n0 = (x: number) => Math.round(x);
 
 export interface DecideInput {
   nowHour: number;
   settings: NotifySettings;
   spots: SpotHours[];
+  /** H3: scores per species; istavrit falls back to `spots`. */
+  bySpecies?: Record<string, SpotHours[]>;
   sent: SentRow[];
   /** meta.notify_test_at and the last one handled. */
   testAt?: string | null;
@@ -104,27 +111,33 @@ export function decide(i: DecideInput): Message[] {
   if (i.testOnly || inQuiet(now, s.quiet)) return out;
   const sentKeys = new Set(i.sent.map((r) => r.key));
 
-  if (s.daily && localHour(now) === DAILY_LOCAL_HOUR && !sentKeys.has(`daily:${localDate(now)}`)) {
-    const { windows } = bestWindows(i.spots, now, 24, { n: 3, perSpot: 1 });
-    out.push({
-      key: `daily:${localDate(now)}`, kind: 'daily', title: 'Önümüzdeki 24 saatin en iyileri',
-      body: windows.length ? windows.map((w) => `${range(w)} ${w.name} · ${n0(w.total)} (${w.rank}.)`).join('\n') : '24 saatte öne çıkan pencere yok.',
-      url: windows[0] ? url(windows[0].spot_id, windows[0].peak) : `${SITE}/`, ttl: 6 * 3600,
-    });
-  }
-
-  if (s.opportunity) {
-    const { windows } = bestWindows(i.spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1 });
-    for (const w of windows) {
-      if (w.p10 === null || w.p90 === null || w.p90 - w.p10 > NARROW_BAND) continue;
-      // Never the same window twice: an earlier alert for this spot overlapping this window counts as sent.
-      const dup = i.sent.some((r) => r.kind === 'opp' && r.spot_id === w.spot_id && r.start_hour !== null && r.end_hour !== null && r.start_hour < w.end && w.start < r.end_hour);
-      if (dup) continue;
+  // H3: daily summary and opportunities for each chosen species (istavrit keeps its original message keys)
+  for (const sp of s.species.length ? s.species : ['istavrit']) {
+    const spots = i.bySpecies?.[sp] ?? (sp === 'istavrit' ? i.spots : []);
+    if (!spots.length && sp !== 'istavrit') continue;
+    const tag = sp === 'istavrit' ? '' : `${sp}:`;
+    const label = sp === 'istavrit' ? '' : ` (${SPECIES_TR[sp] ?? sp})`;
+    if (s.daily && localHour(now) === DAILY_LOCAL_HOUR && !sentKeys.has(`daily:${tag}${localDate(now)}`)) {
+      const { windows } = bestWindows(spots, now, 24, { n: 3, perSpot: 1 });
       out.push({
-        key: `opp:${w.spot_id}:${w.start}`, kind: 'opp', title: `Fırsat: ${w.name}`,
-        body: `${range(w)}, en yüksek ${n0(w.total)} (${w.rank}. sıra, bant ${n0(w.p10)}–${n0(w.p90)}).${w.reason ? ' ' + w.reason : ''}`,
-        url: url(w.spot_id, w.peak), spot_id: w.spot_id, start_hour: w.start, end_hour: w.end, ttl: Math.max(600, (w.end - now) * 3600),
+        key: `daily:${tag}${localDate(now)}`, kind: 'daily', title: `Önümüzdeki 24 saatin en iyileri${label}`,
+        body: windows.length ? windows.map((w) => `${range(w)} ${w.name} · ${n0(w.total)} (${w.rank}.)`).join('\n') : '24 saatte öne çıkan pencere yok.',
+        url: windows[0] ? url(windows[0].spot_id, windows[0].peak, sp) : `${SITE}/`, ttl: 6 * 3600,
       });
+    }
+    if (s.opportunity) {
+      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1 });
+      for (const w of windows) {
+        if (w.p10 === null || w.p90 === null || w.p90 - w.p10 > NARROW_BAND) continue;
+        // Never the same window twice: an earlier alert for this spot (same species) overlapping this window counts as sent.
+        const dup = i.sent.some((r) => r.kind === 'opp' && r.key.startsWith(`opp:${tag}`) && r.spot_id === w.spot_id && r.start_hour !== null && r.end_hour !== null && r.start_hour < w.end && w.start < r.end_hour);
+        if (dup) continue;
+        out.push({
+          key: `opp:${tag}${w.spot_id}:${w.start}`, kind: 'opp', title: `Fırsat${label}: ${w.name}`,
+          body: `${range(w)}, en yüksek ${n0(w.total)} (${w.rank}. sıra, bant ${n0(w.p10)}–${n0(w.p90)}).${w.reason ? ' ' + w.reason : ''}`,
+          url: url(w.spot_id, w.peak, sp), spot_id: w.spot_id, start_hour: w.start, end_hour: w.end, ttl: Math.max(600, (w.end - now) * 3600),
+        });
+      }
     }
   }
 

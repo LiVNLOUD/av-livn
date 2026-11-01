@@ -2,11 +2,15 @@
 // F3: public model page in plain Turkish. The parameter table is generated at build time from PARAMS, so it
 // cannot drift from the engine; the worked example is computed in the browser from the live API.
 import Base from '../../layouts/Base.astro';
-import { PARAMS, SIGMA, LEGAL_MIN_ISTAVRIT_CM, type Evidence } from '@av-livn/scoring';
+import { PARAMS, SIGMA, LEGAL_MIN_ISTAVRIT_CM, LEVREK_PARAMS, LEGAL_MIN_LEVREK_CM, type Evidence } from '@av-livn/scoring';
 
 const RESEARCH = 'https://github.com/LiVNLOUD/av-livn/blob/main/docs/RESEARCH.md';
 const MODEL = 'https://github.com/LiVNLOUD/av-livn/blob/main/docs/MODEL.md';
 const ROWS = Object.entries(PARAMS) as [string, { value: number; unit: string; evidence: Evidence; ref: string }][];
+const LROWS = Object.entries(LEVREK_PARAMS) as [string, { value: number; unit: string; evidence: Evidence; ref: string }][];
+const LCOUNT = { A: 0, B: 0, C: 0 } as Record<Evidence, number>;
+for (const [, p] of LROWS) LCOUNT[p.evidence]++;
+const LEVREK_DOCS = 'https://github.com/LiVNLOUD/av-livn/blob/main/docs/species/levrek';
 const COUNT = { A: 0, B: 0, C: 0 } as Record<Evidence, number>;
 for (const [, p] of ROWS) COUNT[p.evidence]++;
 
@@ -29,6 +33,7 @@ const DESC: Record<string, string> = {
   struct_harbour: 'Yapı tercihi: liman içi',
   struct_beach: 'Yapı tercihi: kumsal',
   struct_river: 'Yapı tercihi: dere ağzı',
+  struct_promenade: 'Yapı tercihi: kordon (taş tahkimat)',
   struct_len_km: 'Yapı uzunluğunun yarı etki noktası',
   len_sat_m: 'Yapı uzunluğunun doyduğu nokta (sonrası çok yavaş artış)',
   depth_mid: 'Gündüz için yeterli derinliğin orta noktası',
@@ -92,6 +97,7 @@ const anchor = (ref: string) => {
       <a href="#biliyoruz">Ne biliyoruz, ne bilmiyoruz</a>
       <a href="#ogrenme">Model nasıl öğrenecek?</a>
       <a href="#parametreler">Tüm parametreler</a>
+      <a href="#levrek">Levrek modeli (deneysel)</a>
     </nav>
 
     <section id="nasil">
@@ -205,6 +211,45 @@ const anchor = (ref: string) => {
       <p>Bir parametre veriyle değişirse kanıt düzeyi C'den yukarı çıkar ve bu sayfadaki tablo kendiliğinden güncellenir.</p>
     </section>
 
+    <section id="levrek">
+      <h2>Levrek modeli (deneysel)</h2>
+      <p>Levrek aynı iskeleti kullanır: yer (yapı ve taban) × saatin koşulları, ağırlıklı geometrik ortalama, 8–92 ölçeği ve %10–90 bant. Farkları:</p>
+      <ul>
+        <li><b>Bulanıklık iyi gelir:</b> orta bulanıklık en iyisi. Fırtına dalgası yatışırken (son 48 saatin en yüksek dalgası ≥ 1 m ve şimdiki onun %70'inin altında) ×1,25.</li>
+        <li><b>Dalga:</b> sörf hattında ~0,6 m en iyi. Dalga ≥ 1,2 m ya da hamle ≥ 40 km/sa güvenlik kapısı (puan en çok 30).</li>
+        <li><b>Mevsim:</b> tepe Ocak ortası (kış üremesi, kaynak L22, B); sonbahar beslenme tepesi.</li>
+        <li><b>Dere ağzı:</b> son 72 saatin yağışı puanı artırır (L13, yön B).</li>
+        <li><b>Işık:</b> gece ve alacakaranlık öğleden iyi. Mevcut iskele aydınlatmasının etkisi <b>orta</b>: ışık–gölge sınırında yem balığı avlar, ama istavritteki kadar belirleyici değil (C). Işıkla balık toplamak yasak (md. 8/8).</li>
+        <li><b>Su:</b> 48 saatte ani soğuma ve 9 °C altı puanı düşürür.</li>
+        <li><b>Yasal asgari boy {LEGAL_MIN_LEVREK_CM} cm.</b></li>
+      </ul>
+      <p><b>Yön testleri (gerçek motorla, her derlemede):</b></p>
+      <ol>
+        <li>fırtına ertesi bulanık su &gt; berrak sakin su;</li>
+        <li>alacakaranlık ve gece &gt; öğle;</li>
+        <li>yağış sonrası dere ağzı &gt; açık kumsal;</li>
+        <li>kış ani soğuması düşürür;</li>
+        <li>fırtınada maruz mera kapıda;</li>
+        <li>aydınlatmalı iskele &gt; aydınlatmasız iskele, fark istavrittekinden küçük.</li>
+      </ol>
+      <p><b>Kanıt:</b> {LROWS.length} parametreden A {LCOUNT.A}, B {LCOUNT.B}, C {LCOUNT.C}. Marmara'ya özgü levrek saha çalışması bulunamadı. Model büyük ölçüde varsayım; av günlüğündeki levrek seanslarıyla ayrı kalibre edilecek. Kaynaklar: <a href={`${LEVREK_DOCS}/RESEARCH.md`}>levrek RESEARCH.md</a> (22 kaynak), denklemler: <a href={`${LEVREK_DOCS}/MODEL.md`}>levrek MODEL.md</a>.</p>
+      <div class="scroll">
+        <table class="t params">
+          <thead><tr><th>Parametre</th><th>Değer</th><th>Kanıt</th><th>Kaynak</th></tr></thead>
+          <tbody>
+            {LROWS.map(([k, p]) => (
+              <tr id={`l-${k}`}>
+                <td><code>{k}</code></td>
+                <td class="num">{p.value.toLocaleString('tr-TR')} {p.unit === '-' ? '' : p.unit}</td>
+                <td><a class={`tag ev ev-${p.evidence}`} href={`#kanit-${p.evidence}`}>{p.evidence}</a></td>
+                <td>{p.ref || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <section id="parametreler">
       <h2>Tüm parametreler</h2>
       <p class="muted">Kaynak numaraları (R1…) <a href={RESEARCH}>RESEARCH.md</a>'de; formüller <a href={MODEL}>MODEL.md</a>'de.</p>
@@ -315,4 +360,5 @@ const anchor = (ref: string) => {
     $('ex').hidden = false;
   }
   example();
+  if (new URLSearchParams(location.search).get('tur') === 'levrek' && !location.hash) document.getElementById('levrek')?.scrollIntoView();
 </script>

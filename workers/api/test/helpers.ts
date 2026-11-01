@@ -91,10 +91,13 @@ export async function writeScoresV2(now = new Date(), draws = 20): Promise<numbe
   const snaps = await loadSnapshots(env.DB, rows.flatMap((r) => (r.sea_cell ? [r.wx_cell, r.sea_cell] : [r.wx_cell])));
   const obs = (await env.DB.prepare('SELECT * FROM field_obs').all()).results as never[];
   const depths = (await env.DB.prepare('SELECT * FROM field_depth').all()).results as never[];
-  const recs = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), draws);
+  const recs = [
+    ...scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), draws),
+    ...scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), draws, new Map(), 'levrek'),
+  ];
   await env.DB.batch([
-    ...recs.map((r) => env.DB.prepare(UPSERT_V2_SQL).bind(r.spot_id, r.model_version, r.computed_at, r.start_hour, r.list_json, r.detail_json, 0)),
+    ...recs.map((r) => env.DB.prepare(UPSERT_V2_SQL).bind(r.spot_id, r.model_version, r.computed_at, r.start_hour, r.list_json, r.detail_json, 0, r.species)),
     env.DB.prepare(DELETE_STALE_V2_SQL),
   ]);
-  return recs.length;
+  return recs.length / 2;
 }

@@ -153,6 +153,7 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `struct_breakwater` | 0.85 | - | C | 0.5 | — |
 | `struct_len_km` | 0.15 | km | C | 0.5 | — |
 | `len_sat_m` | 300 | m | C | 0.5 | H2: etkin uzunluk 300 m'den sonra en çok +60 m (doymalı) |
+| `struct_promenade` | 0.7 | - | C | 0.5 | H6: kordon (taş tahkimat) |
 | `depth_mid` | 3.5 | m | C | 0.5 | R10 |
 | `depth_slope` | 1.2 | m | C | 0.5 | R10 |
 | `dtm_weight_interp` | 0.3 | - | C | 0.5 | DATA-AUDIT |
@@ -183,7 +184,7 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `w_struct` | 0.75 | - | C | 0.5 | — |
 | `w_substrate` | 0.25 | - | C | 0.5 | — |
 
-**Dağılım:** 46 parametre; A 3, B 1, C 42 (D1: struct_harbour, struct_beach, struct_river; H2: len_sat_m eklendi). Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
+**Dağılım:** 47 parametre; A 3, B 1, C 43 (D1: struct_harbour, struct_beach, struct_river; H2: len_sat_m; H6: struct_promenade eklendi). Model ağırlıkla C düzeyinde. Bu yüzden kalibrasyon planı (§8) zorunlu.
 
 **F2 (2026-10):** üç yeni kaynak (R20 hal fiyat–miktar, R21 Hoyle vd. 2024, R22 İBB hal girişleri) parametre değerlerini değiştirmedi. Aylık kıyı serisi yok; hal serisi ticari ve ters mevsimli. R20/R22 bolluk sinyaline (puan dışı), R21 kalibrasyon yöntemine (§8a) bağlandı. Dağılım o sırada: A 3, B 1, C 41 (H2 ile 46 parametre: C 42). Herkese açık özet: [av.livn.tr/model/](https://av.livn.tr/model/).
 
@@ -460,3 +461,21 @@ CREATE TABLE catch_log (id TEXT PRIMARY KEY, spot_id TEXT NOT NULL, start_at TEX
   ```
   Hem yapı terimi (`lenF`) hem derinlik önseli (`depthPrior`) `L_eff` kullanır.
 - Kanıt C: uzunluk derinliğin zayıf bir vekilidir; DTM ölçümü ve saha derinliği onun önündedir (§13).
+
+## 13. Derinlik verisi öncelik zinciri (H4)
+**saha ölçümü > akademik çok ışınlı (multibeam) batimetri > EMODnet ölçüm hücresi > GEBCO dolgusu / enterpolasyon > tip önseli (yapı uzunluğu)**
+
+- Gemlik Körfezi çok ışınlı verisi gelirse (talep taslağı `docs/outreach/gemlik-batimetri-talep.md`):
+  1. `pipeline/av_pipeline/bathy/` içinde ayrı bir ızgara (GeoTIFF/XYZ → 25–50 m) okunur.
+  2. Her meranın atış bandında (0–50, 50–150 m) örneklenir.
+  3. Yeni kaynak `akademik` olarak işaretlenir (ağırlık 0,95; DTM'nin önünde, sahanın arkasında).
+- Lisans ve paylaşmama taahhüdü gereği ham veri repoya ve haritaya **konmaz**; yalnız mera başına türetilmiş bant derinlikleri D1'e yazılır.
+- Haritada "ölçülmüş alan" çerçevesi bu veriyi göstermez.
+
+## 14. Kordon (taş tahkimat) tipi (H6)
+Kıyı çizgisine ≤ 25 m paralel tahkimat, deniz duvarı ya da kordon/sahil yolu kesimleri 300–500 m parçalara bölünür.
+
+| Tür | Yapı terimi | Gerekçe (kanıt C) |
+|---|---|---|
+| İstavrit | 0,70 | Taş arası yem/küçük balık barınağı. Çoğunlukla aydınlatmalı: lamba olasılığı OSM sokak lambası yoğunluğundan, 0,2–0,85. Sığ eğim: derinlik önseli 2 m |
+| Levrek | 0,65 | Taş arası yengeç/karides. Gece ışık–gölge sınırında yem balığı. Sığ eğim kumsaldan iyi, kayalıktan zayıf |

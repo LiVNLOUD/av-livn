@@ -2,7 +2,7 @@
 import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
 import { ACTIVE_COUNT_SQL, publicSpotDetail, type SpotRow } from '../lib/spots';
-import { fieldRecords, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
+import { fieldRecords, isSpecies, SPECIES, type FieldDepthRow, type FieldObsRow, type ListEntryV2, type Species } from '../precompute_v2';
 import { FETCHED_SQL, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
 import { parseProfiles } from '../lib/tackle';
 
@@ -15,10 +15,16 @@ const NO_CACHE = { 'cache-control': 'no-cache' };
 
 // Public API = scores, ranks, bands and general spot info only (docs/PRIVACY.md). Field notes, photos, measured
 // values and the catch log are served by /api/admin/* (ADMIN_TOKEN). v1 scores are no longer served publicly.
-publicRoutes.get('/spots', (c) => (c.req.query('species') && c.req.query('species') !== 'istavrit' ? c.json({ ok: false, error: 'species_not_ready' }, 400) : listV2(c)));
-publicRoutes.get('/spots/:id', (c) => detailV2(c));
-publicRoutes.get('/windows', (c) => windowsV2(c));
-publicRoutes.get('/hours', (c) => hoursV2(c));
+// H3: ?species=istavrit|levrek (default istavrit); anything else → species_not_ready.
+const sp = (c: Ctx): Species | null => {
+  const q = c.req.query('species') ?? 'istavrit';
+  return isSpecies(q) ? q : null;
+};
+const notReady = (c: Ctx) => c.json({ ok: false, error: 'species_not_ready', species: SPECIES }, 400);
+publicRoutes.get('/spots', (c) => (sp(c) ? listV2(c, sp(c)!) : notReady(c)));
+publicRoutes.get('/spots/:id', (c) => (sp(c) ? detailV2(c, sp(c)!) : notReady(c)));
+publicRoutes.get('/windows', (c) => (sp(c) ? windowsV2(c, sp(c)!) : notReady(c)));
+publicRoutes.get('/hours', (c) => (sp(c) ? hoursV2(c, sp(c)!) : notReady(c)));
 /** F1: owner-drawn forbidden areas as GeoJSON (names and shapes are public map info). */
 publicRoutes.get('/forbidden', async (c) => {
   const r = await c.env.DB.prepare('SELECT id, name, geojson FROM forbidden_area ORDER BY created_at').all<{ id: string; name: string; geojson: string }>();
@@ -43,49 +49,49 @@ function hourOf(c: Ctx): number {
 }
 
 /** Precomputed body (score job, lib/views.ts) for the default request at this hour; null → build live. */
-async function pre(c: Ctx, kind: 'list' | 'hours' | 'windows', hour: number): Promise<Response | null> {
-  const r = await c.env.DB.prepare('SELECT value FROM meta WHERE key = ?1').bind(preKey(kind, hour)).first<{ value: string }>();
+async function pre(c: Ctx, kind: 'list' | 'hours' | 'windows', hour: number, species: Species): Promise<Response | null> {
+  const r = await c.env.DB.prepare('SELECT value FROM meta WHERE key = ?1').bind(preKey(kind, hour, species)).first<{ value: string }>();
   return r ? c.body(r.value, 200, { 'content-type': 'application/json; charset=UTF-8', ...NO_CACHE, 'x-av-pre': '1' }) : null;
 }
 
 /** v2 list: expected score, 10–90 % band and rank (among scored spots) at the current or requested hour. */
-async function listV2(c: Ctx) {
+async function listV2(c: Ctx, species: Species) {
   const nowHour = hourOf(c);
   if (nowHour === Math.floor(Date.now() / HOUR)) {
-    const p = await pre(c, 'list', nowHour);
+    const p = await pre(c, 'list', nowHour, species);
     if (p) return p;
   }
-  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(LIST_SQL), c.env.DB.prepare(FETCHED_SQL)]);
-  return c.json(listBody(rows!.results as ListRow[], fetchedAt(fetched!.results), nowHour), 200, NO_CACHE);
+  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(LIST_SQL).bind(species), c.env.DB.prepare(FETCHED_SQL)]);
+  return c.json(listBody(rows!.results as ListRow[], fetchedAt(fetched!.results), nowHour, species), 200, NO_CACHE);
 }
 
 /** Spot × hour grid for the heat map (E2). */
-async function hoursV2(c: Ctx) {
+async function hoursV2(c: Ctx, species: Species) {
   const from = Math.floor(Date.now() / HOUR);
-  const p = await pre(c, 'hours', from);
+  const p = await pre(c, 'hours', from, species);
   if (p) return p;
-  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(HOURS_SQL), c.env.DB.prepare(FETCHED_SQL)]);
-  return c.json(hoursBody(rows!.results as HoursRow[], fetchedAt(fetched!.results), from), 200, NO_CACHE);
+  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(HOURS_SQL).bind(species), c.env.DB.prepare(FETCHED_SQL)]);
+  return c.json(hoursBody(rows!.results as HoursRow[], fetchedAt(fetched!.results), from, species), 200, NO_CACHE);
 }
 
 /** Best windows of the next 72 h (D2). */
-async function windowsV2(c: Ctx) {
+async function windowsV2(c: Ctx, species: Species) {
   const from = Math.floor(Date.now() / HOUR);
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
   if (hours === 72) {
-    const p = await pre(c, 'windows', from);
+    const p = await pre(c, 'windows', from, species);
     if (p) return p;
   }
-  const rows = await c.env.DB.prepare(WINDOWS_SQL).all<WindowsRow>();
-  return c.json(windowsBody(rows.results, from, hours), 200, NO_CACHE);
+  const rows = await c.env.DB.prepare(WINDOWS_SQL).bind(species).all<WindowsRow>();
+  return c.json(windowsBody(rows.results, from, hours, species), 200, NO_CACHE);
 }
 
 /** v2 detail: spot, field summary and the packed v2 hours (spliced raw, as for v1). */
-async function detailV2(c: Ctx) {
+async function detailV2(c: Ctx, species: Species) {
   const id = c.req.param('id')!;
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
   const [spotRes, obsRes, depthRes, countRes] = await c.env.DB.batch([
-    c.env.DB.prepare("SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id WHERE s.id = ?1 AND s.status != 'proposed'").bind(id),
+    c.env.DB.prepare("SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?2 WHERE s.id = ?1 AND s.status != 'proposed'").bind(id, species),
     c.env.DB.prepare('SELECT * FROM field_obs WHERE spot_id = ?1 ORDER BY observed_at').bind(id),
     c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
     c.env.DB.prepare(ACTIVE_COUNT_SQL),
@@ -100,6 +106,7 @@ async function detailV2(c: Ctx) {
   const reasons = entries.map((e) => e[6]?.[2] ?? null);
   const head = JSON.stringify({
     ok: true,
+    species,
     spot: publicSpotDetail(r),
     // Which kinds of field knowledge exist, never their values (badges on the card).
     field: rec && {

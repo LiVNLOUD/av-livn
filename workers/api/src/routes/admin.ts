@@ -6,7 +6,7 @@ import { validateProfiles } from '../lib/tackle';
 import { forbiddenUpdates, parseArea, validateArea, type SpotPos } from '../lib/forbidden';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
-import { fieldRecords, oceanMap, rescoreSpot, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
+import { fieldRecords, oceanMap, rescoreSpot, SPECIES, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 import { CLEAR_PRE_SQL } from '../lib/views';
 
@@ -108,14 +108,18 @@ adminRoutes.put('/tackle', async (c) => {
 
 /** F4: calibration status: session count now and the last report of analysis/calibrate.py (coefficients, n). */
 adminRoutes.get('/calibration', async (c) => {
-  const [n, rep] = await Promise.all([
+  const [n, reps] = await Promise.all([
     c.env.DB.prepare('SELECT COUNT(*) AS n FROM catch_session').first<{ n: number }>(),
-    c.env.DB.prepare("SELECT value FROM meta WHERE key = 'calibration_report'").first<{ value: string }>(),
+    c.env.DB.prepare("SELECT key, value FROM meta WHERE key = 'calibration_report' OR key LIKE 'calibration_report:%'").all<{ key: string; value: string }>(),
   ]);
   const sessions = n?.n ?? 0;
-  let report: unknown = null;
-  try { report = rep ? JSON.parse(rep.value) : null; } catch { report = null; }
-  return c.json({ ok: true, sessions, min_sessions: 30, next_threshold: [30, 100, 300].find((t) => sessions < t) ?? null, report });
+  const parse = (key: string) => {
+    const r = reps.results.find((x) => x.key === key);
+    try { return r ? JSON.parse(r.value) : null; } catch { return null; }
+  };
+  // H3: one report per species (istavrit keeps the original key)
+  const bySpecies = Object.fromEntries(SPECIES.map((sp) => [sp, parse(sp === 'istavrit' ? 'calibration_report' : `calibration_report:${sp}`)]));
+  return c.json({ ok: true, sessions, min_sessions: 30, next_threshold: [30, 100, 300].find((t) => sessions < t) ?? null, report: bySpecies.istavrit, reports: bySpecies });
 });
 
 /** All spots with private fields (lamp state, notes) for /admin/ and /saha/. */
@@ -301,30 +305,26 @@ async function pointRescore(db: D1Database, id: string, now: Date): Promise<List
     db.prepare('SELECT * FROM spots WHERE id = ?1').bind(id),
     db.prepare('SELECT * FROM field_obs WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
-    db.prepare(`SELECT v.spot_id, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.${ACTIVE}`),
+    db.prepare(`SELECT v.spot_id, v.species, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.${ACTIVE}`),
     db.prepare('SELECT * FROM ocean_series WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT * FROM ocean_normal WHERE spot_id = ?1').bind(id),
   ]);
   const row = spotRes!.results[0] as SpotRow | undefined;
   if (!row) return null;
   const snaps = await loadSnapshots(db, row.sea_cell ? [row.wx_cell, row.sea_cell] : [row.wx_cell]);
-  const stored = (scoreRes!.results as { spot_id: string; start_hour: number; list_json: string }[]).map((r) => ({
-    id: r.spot_id,
-    start_hour: r.start_hour,
-    list: JSON.parse(r.list_json) as ListEntryV2[],
-  }));
-  const rec = rescoreSpot(
-    row,
-    snaps.get(row.wx_cell),
-    row.sea_cell ? snaps.get(row.sea_cell) : undefined,
-    now,
-    fieldRecords(obsRes!.results as FieldObsRow[], depthRes!.results as FieldDepthRow[]).get(id),
-    stored.find((s) => s.id === id) ?? null,
-    stored.filter((s) => s.id !== id),
-    oceanMap(oSeries!.results as never[], oNormal!.results as never[]).get(id),
-  );
-  await db.prepare(UPSERT_V2_SQL).bind(rec.spot_id, rec.model_version, rec.computed_at, rec.start_hour, rec.list_json, rec.detail_json, 1).run();
-  return (JSON.parse(rec.list_json) as ListEntryV2[])[0]!;
+  const field = fieldRecords(obsRes!.results as FieldObsRow[], depthRes!.results as FieldDepthRow[]).get(id);
+  const ocean = oceanMap(oSeries!.results as never[], oNormal!.results as never[]).get(id);
+  let first: ListEntryV2 | null = null;
+  // H3: a field edit changes the spot for every species
+  for (const species of SPECIES) {
+    const stored = (scoreRes!.results as { spot_id: string; species: string; start_hour: number; list_json: string }[])
+      .filter((r) => r.species === species)
+      .map((r) => ({ id: r.spot_id, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
+    const rec = rescoreSpot(row, snaps.get(row.wx_cell), row.sea_cell ? snaps.get(row.sea_cell) : undefined, now, field, stored.find((s) => s.id === id) ?? null, stored.filter((s) => s.id !== id), ocean, species);
+    await db.prepare(UPSERT_V2_SQL).bind(rec.spot_id, rec.model_version, rec.computed_at, rec.start_hour, rec.list_json, rec.detail_json, 1, species).run();
+    if (species === 'istavrit') first = (JSON.parse(rec.list_json) as ListEntryV2[])[0]!;
+  }
+  return first;
 }
 
 const scoreJson = (r: ListEntryV2 | 'deferred' | null) =>

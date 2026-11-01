@@ -105,3 +105,22 @@ describe('/api/admin/notify', () => {
     expect((await app.request('/api/admin/notify/settings', { method: 'PUT', headers: auth, body: 'x' }, env)).status).toBe(400);
   });
 });
+
+describe('H3: notifications per species', () => {
+  it('levrek daily summary and opportunities with their own keys and links; setting validated', () => {
+    const lev = [spot('L', Array(24).fill(90), H17, { band: 10 })];
+    const st = { ...DEFAULT_SETTINGS, species: ['istavrit', 'levrek'] };
+    const m = decide({ nowHour: H17, settings: st, spots: [], bySpecies: { levrek: lev }, sent: [] });
+    const daily = m.filter((x) => x.kind === 'daily');
+    expect(daily.map((x) => x.key)).toEqual(['daily:2026-11-02', 'daily:levrek:2026-11-02']);
+    expect(daily[1]!.title).toMatch(/\(Levrek\)$/);
+    expect(daily[1]!.url).toContain('&tur=levrek');
+    const opp = m.filter((x) => x.kind === 'opp');
+    expect(opp[0]!.key.startsWith('opp:levrek:L:')).toBe(true);
+    // istavrit only by default: no levrek message
+    expect(decide({ nowHour: H17, settings: DEFAULT_SETTINGS, spots: [], bySpecies: { levrek: lev }, sent: [] }).some((x) => x.key.includes('levrek'))).toBe(false);
+    expect(validateSettings({ species: ['levrek'] })).toMatchObject({ ok: true, value: { species: ['levrek'] } });
+    expect(validateSettings({ species: ['kalkan'] })).toEqual({ ok: false, error: 'invalid_species' });
+    expect(decide({ nowHour: H17, settings: { ...st, species: [] }, spots: [], sent: [] })[0]!.key).toBe('daily:2026-11-02');
+  });
+});

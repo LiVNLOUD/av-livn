@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { crossWind, DEFAULT_PROFILES, JIG_SIZES, lightCase, R19_CITE, tackle, tackleShort, unitIssues, type TackleInput } from '../src/tackle';
+import { crossWind, DEFAULT_PROFILES, JIG_SIZES, lightCase, R19_CITE, tackle, tackleLevrek, tackleLevrekShort, tackleShort, unitIssues, type TackleInput } from '../src/tackle';
 
 const base: TackleInput = { depthM: 4, currentMs: 0.05, windKmh: 8, gustKmh: 12, crossKmh: 4, sunAlt: -20, lampP: 0.9, turbidity: 1, sstDev: 0 };
 
@@ -158,5 +158,48 @@ describe('tackle (F0/G2)', () => {
     expect(crossWind(20, 90, 0)).toBe(20);
     expect(crossWind(20, 0, 0)).toBe(0);
     expect(crossWind(null, 0, 0)).toBeNull();
+  });
+});
+
+// H3: levrek tackle scenario table (docs/species/levrek/TACKLE.md "Örnek senaryolar")
+const lb: TackleInput = { depthM: 4, currentMs: 0.05, windKmh: 8, gustKmh: 12, crossKmh: 4, sunAlt: -20, lampP: 0.2, turbidity: 1, sstDev: 0, waveM: 0.3, kind: 'rocky' };
+export const LEVREK_SCENARIOS: { name: string; input: TackleInput; expect: [string, number, string, string] }[] = [
+  { name: 'Fırtına ertesi bulanık gece, kayalık', input: { ...lb, waveM: 0.8, turbidity: 0.6, windKmh: 20, gustKmh: 30 }, expect: ['spin', 14, 'silikon shad 10–12 cm', 'chartreuse / beyaz'] },
+  { name: 'Sakin berrak gece, lambalı iskele (3 m)', input: { ...lb, kind: 'pier', waveM: 0.15, lampP: 0.9, depthM: 3 }, expect: ['lrf', 3, 'LRF shad 5–7 cm', 'beyaz-gümüş (ışık–gölge sınırı)'] },
+  { name: 'Yağış sonrası alacakaranlık, dere ağzı', input: { ...lb, kind: 'river_mouth', sunAlt: -3, depthM: 1.5, turbidity: 0.7, waveM: 0.4 }, expect: ['spin', 10, 'silikon shad 10–12 cm', 'chartreuse / beyaz'] },
+  { name: 'Gündüz, derin mendirek (9 m), akıntı 0,3', input: { ...lb, kind: 'breakwater', sunAlt: 30, lampP: null, depthM: 9, currentMs: 0.3, waveM: 0.6 }, expect: ['spin', 28, 'metal jig 28 g', 'doğal, ince profil'] },
+  { name: 'Kış ani soğuma gecesi, kumsal', input: { ...lb, kind: 'beach', sstDev: -2.5, depthM: 1.5, waveM: 0.5 }, expect: ['spin', 14, 'minnow 7–9 cm', 'koyu siluet (siyah, mor)'] },
+  { name: 'Alacakaranlık, sığ berrak kayalık', input: { ...lb, sunAlt: -3, depthM: 2, waveM: 0.6 }, expect: ['spin', 14, 'minnow 9–12 cm', 'doğal gümüş (sardalya)'] },
+];
+
+describe('tackle levrek (H3)', () => {
+  it.each(LEVREK_SCENARIOS)('$name', ({ input, expect: e }) => {
+    const t = tackleLevrek(input);
+    expect([t.profile, t.weightG, `${t.lure} ${t.lureCm}`, t.color]).toEqual(e);
+  });
+  it('spin always 6–32 g, LRF ≤ 5 g; legal 25 cm; md. 8/8; units', () => {
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let k = 0; k < 1500; k++) {
+      const t = tackleLevrek({
+        depthM: rnd() * 15, currentMs: rnd() * 0.6, windKmh: rnd() * 40, gustKmh: rnd() * 60, crossKmh: rnd() * 30, sunAlt: rnd() * 100 - 50,
+        lampP: rnd(), turbidity: rnd(), sstDev: rnd() * 6 - 3, waveM: rnd() * 1.6, kind: ['rocky', 'pier', 'beach', 'river_mouth', 'harbour', 'breakwater'][k % 6],
+      });
+      if (t.profile === 'spin') expect(t.weightG >= 6 && t.weightG <= 32).toBe(true);
+      else expect(t.weightG).toBeLessThanOrEqual(5);
+      for (const r of t.rows) expect(unitIssues(`${r.value} ${r.why}`), r.key).toEqual([]);
+    }
+    const t = tackleLevrek(lb);
+    expect(t.rows.find((r) => r.key === 'yasal')).toMatchObject({ value: '25 cm', evidence: 'A' });
+    expect(t.notes.join(' ')).toMatch(/md\. 8\/8/);
+    expect(JSON.stringify(t.rows)).not.toMatch(/fener|lamba götür|ışık götür/i);
+    expect(tackleLevrekShort(tackleLevrek({ ...lb, kind: 'pier', waveM: 0.1, depthM: 2 }))).toMatch(/^LRF · /);
+    expect(tackleLevrek({ ...lb, gustKmh: 45 }).notes.join(' ')).toMatch(/Hamle 45 km\/sa/);
+    expect(tackleLevrek({ ...lb, sunAlt: 30, lampP: null, depthM: 4, waveM: 0.2 }).lure).toBe('silikon kum balığı');
+    expect(tackleLevrek({ ...lb, waveM: 1.4, turbidity: null, sstDev: null, currentMs: null, windKmh: null, gustKmh: null }).weightG).toBe(24);
+    expect(tackleLevrek(lb, [], 30).rows.at(-1)!.value).toBe('30 cm');
+    const { waveM: _w, kind: _k, ...bare } = lb;
+    expect(tackleLevrek(bare).profile).toBe('spin'); // no wave, no kind: spin, not sheltered
+    expect(tackleLevrekShort(tackleLevrek(lb))).toMatch(/^Spin · 10 g/);
   });
 });

@@ -49,12 +49,15 @@ def _mean(xs: list[float]) -> float | None:
     return sum(xs) / len(xs) if xs else None
 
 
-def session_from_row(row: dict) -> Session | None:
-    """D1 row {active_min, rods, count, model_json} → Session; None when the frozen model is missing."""
+def session_from_row(row: dict, species: str = "istavrit") -> Session | None:
+    """D1 row {active_min, rods, count, model_json} → Session; None when the frozen model is missing.
+    H3: istavrit's frozen hours are at the top level, other species under model_json.species[<name>]."""
     try:
         model = json.loads(row.get("model_json") or "null") or {}
     except json.JSONDecodeError:
         return None
+    if species != "istavrit":
+        model = (model.get("species") or {}).get(species) or {}
     hours = model.get("hours") or []
     score = _mean([h.get("total") for h in hours if isinstance(h.get("total"), (int, float))])
     if score is None or not row.get("active_min"):
@@ -170,15 +173,22 @@ def fake_sessions(n: int, beta: float = 1.2, lam0: float = 3.0, seed: int = 7, n
     return out
 
 
-SQL = """SELECT s.active_min, s.rods, s.model_json, COALESCE((SELECT SUM(i.count) FROM catch_item i WHERE i.session_id = s.id AND i.species = 'istavrit'), 0) AS count
+SQL = """SELECT s.active_min, s.rods, s.model_json, COALESCE((SELECT SUM(i.count) FROM catch_item i WHERE i.session_id = s.id AND i.species = ?1), 0) AS count
 FROM catch_session s ORDER BY s.start_at"""
+SPECIES = ("istavrit", "levrek")
+
+
+def report_key(species: str) -> str:
+    """meta key of the stored report: istavrit keeps the original key."""
+    return "calibration_report" if species == "istavrit" else f"calibration_report:{species}"
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--fake", type=int, help="fit synthetic sessions instead of D1")
     ap.add_argument("--d1", action="store_true", help="read sessions from D1 (CLOUDFLARE_* env)")
-    ap.add_argument("--write", action="store_true", help="store the report in D1 meta.calibration_report")
+    ap.add_argument("--write", action="store_true", help="store the report in D1 meta.calibration_report[:species]")
+    ap.add_argument("--species", choices=SPECIES + ("all",), default="all", help="species to fit (default: all)")
     a = ap.parse_args(argv)
     if a.fake:
         report = fit(fake_sessions(a.fake))
@@ -187,10 +197,12 @@ def main(argv: list[str] | None = None) -> int:
         from av_pipeline.ocean.marmara import D1
 
         d1 = D1()
-        sessions = [s for s in (session_from_row(r) for r in d1.query(SQL)) if s]
-        report = fit(sessions)
-        if a.write:
-            d1.query("INSERT INTO meta (key, value) VALUES ('calibration_report', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [json.dumps(report, ensure_ascii=False)])
+        report = {}
+        for sp in SPECIES if a.species == "all" else (a.species,):
+            sessions = [x for x in (session_from_row(r, sp) for r in d1.query(SQL, [sp])) if x]
+            report[sp] = {**fit(sessions), "species": sp}
+            if a.write:
+                d1.query("INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [report_key(sp), json.dumps(report[sp], ensure_ascii=False)])
     else:
         ap.error("--fake N or --d1")
     # coefficients and n only: safe for the Actions log
