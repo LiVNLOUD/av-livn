@@ -252,6 +252,16 @@ def test_h6_kordon_segments_lamps_exclusions_report():
     assert "Kordon parçası bulunamayan odak yerleşimler" in md and "Kurşunlu" in md
     assert inv.classify({"highway": "secondary", "name": "Sahil Yolu"}) == "promenade"
     assert inv.classify({"highway": "secondary", "name": "Atatürk Cd."}) is None
+    # mahalle names roll up to the nearest focus town; no lamp mapped anywhere → no evidence (type prior)
+    assert all(e["town"] in ("Gemlik", "Narlı") for e in log)
+    raw2 = {"elements": [e for e in raw["elements"] if e.get("tags", {}).get("highway") != "street_lamp"]}
+    raw2["elements"].append(node(97, (-200, 300), place="neighbourhood", name="Cumhuriyet"))
+    feats2, _, diag2 = inv.build_inventory(raw2, [])
+    k2 = [f["properties"] for f in feats2 if f["properties"]["kind"] == "promenade"]
+    assert k2 and all(p["lamp_prior"] is None for p in k2)
+    md2 = inv.report_md(feats2, [], diag2)
+    assert "hiç `highway=street_lamp` yok" in md2 and "Cumhuriyet" in md2
+    assert any(e["town"] == "Gemlik" and e["place"] == "Cumhuriyet" for e in diag2["promenade_log"])
 
 
 def test_h2_with_land_uses_eroded_mainland():

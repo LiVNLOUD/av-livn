@@ -275,7 +275,10 @@ def access_estimate(typ: str, tags: dict, place_m: float | None) -> tuple[str, s
 
 def lamp_props(seg: LineString, lamps: list[tuple[float, float]]) -> dict:
     """H6: street lamps (OSM highway=street_lamp) within LAMP_NEAR_M of a kordon piece → lamp prior (C).
-    0 lamps → 0.2; about one lamp per 25 m → 0.85 (cap)."""
+    0 lamps → 0.2; about one lamp per 25 m → 0.85 (cap). No lamp mapped anywhere in the area → no evidence:
+    lamp_prior None, the model uses the type prior (kordon 0.5)."""
+    if not lamps:
+        return {"lamps_n": None, "lamp_prior": None}
     zone = seg.buffer(LAMP_NEAR_M)
     n = sum(1 for xy in lamps if zone.contains(Point(xy)))
     per100 = n / max(seg.length, 1) * 100
@@ -399,7 +402,7 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                 mid = seg.interpolate(0.5, normalized=True)
                 place0, _ = nearest_place((mid.x, mid.y), places)
                 if any(n.distance(mid) <= 40 for n in natural_shore):
-                    prom_log.append({"place": place0, "status": "elendi", "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)", "osm": ref(el)})
+                    prom_log.append({"place": place0, "town": focus_town((mid.x, mid.y), places), "status": "elendi", "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)", "osm": ref(el)})
                     continue
                 pts.append((mid, round(seg.length), seg))
         else:
@@ -443,7 +446,7 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     order = lambda p: (PRIORITY[p["_typ"]], 0 if isinstance(p["_g"], Polygon) else 1, -(p["length_m"] or 0), p["id"])  # noqa: E731
     for pr in sorted(props_list, key=order):
         if pr["_typ"] == "promenade" and pr["_why_out"]:
-            prom_log.append({"place": pr["place"], "status": "elendi", "reason": pr["_why_out"], "osm": pr["osm"][0]})
+            prom_log.append({"place": pr["place"], "town": focus_town(pr["_xy"], places), "status": "elendi", "reason": pr["_why_out"], "osm": pr["osm"][0]})
         if pr["_why_out"]:
             dropped["excluded"] += 1
             excluded.append({"id": pr["id"], "type": pr["type_tr"], "place": pr["place"], "osm": pr["osm"], "reason": pr["_why_out"], "lonlat": [round(v, 6) for v in to_lonlat(*pr["_xy"])]})
@@ -458,13 +461,15 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
             twin = next((k for k in kept if k["_typ"] == "promenade" and math.dist(k["_xy"], pr["_xy"]) < NEAR_EXISTING_M), None)
             if twin:  # the same stretch of shore drawn twice (path + wall + road): one record
                 dropped["same_object"] += 1
-                prom_log.append({"place": pr["place"], "status": "tekrar", "reason": f"aynı kıyı kesimi: {twin['id']}", "osm": pr["osm"][0]})
+                prom_log.append({"place": pr["place"], "town": focus_town(pr["_xy"], places), "status": "tekrar", "reason": f"aynı kıyı kesimi: {twin['id']}", "osm": pr["osm"][0]})
                 continue
         if any(math.dist(pr["_xy"], xy) < DUP_M for xy in existing_xy.values()) or any(math.dist(pr["_xy"], k["_xy"]) < DUP_M for k in kept):
             dropped["duplicate"] += 1
+            if pr["_typ"] == "promenade":
+                prom_log.append({"place": pr["place"], "town": focus_town(pr["_xy"], places), "status": "tekrar", "reason": "mevcut meranın kopyası (≤ 25 m)", "osm": pr["osm"][0]})
             continue
         if pr["_typ"] == "promenade":
-            prom_log.append({"place": pr["place"], "status": "eklendi", "reason": f"{pr.get('lamps_n', 0)} sokak lambası, lamba olasılığı {pr.get('lamp_prior')}", "osm": pr["osm"][0]})
+            prom_log.append({"place": pr["place"], "town": focus_town(pr["_xy"], places), "status": "eklendi", "reason": "lamba verisi yok" if pr.get("lamp_prior") is None else f"{pr.get('lamps_n', 0)} sokak lambası, lamba olasılığı {pr.get('lamp_prior')}", "osm": pr["osm"][0]})
         kept.append(pr)
         if pr["_typ"] == "structure":
             struct_xy[pr["id"]] = pr["_xy"]
@@ -515,6 +520,7 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
     diag["not_spot"] = not_spots
     diag["same_object"] = same_object
     diag["promenade_log"] = prom_log
+    diag["street_lamps"] = len(lamps)
     diag["promenade_ways_not_along_shore"] = prom_far
     print(f"kordon: {counts.get('promenade', 0)} ways, {prom_far} not along the shore, {len(prom_log)} pieces", file=sys.stderr)
     return feats, forb, diag
@@ -593,30 +599,48 @@ def enrich(feats: list[dict], grid=None, land=None) -> None:  # pragma: no cover
 
 
 KORDON_FOCUS = ["Gemlik", "Kumla", "Kurşunlu", "Narlı", "Umurbey", "Mudanya", "Güzelyalı"]
+FOCUS_M = 4000.0  # a kordon piece belongs to the nearest focus town within this distance (its mahalle names differ)
 
 
-def kordon_report(log: list[dict]) -> list[str]:
-    """H6: kordon pieces per settlement — found, added, left out and why (focus settlements first)."""
+def focus_town(xy: tuple[float, float], places: list[dict]) -> str | None:
+    """H6: nearest focus town (KORDON_FOCUS) within FOCUS_M; 'Güzelyalı' matches 'Güzelyalı Burgaz' etc.
+    'Kumla' matches Büyük-/Küçükkumla."""
+    best = None
+    for p in places:
+        f = next((f for f in KORDON_FOCUS if norm(f) in norm(p["name"])), None)
+        if f is None:
+            continue
+        d = math.dist(xy, p["xy"])
+        if d <= FOCUS_M and (best is None or d < best[0]):
+            best = (d, f)
+    return best[1] if best else None
+
+
+def kordon_report(log: list[dict], lamps_mapped: bool = True) -> list[str]:
+    """H6: kordon pieces per focus town (its mahalle names listed) — found, added, left out and why."""
     by: dict[str, list[dict]] = {}
     for e in log:
-        by.setdefault(e["place"] or "—", []).append(e)
-    focus = lambda name: next((i for i, f in enumerate(KORDON_FOCUS) if norm(f) in norm(name)), len(KORDON_FOCUS))  # noqa: E731
+        by.setdefault(e.get("town") or "diğer (odak yerleşimlere > 4 km)", []).append(e)
+    order = lambda t: (KORDON_FOCUS.index(t) if t in KORDON_FOCUS else len(KORDON_FOCUS), t)  # noqa: E731
     out = ["", "## Kordon (taş tahkimat) — yerleşim raporu (H6)", "",
            "Kıyı çizgisine ≤ 25 m paralel giden tahkimat, deniz duvarı, kordon/sahil yolu ya da yaya yolu 300–500 m parçalara bölünür.",
            "Kumsal/kayalık üstündeki parçalar, aynı kesimin tekrarları ve erişim süzgecine (sanayi, liman, askeri, özel) takılanlar elenir.",
-           "Lamba olasılığı: parça boyunca OSM sokak lambası yoğunluğu (kanıt C).", "",
-           "| Yerleşim | Bulunan | Eklenen | Elenen | Tekrar | Elenme nedenleri |", "|---|---|---|---|---|---|"]
-    for place in sorted(by, key=lambda p: (focus(p), p)):
-        es = by[place]
+           "Her parça en yakın odak yerleşime (≤ 4 km) yazılır; OSM'deki mahalle adları ayrıca verilir.",
+           "Lamba olasılığı: parça boyunca OSM sokak lambası yoğunluğu (kanıt C)." if lamps_mapped else
+           "Lamba olasılığı: bölgede OSM'de hiç `highway=street_lamp` yok; parçalar kordon tip önceliğini (0,5, kanıt C) kullanır.", "",
+           "| Yerleşim | Mahalleler | Bulunan | Eklenen | Elenen | Tekrar | Elenme nedenleri |", "|---|---|---|---|---|---|---|"]
+    for town in sorted(by, key=order):
+        es = by[town]
         reasons: dict[str, int] = {}
         for e in es:
             if e["status"] == "elendi":
                 r = e["reason"].split(" (")[0].split(":")[0]
                 reasons[r] = reasons.get(r, 0) + 1
-        out.append(f"| {place} | {len(es)} | {sum(e['status'] == 'eklendi' for e in es)} | {sum(e['status'] == 'elendi' for e in es)} | {sum(e['status'] == 'tekrar' for e in es)} | {'; '.join(f'{k} ({v})' for k, v in reasons.items()) or '—'} |")
-    missing = [f for f in KORDON_FOCUS if not any(norm(f) in norm(p) for p in by)]
+        places = ", ".join(sorted({e["place"] for e in es if e["place"]})) or "—"
+        out.append(f"| {town} | {places} | {len(es)} | {sum(e['status'] == 'eklendi' for e in es)} | {sum(e['status'] == 'elendi' for e in es)} | {sum(e['status'] == 'tekrar' for e in es)} | {'; '.join(f'{k} ({v})' for k, v in reasons.items()) or '—'} |")
+    missing = [f for f in KORDON_FOCUS if f not in by]
     if missing:
-        out += ["", f"Kordon parçası bulunamayan odak yerleşimler: {', '.join(missing)} (OSM'de kıyıya paralel tahkimat/yol etiketi yok ya da yerleşim noktası farklı adla)."]
+        out += ["", f"Kordon parçası bulunamayan odak yerleşimler: {', '.join(missing)} — OSM'de kıyı çizgisine ≤ 25 m paralel tahkimat, deniz duvarı, sahil yolu ya da yaya yolu etiketi yok."]
     return out
 
 
@@ -664,7 +688,7 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
     lines += ["", "## Elenen yerler", "", "| Neden | Sayı |", "|---|---|", *[f"| {k} | {v} |" for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])], "",
               "| Yer | Tip | Yerleşim | Neden | OSM |", "|---|---|---|---|---|",
               *[f"| {e['id']} | {e['type']} | {e['place'] or '—'} | {e['reason']} | {', '.join(e['osm'])} |" for e in diag.get("excluded", [])]]
-    lines += kordon_report(diag.get("promenade_log", []))
+    lines += kordon_report(diag.get("promenade_log", []), diag.get("street_lamps", 0) > 0)
     lines += ["", "## Mera olmayan nesneler (G1)", "",
               "Şirket şubesi, gişe, suyla teması olmayan bina/ofis/dükkân ve karadaki feribot terminali noktaları aday olamaz.", "",
               "| Yer | Ad | Neden | OSM |", "|---|---|---|---|",
@@ -682,7 +706,7 @@ def report_md(feats: list[dict], forb: list[dict], diag: dict) -> str:
     lines += ["## Bilinen yerler (kullanıcı listesi)", ""]
     lines += [f"- {m}" for m in diag.get("known_missing", [])]
     for k, v in diag.items():
-        if k in ("dropped", "known_missing", "excluded", "not_spot", "same_object", "promenade_log", "promenade_ways_not_along_shore"):
+        if k in ("dropped", "known_missing", "excluded", "not_spot", "same_object", "promenade_log", "promenade_ways_not_along_shore", "street_lamps"):
             continue
         if not v.get("place"):
             lines.append(f"- **{k}:** OSM'de yerleşim noktası yok.")
