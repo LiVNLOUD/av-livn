@@ -113,3 +113,18 @@ def test_prune_deletes_only_unreviewed_stale_rows_of_that_source():
     d2 = D()
     fz.prune(d2, "ced", [])
     assert "NOT IN" not in d2.calls[0][0]
+
+
+def test_i3_mapillary_review_findings(tmp_path):
+    from av_pipeline.desk.run import mapillary_review
+
+    rev = {"reviewed_at": "2026-11-03", "license": "CC BY-SA 4.0", "spots": [
+        {"spot_id": "a", "direk_gorunuyor": "evet", "suya_yonelik": "bilinmiyor", "kanit_goruntuleri": [{"image_id": "1"}]},
+        {"spot_id": "b", "direk_gorunuyor": "evet", "suya_yonelik": "evet", "kanit_goruntuleri": []},
+        {"spot_id": "c", "direk_gorunuyor": "bilinmiyor", "suya_yonelik": "bilinmiyor", "kanit_goruntuleri": []}]}
+    p = tmp_path / "m.json"
+    p.write_text(json.dumps(rev))
+    f = {x.spot_id: x for x in mapillary_review([{"id": "a"}, {"id": "b"}, {"id": "c"}], p)}
+    assert f["a"].light_prob == 0.6 and f["b"].light_prob == 0.7 and "c" not in f
+    assert f["a"].id == "desk-mapillary_review-a" and f["a"].evidence["kind"] == "dolaylı gösterge"
+    assert mapillary_review([{"id": "a"}], tmp_path / "none.json") == []

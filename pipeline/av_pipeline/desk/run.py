@@ -33,6 +33,25 @@ def manual(spots: list[dict], path: Path = ROOT / "data/desk/manual.json") -> li
     return out
 
 
+def mapillary_review(spots: list[dict], path: Path = ROOT / "data/lighting/mapillary.json") -> list[Finding]:
+    """I3: lamp findings from the eye review of Mapillary images (data/lighting/mapillary.json). A pole seen on the sea
+    side → 0.6; also aimed at the water → 0.7. 'bilinmiyor' produces nothing (no image ≠ no lamp)."""
+    if not path.exists():
+        return []
+    ids = {s["id"] for s in spots}
+    rev = json.loads(path.read_text())
+    out = []
+    for r in rev["spots"]:
+        if r["spot_id"] not in ids or r["direk_gorunuyor"] != "evet":
+            continue
+        p = 0.7 if r["suya_yonelik"] == "evet" else 0.6
+        imgs = [i["image_id"] for i in r["kanit_goruntuleri"]]
+        out.append(Finding(spot_id=r["spot_id"], source="mapillary_review", observed_at=rev["reviewed_at"], light_prob=p,
+                           note=f"Mapillary incelemesi: lamba direği görünüyor; suya yönelik: {r['suya_yonelik']}; çalışma saati bilinmiyor ({len(imgs)} görüntü)",
+                           evidence={"kind": "dolaylı gösterge", "evidence": "C", "license": rev["license"], "images": imgs, "limit": "gündüz fotoğrafı: çalışma durumu ve lux bilinmez"}))
+    return out
+
+
 def main(argv: list[str]) -> int:
     d1 = D1()
     today = dt.date.today()
@@ -53,6 +72,10 @@ def main(argv: list[str]) -> int:
         mp = {"skipped": f"Mapillary hatası: {str(e)[:200]}"}
     (ROOT / "apps/web/public/tiles/mapillary.json").write_text(json.dumps(mp, ensure_ascii=False) + "\n")
     report["mapillary"] = mp.get("skipped") or {k: {"found": v["found"], "facing": v["facing"], "selected": len(v["selected"])} for k, v in mp["spots"].items()}
+    rv = mapillary_review(spots)
+    report["mapillary_review"] = {f.spot_id: f.light_prob for f in rv}
+    report["pruned_mapillary_review"] = fz.prune(d1, "mapillary_review", rv)
+    all_f += rv
     if "--skip-s2" not in argv:
         try:
             from av_pipeline.desk import sentinel2

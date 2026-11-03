@@ -230,7 +230,7 @@
 - [x] I0 Faz H kapanışı.
 - [x] I1 `docs/AUDIT-I.md`: 23 bulgu, öncelik sırası, karar soruları.
 - [x] I2 kritik hatalar: takım kutusu, astro check (+ Sahadayım api gölgeleme), WebGL2 notu, pencere/bildirim erişim süzgeci, güçlü/görece, eksik veri kuralları (MODEL §15), e2e (CI) — AUDIT-I #1–#6
-- [~] I3 aydınlatma: üç durumlu ışık ve koşullu takım, takımda eksik veri ≠ sakin, feribot duyarlılığı (`docs/audit/lamp-sensitivity.json`: İDO gece 1.liği 27/30 saat → 0,5 önselle 0) ✅; Mapillary arama yeniden yazıldı, desk.yml çalıştırıldı → görsel inceleme bekliyor
+- [x] I3 aydınlatma: üç durumlu ışık ve koşullu takım, takımda eksik veri ≠ sakin, feribot duyarlılığı (`docs/audit/lamp-sensitivity.json`: İDO gece 1.liği 27/30 saat → 0,5 önselle 0) ✅; Mapillary: 90 meranın 22'sinde görüntü var. 132 görüntü gözle incelendi; deniz tarafında direk görülen 5 mera 0,6 lamba bulgusu aldı. İDO ve diğer feribot iskelelerinde görüntü yok (`docs/audit/mapillary-review.md`) ✅
 - [ ] I4 kanıt sınıfları ve model çelişkileri
 - [ ] I5 kapsam (Bursa batı kıyısı, il etiketi, kıyı kesimi veri tablosu)
 - [~] I6 av günlüğü alanları (migration 0014), başlangıçta dondurma, düzenleme dondurmayı bozmaz, kalibrasyon yalnız ileriye dönük + zaman bölmeli test ✅; 1 Kasım seansı (deploy sonrası), ayrık puanlar ve sıralama kararlılığı bekliyor

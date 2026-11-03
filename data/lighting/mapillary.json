@@ -1,0 +1,847 @@
+{
+ "_note": "I3: Mapillary küçük resimlerinin gözle incelemesi (Claude, 2026-11-03). Ayrımlar: direk görünüyor / ışık suya yönelik / ilgili saatte çalışıyor. Gündüz fotoğrafından çalışma durumu ya da lux üretilmez; görüntü yokluğu 'aydınlatma yok' değildir. OSM street_lamp ile seyir feneri (seamark:light) ayrı tutulur; fener puanı artırmaz.",
+ "license": "CC BY-SA 4.0, © Mapillary katkıcıları (görüntü bağlantıları kaynağa gider)",
+ "reviewed_at": "2026-11-03",
+ "search": {
+  "radius_m": 200.0,
+  "facing_deg": 60.0,
+  "per_spot": 6
+ },
+ "summary": {
+  "active_spots": 90,
+  "with_images": 22,
+  "images_found": 1543,
+  "images_reviewed": 132,
+  "pole_on_sea_side": 5,
+  "not_showing_spot": 12
+ },
+ "model_rule": "direk_gorunuyor='evet' ve suya_yonelik='evet' → lamba olasılığı 0,7; yalnız 'evet' (suya yönelik belirsiz) → 0,6; diğerleri bulgu üretmez. Kanıt: dolaylı gösterge (C), masa başı, onaysız.",
+ "spots": [
+  {
+   "spot_id": "osm-way-24825429-5",
+   "name": "Kordon (Kurşunlu doğusu) 2",
+   "images_found": 25,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Deniz tarafındaki şeritte düzenli aralıklı (≈30–40 m) yüksek kavisli sokak lambası direkleri; armatürler yola dönük. Işığın kıyı suyuna düşüp düşmediği fotoğraftan doğrulanamaz.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "967525174070584",
+     "url": "https://www.mapillary.com/app/?pKey=967525174070584",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.046593,
+      40.362703
+     ],
+     "compass_deg": 105,
+     "distance_m": 26,
+     "facing_spot": true
+    },
+    {
+     "image_id": "369568331147532",
+     "url": "https://www.mapillary.com/app/?pKey=369568331147532",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.046411,
+      40.362727
+     ],
+     "compass_deg": 104,
+     "distance_m": 39,
+     "facing_spot": true
+    },
+    {
+     "image_id": "344823320325618",
+     "url": "https://www.mapillary.com/app/?pKey=344823320325618",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.046219,
+      40.362751
+     ],
+     "compass_deg": 105,
+     "distance_m": 54,
+     "facing_spot": true
+    },
+    {
+     "image_id": "299566878501848",
+     "url": "https://www.mapillary.com/app/?pKey=299566878501848",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.045861,
+      40.362802
+     ],
+     "compass_deg": 104,
+     "distance_m": 84,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-6",
+   "name": "Kordon (Kurşunlu doğusu) 3",
+   "images_found": 28,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Deniz tarafındaki şeritte düzenli aralıklı (≈30–40 m) yüksek kavisli sokak lambası direkleri; armatürler yola dönük. Işığın kıyı suyuna düşüp düşmediği fotoğraftan doğrulanamaz.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "2849237712059625",
+     "url": "https://www.mapillary.com/app/?pKey=2849237712059625",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.042515,
+      40.36313
+     ],
+     "compass_deg": 99,
+     "distance_m": 24,
+     "facing_spot": true
+    },
+    {
+     "image_id": "281243537049667",
+     "url": "https://www.mapillary.com/app/?pKey=281243537049667",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.042339,
+      40.363147
+     ],
+     "compass_deg": 100,
+     "distance_m": 35,
+     "facing_spot": true
+    },
+    {
+     "image_id": "870063816876675",
+     "url": "https://www.mapillary.com/app/?pKey=870063816876675",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.042162,
+      40.363171
+     ],
+     "compass_deg": 102,
+     "distance_m": 49,
+     "facing_spot": true
+    },
+    {
+     "image_id": "3961566160545916",
+     "url": "https://www.mapillary.com/app/?pKey=3961566160545916",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.041803,
+      40.363239
+     ],
+     "compass_deg": 107,
+     "distance_m": 78,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-7",
+   "name": "Kordon (Kurşunlu doğusu) 4",
+   "images_found": 26,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Deniz tarafındaki şeritte düzenli aralıklı (≈30–40 m) yüksek kavisli sokak lambası direkleri; armatürler yola dönük. Işığın kıyı suyuna düşüp düşmediği fotoğraftan doğrulanamaz.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "826955834613147",
+     "url": "https://www.mapillary.com/app/?pKey=826955834613147",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.038028,
+      40.363711
+     ],
+     "compass_deg": 99,
+     "distance_m": 12,
+     "facing_spot": true
+    },
+    {
+     "image_id": "300593844947513",
+     "url": "https://www.mapillary.com/app/?pKey=300593844947513",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.037656,
+      40.363759
+     ],
+     "compass_deg": 106,
+     "distance_m": 31,
+     "facing_spot": true
+    },
+    {
+     "image_id": "141964111308940",
+     "url": "https://www.mapillary.com/app/?pKey=141964111308940",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.037296,
+      40.363814
+     ],
+     "compass_deg": 103,
+     "distance_m": 61,
+     "facing_spot": true
+    },
+    {
+     "image_id": "4266115836742080",
+     "url": "https://www.mapillary.com/app/?pKey=4266115836742080",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.036938,
+      40.36386
+     ],
+     "compass_deg": 101,
+     "distance_m": 92,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-2",
+   "name": "Kordon (Kumsaz güneyi) 2",
+   "images_found": 32,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Deniz tarafında kordon yürüyüş yolu boyunca ince/kısa lamba direği (1–2 adet görünüyor); yürüyüş yoluna dönük. Suya yönelik olup olmadığı belirsiz.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "3607664372672701",
+     "url": "https://www.mapillary.com/app/?pKey=3607664372672701",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.062439,
+      40.367082
+     ],
+     "compass_deg": 54,
+     "distance_m": 22,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-3",
+   "name": "Kordon (Kumsaz güneyi) 3",
+   "images_found": 27,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Deniz tarafında kordon yürüyüş yolu boyunca ince/kısa lamba direği (1–2 adet görünüyor); yürüyüş yoluna dönük. Suya yönelik olup olmadığı belirsiz.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "581688616064265",
+     "url": "https://www.mapillary.com/app/?pKey=581688616064265",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.059391,
+      40.36478
+     ],
+     "compass_deg": 50,
+     "distance_m": 24,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-1165497962",
+   "name": "Kurşunlu Yat Limanı",
+   "images_found": 28,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet (kıyı yolu)",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Liman girişine giden kıyı yolu boyunca çift kollu sokak lambaları; marina havzası ve iskele uçları görünmüyor.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "110715061087716",
+     "url": "https://www.mapillary.com/app/?pKey=110715061087716",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.033057,
+      40.363693
+     ],
+     "compass_deg": 81,
+     "distance_m": 53,
+     "facing_spot": true
+    },
+    {
+     "image_id": "2478131788999580",
+     "url": "https://www.mapillary.com/app/?pKey=2478131788999580",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.032889,
+      40.363669
+     ],
+     "compass_deg": 83,
+     "distance_m": 63,
+     "facing_spot": true
+    },
+    {
+     "image_id": "176065117737169",
+     "url": "https://www.mapillary.com/app/?pKey=176065117737169",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.03272,
+      40.363646
+     ],
+     "compass_deg": 83,
+     "distance_m": 74,
+     "facing_spot": true
+    },
+    {
+     "image_id": "227015482089435",
+     "url": "https://www.mapillary.com/app/?pKey=227015482089435",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.032549,
+      40.363625
+     ],
+     "compass_deg": 52,
+     "distance_m": 87,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-8",
+   "name": "Kordon (Kurşunlu kuzeydoğusu)",
+   "images_found": 30,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "evet (çarşı yolu)",
+   "suya_yonelik": "hayır (yola)",
+   "calisma_saati": "bilinmiyor",
+   "not": "Kurşunlu çarşı yolunda kavisli sokak lambaları; deniz kareye girmiyor.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "1795826157261713",
+     "url": "https://www.mapillary.com/app/?pKey=1795826157261713",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.031739,
+      40.363558
+     ],
+     "compass_deg": 86,
+     "distance_m": 10,
+     "facing_spot": true
+    },
+    {
+     "image_id": "151063643649395",
+     "url": "https://www.mapillary.com/app/?pKey=151063643649395",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.031894,
+      40.363572
+     ],
+     "compass_deg": 86,
+     "distance_m": 13,
+     "facing_spot": true
+    },
+    {
+     "image_id": "6221312007894428",
+     "url": "https://www.mapillary.com/app/?pKey=6221312007894428",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.031595,
+      40.363542
+     ],
+     "compass_deg": 87,
+     "distance_m": 19,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-1",
+   "name": "Kordon (Kumsaz güneyi)",
+   "images_found": 27,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "yalnız kara tarafı",
+   "suya_yonelik": "hayır (yola)",
+   "calisma_saati": "bilinmiyor",
+   "not": "Kara tarafındaki elektrik direklerinde tek tük yola dönük armatür; deniz tarafında lamba direği görünmüyor.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "1367457273633905",
+     "url": "https://www.mapillary.com/app/?pKey=1367457273633905",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.064754,
+      40.369211
+     ],
+     "compass_deg": 38,
+     "distance_m": 82,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-4",
+   "name": "Kordon (Kurşunlu doğusu)",
+   "images_found": 29,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "yalnız kara tarafı",
+   "suya_yonelik": "hayır (yola)",
+   "calisma_saati": "bilinmiyor",
+   "not": "Kara tarafındaki elektrik direklerinde tek tük yola dönük armatür; deniz tarafında lamba direği görünmüyor.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "507258303806199",
+     "url": "https://www.mapillary.com/app/?pKey=507258303806199",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.051606,
+      40.362216
+     ],
+     "compass_deg": 92,
+     "distance_m": 82,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-9",
+   "name": "Kordon (Kurşunlu kuzeydoğusu) 2",
+   "images_found": 30,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "yalnız kara tarafı",
+   "suya_yonelik": "hayır (yola)",
+   "calisma_saati": "bilinmiyor",
+   "not": "Kara tarafındaki elektrik direklerinde tek tük yola dönük armatür; deniz tarafında lamba direği görünmüyor.",
+   "kanit_goruntuleri": [
+    {
+     "image_id": "848894285700576",
+     "url": "https://www.mapillary.com/app/?pKey=848894285700576",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.029049,
+      40.362592
+     ],
+     "compass_deg": 57,
+     "distance_m": 31,
+     "facing_spot": true
+    },
+    {
+     "image_id": "301713841584791",
+     "url": "https://www.mapillary.com/app/?pKey=301713841584791",
+     "captured_at": "2019-04-30",
+     "lonlat": [
+      29.028677,
+      40.36239
+     ],
+     "compass_deg": 59,
+     "distance_m": 64,
+     "facing_spot": true
+    }
+   ]
+  },
+  {
+   "spot_id": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "images_found": 92,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 142–165 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1305691023-1",
+   "name": "Kumsal (Güzelyalı Yalı kuzeydoğusu)",
+   "images_found": 50,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 161–163 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1305691027-1",
+   "name": "Kumsal (Güzelyalı Yalı kuzeybatısı)",
+   "images_found": 35,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 174–176 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1305691028-1",
+   "name": "Kumsal (Güzelyalı Siteler kuzeyi)",
+   "images_found": 27,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 159–196 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1305691029-1",
+   "name": "Kumsal (Güzelyalı Siteler kuzeyi) 2",
+   "images_found": 42,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 152–198 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1430949806",
+   "name": "Dere ağzı (Güzelyalı Burgaz)",
+   "images_found": 42,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 151–196 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1336893184-1",
+   "name": "Kordon (Hisar kuzeybatısı)",
+   "images_found": 182,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 151–156 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-1073087871-1",
+   "name": "Kordon (Ömerbey Mah. güneydoğusu)",
+   "images_found": 263,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 130–138 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-639389497-1",
+   "name": "Kordon (Ömerbey Mah. doğusu)",
+   "images_found": 166,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 48–67 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-639389497-2",
+   "name": "Kordon (Hasanbey kuzeydoğusu)",
+   "images_found": 133,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 47–65 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-639389497-3",
+   "name": "Kordon (Hasanbey kuzeyi)",
+   "images_found": 121,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 82–92 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  },
+  {
+   "spot_id": "osm-way-665674892-1",
+   "name": "Kumsal (Güzelyalı Eğitim kuzeyi)",
+   "images_found": 108,
+   "images_reviewed": 6,
+   "direk_gorunuyor": "bilinmiyor",
+   "suya_yonelik": "bilinmiyor",
+   "calisma_saati": "bilinmiyor",
+   "not": "Görüntüler meradan 79–83 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor. Görüntü olması 'lamba yok' demek değildir.",
+   "kanit_goruntuleri": []
+  }
+ ],
+ "no_images": [
+  {
+   "spot_id": "osm-node-11865648199",
+   "name": "Tirilye Limanı"
+  },
+  {
+   "spot_id": "osm-node-11981818601-1",
+   "name": "Ayı Burnu"
+  },
+  {
+   "spot_id": "osm-node-13872728204",
+   "name": "Karacaali İskelesi"
+  },
+  {
+   "spot_id": "osm-node-2590599404",
+   "name": "Armutlu İskelesi"
+  },
+  {
+   "spot_id": "osm-node-2794622004",
+   "name": "Büyükkumla İskelesi"
+  },
+  {
+   "spot_id": "osm-way-1005837524",
+   "name": "Kapaklı İskelesi (Kapaklı güneyi)"
+  },
+  {
+   "spot_id": "osm-way-1170373160-1",
+   "name": "Kordon (Armutlu batısı)"
+  },
+  {
+   "spot_id": "osm-way-1170373160-2",
+   "name": "Kordon (Armutlu batısı) 2"
+  },
+  {
+   "spot_id": "osm-way-1170373160-3",
+   "name": "Kordon (Armutlu batısı) 3"
+  },
+  {
+   "spot_id": "osm-way-1170373161",
+   "name": "Armutlu İskelesi (Armutlu batısı)"
+  },
+  {
+   "spot_id": "osm-way-1217216668-1",
+   "name": "Kordon (Dr.Ziya Kaya batısı)"
+  },
+  {
+   "spot_id": "osm-way-1217216668-2",
+   "name": "Kordon (Demirsubaşı güneyi)"
+  },
+  {
+   "spot_id": "osm-way-1217216676-1",
+   "name": "Kordon (Cumhuriyet batısı)"
+  },
+  {
+   "spot_id": "osm-way-1217216676-2",
+   "name": "Kordon (Cumhuriyet güneyi)"
+  },
+  {
+   "spot_id": "osm-way-1217216676-3",
+   "name": "Kordon (Orhaniye batısı)"
+  },
+  {
+   "spot_id": "osm-way-1217216676-6",
+   "name": "Kordon (Kayhan güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1217216676-7",
+   "name": "Kordon (Balıkpazarı güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi"
+  },
+  {
+   "spot_id": "osm-way-1218508014",
+   "name": "Kumla Deresi ağzı"
+  },
+  {
+   "spot_id": "osm-way-1336893175-1",
+   "name": "Kordon (Orhaniye güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1364814104",
+   "name": "Armutlu Devlet Limanı – doğu mendireği"
+  },
+  {
+   "spot_id": "osm-way-1391521782-1",
+   "name": "Kumsal (Fıstıklı batısı)"
+  },
+  {
+   "spot_id": "osm-way-1392831837-1",
+   "name": "Kumsal (Armutlu güneydoğusu)"
+  },
+  {
+   "spot_id": "osm-way-1392831837-2",
+   "name": "Kumsal (Armutlu güneydoğusu) 2"
+  },
+  {
+   "spot_id": "osm-way-1392831837-3",
+   "name": "Kumsal (Armutlu güneydoğusu) 3"
+  },
+  {
+   "spot_id": "osm-way-1392831837-4",
+   "name": "Kumsal (Armutlu güneydoğusu) 4"
+  },
+  {
+   "spot_id": "osm-way-1392831837-5",
+   "name": "Kumsal (Armutlu güneydoğusu) 5"
+  },
+  {
+   "spot_id": "osm-way-1392831837-6",
+   "name": "Kumsal (Fıstıklı batısı) 2"
+  },
+  {
+   "spot_id": "osm-way-1393123413-1",
+   "name": "Kumsal (Armutlu güneydoğusu) 6"
+  },
+  {
+   "spot_id": "osm-way-1393123413-2",
+   "name": "Kumsal (Armutlu güneydoğusu) 7"
+  },
+  {
+   "spot_id": "osm-way-1394208138-1",
+   "name": "Kumsal (Armutlu güneyi)"
+  },
+  {
+   "spot_id": "osm-way-1394208138-2",
+   "name": "Kumsal (Armutlu güneyi) 2"
+  },
+  {
+   "spot_id": "osm-way-1394208144",
+   "name": "Armutlu Devlet Limanı – orta batı mendireği"
+  },
+  {
+   "spot_id": "osm-way-1394523720-1",
+   "name": "Kumsal (Armutlu güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1394523720-2",
+   "name": "Kumsal (Armutlu güneybatısı) 2"
+  },
+  {
+   "spot_id": "osm-way-1394523720-3",
+   "name": "Kumsal (Armutlu güneybatısı) 3"
+  },
+  {
+   "spot_id": "osm-way-1394523720-4",
+   "name": "Kumsal (Armutlu güneyi) 3"
+  },
+  {
+   "spot_id": "osm-way-1413355181",
+   "name": "Armutlu Devlet Limanı – uzun batı mendireği"
+  },
+  {
+   "spot_id": "osm-way-1413355183-1",
+   "name": "Kordon (Armutlu batısı) 4"
+  },
+  {
+   "spot_id": "osm-way-1414984335",
+   "name": "Fıstıklı İskelesi (Fıstıklı güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1414985743-1",
+   "name": "Kumsal (Fıstıklı batısı) 3"
+  },
+  {
+   "spot_id": "osm-way-1414985743-2",
+   "name": "Kumsal (Fıstıklı güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1414985744-1",
+   "name": "Kumsal (Fıstıklı güneybatısı) 2"
+  },
+  {
+   "spot_id": "osm-way-1422122108",
+   "name": "Armutlu Devlet Limanı – kısa batı mendireği"
+  },
+  {
+   "spot_id": "osm-way-1422351411-1",
+   "name": "Kayalık kıyı (Armutlu güneydoğusu)"
+  },
+  {
+   "spot_id": "osm-way-1445587670-1",
+   "name": "Kordon (Fıstıklı batısı)"
+  },
+  {
+   "spot_id": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele"
+  },
+  {
+   "spot_id": "osm-way-1500766926-1",
+   "name": "Kordon (Demirsubaşı güneybatısı)"
+  },
+  {
+   "spot_id": "osm-way-1552615726",
+   "name": "Güzelyalı Yat Limanı – liman içi"
+  },
+  {
+   "spot_id": "osm-way-252356832",
+   "name": "Güzelyalı Yat Limanı – doğu mendireği"
+  },
+  {
+   "spot_id": "osm-way-252356833",
+   "name": "Güzelyalı Yat Limanı – batı mendireği"
+  },
+  {
+   "spot_id": "osm-way-253063517",
+   "name": "Dere ağzı (Kumsaz)"
+  },
+  {
+   "spot_id": "osm-way-253083807",
+   "name": "Bülbül Deresi ağzı"
+  },
+  {
+   "spot_id": "osm-way-428743002-1",
+   "name": "Kordon (Armutlu güneydoğusu)"
+  },
+  {
+   "spot_id": "osm-way-479047532",
+   "name": "İskele (İslamköy)"
+  },
+  {
+   "spot_id": "osm-way-479047534-1",
+   "name": "Kumsal (İslamköy kuzeybatısı)"
+  },
+  {
+   "spot_id": "osm-way-479047534-2",
+   "name": "Kumsal (İslamköy kuzeybatısı) 2"
+  },
+  {
+   "spot_id": "osm-way-479047535-1",
+   "name": "Kumsal (İslamköy kuzeybatısı) 3"
+  },
+  {
+   "spot_id": "osm-way-483965349",
+   "name": "Tirilye İskelesi"
+  },
+  {
+   "spot_id": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi"
+  },
+  {
+   "spot_id": "osm-way-519554786-1",
+   "name": "Kumsal (Tirilye kuzeybatısı)"
+  },
+  {
+   "spot_id": "osm-way-534210128-1",
+   "name": "Kordon (Kumyaka doğusu)"
+  },
+  {
+   "spot_id": "osm-way-681112515",
+   "name": "Büyükkumla Deresi ağzı"
+  },
+  {
+   "spot_id": "osm-way-684554355",
+   "name": "Kapaklı Deresi ağzı"
+  },
+  {
+   "spot_id": "osm-way-698849100",
+   "name": "Fıstıklı Deresi ağzı"
+  },
+  {
+   "spot_id": "osm-way-700323582",
+   "name": "Karsak Çayı ağzı"
+  },
+  {
+   "spot_id": "osm-way-757494038-1",
+   "name": "Kumsal (Kapaklı güneydoğusu)"
+  },
+  {
+   "spot_id": "osm-way-77362926",
+   "name": "Demirsubaşı İskelesi"
+  }
+ ]
+}
