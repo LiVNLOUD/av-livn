@@ -39,17 +39,36 @@ def test_sentinel2_classification_and_summary():
     assert round(sentinel2.metres_between((40.4, 28.9), (40.401, 28.9))) == 111
 
 
-def test_mapillary_skips_without_token_and_lists_recent_images():
+def test_mapillary_i3_search_paging_facing_and_selection():
     assert mapillary.images(SPOTS, token="")["skipped"]
     seen = []
+    spot = SPOTS[0]
+    # image 30 m south of the spot looking north (facing), 30 m south looking south (away), 150 m away facing, a panorama
+    south = lambda m: [spot["lon"], spot["lat"] - m / 111_320]  # noqa: E731
+    pages = [
+        {"data": [{"id": "face", "captured_at": 1_700_000_000_000, "compass_angle": 2, "geometry": {"coordinates": south(30)}},
+                  {"id": "away", "captured_at": 1_800_000_000_000, "compass_angle": 180, "geometry": {"coordinates": south(30)}}],
+         "paging": {"next": "https://graph.mapillary.com/images?after=x"}},
+        {"data": [{"id": "far", "captured_at": 1, "computed_compass_angle": 0, "geometry": {"coordinates": south(150)}},
+                  {"id": "pano", "captured_at": 2, "is_pano": True, "geometry": {"coordinates": south(100)}},
+                  {"id": "out", "captured_at": 3, "compass_angle": 0, "geometry": {"coordinates": south(400)}},
+                  {"id": "nogeo"}]},
+    ]
 
     def opener(req, timeout):
         seen.append(req.full_url)
-        return io.BytesIO(json.dumps({"data": [{"id": "1", "captured_at": 1, "thumb_256_url": "t1"}, {"id": "2", "captured_at": 5}]}).encode())
+        return io.BytesIO(json.dumps(pages[len(seen) - 1]).encode())
 
-    r = mapillary.images(SPOTS[:1], token="tok", opener=opener)
-    assert [i["id"] for i in r["spots"]["a"]] == ["2", "1"]
-    assert "bbox=28.89" in seen[0] and r["license"].startswith("CC BY-SA")
+    r = mapillary.images([{**spot, "name": "A"}], token="tok", opener=opener)
+    a = r["spots"]["a"]
+    assert len(seen) == 2 and "bbox=28.8976" in seen[0] and "limit=500" in seen[0]
+    assert a["found"] == 4 and a["facing"] == 3  # 'out' beyond 200 m, 'nogeo' dropped
+    ids = [x["image_id"] for x in a["selected"]]
+    assert ids[0] == "face" and ids.index("away") == len(ids) - 1
+    face = a["selected"][0]
+    assert face["distance_m"] == 30 and face["bearing_to_spot_deg"] in (0, 360) and face["captured_at"] == "2023-11-14"
+    assert r["license"].startswith("CC BY-SA") and r["search_m"] == 200
+    assert mapillary.angle_diff(350, 10) == 20 and mapillary.select([], 6) == []
 
 
 class FakeD1:

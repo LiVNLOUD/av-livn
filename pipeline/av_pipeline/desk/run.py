@@ -52,7 +52,7 @@ def main(argv: list[str]) -> int:
     except Exception as e:  # noqa: BLE001
         mp = {"skipped": f"Mapillary hatası: {str(e)[:200]}"}
     (ROOT / "apps/web/public/tiles/mapillary.json").write_text(json.dumps(mp, ensure_ascii=False) + "\n")
-    report["mapillary"] = mp.get("skipped") or {k: len(v) for k, v in mp["spots"].items()}
+    report["mapillary"] = mp.get("skipped") or {k: {"found": v["found"], "facing": v["facing"], "selected": len(v["selected"])} for k, v in mp["spots"].items()}
     if "--skip-s2" not in argv:
         try:
             from av_pipeline.desk import sentinel2

@@ -20,6 +20,8 @@ import { forbiddenUpdates, parseArea, type SpotPos } from '../workers/api/src/li
 const dryRun = process.argv.includes('--dry-run');
 const pendingOnly = process.argv.includes('--pending');
 const compareOut = process.argv.includes('--compare-desk') ? process.argv[process.argv.indexOf('--compare-desk') + 1] : null;
+// I3: ferry lamp prior sensitivity (dry run): same weather, LAMP_PRIOR.ferry 0.85 vs 0.5 at every night hour
+const lampOut = process.argv.includes('--lamp-sensitivity') ? process.argv[process.argv.indexOf('--lamp-sensitivity') + 1] : null;
 const token = process.env.CLOUDFLARE_API_TOKEN;
 const account = process.env.CLOUDFLARE_ACCOUNT_ID;
 if (!token || !account) throw new Error('CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are required');
@@ -86,6 +88,32 @@ const now0 = Math.floor(now.getTime() / 3_600_000);
 for (const r of v2) {
   const e = (JSON.parse(r.list_json) as unknown[][])[now0 - r.start_hour];
   console.log(`  ${r.spot_id.padEnd(20)} total ${e?.[0]} band ${e?.[1]}–${e?.[2]} rank ${e?.[3]} · ${(e?.[6] as unknown[] | null)?.[2] ?? ''}`);
+}
+
+if (lampOut) {
+  const { LAMP_PRIOR } = await import('@av-livn/scoring');
+  const base = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), 0, oceanMap(oSeries, oNormal));
+  const was = LAMP_PRIOR.ferry;
+  (LAMP_PRIOR as Record<string, number>).ferry = 0.5;
+  const alt = scoreRecordsV2(rows, snaps, now, fieldRecords(obs, depths), 0, oceanMap(oSeries, oNormal));
+  (LAMP_PRIOR as Record<string, number>).ferry = was;
+  const lists = (recs: typeof v2) => new Map(recs.map((r) => [r.spot_id, { start: r.start_hour, list: JSON.parse(r.list_json) as (number | null)[][] }]));
+  const A = lists(base), B = lists(alt);
+  const ferry = rows.filter((r) => r.kind === 'ferry' || r.access === 'kisitli_feribot').map((r) => r.id);
+  // night hours: 18–05 UTC+3 local over the next 72 h
+  const nights = Array.from({ length: 72 }, (_, i) => now0 + i).filter((h) => { const l = (h + 3) % 24; return l >= 19 || l <= 4; });
+  const at = (m: typeof A, id: string, h: number) => { const x = m.get(id)!; return x.list[h - x.start]; };
+  const perSpot = ferry.map((id) => {
+    const d = nights.map((h) => [at(A, id, h)?.[0], at(B, id, h)?.[0], at(A, id, h)?.[3], at(B, id, h)?.[3]] as (number | null)[]).filter((x) => x[0] != null && x[1] != null);
+    const mean = (k: number) => d.reduce((a, x) => a + (x[k] as number), 0) / Math.max(1, d.length);
+    return { id, name: rows.find((r) => r.id === id)!.name, nightHours: d.length, meanScore085: +mean(0).toFixed(1), meanScore050: +mean(1).toFixed(1), meanRank085: +mean(2).toFixed(1), meanRank050: +mean(3).toFixed(1), firstPlaceHours085: d.filter((x) => x[2] === 1).length, firstPlaceHours050: d.filter((x) => x[3] === 1).length };
+  });
+  // top 10 at the next 21:00 local
+  const n21 = now0 + ((18 - (now0 % 24) + 24) % 24);
+  const top = (m: typeof A) => rows.map((r) => [r.name, at(m, r.id, n21)?.[0] ?? null] as const).filter((x) => x[1] !== null).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 10);
+  const { writeFileSync } = await import('node:fs');
+  writeFileSync(lampOut, JSON.stringify({ at: new Date(n21 * 3_600_000).toISOString(), ferryPrior: [was, 0.5], perSpot, top10_085: top(A), top10_050: top(B) }, null, 1) + '\n');
+  console.log(`lamp-sensitivity → ${lampOut}`);
 }
 
 if (compareOut) {

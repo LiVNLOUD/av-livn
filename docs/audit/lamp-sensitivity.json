@@ -1,0 +1,126 @@
+{
+ "at": "2026-11-04T18:00:00.000Z",
+ "ferryPrior": [
+  0.85,
+  0.5
+ ],
+ "perSpot": [
+  {
+   "id": "osm-node-2590599404",
+   "name": "Armutlu İskelesi",
+   "nightHours": 30,
+   "meanScore085": 75.3,
+   "meanScore050": 68.7,
+   "meanRank085": 5.4,
+   "meanRank050": 11.6,
+   "firstPlaceHours085": 6,
+   "firstPlaceHours050": 0
+  },
+  {
+   "id": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "nightHours": 30,
+   "meanScore085": 75.6,
+   "meanScore050": 68.5,
+   "meanRank085": 3.5,
+   "meanRank050": 17.5,
+   "firstPlaceHours085": 0,
+   "firstPlaceHours050": 0
+  },
+  {
+   "id": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "nightHours": 30,
+   "meanScore085": 78.8,
+   "meanScore050": 71.7,
+   "meanRank085": 1.7,
+   "meanRank050": 8.1,
+   "firstPlaceHours085": 27,
+   "firstPlaceHours050": 0
+  }
+ ],
+ "top10_085": [
+  [
+   "İDO Güzelyalı Feribot İskelesi",
+   80.3
+  ],
+  [
+   "Mudanya İskelesi",
+   77
+  ],
+  [
+   "Karacaali İskelesi",
+   74.8
+  ],
+  [
+   "Güzelyalı Yat Limanı – liman içi",
+   74.8
+  ],
+  [
+   "Büyükkumla İskelesi",
+   74.5
+  ],
+  [
+   "Kurşunlu Yat Limanı",
+   74.2
+  ],
+  [
+   "Kapaklı İskelesi (Kapaklı güneyi)",
+   73.9
+  ],
+  [
+   "Demirsubaşı İskelesi",
+   73.1
+  ],
+  [
+   "Güzelyalı Yat Limanı – doğu mendireği",
+   71.9
+  ],
+  [
+   "Kordon (Kurşunlu kuzeydoğusu)",
+   69.3
+  ]
+ ],
+ "top10_050": [
+  [
+   "Karacaali İskelesi",
+   74.8
+  ],
+  [
+   "Güzelyalı Yat Limanı – liman içi",
+   74.8
+  ],
+  [
+   "Büyükkumla İskelesi",
+   74.5
+  ],
+  [
+   "Kurşunlu Yat Limanı",
+   74.2
+  ],
+  [
+   "Kapaklı İskelesi (Kapaklı güneyi)",
+   73.9
+  ],
+  [
+   "Demirsubaşı İskelesi",
+   73.1
+  ],
+  [
+   "İDO Güzelyalı Feribot İskelesi",
+   72.8
+  ],
+  [
+   "Güzelyalı Yat Limanı – doğu mendireği",
+   71.9
+  ],
+  [
+   "Mudanya İskelesi",
+   69.5
+  ],
+  [
+   "Kordon (Kurşunlu kuzeydoğusu)",
+   69.3
+  ]
+ ]
+}

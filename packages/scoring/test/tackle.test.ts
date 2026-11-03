@@ -153,7 +153,8 @@ describe('tackle (F0/G2)', () => {
     expect(tackle({ ...base, crossKmh: null }).jigType).toBe('sabit');
     expect(tackleShort(tackle({ ...base, depthM: 14, sunAlt: 30, currentMs: 0.6 }))).toMatch(/^Spin · 8 g/);
     expect(tackle({ ...base, gustKmh: 40 }).rows[0]!.why).toMatch(/hamle 40 km\/sa: atışta misinayı elle frenle/);
-    expect(lightCase(-10, null)).toBe('karanlık gece');
+    expect(lightCase(-10, null)).toBe('bilinmeyen gece');
+    expect(lightCase(-10, 0.2)).toBe('karanlık gece');
     expect(lightCase(5, 1)).toBe('gündüz');
     expect(crossWind(20, 90, 0)).toBe(20);
     expect(crossWind(20, 0, 0)).toBe(0);
@@ -201,5 +202,35 @@ describe('tackle levrek (H3)', () => {
     const { waveM: _w, kind: _k, ...bare } = lb;
     expect(tackleLevrek(bare).profile).toBe('spin'); // no wave, no kind: spin, not sheltered
     expect(tackleLevrekShort(tackleLevrek(lb))).toMatch(/^Spin · 10 g/);
+  });
+});
+
+describe('I3: unknown lamp → conditional advice; missing data is not calm', () => {
+  it('lamp 0.5 (prior) or null at night gives both variants, lit first; 0.85 counts as lit', () => {
+    for (const lampP of [null, 0.5]) {
+      const t = tackle({ ...base, lampP });
+      expect(t.light).toBe('bilinmeyen gece');
+      const color = t.rows.find((r) => r.key === 'renk')!;
+      expect(color.value).toBe('şeffaf-simli / koyu siluet');
+      expect(color.why).toMatch(/^lamba suya düşüyorsa şeffaf-simli .*; karanlıksa koyu siluet/);
+      expect(t.notes[0]).toMatch(/Lamba durumu bilinmiyor/);
+    }
+    expect(tackle({ ...base, lampP: 0.85 }).light).toBe('aydınlık gece');
+    expect(tackle({ ...base, lampP: 0.85 }).rows.find((r) => r.key === 'renk')!.value).toBe('şeffaf-simli');
+    expect(tackle({ ...base, sunAlt: 20, lampP: null }).light).toBe('gündüz');
+    const lv = tackleLevrek({ ...lb, lampP: null });
+    expect(lv.light).toBe('bilinmeyen gece');
+    expect(lv.rows.find((r) => r.key === 'renk')!.value).toContain(' / ');
+  });
+  it('missing current/wind/wave is named, and never unlocks the light levrek LRF set', () => {
+    const t = tackle({ ...base, currentMs: null, windKmh: null, gustKmh: null });
+    expect(t.notes.at(-1)).toMatch(/^akıntı, rüzgar verisi yok: ağırlık sakin suya göre/);
+    expect(tackle(base).notes.some((n) => /verisi yok/.test(n))).toBe(false);
+    const calm: TackleInput = { depthM: 3, currentMs: 0.05, windKmh: 5, gustKmh: 8, crossKmh: 2, sunAlt: -20, lampP: 1, turbidity: 1, sstDev: 0, waveM: 0.1, kind: 'pier' };
+    expect(tackleLevrek(calm).profile).toBe('lrf');
+    expect(tackleLevrek({ ...calm, waveM: null }).profile).toBe('spin');
+    expect(tackleLevrek({ ...calm, gustKmh: null }).profile).toBe('lrf');
+    expect(tackleLevrek({ ...calm, gustKmh: null, windKmh: null }).profile).toBe('spin');
+    expect(tackleLevrek({ ...calm, waveM: null }).notes.at(-1)).toMatch(/dalga verisi yok/);
   });
 });

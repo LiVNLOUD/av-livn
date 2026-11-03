@@ -187,7 +187,11 @@ import Base from '../../layouts/Base.astro';
     const pub = buildTackle(tkInput(v));
     const depths = priv?.record?.depths ?? [];
     const fieldDepth = depths.length ? 0.4 * fieldBand(depths, 0, 50) + 0.6 * fieldBand(depths, 50, 150) : null;
-    const own = fieldDepth !== null ? buildTackle({ ...tkInput(v), depthM: fieldDepth }) : null;
+    // I3: the owner's device knows the private lamp state; the public box stays conditional when it is unknown
+    const lamp = priv?.has_light ?? null;
+    const own = fieldDepth !== null || lamp !== null
+      ? buildTackle({ ...tkInput(v), ...(fieldDepth !== null ? { depthM: fieldDepth } : {}), ...(lamp !== null ? { lampP: lamp ? 1 : 0 } : {}) })
+      : null;
     const t = own ?? pub;
     $('tk-ver').textContent = `${SPECIES_TR[species]} · ${own ? 'saha ölçümüyle inceltildi' : 'açık veriyle'}`;
     const diff = $('tk-diff');

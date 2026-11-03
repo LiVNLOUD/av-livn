@@ -71,6 +71,8 @@ export interface Tackle {
   rows: TackleRow[];
   /** Information only, never a suggestion (md. 8/8). */
   notes: string[];
+  /** I3: light case behind the advice ('bilinmeyen gece' → rows give both variants). */
+  light: LightCase;
 }
 
 export const LEGAL_MIN_ISTAVRIT_CM = 13;
@@ -78,10 +80,31 @@ const n1 = (x: number) => x.toFixed(1).replace('.', ',').replace(',0', '');
 const nearestSize = (g: number) => JIG_SIZES.reduce((best, s) => (Math.abs(s - g) < Math.abs(best - g) ? s : best), JIG_SIZES[0]!);
 
 /** Hour category from the sun and the pier's lighting. */
-export function lightCase(sunAlt: number, lampP: number | null): 'gündüz' | 'alacakaranlık' | 'aydınlık gece' | 'karanlık gece' {
+export type LightCase = 'gündüz' | 'alacakaranlık' | 'aydınlık gece' | 'karanlık gece' | 'bilinmeyen gece';
+/** I3: lamp probability ≥ LIT_P counts as lit, ≤ DARK_P as dark; in between (or null) the night is unknown and
+ *  the advice is conditional ("lamba suya düşüyorsa … / karanlıksa …"). A prior is not a confirmed lamp. */
+export const LIT_P = 0.7;
+export const DARK_P = 0.3;
+export function lightCase(sunAlt: number, lampP: number | null): LightCase {
   if (sunAlt > 0) return 'gündüz';
   if (sunAlt > -6) return 'alacakaranlık';
-  return (lampP ?? 0) >= 0.5 ? 'aydınlık gece' : 'karanlık gece';
+  if (lampP === null || (lampP > DARK_P && lampP < LIT_P)) return 'bilinmeyen gece';
+  return lampP >= LIT_P ? 'aydınlık gece' : 'karanlık gece';
+}
+
+/** I3: rows of the lit and the dark variant merged; rows that differ say both, the lit one first. */
+function mergeRows(lit: TackleRow[], dark: TackleRow[]): TackleRow[] {
+  return lit.map((r, k) => {
+    const d = dark[k]!;
+    if (r.value === d.value) return r;
+    return { ...r, value: `${r.value} / ${d.value}`, why: `lamba suya düşüyorsa ${r.value} (${r.why}); karanlıksa ${d.value} (${d.why})` };
+  });
+}
+const UNKNOWN_LAMP_NOTE = 'Lamba durumu bilinmiyor: yerinde iskele ışığı suya düşüyorsa "/" işaretinden önceki seçeneği, karanlıksa sonrakini kullan.';
+/** I3: a missing input is not calm water (docs/MODEL.md §15): say what was assumed. */
+function missingNotes(i: TackleInput): string[] {
+  const miss = [i.currentMs == null && 'akıntı', i.windKmh == null && 'rüzgar', i.waveM === null && 'dalga'].filter(Boolean);
+  return miss.length ? [`${miss.join(', ')} verisi yok: ağırlık sakin suya göre hesaplandı; yerinde misina sürükleniyorsa bir boy ağırlaştır.`] : [];
 }
 
 /**
@@ -100,6 +123,17 @@ export function unitIssues(text: string): string[] {
 }
 
 export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFILES, legalMinCm = LEGAL_MIN_ISTAVRIT_CM): Tackle {
+  const light = lightCase(i.sunAlt, i.lampP);
+  if (light === 'bilinmeyen gece') {
+    const lit = tackleOne({ ...i, lampP: 1 }, profiles, legalMinCm);
+    const dark = tackleOne({ ...i, lampP: 0 }, profiles, legalMinCm);
+    return { ...lit, light, rows: mergeRows(lit.rows, dark.rows), notes: [UNKNOWN_LAMP_NOTE, ...lit.notes, ...missingNotes(i)] };
+  }
+  const t = tackleOne(i, profiles, legalMinCm);
+  return { ...t, notes: [...t.notes, ...missingNotes(i)] };
+}
+
+function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number): Tackle {
   const lrf = profiles.find((p) => p.id === 'lrf') ?? DEFAULT_PROFILES[0]!;
   const spin = profiles.find((p) => p.id === 'spin') ?? DEFAULT_PROFILES[1]!;
   const cur = i.currentMs ?? 0;
@@ -173,7 +207,7 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
   const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
   if (gustNote) notes.push(`${gustNote.charAt(0).toLocaleUpperCase('tr')}${gustNote.slice(1)}.`);
   if (color === 'koyu siluet') notes.push('Fosforlu (glow) silikon bir boyadır; onu şarj etmek için ışık kullanmanın kapsamı doğrulanmalı.');
-  return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, rows, notes };
+  return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, rows, notes, light };
 }
 
 /** One-line version (Sahadayım, home page). */
@@ -201,9 +235,20 @@ export interface LevrekTackle {
   color: string;
   rows: TackleRow[];
   notes: string[];
+  light: LightCase;
 }
 
 export function tackleLevrek(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFILES, legalMinCm = LEGAL_MIN_LEVREK_CM): LevrekTackle {
+  if (lightCase(i.sunAlt, i.lampP) === 'bilinmeyen gece') {
+    const lit = levrekOne({ ...i, lampP: 1 }, profiles, legalMinCm);
+    const dark = levrekOne({ ...i, lampP: 0 }, profiles, legalMinCm);
+    return { ...lit, light: 'bilinmeyen gece', rows: mergeRows(lit.rows, dark.rows), notes: [UNKNOWN_LAMP_NOTE, ...lit.notes, ...missingNotes(i)] };
+  }
+  const t = levrekOne(i, profiles, legalMinCm);
+  return { ...t, notes: [...t.notes, ...missingNotes(i)] };
+}
+
+function levrekOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number): LevrekTackle {
   const lrf = profiles.find((p) => p.id === 'lrf') ?? DEFAULT_PROFILES[0]!;
   const spin = profiles.find((p) => p.id === 'spin') ?? DEFAULT_PROFILES[1]!;
   const wave = i.waveM ?? 0;
@@ -216,8 +261,9 @@ export function tackleLevrek(i: TackleInput, profiles: TackleProfile[] = DEFAULT
   const cold = (i.sstDev ?? 0) <= -1.5;
   const sheltered = ['harbour', 'pier', 'quay', 'promenade', 'manual'].includes(i.kind ?? '');
 
-  // light levrek on LRF: calm, shallow, sheltered
-  const useLrf = wave < 0.3 && gust < 20 && cur < 0.2 && depth <= 4 && sheltered;
+  // light levrek on LRF: calm, shallow, sheltered — only when calm is measured, not when data is missing (I3)
+  const known = i.waveM != null && i.currentMs != null && (i.gustKmh ?? i.windKmh) != null;
+  const useLrf = known && wave < 0.3 && gust < 20 && cur < 0.2 && depth <= 4 && sheltered;
   let weightG: number;
   let lure: LevrekTackle['lure'];
   if (useLrf) {
@@ -254,7 +300,7 @@ export function tackleLevrek(i: TackleInput, profiles: TackleProfile[] = DEFAULT
   ];
   const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
   if (gust > spin.maxGustKmh * 0.6) notes.push(`Hamle ${Math.round(gust)} km/sa: rüzgarı arkana ya da yana al, misinayı elle frenle.`);
-  return { profile: useLrf ? 'lrf' : 'spin', weightG, lure, lureCm, color, rows, notes };
+  return { profile: useLrf ? 'lrf' : 'spin', weightG, lure, lureCm, color, rows, notes, light };
 }
 
 /** One-line levrek version. */
