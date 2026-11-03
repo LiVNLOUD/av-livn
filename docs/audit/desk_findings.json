@@ -458,9 +458,17 @@
    "selected": 0
   }
  },
+ "mapillary_review": {
+  "osm-way-24825429-5": 0.6,
+  "osm-way-24825429-6": 0.6,
+  "osm-way-24825429-7": 0.6,
+  "osm-way-24825429-2": 0.6,
+  "osm-way-24825429-3": 0.6
+ },
+ "pruned_mapillary_review": 0,
  "manual": {},
- "pruned_literatur": 0,
- "pruned_ced": 0,
  "pruned_openseamap": 0,
- "written": 2
+ "pruned_ced": 0,
+ "pruned_literatur": 0,
+ "written": 7
 }
