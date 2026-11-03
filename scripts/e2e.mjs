@@ -50,6 +50,16 @@ const overflow = (p) => p.evaluate(() => document.documentElement.scrollWidth - 
   await p.waitForTimeout(800);
   const rows = await p.locator('.r-spots a, .r-spots [data-id], #spots li').count();
   rows > 0 ? ok(`home: ${rows} list rows`) : fail('home: no spot rows');
+  // I9: the first view answers "is there something today?" with one pick, its tackle and ≤ 2 alternatives
+  const verdict = await p.locator('#verdict').innerText();
+  /Yükleniyor|alınamadı/.test(verdict) ? fail(`home: verdict "${verdict}"`) : ok(`home: verdict "${verdict.split('\n')[0]}"`);
+  if (await p.locator('#pick').isVisible()) {
+    await p.waitForFunction(() => document.querySelectorAll('#pick-rig dt').length >= 4, null, { timeout: 8000 }).catch(() => {});
+    const dts = await p.locator('#pick-rig dt').count();
+    dts >= 4 ? ok(`home: main pick with tackle (${dts} rows)`) : fail('home: main pick without tackle rows');
+    const alts = await p.locator('#alts li').count();
+    alts <= 2 ? ok(`home: ${alts} alternatives (≤ 2)`) : fail(`home: ${alts} alternatives`);
+  }
   const ov = await overflow(p);
   ov <= 0 ? ok('home 390: no horizontal overflow') : fail(`home 390: horizontal overflow ${ov} px`);
   errors.length ? fail(`home: console errors ${errors.slice(0, 3).join(' | ')}`) : ok('home: no console errors');

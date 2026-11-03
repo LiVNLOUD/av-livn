@@ -70,7 +70,11 @@ export function windowsBody(rows: WindowsRow[], from: number, hours: number, spe
   const iso = (h: number) => new Date(h * HOUR).toISOString();
   const out = (b: ReturnType<typeof bestWindows>) => ({ threshold: b.threshold, strong: b.strong, windows: b.windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) });
   const all = out(bestWindows(spots, from, hours));
-  return { ok: true, species, from: iso(from), hours, ...all, open: out(bestWindows(spots, from, hours, { openOnly: true })) };
+  // I9: "today" = from now until 06:00 local tomorrow (tonight included), for the home page's first question
+  const lh = (from + 3) % 24;
+  const todayH = lh >= 6 ? 24 - lh + 6 : 6 - lh;
+  const today = { all: out(bestWindows(spots, from, todayH, { n: 3 })), open: out(bestWindows(spots, from, todayH, { n: 3, openOnly: true })), hours: todayH };
+  return { ok: true, species, from: iso(from), hours, ...all, open: out(bestWindows(spots, from, hours, { openOnly: true })), today };
 }
 
 /** Bodies for the given hours, as [meta key, JSON text] rows (score job). */

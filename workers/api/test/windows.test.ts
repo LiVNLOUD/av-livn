@@ -101,3 +101,16 @@ describe('I2: strong vs relative, missing data, access', () => {
     expect(bestWindows(spots, 100, 2, { openOnly: true }).windows.map((w) => w.spot_id)).toEqual(['open']);
   });
 });
+
+describe('I9: today windows in the body', () => {
+  it('covers now → 06:00 local tomorrow, for all and open-access spots', async () => {
+    const { windowsBody } = await import('../src/lib/views');
+    const from = 117 + 18; // 117 = local midnight (UTC+3) → 117 + 18 = 18:00 local
+    const row = (id: string, access: string) => ({ id, name: id, access, start_hour: from, list_json: JSON.stringify(Array.from({ length: 30 }, (_, i): ListEntryV2 => [i === 3 ? 80 : 50, 40, 90, 1, 0, null, null, 0, 0.5])) });
+    const b = windowsBody([row('a', 'acik'), row('f', 'kisitli_feribot')], from, 72);
+    expect(b.today.hours).toBe(12);
+    expect(b.today.all.windows.map((w) => w.spot_id).sort()).toEqual(['a', 'f']);
+    expect(b.today.open.windows.map((w) => w.spot_id)).toEqual(['a']);
+    expect(b.today.all.windows[0]).toMatchObject({ tier: 'guclu', top3: 0.5 });
+  });
+});

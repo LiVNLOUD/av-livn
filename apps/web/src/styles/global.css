@@ -193,3 +193,30 @@ html.embed body { padding-bottom: 0; }
 /* F1: forbidden-area drawing panel (owner) */
 .draw-panel { position: absolute; z-index: 4; left: var(--s3); top: var(--s3); width: min(300px, calc(100% - 24px)); padding: var(--s3); background: var(--deep); border: 1px solid var(--sodium); border-radius: 12px; display: grid; gap: var(--s2); }
 .draw-panel p { margin: 0; }
+
+/* I9: home plan (index.astro; markup is built in the script, so these are global) */
+.plan { margin-top: var(--s4); display: grid; gap: var(--s3); }
+.verdict { margin: 0; font-size: var(--fs-4, 1.25rem); font-weight: 700; line-height: 1.3; }
+.verdict small { display: block; font-size: var(--fs-2); font-weight: 400; color: var(--mist); margin-top: 2px; }
+.main-pick { display: grid; gap: var(--s2); padding: var(--s4); }
+.main-pick .top { display: flex; justify-content: space-between; gap: var(--s3); align-items: baseline; }
+.main-pick .nm { font-size: var(--fs-3, 1.1rem); font-weight: 700; margin: 0; }
+.main-pick .tm { font-variant-numeric: tabular-nums; color: var(--foam); }
+.main-pick .sc { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.main-pick ul { margin: 0; padding-left: 1.1em; display: grid; gap: 2px; font-size: var(--fs-2); }
+.main-pick .badges { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.main-pick .go { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.rig { display: grid; grid-template-columns: 76px 1fr; gap: var(--s3); align-items: center; background: var(--deep); border-radius: 10px; padding: var(--s3); }
+.rig svg { width: 76px; height: 96px; }
+.rig dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px var(--s3); font-size: var(--fs-2); }
+.rig dt { color: var(--mist); } .rig dd { margin: 0; font-weight: 600; }
+.alts { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
+.alts li { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s3); padding: var(--s3); border: 1px solid var(--swell); border-radius: 10px; }
+.alts .a-n { font-weight: 600; } .alts .a-s { font-weight: 700; font-variant-numeric: tabular-nums; } .alts .a-r { grid-column: 1 / -1; font-size: var(--fs-1); color: var(--mist); }
+.alts button { all: unset; cursor: pointer; display: contents; }
+.why-box, .more-win { border-top: 1px solid var(--swell); padding-top: var(--s2); }
+.why-box summary, .more-win summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: var(--s2); font-weight: 600; }
+.why-box p { font-size: var(--fs-2); margin: var(--s2) 0; }
+.more-win .windows { margin-top: var(--s2); }
+.to-all { margin: var(--s3) 0 0; } .to-all a { display: inline-flex; min-height: 44px; align-items: center; }
+.badge.good { border-color: #5fbf7f; color: #5fbf7f; }

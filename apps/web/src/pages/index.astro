@@ -14,9 +14,26 @@ import Base from '../layouts/Base.astro';
       </div>
       <p class="fs-1 muted sp-note" id="sp-note">Levrek deneysel (kanıtın çoğu varsayım); diğer türler araştırma aşamasında.</p>
 
-      <h2 class="sec">En iyi pencereler <span class="muted fs-2">önümüzdeki 72 saat</span></h2>
-      <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
-      <p class="muted fs-1" id="win-note"></p>
+      <!-- I9: first view = one plan, at most two alternatives; everything else is one tap away -->
+      <div class="plan" id="plan" aria-live="polite">
+        <p class="verdict" id="verdict">Yükleniyor…</p>
+        <article class="card main-pick" id="pick" hidden></article>
+        <ol class="alts" id="alts" hidden></ol>
+        <details class="why-box">
+          <summary>Puan ne demek? Öneri ne kadar sağlam?</summary>
+          <p>Puan, o saatteki koşulların bu tür için tanımlı <b>ideal senaryoya göre yeri</b> (0–100). Sahada doğrulanmış yakalama olasılığı değildir; av günlüğünde henüz yeterli ileriye dönük seans yok.</p>
+          <p><b>Bant</b> ve <b>“ilk 3'te”</b> oranı yalnız model parametrelerinin belirsizliğini gösterir. Hava tahmininin hatası ve modelin yapısı bu aralığa dahil değildir.</p>
+          <p><b>Güçlü:</b> zirve ≥ 65 ve veri tam. <b>Görece:</b> mevcut seçeneklerin en iyisi. Rüzgar ya da dalga verisi yoksa öneri verilmez.</p>
+          <p>Kanıt düzeyleri ve formüller: <a href="/model/">Model nasıl çalışıyor?</a> · Veri kaynakları ve geçerlilik kuralları: <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/DATA-SOURCES.md">DATA-SOURCES</a></p>
+        </details>
+      </div>
+
+      <details class="more-win" id="more-win">
+        <summary>Tüm pencereler <span class="muted fs-2">önümüzdeki 72 saat</span></summary>
+        <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
+        <p class="muted fs-1" id="win-note"></p>
+      </details>
+      <p class="fs-2 to-all"><a href="#t-spots">Tüm meralar, saat çizelgesi ve harita ↓</a></p>
     </section>
 
     <section class="r-heat" aria-labelledby="t-heat">
@@ -110,6 +127,7 @@ import Base from '../layouts/Base.astro';
   }
 
   .r-win h1 { margin-top: var(--s1); }
+
   .sec { margin: var(--s5) 0 var(--s3); display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
   .species { display: flex; gap: var(--s2); overflow-x: auto; margin-top: var(--s4); padding-bottom: 2px; }
   .sp { flex: none; height: 32px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font-size: var(--fs-2); font-weight: 600; }
@@ -168,6 +186,8 @@ import Base from '../layouts/Base.astro';
   .spots { list-style: none; margin: var(--s2) 0 0; padding: 0; }
   :global(.grp-btn) { width: 100%; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s3) 0; border: 0; border-top: 1px solid var(--swell); background: none; color: var(--foam); font: inherit; font-size: var(--fs-2); text-align: left; cursor: pointer; min-height: 52px; }
   :global(.grp-btn:hover) { color: var(--sodium); }
+  :global(.grp), :global(.grp-btn) { min-width: 0; max-width: 100%; }
+  :global(.grp-btn > span:last-child) { white-space: normal; overflow-wrap: anywhere; min-width: 0; }
   :global(.grp.beach .grp-btn) { font-weight: 650; }
   :global(.heatmap .hm-grp text) { fill: var(--sodium); font-weight: 650; cursor: pointer; }
   :global(.spot) { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: var(--s3); align-items: center; padding: var(--s3) 0; border-top: 1px solid var(--swell); text-decoration: none; cursor: pointer; }
@@ -198,7 +218,7 @@ import Base from '../layouts/Base.astro';
     id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
-  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null };
+  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const app = $('app');
@@ -222,6 +242,7 @@ import Base from '../layouts/Base.astro';
     heat();
     summary();
     renderWindows();
+    renderPlan();
   });
 
   // ---------------------------------------------------------------- card drawer
@@ -521,7 +542,7 @@ import Base from '../layouts/Base.astro';
 
   // ---------------------------------------------------------------- best windows (E3)
   type WinList = { windows: Win[]; threshold: number; strong?: number };
-  let winBody: (WinList & { open?: WinList }) | null = null;
+  let winBody: (WinList & { open?: WinList; today?: { all: WinList; open: WinList; hours: number } }) | null = null;
   /** I2: the access filter applies to windows too (server computes the open-access list separately). */
   function renderWindows() {
     const ol = $('windows');
@@ -556,10 +577,104 @@ import Base from '../layouts/Base.astro';
       ? `72 saatte 65'i geçen saat az; en yüksek %15'lik dilim (≥ ${Math.round(b.threshold)}) gösteriliyor.`
       : 'Güçlü: zirve ≥ 65 ve veri tam. Pencere: zirve saatin çevresinde puanın 65 ve zirve − 8\'in üstünde kaldığı en çok 4 saat; mera başına bir pencere.';
   }
+
+  // ---------------------------------------------------------------- I9: the plan (first view)
+  const COLOR_FILL: [RegExp, string][] = [[/şeffaf|beyaz|gümüş/, '#dfe9ef'], [/koyu|siyah|mor/, '#3a3550'], [/parlak|chartreuse/, '#e8e23a'], [/doğal/, '#c9b28a']];
+  const fillOf = (c: string) => COLOR_FILL.find(([re]) => re.test(c))?.[1] ?? '#c9b28a';
+  const ZONE_Y: Record<string, number> = { 'yüzeye yakın': 24, 'orta su': 52, 'dibe yakın': 80 };
+  /** Small rig picture: water column, target layer, jighead sized by grams, lure in its colour. */
+  function rigSvg(g: number, zone: string, color: string) {
+    const y = ZONE_Y[zone] ?? 52;
+    const r = Math.max(3, Math.min(9, 2.5 + Math.sqrt(g) * 1.6));
+    return `<svg viewBox="0 0 76 96" aria-hidden="true">
+      <rect x="0" y="10" width="76" height="86" rx="6" fill="#10283a"/>
+      <path d="M0 10 Q19 6 38 10 T76 10" stroke="#6fa3bf" fill="none" stroke-width="1.5"/>
+      <rect x="0" y="88" width="76" height="8" fill="#3b3326"/>
+      <line x1="38" y1="0" x2="38" y2="${y - r}" stroke="#dbe6ea" stroke-width="1" stroke-dasharray="2 2"/>
+      <circle cx="38" cy="${y}" r="${r.toFixed(1)}" fill="#b9c4cc"/>
+      <path d="M${38 + r} ${y} q12 -5 22 3 q-10 5 -22 -3z" fill="${fillOf(color)}" stroke="#0e1c27" stroke-width=".6"/>
+      <rect x="2" y="${y - 7}" width="6" height="14" rx="2" fill="var(--sodium, #f2a93b)"/>
+    </svg>`;
+  }
+  let planSeq = 0;
+  async function renderPlan() {
+    const my = ++planSeq;
+    if (!winBody) return;
+    const b = box.checked && winBody.open ? winBody.open : winBody;
+    const ws = b.windows;
+    const pick = $('pick');
+    const alts = $('alts');
+    const verdict = $('verdict');
+    if (!ws.length) {
+      verdict.innerHTML = '72 saatte öneri yok.<small>Ya koşullar uygun değil ya da rüzgar/dalga verisi eksik (güvenlik denetlenemiyor). Güvenlik uyarılarını listede görebilirsiniz.</small>';
+      pick.hidden = true; alts.hidden = true; return;
+    }
+    // I9: answer "today?" first (until 06:00 tomorrow), then the nearest strong option in 72 h, else the relative best
+    const td = winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : [];
+    for (const w of td) w.tier ??= w.total >= 65 ? 'guclu' : 'goreli';
+    const todayStrong = td.find((w) => w.tier === 'guclu');
+    const nextStrong = ws.find((w) => w.tier === 'guclu');
+    const m = todayStrong ?? nextStrong ?? ws[0]!;
+    const startD = fmtDay(m.start);
+    const today = fmtDay(new Date().toISOString());
+    const when = startD === today ? 'Bugün' : startD;
+    const scope = `${SPECIES_TR[species]} için, ${box.checked ? 'yalnız erişimi açık meralar' : 'tüm meralar'} arasından.`;
+    verdict.innerHTML = todayStrong
+      ? `Bugün ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}: anlamlı bir seçenek var.<small>${scope}</small>`
+      : nextStrong
+      ? `Bugün güçlü seçenek yok. En yakın güçlü pencere: ${esc(when)} ${fmtTime(m.start)}.<small>${scope}${td[0] ? ` Bugünün görece en iyisi: ${esc(td[0].name)}, ${Math.round(td[0].total)}.` : ''}</small>`
+      : `72 saatte güçlü öneri yok.<small>Aşağıdaki, mevcut seçeneklerin görece en iyisi; gitmek için güçlü bir gerekçe değil. ${scope}</small>`;
+    const col = Math.floor(Date.parse(m.peak) / HOUR) - nowHour;
+    const robust = [
+      m.tier === 'guclu' ? '<span class="badge good">güçlü</span>' : '<span class="badge assume">görece</span>',
+      m.missing ? `<span class="badge warn">${esc(m.missing)}</span>` : '<span class="badge">veri tam</span>',
+      m.top3 != null ? `<span class="badge${m.top3 < 0.5 ? ' assume' : ''}" title="Model parametreleri oynatıldığında bu meranın ilk 3'te kaldığı çekimlerin payı (tahmin hatası dahil değil)">ilk 3'te: çekimlerin %${Math.round(m.top3 * 100)}'i</span>` : '',
+      m.access && m.access !== 'acik' ? `<span class="badge warn">${esc(ACCESS_BADGE[m.access] ?? 'erişim belirsiz')}</span>` : '',
+      m.assumed ? '<span class="badge assume">ana gerekçe varsayıma dayanıyor</span>' : '',
+    ].join('');
+    const reasons = [
+      m.why ? `${esc(m.why)}${m.assumed ? ' (varsayım)' : ''}` : null,
+      `en iyi saat ${fmtTime(m.peak)}${m.p10 !== null && m.p90 !== null ? `, bant ${Math.round(m.p10)}–${Math.round(m.p90)}` : ''}`,
+      m.top3 != null && m.top3 < 0.5 ? 'sıralama kararsız: alternatiflerle arası açık değil' : null,
+    ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
+    pick.innerHTML = `<div class="top"><div><p class="nm">${esc(m.name)}</p><span class="tm">${esc(when)} ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}</span></div><span class="sc" title="Puan: ideal senaryoya göre yer, yakalama olasılığı değil">${Math.round(m.total)}</span></div>
+      <div class="rig" id="pick-rig"><svg viewBox="0 0 76 96"></svg><dl><dt>Takım</dt><dd>hesaplanıyor…</dd></dl></div>
+      <ul>${reasons}</ul>
+      <div class="badges">${robust}</div>
+      <div class="go"><button type="button" class="btn small" id="pick-open">Merayı ve saatleri aç</button><a class="btn small secondary" href="${link(`/sahadayim/?id=${encodeURIComponent(m.spot_id)}`, species)}">Sahadayım'da başlat</a></div>`;
+    pick.hidden = false;
+    $('pick-open').addEventListener('click', () => openSpot(m.spot_id, col));
+    const pool = todayStrong ? [...td, ...ws] : ws;
+    const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
+    alts.innerHTML = others.map((w) => {
+      const c = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
+      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${c}"><span class="a-n">${esc(w.name)}</span><span class="a-s">${Math.round(w.total)}</span><span class="a-r">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}${w.tier === 'guclu' ? '' : ' · görece'}${w.missing ? ' · eksik veri' : ''}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}</span></button></li>`;
+    }).join('');
+    alts.hidden = !others.length;
+    alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
+    // tackle for the peak hour (public inputs; owner refinements stay on the card)
+    const d = await detail(m.spot_id);
+    if (my !== planSeq) return;
+    const rig = document.getElementById('pick-rig');
+    const v = d?.packed?.tk?.[d.from + col];
+    if (!rig) return;
+    if (!v) { rig.innerHTML = '<p class="muted fs-2">Takım önerisi için bu saatin girdileri yok.</p>'; return; }
+    const kind = all.find((x) => x.id === m.spot_id)?.kind;
+    const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind };
+    if (species === 'levrek') {
+      const t = tackleLevrek(input, profiles);
+      const row = (k: string) => t.rows.find((r) => r.key === k)?.value ?? '–';
+      rig.innerHTML = `${rigSvg(t.weightG, 'orta su', t.color)}<dl><dt>Takım</dt><dd>${t.profile === 'lrf' ? 'LRF' : 'Spin'} · ${String(t.weightG).replace('.', ',')} g</dd><dt>Yem</dt><dd>${esc(row('yem'))}</dd><dt>Renk</dt><dd>${esc(t.color)}</dd><dt>Teknik</dt><dd>${esc(row('teknik'))}</dd><dt>Yasal</dt><dd>${LEGAL_MIN[species]} cm</dd></dl>`;
+    } else {
+      const t = tackle(input, profiles);
+      const row = (k: string) => t.rows.find((r) => r.key === k)?.value ?? '–';
+      rig.innerHTML = `${rigSvg(t.jigG, t.zone, t.color)}<dl><dt>Takım</dt><dd>${t.profile === 'lrf' ? 'LRF' : 'Spin'} · ${esc(row('jighead'))}</dd><dt>Silikon</dt><dd>${esc(row('silikon'))}</dd><dt>Renk</dt><dd>${esc(row('renk'))}</dd><dt>Katman</dt><dd>${esc(t.zone)} · say ${esc(row('saydirma'))}</dd><dt>Yasal</dt><dd>${LEGAL_MIN[species]} cm</dd></dl>${t.light === 'bilinmeyen gece' ? '<p class="fs-1 muted" style="grid-column:1/-1;margin:0">Lamba durumu bilinmiyor: "/" öncesi lamba suya düşüyorsa, sonrası karanlıksa.</p>' : ''}`;
+    }
+  }
   const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-    .then((b: WinList & { open?: WinList }) => { winBody = b; renderWindows(); })
-    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; });
+    .then((b: NonNullable<typeof winBody>) => { winBody = b; renderWindows(); renderPlan(); })
+    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). Liste aşağıda.'; });
   loadWindows();
 
   // ---------------------------------------------------------------- species (H3)
