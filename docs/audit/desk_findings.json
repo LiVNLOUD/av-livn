@@ -1,31 +1,466 @@
 {
- "date": "2026-10-31",
- "spots": 16,
+ "date": "2026-11-03",
+ "spots": 90,
  "osm_lamp": {
+  "osm-way-479047534-1": "OSM: 1 lamba/fener ≤ 40 m (seamark_light 38 m)",
   "osm-way-77362926": "OSM: 1 lamba/fener ≤ 40 m (seamark_light 37 m)"
  },
  "pruned_osm_lamp": 0,
  "mapillary": {
-  "osm-way-1005837524": 0,
-  "osm-way-1170373161": 0,
-  "osm-way-1218507890": 0,
-  "osm-way-1233883494": 0,
-  "osm-way-1364814104": 0,
-  "osm-way-1394208144": 0,
-  "osm-way-1413355181": 0,
-  "osm-way-1414984335": 0,
-  "osm-way-1422122108": 0,
-  "osm-way-1456975486": 0,
-  "osm-way-252356832": 0,
-  "osm-way-252356833": 0,
-  "osm-way-479047532": 0,
-  "osm-way-483965349": 0,
-  "osm-way-503770078": 0,
-  "osm-way-77362926": 0
+  "osm-node-11865648199": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-node-11981818601-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-node-13872728204": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-node-2590599404": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-node-2794622004": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1005837524": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1073087871-1": {
+   "found": 263,
+   "facing": 57,
+   "selected": 6
+  },
+  "osm-way-1165497962": {
+   "found": 28,
+   "facing": 13,
+   "selected": 6
+  },
+  "osm-way-1170373160-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1170373160-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1170373160-3": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1170373161": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216668-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216668-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216676-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216676-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216676-3": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216676-6": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1217216676-7": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1218507890": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1218508014": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1233883494": {
+   "found": 92,
+   "facing": 18,
+   "selected": 6
+  },
+  "osm-way-1305691023-1": {
+   "found": 50,
+   "facing": 0,
+   "selected": 6
+  },
+  "osm-way-1305691027-1": {
+   "found": 35,
+   "facing": 0,
+   "selected": 6
+  },
+  "osm-way-1305691028-1": {
+   "found": 27,
+   "facing": 1,
+   "selected": 6
+  },
+  "osm-way-1305691029-1": {
+   "found": 42,
+   "facing": 3,
+   "selected": 6
+  },
+  "osm-way-1336893175-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1336893184-1": {
+   "found": 182,
+   "facing": 47,
+   "selected": 6
+  },
+  "osm-way-1364814104": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1391521782-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1392831837-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1392831837-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1392831837-3": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1392831837-4": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1392831837-5": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1392831837-6": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1393123413-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1393123413-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394208138-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394208138-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394208144": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394523720-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394523720-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394523720-3": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1394523720-4": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1413355181": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1413355183-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1414984335": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1414985743-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1414985743-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1414985744-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1422122108": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1422351411-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1430949806": {
+   "found": 42,
+   "facing": 5,
+   "selected": 6
+  },
+  "osm-way-1445587670-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1456975486": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1500766926-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-1552615726": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-24825429-1": {
+   "found": 27,
+   "facing": 13,
+   "selected": 6
+  },
+  "osm-way-24825429-2": {
+   "found": 32,
+   "facing": 18,
+   "selected": 6
+  },
+  "osm-way-24825429-3": {
+   "found": 27,
+   "facing": 11,
+   "selected": 6
+  },
+  "osm-way-24825429-4": {
+   "found": 29,
+   "facing": 16,
+   "selected": 6
+  },
+  "osm-way-24825429-5": {
+   "found": 25,
+   "facing": 12,
+   "selected": 6
+  },
+  "osm-way-24825429-6": {
+   "found": 28,
+   "facing": 14,
+   "selected": 6
+  },
+  "osm-way-24825429-7": {
+   "found": 26,
+   "facing": 12,
+   "selected": 6
+  },
+  "osm-way-24825429-8": {
+   "found": 30,
+   "facing": 17,
+   "selected": 6
+  },
+  "osm-way-24825429-9": {
+   "found": 30,
+   "facing": 14,
+   "selected": 6
+  },
+  "osm-way-252356832": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-252356833": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-253063517": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-253083807": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-428743002-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-479047532": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-479047534-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-479047534-2": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-479047535-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-483965349": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-503770078": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-519554786-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-534210128-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-639389497-1": {
+   "found": 166,
+   "facing": 61,
+   "selected": 6
+  },
+  "osm-way-639389497-2": {
+   "found": 133,
+   "facing": 60,
+   "selected": 6
+  },
+  "osm-way-639389497-3": {
+   "found": 121,
+   "facing": 47,
+   "selected": 6
+  },
+  "osm-way-665674892-1": {
+   "found": 108,
+   "facing": 21,
+   "selected": 6
+  },
+  "osm-way-681112515": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-684554355": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-698849100": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-700323582": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-757494038-1": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  },
+  "osm-way-77362926": {
+   "found": 0,
+   "facing": 0,
+   "selected": 0
+  }
  },
  "manual": {},
+ "pruned_literatur": 0,
  "pruned_ced": 0,
  "pruned_openseamap": 0,
- "pruned_literatur": 0,
- "written": 1
+ "written": 2
 }

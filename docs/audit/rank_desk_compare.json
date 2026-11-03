@@ -1,968 +1,5768 @@
 {
- "hour": "2026-10-31T09:00:00.000Z",
+ "hour": "2026-11-03T21:00:00.000Z",
  "spots": [
   {
-   "spot_id": "osm-way-1005837524",
-   "name": "İskele (Kapaklı)",
+   "spot_id": "osm-node-11865648199",
+   "name": "Tirilye Limanı",
    "before": [
-    68.6,
-    46.3,
-    81.2,
+    74.9,
+    44.2,
+    91.8,
     8,
     0,
     null,
     [
-     "yapi",
-     2.1,
-     "Öne çıkaran: iskele 283 m — OSM, kanıt C"
-    ]
+     "lamba",
+     6.2,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    68.6,
+    74.9,
+    44.2,
+    91.8,
+    8,
+    0,
+    null,
+    [
+     "lamba",
+     6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-node-11981818601-1",
+   "name": "Ayı Burnu",
+   "before": [
+    61,
+    40.2,
+    78.3,
+    54,
+    0,
+    null,
+    [
+     "lamba",
+     -8.2,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    61,
+    40.2,
+    78.3,
+    55,
+    0,
+    null,
+    [
+     "lamba",
+     -8.4,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-node-13872728204",
+   "name": "Karacaali İskelesi",
+   "before": [
+    75.9,
+    45.9,
+    92.5,
+    4,
+    0,
+    null,
+    [
+     "lamba",
+     6.3,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    75.9,
+    45.9,
+    92.5,
+    4,
+    0,
+    null,
+    [
+     "lamba",
+     6.1,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-node-2590599404",
+   "name": "Armutlu İskelesi",
+   "before": [
+    80.6,
+    58.3,
+    92.3,
+    2,
+    0,
+    null,
+    [
+     "lamba",
+     11.5,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    80.6,
+    58.3,
+    92.3,
+    2,
+    0,
+    null,
+    [
+     "lamba",
+     11.3,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-node-2794622004",
+   "name": "Büyükkumla İskelesi",
+   "before": [
+    75.6,
     46.3,
-    81.2,
+    92.3,
+    5,
+    0,
+    null,
+    [
+     "lamba",
+     6.3,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    75.6,
+    46.3,
+    92.3,
+    5,
+    0,
+    null,
+    [
+     "lamba",
+     6.1,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1005837524",
+   "name": "Kapaklı İskelesi (Kapaklı güneyi)",
+   "before": [
+    74.9,
+    47.9,
+    90.5,
     8,
     0,
     null,
     [
      "yapi",
-     2.1,
+     8.1,
      "Öne çıkaran: iskele 283 m — OSM, kanıt C"
-    ]
+    ],
+    0
+   ],
+   "after": [
+    74.9,
+    47.9,
+    90.5,
+    8,
+    0,
+    null,
+    [
+     "yapi",
+     8.1,
+     "Öne çıkaran: iskele 283 m — OSM, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1073087871-1",
+   "name": "Kordon (Ömerbey Mah. güneydoğusu)",
+   "before": [
+    69.8,
+    44.5,
+    88,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.8,
+    44.5,
+    88,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1165497962",
+   "name": "Kurşunlu Yat Limanı",
+   "before": [
+    75.3,
+    45.4,
+    92.1,
+    6,
+    0,
+    null,
+    [
+     "lamba",
+     6.2,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    75.3,
+    45.4,
+    92.1,
+    6,
+    0,
+    null,
+    [
+     "lamba",
+     6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1170373160-1",
+   "name": "Kordon (Armutlu batısı)",
+   "before": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1170373160-2",
+   "name": "Kordon (Armutlu batısı) 2",
+   "before": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1170373160-3",
+   "name": "Kordon (Armutlu batısı) 3",
+   "before": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1170373161",
-   "name": "İskele (Armutlu)",
+   "name": "Armutlu İskelesi (Armutlu batısı)",
    "before": [
-    52.1,
-    34.1,
-    70.7,
-    15,
+    66.8,
+    40,
+    86.1,
+    47,
     0,
     null,
     [
-     "derinlik",
-     -10.1,
-     "Geri bırakan: atış mesafesinde ~1.6 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    52.1,
-    34.1,
-    70.7,
-    15,
+    66.8,
+    40,
+    86.1,
+    47,
     0,
     null,
     [
-     "derinlik",
-     -10.1,
-     "Geri bırakan: atış mesafesinde ~1.6 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216668-1",
+   "name": "Kordon (Dr.Ziya Kaya batısı)",
+   "before": [
+    69.9,
+    44.6,
+    88.4,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.9,
+    44.6,
+    88.4,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216668-2",
+   "name": "Kordon (Demirsubaşı güneyi)",
+   "before": [
+    69.9,
+    44.5,
+    88.4,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.9,
+    44.5,
+    88.4,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216676-1",
+   "name": "Kordon (Cumhuriyet batısı)",
+   "before": [
+    69.8,
+    44.5,
+    88.4,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.8,
+    44.5,
+    88.4,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216676-2",
+   "name": "Kordon (Cumhuriyet güneyi)",
+   "before": [
+    69.8,
+    44.5,
+    88.3,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.8,
+    44.5,
+    88.3,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216676-3",
+   "name": "Kordon (Orhaniye batısı)",
+   "before": [
+    69.8,
+    44.5,
+    88.3,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.8,
+    44.5,
+    88.3,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216676-6",
+   "name": "Kordon (Kayhan güneybatısı)",
+   "before": [
+    69.9,
+    44.5,
+    88.4,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.9,
+    44.5,
+    88.4,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1217216676-7",
+   "name": "Kordon (Balıkpazarı güneybatısı)",
+   "before": [
+    69.9,
+    44.5,
+    88.3,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.9,
+    44.5,
+    88.3,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1218507890",
    "name": "Küçükkumla İskelesi",
    "before": [
-    54.8,
-    36,
-    72.8,
-    12,
+    66.2,
+    41.2,
+    85.6,
+    49,
     0,
     null,
     [
-     "derinlik",
-     -8.3,
-     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    54.8,
-    36,
-    72.8,
-    12,
+    66.2,
+    41.2,
+    85.6,
+    49,
     0,
     null,
     [
-     "derinlik",
-     -8.3,
-     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1218508014",
+   "name": "Kumla Deresi ağzı",
+   "before": [
+    56.3,
+    33.3,
+    77.2,
+    59,
+    0,
+    null,
+    [
+     "lamba",
+     -6.4,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.3,
+    33.3,
+    77.2,
+    60,
+    0,
+    null,
+    [
+     "lamba",
+     -6.6,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1233883494",
    "name": "Mudanya İskelesi",
    "before": [
-    73.6,
-    47.1,
-    83.5,
-    5,
+    78.2,
+    56.8,
+    91.5,
+    3,
     0,
     null,
     [
-     "derinlik",
-     6.5,
-     "Öne çıkaran: atış mesafesinde ~3.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     11.5,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    73.6,
-    47.1,
-    83.5,
-    5,
+    78.2,
+    56.8,
+    91.5,
+    3,
     0,
     null,
     [
-     "derinlik",
-     6.5,
-     "Öne çıkaran: atış mesafesinde ~3.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     11.4,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1305691023-1",
+   "name": "Kumsal (Güzelyalı Yalı kuzeydoğusu)",
+   "before": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1305691027-1",
+   "name": "Kumsal (Güzelyalı Yalı kuzeybatısı)",
+   "before": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1305691028-1",
+   "name": "Kumsal (Güzelyalı Siteler kuzeyi)",
+   "before": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1305691029-1",
+   "name": "Kumsal (Güzelyalı Siteler kuzeyi) 2",
+   "before": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1336893175-1",
+   "name": "Kordon (Orhaniye güneybatısı)",
+   "before": [
+    69.8,
+    44.5,
+    88.3,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.8,
+    44.5,
+    88.3,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1336893184-1",
+   "name": "Kordon (Hisar kuzeybatısı)",
+   "before": [
+    69.8,
+    44.6,
+    88.1,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.8,
+    44.6,
+    88.1,
+    27,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1364814104",
    "name": "Armutlu Devlet Limanı – doğu mendireği",
    "before": [
-    54.2,
-    34.6,
-    73.3,
-    14,
+    63.4,
+    37.4,
+    84.5,
+    52,
     0,
     null,
     [
-     "derinlik",
-     -8,
-     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     1.8,
+     "Öne çıkaran: mendirek 64 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    54.2,
-    34.6,
-    73.3,
-    14,
+    63.4,
+    37.4,
+    84.5,
+    52,
     0,
     null,
     [
-     "derinlik",
-     -8,
-     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     -1.8,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,30 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1391521782-1",
+   "name": "Kumsal (Fıstıklı batısı)",
+   "before": [
+    51.9,
+    29.1,
+    72.8,
+    63,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.9,
+    29.1,
+    72.8,
+    64,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1392831837-1",
+   "name": "Kumsal (Armutlu güneydoğusu)",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1392831837-2",
+   "name": "Kumsal (Armutlu güneydoğusu) 2",
+   "before": [
+    51.5,
+    28.8,
+    72.4,
+    83,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.5,
+    28.8,
+    72.4,
+    83,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1392831837-3",
+   "name": "Kumsal (Armutlu güneydoğusu) 3",
+   "before": [
+    51.8,
+    29,
+    72.7,
+    66,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.8,
+    29,
+    72.7,
+    67,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1392831837-4",
+   "name": "Kumsal (Armutlu güneydoğusu) 4",
+   "before": [
+    51.8,
+    29,
+    72.7,
+    66,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.8,
+    29,
+    72.7,
+    67,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1392831837-5",
+   "name": "Kumsal (Armutlu güneydoğusu) 5",
+   "before": [
+    51.9,
+    29.1,
+    72.8,
+    63,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.9,
+    29.1,
+    72.8,
+    64,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1392831837-6",
+   "name": "Kumsal (Fıstıklı batısı) 2",
+   "before": [
+    51.9,
+    29.1,
+    72.8,
+    63,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.9,
+    29.1,
+    72.8,
+    64,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1393123413-1",
+   "name": "Kumsal (Armutlu güneydoğusu) 6",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1393123413-2",
+   "name": "Kumsal (Armutlu güneydoğusu) 7",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394208138-1",
+   "name": "Kumsal (Armutlu güneyi)",
+   "before": [
+    51.6,
+    29,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    29,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394208138-2",
+   "name": "Kumsal (Armutlu güneyi) 2",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1394208144",
-   "name": "Armutlu Devlet Limanı – kısa batı mendireği",
+   "name": "Armutlu Devlet Limanı – orta batı mendireği",
    "before": [
-    63.2,
-    40.3,
-    78.9,
-    11,
+    67.1,
+    40.9,
+    87.8,
+    45,
     0,
     null,
     [
-     "derinlik",
-     -2.3,
-     "Geri bırakan: atış mesafesinde ~2.4 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     5.5,
+     "Öne çıkaran: mendirek 112 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    63.2,
-    40.3,
-    78.9,
-    11,
+    67.1,
+    40.9,
+    87.8,
+    45,
     0,
     null,
     [
-     "derinlik",
-     -2.3,
-     "Geri bırakan: atış mesafesinde ~2.4 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     5.5,
+     "Öne çıkaran: mendirek 112 m — OSM, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394523720-1",
+   "name": "Kumsal (Armutlu güneybatısı)",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394523720-2",
+   "name": "Kumsal (Armutlu güneybatısı) 2",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394523720-3",
+   "name": "Kumsal (Armutlu güneybatısı) 3",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1394523720-4",
+   "name": "Kumsal (Armutlu güneyi) 3",
+   "before": [
+    51.7,
+    28.9,
+    72.6,
+    71,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.7,
+    28.9,
+    72.6,
+    71,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1413355181",
    "name": "Armutlu Devlet Limanı – uzun batı mendireği",
    "before": [
-    81,
-    50.5,
-    88.2,
-    2,
+    72.9,
+    45.1,
+    89.6,
+    10,
     0,
     null,
     [
-     "derinlik",
-     8.8,
-     "Öne çıkaran: atış mesafesinde ~3.9 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     11.3,
+     "Öne çıkaran: mendirek 353 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    81,
-    50.5,
-    88.2,
-    2,
+    72.9,
+    45.1,
+    89.6,
+    11,
     0,
     null,
     [
-     "derinlik",
-     8.8,
-     "Öne çıkaran: atış mesafesinde ~3.9 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     11.3,
+     "Öne çıkaran: mendirek 353 m — OSM, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1413355183-1",
+   "name": "Kordon (Armutlu batısı) 4",
+   "before": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1414984335",
-   "name": "İskele (Fıstıklı)",
+   "name": "Fıstıklı İskelesi (Fıstıklı güneybatısı)",
    "before": [
-    76.5,
-    48.1,
-    87.5,
-    4,
+    69.7,
+    42.6,
+    88.6,
+    33,
     0,
     null,
     [
-     "derinlik",
-     11.6,
-     "Öne çıkaran: atış mesafesinde ~4.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    76.5,
-    48.1,
-    87.5,
-    4,
+    69.7,
+    42.6,
+    88.6,
+    33,
     0,
     null,
     [
-     "derinlik",
-     11.6,
-     "Öne çıkaran: atış mesafesinde ~4.5 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1414985743-1",
+   "name": "Kumsal (Fıstıklı batısı) 3",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1414985743-2",
+   "name": "Kumsal (Fıstıklı güneybatısı)",
+   "before": [
+    51.6,
+    29,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    29,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1414985744-1",
+   "name": "Kumsal (Fıstıklı güneybatısı) 2",
+   "before": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.6,
+    28.8,
+    72.5,
+    72,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1422122108",
-   "name": "Armutlu Devlet Limanı – orta batı mendireği",
+   "name": "Armutlu Devlet Limanı – kısa batı mendireği",
    "before": [
-    72,
-    45.7,
-    84.1,
-    6,
+    66.4,
+    40.2,
+    87.1,
+    48,
     0,
     null,
     [
      "yapi",
-     5.2,
-     "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
-    ]
+     4.7,
+     "Öne çıkaran: mendirek 100 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    72,
-    45.7,
-    84.1,
-    6,
+    66.4,
+    40.2,
+    87.1,
+    48,
     0,
     null,
     [
      "yapi",
-     5.2,
-     "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
-    ]
+     4.7,
+     "Öne çıkaran: mendirek 100 m — OSM, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1422351411-1",
+   "name": "Kayalık kıyı (Armutlu güneydoğusu)",
+   "before": [
+    61.1,
+    40.2,
+    78.5,
+    53,
+    0,
+    null,
+    [
+     "lamba",
+     -8.2,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    61.1,
+    40.2,
+    78.5,
+    54,
+    0,
+    null,
+    [
+     "lamba",
+     -8.4,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1430949806",
+   "name": "Dere ağzı (Güzelyalı Burgaz)",
+   "before": [
+    56.2,
+    33.1,
+    76.8,
+    62,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.2,
+    33.1,
+    76.8,
+    63,
+    0,
+    null,
+    [
+     "lamba",
+     -6.6,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1445587670-1",
+   "name": "Kordon (Fıstıklı batısı)",
+   "before": [
+    70.3,
+    44.8,
+    88.5,
+    13,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70.3,
+    44.8,
+    88.5,
+    13,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-1456975486",
    "name": "Petek Sitesi İskele",
    "before": [
-    64.7,
-    38.3,
-    81.7,
-    10,
+    65.5,
+    37.8,
+    85,
+    50,
     0,
     null,
     [
-     "yapi",
-     -4.5,
-     "Geri bırakan: iskele 99 m — OSM, kanıt C"
-    ]
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    64.7,
-    38.3,
-    81.7,
-    10,
+    65.5,
+    37.8,
+    85,
+    50,
     0,
     null,
     [
-     "yapi",
-     -4.5,
-     "Geri bırakan: iskele 99 m — OSM, kanıt C"
-    ]
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1500766926-1",
+   "name": "Kordon (Demirsubaşı güneybatısı)",
+   "before": [
+    69.9,
+    44.5,
+    88.3,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.9,
+    44.5,
+    88.3,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-1552615726",
+   "name": "Güzelyalı Yat Limanı – liman içi",
+   "before": [
+    75.2,
+    44.5,
+    92.1,
+    7,
+    0,
+    null,
+    [
+     "lamba",
+     6.2,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    75.2,
+    44.5,
+    92.1,
+    7,
+    0,
+    null,
+    [
+     "lamba",
+     6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-1",
+   "name": "Kordon (Kumsaz güneyi)",
+   "before": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-2",
+   "name": "Kordon (Kumsaz güneyi) 2",
+   "before": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-3",
+   "name": "Kordon (Kumsaz güneyi) 3",
+   "before": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-4",
+   "name": "Kordon (Kurşunlu doğusu)",
+   "before": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.3,
+    88,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-5",
+   "name": "Kordon (Kurşunlu doğusu) 2",
+   "before": [
+    69.7,
+    44.4,
+    88.1,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.4,
+    88.1,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-6",
+   "name": "Kordon (Kurşunlu doğusu) 3",
+   "before": [
+    69.9,
+    44.6,
+    88.3,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.9,
+    44.6,
+    88.3,
+    21,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-7",
+   "name": "Kordon (Kurşunlu doğusu) 4",
+   "before": [
+    69.7,
+    44.4,
+    88.1,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.4,
+    88.1,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-8",
+   "name": "Kordon (Kurşunlu kuzeydoğusu)",
+   "before": [
+    70.1,
+    44.8,
+    88.5,
+    14,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70.1,
+    44.8,
+    88.5,
+    14,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-24825429-9",
+   "name": "Kordon (Kurşunlu kuzeydoğusu) 2",
+   "before": [
+    70.1,
+    44.8,
+    88.5,
+    14,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70.1,
+    44.8,
+    88.5,
+    14,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-252356832",
    "name": "Güzelyalı Yat Limanı – doğu mendireği",
    "before": [
-    81.4,
-    51.2,
-    88.4,
-    1,
+    72.8,
+    45.6,
+    89.8,
+    11,
     0,
     null,
     [
-     "derinlik",
-     9.8,
-     "Öne çıkaran: atış mesafesinde ~4.1 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     11.4,
+     "Öne çıkaran: mendirek 459 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    81.4,
-    51.2,
-    88.4,
-    1,
+    72.8,
+    45.6,
+    89.8,
+    12,
     0,
     null,
     [
-     "derinlik",
-     9.8,
-     "Öne çıkaran: atış mesafesinde ~4.1 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "yapi",
+     11.4,
+     "Öne çıkaran: mendirek 459 m — OSM, kanıt C"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-252356833",
    "name": "Güzelyalı Yat Limanı – batı mendireği",
    "before": [
-    68.5,
+    67.4,
+    41.3,
+    87.6,
     44,
-    82,
-    9,
     0,
     null,
     [
      "yapi",
-     3.3,
-     "Öne çıkaran: mendirek 204 m — OSM, kanıt C"
-    ]
+     6,
+     "Öne çıkaran: mendirek 121 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    68.5,
+    67.4,
+    41.3,
+    87.6,
     44,
-    82,
-    9,
     0,
     null,
     [
      "yapi",
-     3.3,
-     "Öne çıkaran: mendirek 204 m — OSM, kanıt C"
-    ]
+     6,
+     "Öne çıkaran: mendirek 121 m — OSM, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-253063517",
+   "name": "Dere ağzı (Kumsaz)",
+   "before": [
+    56.3,
+    33.6,
+    77.2,
+    59,
+    0,
+    null,
+    [
+     "lamba",
+     -6.4,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.3,
+    33.6,
+    77.2,
+    60,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-253083807",
+   "name": "Bülbül Deresi ağzı",
+   "before": [
+    56.4,
+    33.2,
+    77,
+    57,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.4,
+    33.2,
+    77,
+    58,
+    0,
+    null,
+    [
+     "lamba",
+     -6.6,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-428743002-1",
+   "name": "Kordon (Armutlu güneydoğusu)",
+   "before": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    70,
+    44.7,
+    88.3,
+    16,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-479047532",
    "name": "İskele (İslamköy)",
    "before": [
-    36.6,
-    22.1,
-    61.5,
-    16,
+    64.3,
+    39.7,
+    83.8,
+    51,
     0,
     null,
     [
-     "derinlik",
-     -16.6,
-     "Geri bırakan: atış mesafesinde ~1.0 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    36.6,
-    22.1,
-    61.5,
-    16,
+    64.3,
+    39.7,
+    83.8,
+    51,
     0,
     null,
     [
-     "derinlik",
-     -16.6,
-     "Geri bırakan: atış mesafesinde ~1.0 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-479047534-1",
+   "name": "Kumsal (İslamköy kuzeybatısı)",
+   "before": [
+    51.8,
+    30,
+    72.7,
+    66,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    62.6,
+    35.3,
+    79.4,
+    53,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-479047534-2",
+   "name": "Kumsal (İslamköy kuzeybatısı) 2",
+   "before": [
+    51.8,
+    29.9,
+    72.7,
+    66,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.8,
+    29.9,
+    72.7,
+    67,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-479047535-1",
+   "name": "Kumsal (İslamköy kuzeybatısı) 3",
+   "before": [
+    51.8,
+    29.9,
+    72.6,
+    66,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.8,
+    29.9,
+    72.6,
+    67,
+    0,
+    null,
+    [
+     "yapi",
+     -7,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-483965349",
-   "name": "İskele (Tirilye)",
+   "name": "Tirilye İskelesi",
    "before": [
-    54.6,
-    35.3,
-    72,
-    13,
+    67,
+    39.2,
+    86.2,
+    46,
     0,
     null,
     [
-     "derinlik",
-     -8,
-     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    54.6,
-    35.3,
-    72,
-    13,
+    67,
+    39.2,
+    86.2,
+    46,
     0,
     null,
     [
-     "derinlik",
-     -8,
-     "Geri bırakan: atış mesafesinde ~1.8 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-503770078",
    "name": "İDO Güzelyalı Feribot İskelesi",
    "before": [
-    76.8,
-    49.6,
-    86.1,
-    3,
+    81.3,
+    60.1,
+    92.4,
+    1,
     0,
     null,
     [
-     "derinlik",
-     7.9,
-     "Öne çıkaran: atış mesafesinde ~3.7 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     11.5,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+    ],
+    0
    ],
    "after": [
-    76.8,
-    49.6,
-    86.1,
-    3,
+    81.3,
+    60.1,
+    92.4,
+    1,
     0,
     null,
     [
-     "derinlik",
-     7.9,
-     "Öne çıkaran: atış mesafesinde ~3.7 m — yapı uzunluğundan tahmin (C), saha ölçümü yok"
-    ]
+     "lamba",
+     11.4,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-519554786-1",
+   "name": "Kumsal (Tirilye kuzeybatısı)",
+   "before": [
+    51.1,
+    28.2,
+    72,
+    90,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.1,
+    28.2,
+    72,
+    90,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-534210128-1",
+   "name": "Kordon (Kumyaka doğusu)",
+   "before": [
+    69.6,
+    44.4,
+    87.9,
+    41,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.6,
+    44.4,
+    87.9,
+    41,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-639389497-1",
+   "name": "Kordon (Ömerbey Mah. doğusu)",
+   "before": [
+    69.7,
+    44.4,
+    87.9,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.7,
+    44.4,
+    87.9,
+    33,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-639389497-2",
+   "name": "Kordon (Hasanbey kuzeydoğusu)",
+   "before": [
+    69.6,
+    44.2,
+    87.7,
+    41,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.6,
+    44.2,
+    87.7,
+    41,
+    0,
+    null,
+    [
+     "lamba",
+     3.7,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-639389497-3",
+   "name": "Kordon (Hasanbey kuzeyi)",
+   "before": [
+    69.5,
+    44.2,
+    87.7,
+    43,
+    0,
+    null,
+    [
+     "lamba",
+     3.8,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    69.5,
+    44.2,
+    87.7,
+    43,
+    0,
+    null,
+    [
+     "lamba",
+     3.6,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-665674892-1",
+   "name": "Kumsal (Güzelyalı Eğitim kuzeyi)",
+   "before": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.4,
+    28.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-681112515",
+   "name": "Büyükkumla Deresi ağzı",
+   "before": [
+    56.5,
+    33.9,
+    77.5,
+    55,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.5,
+    33.9,
+    77.5,
+    56,
+    0,
+    null,
+    [
+     "lamba",
+     -6.6,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-684554355",
+   "name": "Kapaklı Deresi ağzı",
+   "before": [
+    56.5,
+    33.9,
+    77.4,
+    55,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.5,
+    33.9,
+    77.4,
+    56,
+    0,
+    null,
+    [
+     "lamba",
+     -6.6,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-698849100",
+   "name": "Fıstıklı Deresi ağzı",
+   "before": [
+    56.4,
+    33.2,
+    77.1,
+    57,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.4,
+    33.2,
+    77.1,
+    58,
+    0,
+    null,
+    [
+     "lamba",
+     -6.6,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-700323582",
+   "name": "Karsak Çayı ağzı",
+   "before": [
+    56.3,
+    33.3,
+    77.1,
+    59,
+    0,
+    null,
+    [
+     "lamba",
+     -6.4,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ],
+   "after": [
+    56.3,
+    33.3,
+    77.1,
+    60,
+    0,
+    null,
+    [
+     "lamba",
+     -6.5,
+     "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+    ],
+    0
+   ]
+  },
+  {
+   "spot_id": "osm-way-757494038-1",
+   "name": "Kumsal (Kapaklı güneydoğusu)",
+   "before": [
+    51.4,
+    29.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
+   ],
+   "after": [
+    51.4,
+    29.5,
+    72.3,
+    84,
+    0,
+    null,
+    [
+     "yapi",
+     -7.1,
+     "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+    ],
+    0
    ]
   },
   {
    "spot_id": "osm-way-77362926",
-   "name": "İskele (Demirsubaşı)",
+   "name": "Demirsubaşı İskelesi",
    "before": [
-    70.5,
-    46.1,
-    82.2,
-    7,
+    71.8,
+    45.9,
+    89.2,
+    12,
     0,
     null,
     [
      "yapi",
-     2.9,
-     "Öne çıkaran: iskele 353 m — OSM, kanıt C"
-    ]
+     5,
+     "Öne çıkaran: iskele 160 m — OSM, kanıt C"
+    ],
+    0
    ],
    "after": [
-    70.5,
-    46.1,
-    82.2,
-    7,
+    74.2,
+    47.5,
+    90.6,
+    10,
     0,
     null,
     [
-     "yapi",
-     2.9,
-     "Öne çıkaran: iskele 353 m — OSM, kanıt C"
-    ]
+     "lamba",
+     6.1,
+     "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — masa başı veri (onay bekliyor)"
+    ],
+    0
    ]
   }
  ],
  "night": {
-  "hour": "2026-10-31T18:00:00.000Z",
+  "hour": "2026-11-04T18:00:00.000Z",
   "spots": [
    {
-    "spot_id": "osm-way-1005837524",
-    "name": "İskele (Kapaklı)",
+    "spot_id": "osm-node-11865648199",
+    "name": "Tirilye Limanı",
     "before": [
-     74.3,
-     44.3,
-     89.9,
-     4,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 51 km/sa > 40 km/sa — güvenli değil",
      [
-      "yapi",
-      2,
-      "Öne çıkaran: iskele 283 m — OSM, kanıt C"
-     ]
+      "lamba",
+      6.2,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     74.3,
-     44.3,
-     89.9,
-     4,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 51 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      6.1,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-node-11981818601-1",
+    "name": "Ayı Burnu",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -8.3,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -8.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-node-13872728204",
+    "name": "Karacaali İskelesi",
+    "before": [
+     74.8,
+     44.2,
+     91.7,
+     3,
+     0,
+     null,
+     [
+      "lamba",
+      6.3,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     74.8,
+     44.2,
+     91.7,
+     3,
+     0,
+     null,
+     [
+      "lamba",
+      6.1,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-node-2590599404",
+    "name": "Armutlu İskelesi",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      11.5,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      11.4,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-node-2794622004",
+    "name": "Büyükkumla İskelesi",
+    "before": [
+     74.5,
+     44.1,
+     91.4,
+     5,
+     0,
+     null,
+     [
+      "lamba",
+      6.2,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     74.5,
+     44.1,
+     91.4,
+     5,
+     0,
+     null,
+     [
+      "lamba",
+      6.1,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1005837524",
+    "name": "Kapaklı İskelesi (Kapaklı güneyi)",
+    "before": [
+     73.9,
+     45.5,
+     89.7,
+     7,
      0,
      null,
      [
       "yapi",
-      2,
+      8,
       "Öne çıkaran: iskele 283 m — OSM, kanıt C"
-     ]
+     ],
+     0
+    ],
+    "after": [
+     73.9,
+     45.5,
+     89.7,
+     7,
+     0,
+     null,
+     [
+      "yapi",
+      8,
+      "Öne çıkaran: iskele 283 m — OSM, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1073087871-1",
+    "name": "Kordon (Ömerbey Mah. güneydoğusu)",
+    "before": [
+     68.7,
+     43.6,
+     86.4,
+     27,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.7,
+     43.6,
+     86.4,
+     27,
+     0,
+     null,
+     [
+      "lamba",
+      3.6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1165497962",
+    "name": "Kurşunlu Yat Limanı",
+    "before": [
+     74.2,
+     42.7,
+     90.4,
+     6,
+     0,
+     null,
+     [
+      "lamba",
+      6.2,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     74.2,
+     42.7,
+     90.4,
+     6,
+     0,
+     null,
+     [
+      "lamba",
+      6.1,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1170373160-1",
+    "name": "Kordon (Armutlu batısı)",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1170373160-2",
+    "name": "Kordon (Armutlu batısı) 2",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1170373160-3",
+    "name": "Kordon (Armutlu batısı) 3",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1170373161",
-    "name": "İskele (Armutlu)",
+    "name": "Armutlu İskelesi (Armutlu batısı)",
     "before": [
-     67.9,
-     38.9,
-     86,
-     12,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
-      "yapi",
-      -4.9,
-      "Geri bırakan: iskele 93 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     67.9,
-     38.9,
-     86,
-     12,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216668-1",
+    "name": "Kordon (Dr.Ziya Kaya batısı)",
+    "before": [
+     69,
+     43.7,
+     87.1,
+     13,
      0,
      null,
      [
-      "yapi",
-      -4.9,
-      "Geri bırakan: iskele 93 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     69,
+     43.7,
+     87.1,
+     13,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216668-2",
+    "name": "Kordon (Demirsubaşı güneyi)",
+    "before": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216676-1",
+    "name": "Kordon (Cumhuriyet batısı)",
+    "before": [
+     68.9,
+     43.5,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.9,
+     43.5,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216676-2",
+    "name": "Kordon (Cumhuriyet güneyi)",
+    "before": [
+     68.8,
+     43.4,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.4,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216676-3",
+    "name": "Kordon (Orhaniye batısı)",
+    "before": [
+     68.8,
+     43.4,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.4,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216676-6",
+    "name": "Kordon (Kayhan güneybatısı)",
+    "before": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1217216676-7",
+    "name": "Kordon (Balıkpazarı güneybatısı)",
+    "before": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1218507890",
     "name": "Küçükkumla İskelesi",
     "before": [
-     69.6,
-     40.2,
-     87.7,
-     10,
+     65.4,
+     37.8,
+     84.6,
+     35,
      0,
      null,
      [
-      "yapi",
-      -2.7,
-      "Geri bırakan: iskele 128 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     69.6,
-     40.2,
-     87.7,
-     10,
+     65.4,
+     37.8,
+     84.6,
+     35,
      0,
      null,
      [
-      "yapi",
-      -2.7,
-      "Geri bırakan: iskele 128 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1218508014",
+    "name": "Kumla Deresi ağzı",
+    "before": [
+     55.5,
+     32.3,
+     75.6,
+     40,
+     0,
+     null,
+     [
+      "lamba",
+      -6.4,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     55.5,
+     32.3,
+     75.6,
+     41,
+     0,
+     null,
+     [
+      "lamba",
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1233883494",
     "name": "Mudanya İskelesi",
     "before": [
-     82,
-     63.5,
-     91.2,
+     77,
+     52.6,
+     89.9,
      2,
      0,
      null,
      [
       "lamba",
-      9.1,
-      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
-     ]
+      11.4,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     82,
-     63.5,
-     91.2,
+     77,
+     52.6,
+     89.9,
      2,
      0,
      null,
      [
       "lamba",
-      9,
-      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
-     ]
+      11.3,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1305691023-1",
+    "name": "Kumsal (Güzelyalı Yalı kuzeydoğusu)",
+    "before": [
+     50.5,
+     24.6,
+     70.2,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     50.5,
+     24.6,
+     70.2,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1305691027-1",
+    "name": "Kumsal (Güzelyalı Yalı kuzeybatısı)",
+    "before": [
+     50.5,
+     24.6,
+     70.2,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     50.5,
+     24.6,
+     70.2,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1305691028-1",
+    "name": "Kumsal (Güzelyalı Siteler kuzeyi)",
+    "before": [
+     51,
+     27.1,
+     71.1,
+     44,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     51,
+     27.1,
+     71.1,
+     45,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1305691029-1",
+    "name": "Kumsal (Güzelyalı Siteler kuzeyi) 2",
+    "before": [
+     50.5,
+     24.6,
+     70.2,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     50.5,
+     24.6,
+     70.2,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1336893175-1",
+    "name": "Kordon (Orhaniye güneybatısı)",
+    "before": [
+     68.8,
+     43.4,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.4,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1336893184-1",
+    "name": "Kordon (Hisar kuzeybatısı)",
+    "before": [
+     69.1,
+     43.8,
+     87.3,
+     12,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     69.1,
+     43.8,
+     87.3,
+     12,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1364814104",
     "name": "Armutlu Devlet Limanı – doğu mendireği",
     "before": [
-     62.7,
-     39.3,
-     80.6,
-     15,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
-      "lamba",
-      -4.5,
-      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
-     ]
+      "yapi",
+      1.8,
+      "Öne çıkaran: mendirek 64 m — OSM, kanıt C"
+     ],
+     0
     ],
     "after": [
-     62.7,
-     39.3,
-     80.6,
-     15,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
       "lamba",
-      -4.7,
-      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
-     ]
+      -1.8,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,30 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1391521782-1",
+    "name": "Kumsal (Fıstıklı batısı)",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1392831837-1",
+    "name": "Kumsal (Armutlu güneydoğusu)",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1392831837-2",
+    "name": "Kumsal (Armutlu güneydoğusu) 2",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1392831837-3",
+    "name": "Kumsal (Armutlu güneydoğusu) 3",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1392831837-4",
+    "name": "Kumsal (Armutlu güneydoğusu) 4",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1392831837-5",
+    "name": "Kumsal (Armutlu güneydoğusu) 5",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1392831837-6",
+    "name": "Kumsal (Fıstıklı batısı) 2",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1393123413-1",
+    "name": "Kumsal (Armutlu güneydoğusu) 6",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1393123413-2",
+    "name": "Kumsal (Armutlu güneydoğusu) 7",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394208138-1",
+    "name": "Kumsal (Armutlu güneyi)",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394208138-2",
+    "name": "Kumsal (Armutlu güneyi) 2",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1394208144",
-    "name": "Armutlu Devlet Limanı – kısa batı mendireği",
+    "name": "Armutlu Devlet Limanı – orta batı mendireği",
     "before": [
-     66.5,
-     41.9,
-     83.9,
-     14,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
-      "lamba",
-      -4.5,
-      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
-     ]
+      "yapi",
+      5.5,
+      "Öne çıkaran: mendirek 112 m — OSM, kanıt C"
+     ],
+     0
     ],
     "after": [
-     66.5,
-     41.9,
-     83.9,
-     14,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
-      "lamba",
-      -4.7,
-      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
-     ]
+      "yapi",
+      5.5,
+      "Öne çıkaran: mendirek 112 m — OSM, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394523720-1",
+    "name": "Kumsal (Armutlu güneybatısı)",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394523720-2",
+    "name": "Kumsal (Armutlu güneybatısı) 2",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394523720-3",
+    "name": "Kumsal (Armutlu güneybatısı) 3",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1394523720-4",
+    "name": "Kumsal (Armutlu güneyi) 3",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1413355181",
     "name": "Armutlu Devlet Limanı – uzun batı mendireği",
     "before": [
-     73.9,
-     48.5,
-     89.4,
-     5,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
       "yapi",
-      7.2,
-      "Öne çıkaran: mendirek 930 m — OSM, kanıt C"
-     ]
+      11.3,
+      "Öne çıkaran: mendirek 353 m — OSM, kanıt C"
+     ],
+     0
     ],
     "after": [
-     73.9,
-     48.5,
-     89.4,
-     5,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
       "yapi",
-      7.2,
-      "Öne çıkaran: mendirek 930 m — OSM, kanıt C"
-     ]
+      11.3,
+      "Öne çıkaran: mendirek 353 m — OSM, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1413355183-1",
+    "name": "Kordon (Armutlu batısı) 4",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1414984335",
-    "name": "İskele (Fıstıklı)",
+    "name": "Fıstıklı İskelesi (Fıstıklı güneybatısı)",
     "before": [
-     72.1,
-     43.5,
-     89.4,
-     7,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
       "lamba",
-      1.1,
-      "Öne çıkaran: lamba olasılığı 0,50 — varsayım (C), saha verisi yok"
-     ]
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     72.1,
-     43.5,
-     89.4,
-     7,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
       "lamba",
-      1,
-      "Öne çıkaran: lamba olasılığı 0,50 — varsayım (C), saha verisi yok"
-     ]
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1414985743-1",
+    "name": "Kumsal (Fıstıklı batısı) 3",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1414985743-2",
+    "name": "Kumsal (Fıstıklı güneybatısı)",
+    "before": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27.1,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1414985744-1",
+    "name": "Kumsal (Fıstıklı güneybatısı) 2",
+    "before": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     27,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1422122108",
-    "name": "Armutlu Devlet Limanı – orta batı mendireği",
+    "name": "Armutlu Devlet Limanı – kısa batı mendireği",
     "before": [
-     71.9,
-     46.9,
-     88.3,
-     8,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
      [
       "yapi",
-      5.1,
-      "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
-     ]
+      4.7,
+      "Öne çıkaran: mendirek 100 m — OSM, kanıt C"
+     ],
+     0
     ],
     "after": [
-     71.9,
-     46.9,
-     88.3,
-     8,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      4.7,
+      "Öne çıkaran: mendirek 100 m — OSM, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1422351411-1",
+    "name": "Kayalık kıyı (Armutlu güneydoğusu)",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -8.3,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -8.4,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,10 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1430949806",
+    "name": "Dere ağzı (Güzelyalı Burgaz)",
+    "before": [
+     55.8,
+     32.9,
+     75.5,
+     38,
      0,
      null,
      [
-      "yapi",
-      5.1,
-      "Öne çıkaran: mendirek 292 m — OSM, kanıt C"
-     ]
+      "lamba",
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     55.8,
+     32.9,
+     75.5,
+     39,
+     0,
+     null,
+     [
+      "lamba",
+      -6.6,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1445587670-1",
+    "name": "Kordon (Fıstıklı batısı)",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-1456975486",
     "name": "Petek Sitesi İskele",
     "before": [
-     67.7,
-     39.2,
-     86,
-     13,
+     64.3,
+     37.3,
+     82.6,
+     36,
      0,
      null,
      [
-      "yapi",
-      -4.5,
-      "Geri bırakan: iskele 99 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     67.7,
-     39.2,
-     86,
-     13,
+     64.3,
+     37.3,
+     82.6,
+     36,
      0,
      null,
      [
-      "yapi",
-      -4.5,
-      "Geri bırakan: iskele 99 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1500766926-1",
+    "name": "Kordon (Demirsubaşı güneybatısı)",
+    "before": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.3,
+     86.9,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-1552615726",
+    "name": "Güzelyalı Yat Limanı – liman içi",
+    "before": [
+     74.8,
+     44.6,
+     91.6,
+     3,
+     0,
+     null,
+     [
+      "lamba",
+      6.2,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     74.8,
+     44.6,
+     91.6,
+     3,
+     0,
+     null,
+     [
+      "lamba",
+      6.1,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-1",
+    "name": "Kordon (Kumsaz güneyi)",
+    "before": [
+     68.9,
+     43.7,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.9,
+     43.7,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-2",
+    "name": "Kordon (Kumsaz güneyi) 2",
+    "before": [
+     68.9,
+     43.6,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.9,
+     43.6,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-3",
+    "name": "Kordon (Kumsaz güneyi) 3",
+    "before": [
+     68.9,
+     43.6,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.9,
+     43.6,
+     87,
+     15,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-4",
+    "name": "Kordon (Kurşunlu doğusu)",
+    "before": [
+     68.7,
+     43.5,
+     87,
+     27,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.7,
+     43.5,
+     87,
+     27,
+     0,
+     null,
+     [
+      "lamba",
+      3.6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-5",
+    "name": "Kordon (Kurşunlu doğusu) 2",
+    "before": [
+     68.7,
+     43.3,
+     86.8,
+     27,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.7,
+     43.3,
+     86.8,
+     27,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-6",
+    "name": "Kordon (Kurşunlu doğusu) 3",
+    "before": [
+     68.8,
+     43.5,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.8,
+     43.5,
+     86.8,
+     19,
+     0,
+     null,
+     [
+      "lamba",
+      3.6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-7",
+    "name": "Kordon (Kurşunlu doğusu) 4",
+    "before": [
+     68.6,
+     43.3,
+     86.6,
+     30,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.6,
+     43.3,
+     86.6,
+     30,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-8",
+    "name": "Kordon (Kurşunlu kuzeydoğusu)",
+    "before": [
+     69.3,
+     44,
+     87.5,
+     10,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     69.3,
+     44,
+     87.5,
+     10,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-24825429-9",
+    "name": "Kordon (Kurşunlu kuzeydoğusu) 2",
+    "before": [
+     69.3,
+     44.1,
+     87.5,
+     10,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     69.3,
+     44.1,
+     87.5,
+     10,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-252356832",
     "name": "Güzelyalı Yat Limanı – doğu mendireği",
     "before": [
-     73.7,
-     48.4,
-     89,
-     6,
+     71.9,
+     43.9,
+     87.8,
+     8,
      0,
      null,
      [
       "yapi",
-      7.2,
-      "Öne çıkaran: mendirek 1067 m — OSM, kanıt C"
-     ]
+      11.4,
+      "Öne çıkaran: mendirek 459 m — OSM, kanıt C"
+     ],
+     0
     ],
     "after": [
-     73.7,
-     48.4,
-     89,
-     6,
+     71.9,
+     43.9,
+     87.8,
+     9,
      0,
      null,
      [
       "yapi",
-      7.2,
-      "Öne çıkaran: mendirek 1067 m — OSM, kanıt C"
-     ]
+      11.4,
+      "Öne çıkaran: mendirek 459 m — OSM, kanıt C"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-252356833",
     "name": "Güzelyalı Yat Limanı – batı mendireği",
     "before": [
-     70,
-     44.7,
-     86.9,
-     9,
+     66.5,
+     39.4,
+     85.4,
+     34,
      0,
      null,
      [
-      "lamba",
-      -4.5,
-      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
-     ]
+      "yapi",
+      6,
+      "Öne çıkaran: mendirek 121 m — OSM, kanıt C"
+     ],
+     0
     ],
     "after": [
-     70,
-     44.7,
-     86.9,
-     9,
+     66.5,
+     39.4,
+     85.4,
+     34,
+     0,
+     null,
+     [
+      "yapi",
+      6,
+      "Öne çıkaran: mendirek 121 m — OSM, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-253063517",
+    "name": "Dere ağzı (Kumsaz)",
+    "before": [
+     55.5,
+     32.4,
+     75.6,
+     40,
      0,
      null,
      [
       "lamba",
-      -4.7,
-      "Geri bırakan: lamba olasılığı 0,30 — varsayım (C), saha verisi yok"
-     ]
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     55.5,
+     32.4,
+     75.6,
+     41,
+     0,
+     null,
+     [
+      "lamba",
+      -6.6,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-253083807",
+    "name": "Bülbül Deresi ağzı",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -6.4,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-428743002-1",
+    "name": "Kordon (Armutlu güneydoğusu)",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-479047532",
     "name": "İskele (İslamköy)",
     "before": [
-     59.2,
-     28.3,
-     78.7,
-     16,
+     63.5,
+     36.3,
+     83,
+     37,
      0,
      null,
      [
-      "yapi",
-      -14.1,
-      "Geri bırakan: iskele 16 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     59.2,
-     28.3,
-     78.7,
-     16,
+     63.5,
+     36.3,
+     83,
+     37,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-479047534-1",
+    "name": "Kumsal (İslamköy kuzeybatısı)",
+    "before": [
+     51,
+     27.2,
+     71.8,
+     44,
      0,
      null,
      [
       "yapi",
-      -14.1,
-      "Geri bırakan: iskele 16 m — OSM, kanıt C"
-     ]
+      -7.1,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     61.9,
+     34.7,
+     78.9,
+     38,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-479047534-2",
+    "name": "Kumsal (İslamköy kuzeybatısı) 2",
+    "before": [
+     51,
+     26.9,
+     71.5,
+     44,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     51,
+     26.9,
+     71.5,
+     45,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-479047535-1",
+    "name": "Kumsal (İslamköy kuzeybatısı) 3",
+    "before": [
+     51,
+     27.1,
+     71.8,
+     44,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     51,
+     27.1,
+     71.8,
+     45,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-483965349",
-    "name": "İskele (Tirilye)",
+    "name": "Tirilye İskelesi",
     "before": [
-     68.6,
-     38,
-     85.7,
-     11,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 51 km/sa > 40 km/sa — güvenli değil",
      [
-      "yapi",
-      -3.4,
-      "Geri bırakan: iskele 116 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     68.6,
-     38,
-     85.7,
-     11,
-     0,
-     null,
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 51 km/sa > 40 km/sa — güvenli değil",
      [
-      "yapi",
-      -3.4,
-      "Geri bırakan: iskele 116 m — OSM, kanıt C"
-     ]
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
     "spot_id": "osm-way-503770078",
     "name": "İDO Güzelyalı Feribot İskelesi",
     "before": [
-     83.7,
-     66.2,
-     92.5,
+     80.3,
+     55.8,
+     91,
      1,
      0,
      null,
      [
       "lamba",
-      9.1,
-      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
-     ]
+      11.4,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ],
+     0
     ],
     "after": [
-     83.7,
-     66.2,
-     92.5,
+     80.3,
+     55.8,
+     91,
      1,
      0,
      null,
      [
       "lamba",
-      9,
-      "Öne çıkaran: lamba olasılığı 0,85 — varsayım (C), saha verisi yok"
-     ]
+      11.3,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,85 — varsayım (C), saha verisi yok"
+     ],
+     0
     ]
    },
    {
-    "spot_id": "osm-way-77362926",
-    "name": "İskele (Demirsubaşı)",
+    "spot_id": "osm-way-519554786-1",
+    "name": "Kumsal (Tirilye kuzeybatısı)",
     "before": [
-     74.7,
-     44.7,
-     89.6,
-     3,
+     30,
+     19.8,
+     30,
+     53,
+     1,
+     "Hamle 51 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     19.8,
+     30,
+     53,
+     1,
+     "Hamle 51 km/sa > 40 km/sa — güvenli değil",
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-534210128-1",
+    "name": "Kordon (Kumyaka doğusu)",
+    "before": [
+     68.3,
+     43.2,
+     86,
+     33,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.3,
+     43.2,
+     86,
+     33,
+     0,
+     null,
+     [
+      "lamba",
+      3.6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-639389497-1",
+    "name": "Kordon (Ömerbey Mah. doğusu)",
+    "before": [
+     68.6,
+     43.5,
+     86.3,
+     30,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.6,
+     43.5,
+     86.3,
+     30,
+     0,
+     null,
+     [
+      "lamba",
+      3.6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-639389497-2",
+    "name": "Kordon (Hasanbey kuzeydoğusu)",
+    "before": [
+     68.5,
+     43.5,
+     86.2,
+     32,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     68.5,
+     43.5,
+     86.2,
+     32,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-639389497-3",
+    "name": "Kordon (Hasanbey kuzeyi)",
+    "before": [
+     69,
+     43.5,
+     86.8,
+     13,
+     0,
+     null,
+     [
+      "lamba",
+      3.8,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     69,
+     43.5,
+     86.8,
+     13,
+     0,
+     null,
+     [
+      "lamba",
+      3.7,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,50 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-665674892-1",
+    "name": "Kumsal (Güzelyalı Eğitim kuzeyi)",
+    "before": [
+     50.5,
+     24.6,
+     70.4,
+     48,
      0,
      null,
      [
       "yapi",
-      2.9,
-      "Öne çıkaran: iskele 353 m — OSM, kanıt C"
-     ]
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
     ],
     "after": [
-     77,
-     48.3,
-     90.2,
-     3,
+     50.5,
+     24.6,
+     70.4,
+     48,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-681112515",
+    "name": "Büyükkumla Deresi ağzı",
+    "before": [
+     55.5,
+     32.5,
+     75.1,
+     40,
      0,
      null,
      [
       "lamba",
-      3.4,
-      "Öne çıkaran: lamba olasılığı 0,60 — masa başı veri (onay bekliyor)"
-     ]
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     55.5,
+     32.5,
+     75.1,
+     41,
+     0,
+     null,
+     [
+      "lamba",
+      -6.6,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-684554355",
+    "name": "Kapaklı Deresi ağzı",
+    "before": [
+     55.6,
+     32.5,
+     75.4,
+     39,
+     0,
+     null,
+     [
+      "lamba",
+      -6.4,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     55.6,
+     32.5,
+     75.4,
+     40,
+     0,
+     null,
+     [
+      "lamba",
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-698849100",
+    "name": "Fıstıklı Deresi ağzı",
+    "before": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -6.5,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     30,
+     30,
+     30,
+     53,
+     1,
+     "Hamle 43 km/sa > 40 km/sa — güvenli değil",
+     [
+      "lamba",
+      -6.6,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-700323582",
+    "name": "Karsak Çayı ağzı",
+    "before": [
+     55.5,
+     32.3,
+     75.3,
+     40,
+     0,
+     null,
+     [
+      "lamba",
+      -6.4,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ],
+    "after": [
+     55.5,
+     32.3,
+     75.3,
+     41,
+     0,
+     null,
+     [
+      "lamba",
+      -6.6,
+      "Geri bırakan: iskele aydınlatması olasılığı 0,15 — varsayım (C), saha verisi yok"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-757494038-1",
+    "name": "Kumsal (Kapaklı güneydoğusu)",
+    "before": [
+     50.4,
+     25.2,
+     70.3,
+     52,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     50.4,
+     25.2,
+     70.3,
+     52,
+     0,
+     null,
+     [
+      "yapi",
+      -7,
+      "Geri bırakan: kumsal — tip tercihi varsayım, kanıt C"
+     ],
+     0
+    ]
+   },
+   {
+    "spot_id": "osm-way-77362926",
+    "name": "Demirsubaşı İskelesi",
+    "before": [
+     70.8,
+     43.5,
+     88.6,
+     9,
+     0,
+     null,
+     [
+      "yapi",
+      5,
+      "Öne çıkaran: iskele 160 m — OSM, kanıt C"
+     ],
+     0
+    ],
+    "after": [
+     73.1,
+     45.6,
+     89.1,
+     8,
+     0,
+     null,
+     [
+      "lamba",
+      6,
+      "Öne çıkaran: iskele aydınlatması olasılığı 0,60 — masa başı veri (onay bekliyor)"
+     ],
+     0
     ]
    }
   ]
