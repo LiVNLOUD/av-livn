@@ -1,0 +1,54 @@
+# Faz I denetimi — güncel kod, üretilen veri ve canlı çıktı (2026-11-03)
+
+Kaynak: `main` 45ed16e (kullanıcının incelediği 036cf1d'den sonraki sürüm), canlı av.livn.tr ve D1 (salt okuma).
+Belgeler kanıt sayılmadı; her satır kod, veri ya da canlı yanıtla doğrulandı.
+"Düzeltme" ve "Doğrulama" sütunları iş ilerledikçe dolar; boş olan henüz yapılmadı.
+
+## 1. Bulgular
+
+| # | Dosya / işlev / akış | Gözlenen davranış | Kullanıcıya etkisi | Düzeltme | Doğrulama |
+|---|---|---|---|---|---|
+| 1 | `apps/web/src/pages/mera/index.astro:163,174` `box` / `renderTackle` | Dıştaki takım üretici `const box`, `renderTackle` içindeki `const box = querySelector('.tackle')` ile gölgeleniyor; `box(tkInput(v))` → `TypeError: box is not a function`. `catch` bunu "veri bağlantısı" hatası gibi gösteriyor | Mera kartında takım kutusu hiç çizilmiyor | | |
+| 2 | `npm run typecheck`, testler | `.astro` içindeki script'ler tip kontrolünden geçmiyor; kartı açıp takımı gösteren uçtan uca test yok | #1 gibi hatalar yakalanmıyor | | |
+| 3 | `apps/web/src/scripts/map.ts` | WebGL2 yoksa MapLibre hata verir; harita "yükleniyor"da kalabilir (cihazda doğrulanacak) | Eski cihazda harita boş; liste etkilenmemeli | | |
+| 4 | `workers/api/src/lib/views.ts:15` `WINDOWS_SQL`, `notify.ts` | Pencere ve bildirim sorgusunda erişim süzgeci yok; liste/ısı haritası süzüyor | "En iyi zamanlar" ve bildirim erişimi belirsiz/kapalı yeri önerebilir | | |
+| 5 | `workers/api/src/lib/windows.ts:99–106` `bestWindows` | Eşiği geçen aday n'den azsa eşik, tüm saatlerin %85 yüzdeliğine düşürülüp liste dolduruluyor | "Görece iyi" ile "güçlü öneri" ayırt edilmiyor; "bugün güçlü seçenek yok" denemiyor | | |
+| 6 | `packages/scoring/src/v2/model.ts` (geometrik ortalama), `score.ts` | Eksik akıntı/dalga/bulanıklık/SST terimi ortalamadan atlanıyor; kalan terimlerle puan yükselebilir; öneri "eksik veri" demiyor | Eksik veri sessizce nötr ya da sakin kabul ediliyor | | |
+| 7 | `packages/scoring/src/tackle.ts:81` `lightCase` | `lampP ≥ 0.5` → "aydınlık gece" (0,5 = bilinmiyor da aydınlık sayılıyor); `null` → "karanlık gece" | Bilinmeyen ışıkta kesin renk/katman önerisi; bilinen ışık null zincirinde karanlığa düşebilir | | |
+| 8 | `v2/model.ts:100` `LAMP_PRIOR.ferry = 0.85` | Feribot iskelesi için fotoğrafla doğrulanmamış önsel (C) | İDO Güzelyalı gece 1. sırada; etkisi ölçülmemiş | | |
+| 9 | `pipeline/av_pipeline/desk/mapillary.py` | Uç noktanın ±50 m kutusu, tek istek (limit 20), sayfalama ve görsel analiz yok; kullanıcının bakması bekleniyor. Rapor eski 16 meralık | Lamba kanıtı üretilmiyor | | |
+| 10 | `v2/model.ts:280` akıntı terimi | `0.7 + 0.3·sig((v − 0.05)/0.03)` monoton artan; metin "çok güçlüsü kötü" diyor | Güçlü akıntı en iyi sayılıyor; balığın bulunabilirliği ile takımla avlanabilirlik karışmış | | |
+| 11 | `model.ts` `lenF` + `depthPrior` | Yapı uzunluğu hem yapı terimini hem tahmini derinliği artırıyor (H2 doyurdu, çift sayım duruyor) | Uzun yapı iki kez ödüllendiriliyor | | |
+| 12 | `tackle.ts:135` ve `v2/sink.ts:27` | İki ayrı batış hızı: takım `0.25 + 0.12·g` (spin 0.9), saha formu `0.25·√g`. 3 g'da 0.61 ile 0.43 m/s (%40 fark) | Önerilen saydırma ile sahada ölçülen derinlik birbirini tutmuyor | | |
+| 13 | `tackle.ts:152` iğne `evidence: 'A'`, `RESEARCH.md` R19 | Peksu vd. 2020 seçiciliği (#8 → 17,7 cm) çapari/el oltası iğnesine ait; LRF jighead için "A" | Aktarım kesin kanıt gibi görünüyor | | |
+| 14 | `v2/params.ts:57–60` `season_*_doy/_w` | Tepe günü ve genişlik A/B; kaynak yalnız ay düzeyinde üreme/beslenme dönemi veriyor | Sayısal seçim (gün 210, ±45) kanıt düzeyinden yüksek etiketli | | |
+| 15 | `pipeline/av_pipeline/ocean/marmara.py:167–168` | SST = 0,5–20,5 m ortalaması (yüzey değil); akıntı = 0,5–5,5 m ortalaması; en yakın ıslak hücre ≤ 0,8 km. Arayüz yalnız "deniz suyu sıcaklığı" diyor | Kullanıcı yüzey sıcaklığı sanıyor; katman açıklaması yok | | |
+| 16 | `pipeline/av_pipeline/desk/sentinel2.py:23–28` | Oran ≤ 0,85 → "koyu (kaya/yosun/midye)", ≥ eşik → "açık (kum)"; derinlik, bulanıklık, gölge maskesi sınıfa girmiyor (yalnız metinde) | Gerçeğe benzeyen dip bilgisi üretilebiliyor | | |
+| 17 | `v2/model.ts:28–30` saha derinliği | Tek kurşun ölçümü, ağırlık 0,95 ile meranın tüm derinlik önseline uygulanıyor | Tek nokta 0–150 m alanın ölçümü gibi kullanılıyor | | |
+| 18 | `pipeline/av_pipeline/__init__.py:5` BBOX | West 28.70: Mudanya batısı–Karacabey kıyısı dışarıda. Armutlu/Fıstıklı (Yalova) meraları Bursa'dan ayrılmıyor | Bursa kıyısının bir kısmı değerlendirilmiyor | | |
+| 19 | `workers/api/migrations/0010` `catch_session` | Hedef tür, yöntem, geriye dönük bayrağı ve tahmin türü (dondurulmuş / yeniden hesaplanmış) yok. Canlı günlük **boş** (0 seans) | Kalibrasyon ileriye dönük tahmini ayıramıyor | | |
+| 20 | `analysis/calibrate.py:22–30` | 30/100/300 aşamaları yalnız etiket (`STAGE` sözlüğü); aşamaya göre farklı fit yok | "Öğrenme gerçekleşti" izlenimi verebilir | | |
+| 21 | 1 Kasım 18:00–22:00, İDO Güzelyalı (`osm-way-503770078`) | Günlükte kayıt yok. `spot_scores_v2_history`'de o aralık için yalnız 1 saat: istavrit 80,4 (v2.0), H2 uzunluk düzeltmesinden sonra yeniden hesaplanmış. Ekranda görülen 83 saklanmamış | Başarısızlık o anki tahminle karşılaştırılamıyor | | |
+| 22 | Ana ekran (`apps/web/src/pages/index.astro`) | İlk görünümde pencere listesi, tüm meralar, ısı haritası, harita ve kart birlikte | "Kalabalık, odak dağılıyor" | | |
+| 23 | Puan sunumu | 0–100, ideal/kötü senaryo çapalarına göre ölçekli; MC bandı yalnız parametre oynatımı. Arayüzde ikisi de açıklanmıyor; sıralama kararlılığı hesaplanmıyor | Puan yakalama olasılığı gibi okunuyor | | |
+
+## 2. Korunan ve değerlendirilen mevcut parçalar
+Av günlüğü ve sıfır av, saha/uzaktan gözlem formları, Mapillary listesi, EMODnet DTM ve G5 ölçüm/enterpolasyon gösterimi, Copernicus Marmara günlük özetleri, MC belirsizlik bandı, `calibrate.py`, takım profilleri (admin), Sahadayım akışı, levrek motoru (deneysel).
+Bunlar yeniden önerilmez; yukarıdaki bulgulara göre düzeltilir.
+
+## 3. Öncelik sırası
+1. **Kırık akış ve yanlış yönlendirme:** #1, #2, #3, #4, #5, #6.
+2. **Aydınlatma dürüstlüğü:** #7, #8, #9 (Mapillary'yi ben incelerim).
+3. **Kanıt sınıfları ve model çelişkileri:** #10–#17.
+4. **Kapsam:** #18 (Bursa batı kıyısı, il etiketi, kıyı kesimi veri tablosu).
+5. **Dürüst puan ve kalibrasyon:** #19–#21, #23. 1 Kasım seansı geriye dönük sıfır av olarak girilir (tahmin "yeniden hesaplanmış").
+6. **Takım tutarlılığı:** #12, #13; batış aralığı, toplam atış ağırlığı, gece varyantları.
+7. **Referans incelemesi:** Fishbrain, Windy.com, Navionics; sjwasko/fishin, akt/SGFishing, TheWillMiller/tide-wise.
+8. **Sade ana ekran ve mobil kontroller:** #22.
+
+## 4. Kullanıcı kararı gereken noktalar
+Varsayılanla ilerlenir; cevap gelince değiştirilir.
+1. Feribot lamba önseli 0,85: Mapillary kanıtına kadar ne olsun? **Varsayılan:** değer kalır, duyarlılık raporlanır, kartta "varsayım" yazar.
+2. Uzunluk yalnız derinlik tahmininde kalsın mı, yapı teriminden çıksın mı? **Varsayılan:** evet.
+3. Bursa dışı yakın meralar (Armutlu, Fıstıklı) nerede görünsün? **Varsayılan:** yalnız ikinci düzeyde, "Bursa dışı" rozetiyle.
+4. 1 Kasım seansında kullanılan takım/jighead gramı. **Varsayılan:** boş kalır.

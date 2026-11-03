@@ -189,3 +189,52 @@
   - 5 yön testi geçti (`analysis/levrek_draft.py`, mock hava).
   - Takım kuralları; asgari boy 25 cm.
 - **CPU:** önceden hazırlanan yanıtlar 3 saat ilerisini kapsıyordu. GitHub zamanlayıcısı gecikince canlı hesaba düşüyordu (p50 ~11–13 ms); artık 6 saat yazılıyor.
+
+## Faz H — takım kuralı, uzunluk sağlığı, levrek uygulaması, ısı haritası, kordon (2026-11-01) ✅ DUR
+- **H1 takım:**
+  - Takım seçimini yalnız gereken gramaj belirler: ≤ 5 g LRF (5–6 g arası LRF 5 g), ≥ 6 g spin. Hamle yalnız atış notudur.
+  - "Yan 25 km/sa + hamle 30" → LRF 3 g sabit.
+  - İstavritte spin 6–10 g mikro metal jig / ağır jighead.
+  - 2.000 rastgele girdide "spin < 6 g" ve "LRF > 5 g" hiç yok (test).
+- **H2 uzunluk:**
+  - Model OSM çevre uzunluğu yerine denize uzanan uzunluğu kullanıyor (kara/kıyı dışı kısım; kapalı yolda dönmüş dikdörtgenin uzun kenarı).
+  - Etki 300 m'den sonra doyar (`len_sat_m`, C).
+  - İDO Güzelyalı 960 → 222 m. Şüpheliler `docs/audit/length-audit.md`'de (3/16).
+  - İlk 10 aynı saatte: sıra büyük ölçüde korundu, Mudanya 2 → 3, Armutlu uzun batı mendireği 11 → 10.
+- **H3 levrek (deneysel):**
+  - Motor `packages/scoring/src/v2/levrek.ts`: 43 parametre (B 3, C 40); lamba etkisi orta (C).
+  - 6 yön testi gerçek motorla geçti.
+  - D1 tür sütunu (migration 0013, şema v2.8); API `?species=`; önceden hazırlanmış yanıtlar her iki tür için.
+  - Web: tür çipi, liste, ısı haritası, pencereler, harita, kart, /model/#levrek.
+  - Levrek takım kutusu: varsayılan spin 6–32 g; sakin/sığ korunaklı yerde LRF; yasal asgari 25 cm.
+  - Bildirim türleri ayarlarda. Kalibrasyon raporu tür başına.
+- **H4:**
+  - `docs/outreach/gemlik-batimetri-talep.md` (gönderilmedi).
+  - Doğrulananlar: K. Kadir Eriş Prof. Dr.; Sabuncu 2017, Özmaral 2012, Filikci 2016.
+  - Babayev 2015 bulunamadı.
+  - Derinlik öncelik zinciri MODEL.md §13'te.
+- **H5 ısı haritası:**
+  - İki satırlı başlık ("Pazar 1 Kasım" / saatler); etiket çakışma kuralı ve testi.
+  - Tam gün adları; ad sütunu 260 px; satır 24 px; ince "şimdi" çizgisi.
+  - ≥ 1920 px'de geniş ısı haritası ve katlanır harita.
+- **H6 kordon (taş tahkimat):**
+  - Yeni mera tipi: kıyıya ≤ 25 m paralel tahkimat, deniz duvarı, sahil yolu ya da yaya yolu; 300–500 m parçalar.
+  - Lamba önceliği: OSM sokak lambası yoğunluğu. Bölgede OSM'de lamba yok, bu yüzden tip önceliği 0,5 (C).
+  - Tercihler: istavrit 0,70, levrek 0,65 (C).
+  - Yerleşim raporu `docs/spots-candidates.md`: 30 kordon eklendi (Gemlik 10, Kurşunlu 9, Mudanya 5, Armutlu/Fıstıklı 6). Elenen 11 (10 zaten kumsal/kayalık, 1 access=no). Kumla, Narlı, Umurbey, Güzelyalı'da OSM etiketi yok.
+  - Sanayi ve askeri sınırlar haritada.
+  - Overpass yansıları `around.c` filtresini farklı işlediği için yollar bbox ile çekilip kıyı süzgeci yerelde uygulanıyor.
+
+## Faz I — dürüst, sade, sınanabilir karar desteği (2026-11-03) — sürüyor
+- Plan: `/root/.claude/plans/proje-av-livn-spicy-dragonfly.md` özeti `docs/AUDIT-I.md` §3'te. Adımlar I0–I10.
+- [x] I0 Faz H kapanışı.
+- [x] I1 `docs/AUDIT-I.md`: 23 bulgu, öncelik sırası, karar soruları.
+- [ ] I2 kritik hatalar (takım kutusu, WebGL, erişim, güçlü/görece, eksik veri)
+- [ ] I3 aydınlatma (üç durumlu ışık, feribot duyarlılığı, Mapillary incelemesi)
+- [ ] I4 kanıt sınıfları ve model çelişkileri
+- [ ] I5 kapsam (Bursa batı kıyısı, il etiketi, kıyı kesimi veri tablosu)
+- [ ] I6 dürüst puan, av günlüğü alanları, 1 Kasım geriye dönük seans, kalibrasyon
+- [ ] I7 takım tutarlılığı
+- [ ] I8 referans incelemesi
+- [ ] I9 sade ana ekran + mobil
+- [ ] I10 teslim
