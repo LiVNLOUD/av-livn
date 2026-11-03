@@ -92,6 +92,7 @@ describe('levrek engine — scale, band, metadata, explain', () => {
     expect(h[0]!.p10!).toBeLessThanOrEqual(h[0]!.p90!);
     expect(h[0]!.components.map((c) => c.key)).toEqual(['yapi', 'taban', 'lamba', 'diel', 'mevsim', 'bulaniklik', 'dalga', 'su_degisim', 'dere', 'basinc']);
     expect(h[0]!.components.find((c) => c.key === 'mevsim')!.evidence).toBe('B');
+    expect(scoreSeriesLevrek({ spot: { ...PIER, lamp: null, lat: 40.43, lon: 29.0 }, points, from, hours: 1, draws: 3, keepSamples: true })[0]!.samples).toHaveLength(3);
     const known = scoreSeriesLevrek({ spot: { ...PIER, lamp: true, lat: 40.43, lon: 29.0 }, points, from, hours: 2, draws: 4 });
     expect(known[0]!.lampP).toBeNull();
     const empty = scoreSeriesLevrek({ spot: { ...MOUTH, lat: 40.43, lon: 29.0 }, points: [], from, hours: 1 });

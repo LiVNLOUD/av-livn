@@ -3,6 +3,7 @@
 // (`pub:<kind>:<species>:<epoch hour>`), so the default requests cost one row read instead of parsing every list_json
 // (Phase F: 63 spots pushed live parsing over the ~10 ms CPU budget).
 import { ACTIVE, publicSpot, type SpotRow } from './spots';
+import { dataTier, missingNote } from '@av-livn/scoring';
 import { bestWindows } from './windows';
 import type { ListEntryV2 } from '../precompute_v2';
 
@@ -31,8 +32,9 @@ export function listBody(all: ListRow[], dataFetchedAt: string | null, nowHour: 
     return {
       ...publicSpot(r),
       score: e
-        ? { total: e[0], p10: e[1], p90: e[2], rank: e[3], gated: e[4] === 1, warnings: e[5] ? [e[5]] : [], partial: r.partial === 1, reason: e[6]?.[2] ?? null }
-        : { total: null, p10: null, p90: null, rank: null, gated: false, warnings: [], partial: false, reason: null },
+        ? { total: e[0], p10: e[1], p90: e[2], rank: e[3], gated: e[4] === 1, warnings: e[5] ? [e[5]] : [], partial: r.partial === 1, reason: e[6]?.[2] ?? null,
+            data: dataTier(e[7] ?? 0), missing: missingNote(e[7] ?? 0), top3: e[8] ?? null }
+        : { total: null, p10: null, p90: null, rank: null, gated: false, warnings: [], partial: false, reason: null, data: null, missing: null, top3: null },
     };
   });
   spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));

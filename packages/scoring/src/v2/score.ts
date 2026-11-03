@@ -38,6 +38,8 @@ export interface V2Hour {
   /** Weight of the night arm (0 day … 1 night). */
   wNight: number;
   components: V2Component[];
+  /** I6: draw-ordered capped samples (only with keepSamples). */
+  samples?: number[];
 }
 
 const HOUR = 3_600_000;
@@ -130,6 +132,8 @@ export interface ScoreV2Args {
   /** Monte Carlo draws for the band (0 = no band). */
   draws?: number;
   seed?: number;
+  /** I6: keep the capped draws per hour (unsorted, draw order) for rank stability across spots. */
+  keepSamples?: boolean;
 }
 
 export function scoreSeriesV2(a: ScoreV2Args): V2Hour[] {
@@ -146,7 +150,9 @@ export function scoreSeriesV2(a: ScoreV2Args): V2Hour[] {
     const q = a.spot.lamp === null ? lampPrior(a.spot) : null;
     for (let k = 0; k < draws; k++) {
       const p = drawParams(r.normal);
-      const lamp = q === null ? undefined : r.uniform() < q;
+      // I6: always draw the lamp uniform so draw k uses the same parameters at every spot (paired draws → rank stability)
+      const u = r.uniform();
+      const lamp = q === null ? undefined : u < q;
       weather.forEach((w, i) => samples[i]!.push(calibrate(rawScore(a.spot, w, p, lamp).raw)));
     }
   }
@@ -159,7 +165,7 @@ export function scoreSeriesV2(a: ScoreV2Args): V2Hour[] {
     let p10: number | null = null;
     let p90: number | null = null;
     if (draws > 0) {
-      const s = samples[i]!.sort((x, y) => x - y);
+      const s = [...samples[i]!].sort((x, y) => x - y);
       p10 = cap(s[Math.floor(0.1 * (s.length - 1))]!);
       p90 = cap(s[Math.ceil(0.9 * (s.length - 1))]!);
     }
@@ -176,6 +182,7 @@ export function scoreSeriesV2(a: ScoreV2Args): V2Hour[] {
       lampP: res.lampP,
       wNight: Math.round(res.dyn[0]!.wNight * 1000) / 1000,
       components: components(a.spot, res, w, sstSource),
+      ...(a.keepSamples && draws > 0 ? { samples: samples[i]!.map(cap) } : {}),
     };
   });
 }
@@ -183,4 +190,17 @@ export function scoreSeriesV2(a: ScoreV2Args): V2Hour[] {
 /** Rank (1 = best) of each spot's total at one hour; nulls rank last. Ties share the better rank. */
 export function ranks(totals: (number | null)[]): number[] {
   return totals.map((t) => (t === null ? totals.length : 1 + totals.filter((u) => u !== null && u > t).length));
+}
+
+/** I6: share of paired draws in which each spot is among the best `k` at one hour (parameter uncertainty only:
+ *  forecast error and model structure are not in it). spots[s][d] = draw d of spot s; null = not scored. */
+export function topShare(spots: (number[] | null)[], k = 3): (number | null)[] {
+  const n = Math.min(...spots.filter((x): x is number[] => !!x).map((x) => x.length));
+  if (!Number.isFinite(n) || n === 0) return spots.map(() => null);
+  const hits = spots.map(() => 0);
+  for (let d = 0; d < n; d++) {
+    const order = spots.map((x, i) => [x ? x[d]! : -1, i] as const).filter(([v]) => v >= 0).sort((a, b) => b[0] - a[0]);
+    for (let r = 0; r < Math.min(k, order.length); r++) hits[order[r]![1]]!++;
+  }
+  return spots.map((x, i) => (x ? Math.round((hits[i]! / n) * 100) / 100 : null));
 }

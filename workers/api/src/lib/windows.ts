@@ -35,6 +35,8 @@ export interface Window {
   missing: string | null;
   data: 'tam' | 'goreli';
   access: string | null;
+  /** I6: share of paired parameter draws with this spot in the top 3 at the peak hour (null without draws). */
+  top3: number | null;
 }
 
 export const WINDOW_GOOD = 65;
@@ -78,7 +80,7 @@ function around(s: SpotHours, a: number, b: number, floor: number): Window | nul
   const mask = pe[7] ?? 0;
   const data = dataTier(mask) === 'tam' ? 'tam' : 'goreli'; // 'yok' hours never reach here (ok())
   const tier = pe[0]! >= WINDOW_GOOD && data === 'tam' ? 'guclu' : 'goreli';
-  return { spot_id: s.id, name: s.name, start, end, peak, total: pe[0]!, p10: pe[1], p90: pe[2], rank: pe[3], reason, ...plainReason(reason), tier, missing: missingNote(mask), data, access: s.access ?? null };
+  return { spot_id: s.id, name: s.name, start, end, peak, total: pe[0]!, p10: pe[1], p90: pe[2], rank: pe[3], reason, ...plainReason(reason), tier, missing: missingNote(mask), data, access: s.access ?? null, top3: pe[8] ?? null };
 }
 
 /**

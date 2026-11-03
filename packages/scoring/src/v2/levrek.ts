@@ -261,7 +261,9 @@ export function scoreSeriesLevrek(a: Omit<ScoreV2Args, 'profile'> & { profile?: 
     const q = a.spot.lamp === null ? lampPrior(a.spot) : null;
     for (let k = 0; k < draws; k++) {
       const p = drawLevrek(r.normal);
-      const lamp = q === null ? undefined : r.uniform() < q;
+      // I6: always draw the lamp uniform so draw k uses the same parameters at every spot (paired draws → rank stability)
+      const u = r.uniform();
+      const lamp = q === null ? undefined : u < q;
       weather.forEach((w, i) => samples[i]!.push(calibrateLevrek(rawLevrek(a.spot, w, p, lamp).raw)));
     }
   }
@@ -274,7 +276,7 @@ export function scoreSeriesLevrek(a: Omit<ScoreV2Args, 'profile'> & { profile?: 
     let p10: number | null = null;
     let p90: number | null = null;
     if (draws > 0) {
-      const s = samples[i]!.sort((x, y) => x - y);
+      const s = [...samples[i]!].sort((x, y) => x - y);
       p10 = cap(s[Math.floor(0.1 * (s.length - 1))]!);
       p90 = cap(s[Math.ceil(0.9 * (s.length - 1))]!);
     }
@@ -291,6 +293,7 @@ export function scoreSeriesLevrek(a: Omit<ScoreV2Args, 'profile'> & { profile?: 
       lampP: res.lampP,
       wNight: Math.round(res.terms[0]!.wNight * 1000) / 1000,
       components: components(a.spot, res, w),
+      ...(a.keepSamples && draws > 0 ? { samples: samples[i]!.map(cap) } : {}),
     };
   });
 }

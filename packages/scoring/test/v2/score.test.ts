@@ -134,3 +134,17 @@ describe('lamp source labels', () => {
     expect(k!.components.find((x) => x.key === 'lamba')!.source).toBe('uzaktan gözlem');
   });
 });
+
+describe('I6: paired draws and rank stability', () => {
+  it('keeps draw-ordered samples on request; topShare counts top-k membership over paired draws', async () => {
+    const { topShare } = await import('../../src/v2/score');
+    const a = scoreSeriesV2({ spot: { ...SPOT, lamp: null }, points: series(140), from: FROM, hours: 2, profile: SAFETY, draws: 40, keepSamples: true });
+    const b = scoreSeriesV2({ spot: { ...SPOT, lamp: true }, points: series(140), from: FROM, hours: 2, profile: SAFETY, draws: 40, keepSamples: true });
+    expect(a[0]!.samples).toHaveLength(40);
+    expect(scoreSeriesV2({ spot: SPOT, points: series(140), from: FROM, hours: 1, profile: SAFETY, draws: 5 })[0]!.samples).toBeUndefined();
+    expect(topShare([[3, 2, 1], [1, 3, 2], null], 1)).toEqual([0.33, 0.67, null]);
+    expect(topShare([null, null])).toEqual([null, null]);
+    const s = topShare([a[0]!.samples!, b[0]!.samples!], 1);
+    expect(s[0]! + s[1]!).toBeCloseTo(1, 6);
+  });
+});

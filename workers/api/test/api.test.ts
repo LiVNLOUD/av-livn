@@ -63,6 +63,11 @@ describe('privacy: public endpoints never return field values (docs/PRIVACY.md)'
     }, env);
     await writeScoresV2();
     const list = await (await app.request('/api/spots?p=1', {}, env)).text();
+    // I6: top-3 share over paired draws (sums to 3 over the scored spots) and data adequacy per spot
+    const L = JSON.parse(list) as { spots: { score: { total: number | null; top3: number | null; data: string | null } }[] };
+    const scored = L.spots.filter((x) => x.score.total !== null);
+    expect(scored.reduce((a, x) => a + (x.score.top3 ?? 0), 0)).toBeCloseTo(Math.min(3, scored.length), 1);
+    expect(scored.every((x) => ['tam', 'goreli', 'yok'].includes(x.score.data!))).toBe(true);
     const det = await (await app.request('/api/spots/osm-way-1?p=1', {}, env)).text();
     for (const body of [list, det]) {
       for (const secret of ['GİZLİ', '7.77', 'has_light', '"notes"', 'QUJD', 'depth_field_at":"', 'observed_at', 'kaya']) expect(body).not.toContain(secret);

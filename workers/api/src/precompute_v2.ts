@@ -1,7 +1,7 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  crossWind, DEFAULTS, explain, explainLevrek, scoreSeriesLevrek, LEVREK_VERSION, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
+  crossWind, DEFAULTS, explain, topShare, explainLevrek, scoreSeriesLevrek, LEVREK_VERSION, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
   type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour, type ShoreKind,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
@@ -274,7 +274,8 @@ export function computeSpotV2(row: SpotRow, wx: Snap | undefined, sea: Snap | un
   const spot = spotV2(row, field);
   const points = applyOcean(mergeSnapshots(wx?.snap, sea?.snap), ocean);
   const startHour = Math.floor(now.getTime() / HOUR);
-  const hours = species === 'levrek' ? scoreSeriesLevrek({ spot, points, from: now, hours: HOURS_V2, draws }) : scoreSeriesV2({ spot, points, from: now, hours: HOURS_V2, profile: SAFETY, draws });
+  const keepSamples = draws > 0; // I6: paired draws for the rank stability of the whole list (dropped after use)
+  const hours = species === 'levrek' ? scoreSeriesLevrek({ spot, points, from: now, hours: HOURS_V2, draws, keepSamples }) : scoreSeriesV2({ spot, points, from: now, hours: HOURS_V2, profile: SAFETY, draws, keepSamples });
   const index = indexSeries(points);
   const weather = hours.map((_, i) => weatherAt(index, new Date((startHour + i) * HOUR), row.lat, row.lon));
   const seaGrid =
@@ -318,9 +319,10 @@ export interface ScoreRecordV2 {
 
 /** Main reason of the rank at an hour: driver, score delta vs. the other spots, Turkish one-liner. */
 export type ReasonEntry = [DriverKey, number, string];
-/** [total, p10, p90, rank, gated, first warning, main reason, missing-data mask (I2, v2/data.ts; absent = 0)]
+/** [total, p10, p90, rank, gated, first warning, main reason, missing-data mask (I2, v2/data.ts; absent = 0),
+ *   share of paired draws in the top 3 (I6; null without draws)]
  *  — p10/p90 null while the band is being recomputed. */
-export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null, ReasonEntry | null, number?];
+export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null, ReasonEntry | null, number?, (number | null)?];
 
 const COMPASS_TR = ['kuzey', 'kuzeydoğu', 'doğu', 'güneydoğu', 'güney', 'güneybatı', 'batı', 'kuzeybatı'];
 const n1 = (x: number) => (Math.round(x * 10) / 10).toString().replace('.', ',');
@@ -388,9 +390,12 @@ export function scoreRecordsV2(
 ): ScoreRecordV2[] {
   const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fields.get(r.id), draws, oceans.get(r.id), species));
   const rankAt = Array.from({ length: HOURS_V2 }, (_, i) => ranks(res.map((x) => x.hours[i]!.total)));
+  // I6: share of paired parameter draws in which a spot is among the best 3 (parameter uncertainty only)
+  const top3 = Array.from({ length: HOURS_V2 }, (_, i) => topShare(res.map((x) => x.hours[i]!.samples ?? null), 3));
+  for (const x of res) for (const h of x.hours) delete h.samples;
   const reasons = reasonsFor(res, species);
   return rows.map((r, k) => {
-    const list = res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null, reasons[k]![i]!, h.missing]);
+    const list = res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null, reasons[k]![i]!, h.missing, top3[i]![k] ?? null]);
     const h0 = res[k]!.hours[0]!;
     return {
       spot_id: r.id,
@@ -436,7 +441,7 @@ export function rescoreSpot(
     const hour = r.startHour + i;
     const old = prev?.list[hour - prev.start_hour];
     const totals = [h.total, ...others.map((o) => o.list[hour - o.start_hour]?.[0] ?? null)];
-    return [h.total, null, null, ranks(totals)[0]!, h.gated ? 1 : 0, h.warnings[0] ?? null, old?.[6] ?? null, h.missing];
+    return [h.total, null, null, ranks(totals)[0]!, h.gated ? 1 : 0, h.warnings[0] ?? null, old?.[6] ?? null, h.missing, old?.[8] ?? null];
   });
   return {
     spot_id: row.id,
