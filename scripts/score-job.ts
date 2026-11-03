@@ -21,6 +21,8 @@ const dryRun = process.argv.includes('--dry-run');
 const pendingOnly = process.argv.includes('--pending');
 const compareOut = process.argv.includes('--compare-desk') ? process.argv[process.argv.indexOf('--compare-desk') + 1] : null;
 // I3: ferry lamp prior sensitivity (dry run): same weather, LAMP_PRIOR.ferry 0.85 vs 0.5 at every night hour
+// I4: istavrit top 10 now and at the next 21:00 local (before/after a model change, same data)
+const topOut = process.argv.includes('--top10') ? process.argv[process.argv.indexOf('--top10') + 1] : null;
 const lampOut = process.argv.includes('--lamp-sensitivity') ? process.argv[process.argv.indexOf('--lamp-sensitivity') + 1] : null;
 const token = process.env.CLOUDFLARE_API_TOKEN;
 const account = process.env.CLOUDFLARE_ACCOUNT_ID;
@@ -88,6 +90,15 @@ const now0 = Math.floor(now.getTime() / 3_600_000);
 for (const r of v2) {
   const e = (JSON.parse(r.list_json) as unknown[][])[now0 - r.start_hour];
   console.log(`  ${r.spot_id.padEnd(20)} total ${e?.[0]} band ${e?.[1]}–${e?.[2]} rank ${e?.[3]} · ${(e?.[6] as unknown[] | null)?.[2] ?? ''}`);
+}
+
+if (topOut) {
+  const n21 = now0 + ((18 - (now0 % 24) + 24) % 24);
+  const at = (h: number) => v2.map((r) => [rows.find((x) => x.id === r.spot_id)!.name, (JSON.parse(r.list_json) as (number | null)[][])[h - r.start_hour]?.[0] ?? null] as const)
+    .filter((x) => x[1] !== null).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 10);
+  const { writeFileSync } = await import('node:fs');
+  writeFileSync(topOut, JSON.stringify({ now: new Date(now0 * 3_600_000).toISOString(), night: new Date(n21 * 3_600_000).toISOString(), top_now: at(now0), top_night: at(n21) }, null, 1) + '\n');
+  console.log(`top10 → ${topOut}`);
 }
 
 if (lampOut) {

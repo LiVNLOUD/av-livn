@@ -56,7 +56,8 @@ describe('tackle (F0/G2)', () => {
     const t = tackle(base);
     expect(t.rows.map((r) => r.key)).toEqual(['takim', 'jighead', 'igne', 'silikon', 'renk', 'saydirma', 'yasal']);
     const hook = t.rows.find((r) => r.key === 'igne')!;
-    expect([hook.value, hook.evidence]).toEqual(['#8', 'A']);
+    expect([hook.value, hook.evidence]).toEqual(['#8', 'C']);
+    expect(hook.why).toMatch(/çapari \(el oltası\) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı \(R19b:/);
     expect(hook.why).toMatch(/#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş/);
     expect(hook.why).toMatch(/#10: daha çok vuruş, 13 cm altı oranı yüksek, geri bırakma/);
     expect(hook.why).toContain(R19_CITE);
@@ -232,5 +233,13 @@ describe('I3: unknown lamp → conditional advice; missing data is not calm', ()
     expect(tackleLevrek({ ...calm, gustKmh: null }).profile).toBe('lrf');
     expect(tackleLevrek({ ...calm, gustKmh: null, windKmh: null }).profile).toBe('spin');
     expect(tackleLevrek({ ...calm, waveM: null }).notes.at(-1)).toMatch(/dalga verisi yok/);
+  });
+});
+
+describe('I4: strong current is a fishability note, not an availability penalty', () => {
+  it('≥ 0.5 m/s adds the note (istavrit, lit and unknown lamp)', () => {
+    expect(tackle({ ...base, currentMs: 0.6 }).notes.at(-1)).toMatch(/^akıntı 0,60 m\/s: hafif takımla kontrol zor \(avlanabilirlik\)/);
+    expect(tackle({ ...base, currentMs: 0.6, lampP: null }).notes.at(-1)).toMatch(/avlanabilirlik/);
+    expect(tackle({ ...base, currentMs: 0.3 }).notes.some((n) => /avlanabilirlik/.test(n))).toBe(false);
   });
 });

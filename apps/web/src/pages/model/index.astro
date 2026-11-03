@@ -34,7 +34,6 @@ const DESC: Record<string, string> = {
   struct_beach: 'Yapı tercihi: kumsal',
   struct_river: 'Yapı tercihi: dere ağzı',
   struct_promenade: 'Yapı tercihi: kordon (taş tahkimat)',
-  struct_len_km: 'Yapı uzunluğunun yarı etki noktası',
   len_sat_m: 'Yapı uzunluğunun doyduğu nokta (sonrası çok yavaş artış)',
   depth_mid: 'Gündüz için yeterli derinliğin orta noktası',
   depth_slope: 'Derinlik etkisinin yayılımı',
@@ -77,7 +76,7 @@ const DYN: [string, string, string][] = [
   ['Su sıcaklığı sapması', 'w_sst_dev', 'Suyun 5 yıllık kısa normalden ne kadar farklı olduğu.'],
   ['Bulanıklık', 'w_turb', 'Yağış ve dalgadan tahmin; bulanık su görmeyi zorlaştırır.'],
   ['Basınç', 'w_press', 'Hızlı basınç değişimi. Kanıtı en zayıf terim, ağırlığı en düşük.'],
-  ['Akıntı', 'w_current', 'Copernicus yüzey akıntısı; orta akıntı iyi, çok güçlü akıntı kötü.'],
+  ['Akıntı', 'w_current', 'Copernicus 0,5–5,5 m ortalama akıntısı. Bulunabilirlik: durgun suda hafif düşer, akan su yem taşır (C). Çok güçlü akıntı puanı düşürmez; hafif takımla avlanabilirliği takım kutusunda uyarı olarak yazılır.'],
 ];
 const anchor = (ref: string) => {
   const m = /R(\d+)/.exec(ref);

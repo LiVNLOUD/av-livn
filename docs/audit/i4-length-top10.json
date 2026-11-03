@@ -1,0 +1,179 @@
+{
+ "note": "I4: uzunluk yalnız derinlik önselinde + saha derinliği ±30 m. Aynı D1 verisi (Mapillary lamba bulguları dahil), gece 21:00 yerel; 'before' = I4 öncesi motor.",
+ "before": {
+  "now": "2026-11-03T22:00:00.000Z",
+  "night": "2026-11-04T18:00:00.000Z",
+  "top_now": [
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    81.3
+   ],
+   [
+    "Armutlu İskelesi",
+    80.6
+   ],
+   [
+    "Mudanya İskelesi",
+    78.2
+   ],
+   [
+    "Karacaali İskelesi",
+    75.9
+   ],
+   [
+    "Büyükkumla İskelesi",
+    75.6
+   ],
+   [
+    "Kurşunlu Yat Limanı",
+    75.3
+   ],
+   [
+    "Güzelyalı Yat Limanı – liman içi",
+    75.2
+   ],
+   [
+    "Tirilye Limanı",
+    74.9
+   ],
+   [
+    "Kapaklı İskelesi (Kapaklı güneyi)",
+    74.9
+   ],
+   [
+    "Demirsubaşı İskelesi",
+    74.2
+   ]
+  ],
+  "top_night": [
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    80.9
+   ],
+   [
+    "Armutlu İskelesi",
+    79.8
+   ],
+   [
+    "Mudanya İskelesi",
+    77.6
+   ],
+   [
+    "Güzelyalı Yat Limanı – liman içi",
+    75.1
+   ],
+   [
+    "Kurşunlu Yat Limanı",
+    74.5
+   ],
+   [
+    "Kapaklı İskelesi (Kapaklı güneyi)",
+    74
+   ],
+   [
+    "Güzelyalı Yat Limanı – doğu mendireği",
+    72.5
+   ],
+   [
+    "Armutlu Devlet Limanı – uzun batı mendireği",
+    72.2
+   ],
+   [
+    "Kordon (Kumsaz güneyi) 2",
+    71.6
+   ],
+   [
+    "Kordon (Kumsaz güneyi) 3",
+    71.6
+   ]
+  ]
+ },
+ "after": {
+  "now": "2026-11-03T22:00:00.000Z",
+  "night": "2026-11-04T18:00:00.000Z",
+  "top_now": [
+   [
+    "Armutlu İskelesi",
+    83
+   ],
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    81
+   ],
+   [
+    "Mudanya İskelesi",
+    80.6
+   ],
+   [
+    "Karacaali İskelesi",
+    77.2
+   ],
+   [
+    "Büyükkumla İskelesi",
+    76.8
+   ],
+   [
+    "Kurşunlu Yat Limanı",
+    76.5
+   ],
+   [
+    "Güzelyalı Yat Limanı – liman içi",
+    76.4
+   ],
+   [
+    "Tirilye Limanı",
+    76
+   ],
+   [
+    "Demirsubaşı İskelesi",
+    74.5
+   ],
+   [
+    "Kordon (Kurşunlu doğusu) 3",
+    72.8
+   ]
+  ],
+  "top_night": [
+   [
+    "Armutlu İskelesi",
+    82.1
+   ],
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    80.5
+   ],
+   [
+    "Mudanya İskelesi",
+    79.9
+   ],
+   [
+    "Güzelyalı Yat Limanı – liman içi",
+    76.2
+   ],
+   [
+    "Kurşunlu Yat Limanı",
+    75.5
+   ],
+   [
+    "Kordon (Kumsaz güneyi) 2",
+    71.9
+   ],
+   [
+    "Kordon (Kumsaz güneyi) 3",
+    71.9
+   ],
+   [
+    "Kordon (Kurşunlu doğusu) 3",
+    71.8
+   ],
+   [
+    "Kordon (Kurşunlu doğusu) 2",
+    71.6
+   ],
+   [
+    "İskele (İslamköy)",
+    71.6
+   ]
+  ]
+ }
+}

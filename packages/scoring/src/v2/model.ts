@@ -129,6 +129,23 @@ export function depthPrior(s: SpotV2, sat = 300): number {
 }
 
 /** Mean of the linearly interpolated field profile over [a, b] m (held flat beyond the measured range). */
+/** I4: a field depth speaks for ± FIELD_REACH_M around the measured distance (between two soundings: linear). */
+export const FIELD_REACH_M = 30;
+
+/** Mean over [a, b] of: field (weight fw, interpolated) where within reach of a sounding, else `open` (DTM/prior). */
+export function fieldMix(pairs: FieldDepth[], a: number, b: number, fw: number, open: number): number {
+  const pts = [...pairs].sort((x, y) => x.distance_m - y.distance_m);
+  const lo = pts[0]!.distance_m - FIELD_REACH_M;
+  const hi = pts[pts.length - 1]!.distance_m + FIELD_REACH_M;
+  let sum = 0;
+  for (let i = 0; i <= 10; i++) {
+    const x = a + ((b - a) * i) / 10;
+    const near = x >= lo && x <= hi && pts.some((q, k) => Math.abs(q.distance_m - x) <= FIELD_REACH_M || (k > 0 && x >= pts[k - 1]!.distance_m && x <= q.distance_m));
+    sum += near ? fw * fieldBand(pts, x, x) + (1 - fw) * open : open;
+  }
+  return sum / 11;
+}
+
 export function fieldBand(pairs: FieldDepth[], a: number, b: number): number {
   const pts = [...pairs].sort((x, y) => x.distance_m - y.distance_m);
   const at = (x: number) => {
@@ -154,29 +171,33 @@ export interface StaticTerms {
   sources: { struct: Source; substrate: Source; depth: Source };
 }
 
+/** I4: fixed structure share (formerly the length factor of a 150 m structure: 0.4 + 0.6·(1 − e⁻¹)). */
+export const STRUCT_SHARE = 0.4 + 0.6 * (1 - Math.exp(-1));
+
 export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   const fs = s.fieldStructure;
   const shore: Partial<Record<StructureKind, number>> = { harbour: p.struct_harbour, rocky: p.struct_rock, beach: p.struct_beach, river_mouth: p.struct_river, promenade: p.struct_promenade };
   const base =
     fs === 'mendirek' || (!fs && s.kind === 'breakwater') ? p.struct_breakwater : fs === 'dogal_kaya' ? p.struct_rock : (!fs && shore[s.kind]) || p.struct_pier;
-  const L = effLength(s.lengthM ?? 50, p.len_sat_m);
-  // Shore types have no structure length: a fixed share (a 150 m structure's) stands in for it.
-  const lenF = !fs && s.kind in shore ? 0.4 + 0.6 * (1 - Math.exp(-1)) : 0.4 + 0.6 * (1 - Math.exp(-L / 1000 / p.struct_len_km));
-  const struct = base * lenF;
+  // I4: the structure term no longer grows with length — length already raises the depth prior (depthPrior), and
+  // counting it twice rewarded long structures twice. Every kind keeps the share a 150 m structure used to get.
+  const struct = base * STRUCT_SHARE;
 
   let depthM: number;
   let depthSrc: Source;
+  const prior = depthPrior(s, p.len_sat_m);
+  const w = s.dtm.interpolated ? p.dtm_weight_interp : 0.9;
+  const est = (d: number | null) => (d === null || Number.isNaN(d) ? prior : w * d + (1 - w) * prior);
+  const open0 = est(s.dtm.d0_50);
+  const open1 = est(s.dtm.d50_150);
   if (s.fieldDepths && s.fieldDepths.length > 0) {
-    // Field pairs dominate; the prior share keeps a single bad entry from saturating the term.
-    const prior = depthPrior(s, p.len_sat_m);
+    // Field pairs dominate where they were measured; I4: only within FIELD_REACH_M of a measured distance — a single
+    // sounding is not the depth of the whole 0–150 m band (beyond its reach the DTM / structure estimate stays).
     const fw = fieldWeight(s.fieldDepths);
-    depthM = fw * (0.4 * fieldBand(s.fieldDepths, 0, 50) + 0.6 * fieldBand(s.fieldDepths, 50, 150)) + (1 - fw) * prior;
+    depthM = 0.4 * fieldMix(s.fieldDepths, 0, 50, fw, open0) + 0.6 * fieldMix(s.fieldDepths, 50, 150, fw, open1);
     depthSrc = KIND_SOURCE[s.fieldDepthKind ?? 'saha'];
   } else {
-    const prior = depthPrior(s, p.len_sat_m);
-    const w = s.dtm.interpolated ? p.dtm_weight_interp : 0.9;
-    const est = (d: number | null) => (d === null || Number.isNaN(d) ? prior : w * d + (1 - w) * prior);
-    depthM = 0.4 * est(s.dtm.d0_50) + 0.6 * est(s.dtm.d50_150);
+    depthM = 0.4 * open0 + 0.6 * open1;
     const hasDtm = s.dtm.d0_50 !== null || s.dtm.d50_150 !== null;
     depthSrc = !hasDtm || s.dtm.interpolated ? 'yapı-uzunluğu-tahmini' : 'DTM-ölçüm';
   }

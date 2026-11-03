@@ -192,10 +192,15 @@ export interface Ocean {
  * Overlay Copernicus on the Open-Meteo points: water temperature (1–20 m) and current (1–5 m) where the model
  * has a value, marked sstSource 'copernicus'; the short normal for each point's day of year.
  */
+/** I4: a Copernicus cell farther than this from the spot does not describe it (500 m grid; all spots ≤ 0.8 km today). */
+export const OCEAN_MAX_KM = 2;
+
+/** Copernicus values replace Open-Meteo hour by hour (by timestamp, so a stale fetch never fills hours it does not
+ *  cover: those keep Open-Meteo, source 'Open-Meteo'). SST = 0.5–20.5 m mean, current = 0.5–5.5 m mean speed. */
 export function applyOcean(points: HourlyPoint[], ocean: Ocean | undefined): HourlyPoint[] {
   if (!ocean?.series && !ocean?.normal) return points;
   const byTs = new Map(points.map((p) => [Date.parse(p.ts), { ...p }]));
-  const s = ocean.series?.data;
+  const s = ocean.series && ocean.series.data.cell.distance_km <= OCEAN_MAX_KM ? ocean.series.data : undefined;
   if (s) {
     const t0 = Date.parse(s.t0);
     s.sst.forEach((v, i) => {

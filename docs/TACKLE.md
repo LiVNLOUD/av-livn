@@ -37,7 +37,7 @@ Girdiler: yakın-uç derinliği (DTM/saha, 0–50 ve 50–150 m), akıntı (Cope
 - Varsayılan **#8**. Bedel açık yazılır:
   - **#8:** daha seçici, yasal boy (13 cm) üstü oranı yüksek, daha az vuruş.
   - **#10:** daha çok vuruş, 13 cm altı oranı yüksek, geri bırakma gerekir.
-- Dayanak: R19 — Peksu M., Uzer U., Yıldız T., Ayaz A., Karakulak F.S. (2020). J. Appl. Ichthyol. 36(6):893–900. Modal yakalanma boyu #8'de 17,7 cm, #10'da 13,4 cm. Atıf metni RESEARCH.md künyesiyle testle eşlenir.
+- Dayanak: R19b — Peksu M., Uzer U., Yıldız T., Ayaz A., Karakulak F.S. (2020). J. Appl. Ichthyol. 36(6):893–900. Modal yakalanma boyu #8'de 17,7 cm, #10'da 13,4 cm; bu seçicilik **çapari (el oltası) iğnelerinde** ölçüldü. LRF jighead'e aktarımdır (kanıt C), LRF için doğrulanmadı. Aynı çalışmanın LRF'ye ait ölçümleri ayrı satırdır (R19): CPUE 1,295 kg/10 iğne/saat, boy 9–16 cm. Atıf metni RESEARCH.md künyesiyle testle eşlenir.
 
 **Silikon boyu ve rengi**
 - İskelenin mevcut aydınlatması altında, gece, berrak su: 1,5–2" şeffaf, simli, beyaz-glow; boy 3–5 cm.

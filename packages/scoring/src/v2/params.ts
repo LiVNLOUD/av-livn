@@ -3,6 +3,14 @@
 // angle/threshold parameters (additive: true) are shifted instead.
 
 export type Evidence = 'A' | 'B' | 'C';
+/** I4: what the NUMBER rests on — separate from whether a source supports the effect's existence (`ref`).
+ *  olcum: measured here/for this technique · bolgesel_model: regional model output · dolayli: inferred from an
+ *  indirect indicator · literatur: taken from the literature (possibly another place/technique) · varsayim:
+ *  expert choice / not yet calibrated. Default varsayim: a cited effect does not make its coefficient known. */
+export type Basis = 'olcum' | 'bolgesel_model' | 'dolayli' | 'literatur' | 'varsayim';
+export const BASIS_TR: Record<Basis, string> = {
+  olcum: 'ölçüm', bolgesel_model: 'bölgesel model', dolayli: 'dolaylı gösterge', literatur: 'literatürden aktarım', varsayim: 'varsayım (kalibre edilmedi)',
+};
 
 export interface ParamDef {
   value: number;
@@ -10,7 +18,13 @@ export interface ParamDef {
   evidence: Evidence;
   ref: string;
   additive?: boolean;
+  /** I4: basis of the numeric value (default 'varsayim'). */
+  basis?: Basis;
+  /** I4: why this basis/evidence, when not obvious. */
+  note?: string;
 }
+
+export const paramBasis = (d: ParamDef): Basis => d.basis ?? 'varsayim';
 
 export const SIGMA: Record<Evidence, number> = { A: 0.1, B: 0.25, C: 0.5 };
 
@@ -35,7 +49,6 @@ export const PARAMS = {
   struct_beach: { value: 0.45, unit: '-', evidence: 'C', ref: 'docs/spots-candidates.md' },
   struct_river: { value: 0.6, unit: '-', evidence: 'C', ref: 'docs/spots-candidates.md' },
   struct_promenade: { value: 0.7, unit: '-', evidence: 'C', ref: 'H6' },
-  struct_len_km: { value: 0.15, unit: 'km', evidence: 'C', ref: '—' },
   len_sat_m: { value: 300, unit: 'm', evidence: 'C', ref: 'H2' },
   depth_mid: { value: 3.5, unit: 'm', evidence: 'C', ref: 'R10' },
   depth_slope: { value: 1.2, unit: 'm', evidence: 'C', ref: 'R10' },
@@ -54,11 +67,11 @@ export const PARAMS = {
   press_loss: { value: 0.2, unit: '-', evidence: 'C', ref: '—' },
   season_base: { value: 0.3, unit: '-', evidence: 'C', ref: 'R3' },
   season_spawn_amp: { value: 0.45, unit: '-', evidence: 'C', ref: 'R1,R2' },
-  season_spawn_doy: { value: 210, unit: 'gün', evidence: 'A', ref: 'R1,R2', additive: true },
-  season_spawn_w: { value: 45, unit: 'gün', evidence: 'A', ref: 'R1,R2' },
+  season_spawn_doy: { value: 210, unit: 'gün', evidence: 'B', ref: 'R1,R2', additive: true, basis: 'literatur', note: 'Kaynak ay düzeyinde: üreme Mayıs–Eylül, zirve Temmuz–Ağustos; 210. gün bu aralığın ortası. Üremenin kıyıda yakalanabilirliğe dönüşmesi varsayım.' },
+  season_spawn_w: { value: 45, unit: 'gün', evidence: 'C', ref: 'R1,R2', note: 'Eğri genişliği sayısal tercih; kaynak yalnız dönemin uzun ve sürekli olduğunu söylüyor.' },
   season_autumn_amp: { value: 0.7, unit: '-', evidence: 'C', ref: 'R3' },
-  season_autumn_doy: { value: 285, unit: 'gün', evidence: 'A', ref: 'R3', additive: true },
-  season_autumn_w: { value: 35, unit: 'gün', evidence: 'B', ref: 'R3' },
+  season_autumn_doy: { value: 285, unit: 'gün', evidence: 'C', ref: 'R3', additive: true, basis: 'dolayli', note: 'R3 beslenme yoğunluğunu yalnız mevsim düzeyinde veriyor (sonbahar en yüksek, yaz örneği yok); 285. gün (ekim ortası) sayısal tercih.' },
+  season_autumn_w: { value: 35, unit: 'gün', evidence: 'C', ref: 'R3', note: 'Genişlik sayısal tercih.' },
   // weights
   w_diel: { value: 0.4, unit: '-', evidence: 'C', ref: '' },
   w_season: { value: 0.2, unit: '-', evidence: 'C', ref: '' },

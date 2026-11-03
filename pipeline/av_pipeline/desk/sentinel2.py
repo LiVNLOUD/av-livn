@@ -39,10 +39,14 @@ def summarise(spot_id: str, ratios: list[float], scenes: int, date: str) -> Find
     if major == "belirsiz" or share < 0.5:
         return None
     conf = "orta" if major == "acik" and scenes >= 6 and share >= 0.6 else "düşük"
-    label = {"acik": "açık dip (kum)", "koyu": "koyu dip (kaya, yosun, midye — ya da derin su)"}[major]
+    # I4: brightness is not a bottom class. A bright pixel may be sand — or turbid water, glint, foam; a dark pixel may
+    # be rock/weed/mussel — or simply deeper water or the structure's shadow. 10 m pixels cannot tell these apart, so
+    # the finding keeps the brightness class as a note and assigns NO substrate (the model keeps EUSeaMap / prior).
+    label = {"acik": "açık sinyal (kum olabilir; bulanıklık, yansıma ya da köpük de açık gösterir)",
+             "koyu": "koyu sinyal (kaya/yosun/midye olabilir; daha derin su ya da yapının gölgesi de koyu gösterir)"}[major]
     return Finding(
-        spot_id=spot_id, source="sentinel2", observed_at=date, substrate=["kum"] if major == "acik" else ["yosunlu"],
-        note=f"Sentinel-2: {label}, uç çevresi {len(ratios)} su pikselinin %{round(share * 100)}'i, {scenes} sahne, medyan oran {round(median(ratios), 2)}",
+        spot_id=spot_id, source="sentinel2", observed_at=date, substrate=None,
+        note=f"Sentinel-2: {label} — dip sınıfı belirsiz bırakıldı; uç çevresi {len(ratios)} su pikselinin %{round(share * 100)}'i, {scenes} sahne, medyan oran {round(median(ratios), 2)}",
         evidence={"source": "Copernicus Sentinel-2 L2A (Microsoft Planetary Computer)", "date": date, "confidence": conf, "license": "Copernicus açık veri",
                   "method": f"(B02+B03)/2, {REF_M[0]:.0f}–{REF_M[1]:.0f} m açık su medyanına oran, uç 0–{NEAR_M:.0f} m su pikselleri, sahneler arası medyan; ≥{BRIGHT} açık, ≤{DARK} koyu",
                   "pixels": len(ratios), "scenes": scenes, "share": round(share, 2), "median_ratio": round(median(ratios), 3)},

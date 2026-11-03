@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ambientLogLux, calibrate, DEFAULTS, depthPrior, effLength, drawParams, dynamicTerms, exposure, fieldBand, fieldWeight, IDEAL_SPOT, IDEAL_WEATHER, lampPrior,
-  PARAMS, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, SHORE_KINDS, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type StructureKind, type Weather,
+  PARAMS, STRUCT_SHARE, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, SHORE_KINDS, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type StructureKind, type Weather,
 } from '../../src';
 import { BASE, CALM } from './fixtures';
 
@@ -94,7 +94,7 @@ describe('v2 static terms and sources', () => {
 
   it('structure from the field form and OSM kind', () => {
     const L = { lengthM: null };
-    expect(staticTerms({ ...BASE, ...L, fieldStructure: 'mendirek' }, P).struct).toBeCloseTo(0.85 * (0.4 + 0.6 * (1 - Math.exp(-0.05 / 0.15))), 6);
+    expect(staticTerms({ ...BASE, ...L, fieldStructure: 'mendirek' }, P).struct).toBeCloseTo(0.85 * STRUCT_SHARE, 6);
     expect(staticTerms({ ...BASE, fieldStructure: 'dogal_kaya' }, P).sources.struct).toBe('saha');
     expect(staticTerms({ ...BASE, fieldStructure: 'iskele' }, P).struct).toBeLessThan(staticTerms({ ...BASE, kind: 'breakwater' }, P).struct);
     expect(staticTerms(BASE, P).sources.struct).toBe('OSM');
@@ -175,10 +175,12 @@ describe('v2 parameters', () => {
       const m = l.reduce((x, y) => x + y) / l.length;
       return Math.sqrt(l.reduce((x, y) => x + (y - m) ** 2, 0) / l.length);
     };
-    expect(spread('season_spawn_w')).toBeLessThan(0.15);
+    // I4: no istavrit value is measured (A) any more; B (spawn peak day, additive) moves less than C (autumn peak day)
     expect(spread('lamp_lux')).toBeGreaterThan(0.4);
-    const doy = ds.map((d) => d.season_autumn_doy);
-    expect(Math.max(...doy) - Math.min(...doy)).toBeGreaterThan(3);
+    expect(spread('season_spawn_w')).toBeGreaterThan(0.4);
+    const range = (k: 'season_spawn_doy' | 'season_autumn_doy') => { const v = ds.map((d) => d[k]); return Math.max(...v) - Math.min(...v); };
+    expect(range('season_autumn_doy')).toBeGreaterThan(3);
+    expect(range('season_spawn_doy')).toBeLessThan(range('season_autumn_doy'));
     expect(Math.max(...ds.map((d) => Math.abs(d.twilight_centre + 3)))).toBeGreaterThan(0.5);
   });
 });
@@ -218,7 +220,9 @@ describe('shore types (D1, evidence C)', () => {
     expect(t('rocky')).toBeGreaterThan(t('river_mouth'));
     expect(t('river_mouth')).toBeGreaterThan(t('beach'));
     expect(t('beach', 10)).toBe(t('beach', 900));
-    expect(t('quay', 900)).toBeGreaterThan(t('quay', 10));
+    // I4: length no longer raises the structure term (only the depth prior)
+    expect(t('quay', 900)).toBe(t('quay', 10));
+    expect(staticTerms({ ...BASE, kind: 'pier', lengthM: 900 }, DEFAULTS).depthM).toBeGreaterThan(staticTerms({ ...BASE, kind: 'pier', lengthM: 30 }, DEFAULTS).depthM);
     expect(staticTerms({ ...BASE, kind: 'beach', fieldStructure: 'mendirek' }, DEFAULTS).struct).toBeGreaterThan(t('beach'));
   });
   it('lamp priors: lit harbours, dark shores', () => {
@@ -243,5 +247,20 @@ describe('H2: saturating structure length', () => {
     const b = depthPrior({ ...pier, lengthM: 360 });
     expect(a - b).toBeLessThan(0.25); // m, vs 0.9 m without saturation
     expect(depthPrior({ ...pier, lengthM: 960 }, 2000)).toBeGreaterThan(a); // without saturation it was larger
+  });
+});
+
+describe('I4: a single field sounding speaks only for its surroundings', () => {
+  it('one plumb at 20 m sets 0–50 m but leaves most of 50–150 m to the DTM/structure estimate', async () => {
+    const { fieldMix, FIELD_REACH_M } = await import('../../src/v2/model');
+    const one = [{ distance_m: 20, depth_m: 8 }];
+    expect(FIELD_REACH_M).toBe(30);
+    expect(fieldMix(one, 0, 50, 1, 2)).toBeCloseTo(8, 6); // 0–50 all within 20 ± 30
+    expect(fieldMix(one, 50, 150, 1, 2)).toBeCloseTo((8 + 10 * 2) / 11, 6); // only x = 50 is within reach; the rest → open estimate
+    const two = [{ distance_m: 20, depth_m: 4 }, { distance_m: 140, depth_m: 10 }];
+    expect(fieldMix(two, 50, 150, 1, 2)).toBeGreaterThan(5); // bracketed: interpolated between soundings
+    const s = staticTerms({ ...BASE, fieldDepths: one }, DEFAULTS);
+    const wide = staticTerms({ ...BASE, fieldDepths: [{ distance_m: 20, depth_m: 8 }, { distance_m: 120, depth_m: 8 }] }, DEFAULTS);
+    expect(s.depthM).toBeLessThan(wide.depthM);
   });
 });

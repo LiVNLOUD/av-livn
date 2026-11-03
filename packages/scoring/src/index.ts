@@ -12,9 +12,9 @@ export { clamp01, angleDiff, hourKey, localParts, nextLocalMidnight, TZ_OFFSET_M
 export { PROFILES, getProfile } from './profiles';
 export { packDetail, unpackDetail, type Detail, type DetailHour, type PackedDetail } from './packed';
 export { scoreSeriesV2, weatherAt, ranks, MODEL_VERSION, type V2Hour, type V2Component, type ScoreV2Args } from './v2/score';
-export { rawScore, staticTerms, dynamicTerms, ambientLogLux, season, exposure, depthPrior, effLength, lampPrior, fieldBand, fieldWeight, LAMP_PRIOR, KIND_SOURCE, SHORE_KINDS, type ShoreKind, type FieldKind, type TermOverrides, type SpotV2, type Weather, type Source, type FieldDepth, type FieldSubstrate, type FieldStructure, type StructureKind } from './v2/model';
+export { rawScore, staticTerms, STRUCT_SHARE, FIELD_REACH_M, fieldMix, dynamicTerms, ambientLogLux, season, exposure, depthPrior, effLength, lampPrior, fieldBand, fieldWeight, LAMP_PRIOR, KIND_SOURCE, SHORE_KINDS, type ShoreKind, type FieldKind, type TermOverrides, type SpotV2, type Weather, type Source, type FieldDepth, type FieldSubstrate, type FieldStructure, type StructureKind } from './v2/model';
 export { calibrate, R_IDEAL, R_WORST, SCALE, IDEAL_SPOT, IDEAL_WEATHER, WORST_SPOT, WORST_WEATHER } from './v2/calibrate';
-export { PARAMS, DEFAULTS, SIGMA, drawParams, rng, type Evidence, type ParamKey, type Params } from './v2/params';
+export { PARAMS, DEFAULTS, SIGMA, drawParams, rng, paramBasis, BASIS_TR, type Evidence, type Basis, type ParamDef, type ParamKey, type Params } from './v2/params';
 export { skyAt, dayOfYear } from './v2/astro';
 export { tackle, tackleShort, tackleLevrek, tackleLevrekShort, LEGAL_MIN_LEVREK_CM, SPIN_SIZES, type LevrekTackle, crossWind, lightCase, unitIssues, DEFAULT_PROFILES, JIG_SIZES, R19_CITE, LEGAL_MIN_ISTAVRIT_CM, type Tackle, type TackleInput, type TackleProfile, type TackleRow } from './tackle';
 export { sinkSpeed, calibrateSink, fieldDepths, PAIR_M, PRIOR_REL_SD, type SinkObs, type PlumbObs, type ConvertedDepth, type SinkCalibration } from './v2/sink';

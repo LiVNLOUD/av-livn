@@ -29,10 +29,12 @@ def test_osm_lamps_within_radius_only_and_no_negative_findings():
 def test_sentinel2_classification_and_summary():
     assert [sentinel2.classify(r) for r in (1.6, 1.3, 1.0, 0.8)] == ["acik", "belirsiz", "belirsiz", "koyu"]
     f = sentinel2.summarise("a", [1.7] * 8 + [1.0] * 2, 7, "2026-10-31")
-    assert f.substrate == ["kum"] and f.evidence["confidence"] == "orta" and f.evidence["share"] == 0.8
+    # I4: brightness never becomes a bottom class
+    assert f.substrate is None and f.evidence["confidence"] == "orta" and f.evidence["share"] == 0.8
+    assert "kum olabilir" in f.note and "yansıma" in f.note and "belirsiz bırakıldı" in f.note
     k = sentinel2.summarise("a", [0.8] * 5, 9, "d")
     assert sentinel2.summarise("a", [1.0] * 5, 9, "d") is None
-    assert k.substrate == ["yosunlu"] and k.evidence["confidence"] == "düşük"
+    assert k.substrate is None and k.evidence["confidence"] == "düşük" and "gölgesi" in k.note
     assert sentinel2.summarise("a", [1.3] * 5, 9, "d") is None
     assert sentinel2.summarise("a", [1.7, 0.8, 1.3], 9, "d") is None
     assert sentinel2.summarise("a", [], 0, "d") is None

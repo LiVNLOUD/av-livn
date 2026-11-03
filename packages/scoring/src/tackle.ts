@@ -1,6 +1,7 @@
 // F0/G2: tackle and lure suggestion for istavrit (docs/TACKLE.md). Pure: the score job stores the open-data inputs
 // per hour; the card turns them into rows with this function. Rules are C-level heuristics, except the hook
-// size (R19, Peksu et al. 2020, A, local) and the legal minimum size (6/2 Tebliğ Çizelge 7, A).
+// legal minimum size (6/2 Tebliğ Çizelge 7, A). I4: the hook size rests on R19b — selectivity measured for the
+// classic handline (çapari) hooks, transferred to LRF jigheads (C, literatürden aktarım), not measured for LRF.
 // G2: the target depth follows the model's diel arm (night: mid-water/near the surface under the light, twilight:
 // mid-water, day: near the bottom); fixed (non-articulated) ajing heads by default; LRF up to 5 g, then spin.
 // md. 8/8: never suggests bringing light; "light" here is only the pier's existing lighting.
@@ -102,6 +103,14 @@ function mergeRows(lit: TackleRow[], dark: TackleRow[]): TackleRow[] {
 }
 const UNKNOWN_LAMP_NOTE = 'Lamba durumu bilinmiyor: yerinde iskele ışığı suya düşüyorsa "/" işaretinden önceki seçeneği, karanlıksa sonrakini kullan.';
 /** I3: a missing input is not calm water (docs/MODEL.md §15): say what was assumed. */
+/** I4: fishability, not fish availability — the model's current term (availability) never penalises strong
+ *  current; whether the angler can still work the lure is said here. */
+export const STRONG_CURRENT_MS = 0.5;
+function currentNotes(i: TackleInput): string[] {
+  return i.currentMs != null && i.currentMs >= STRONG_CURRENT_MS
+    ? [`akıntı ${i.currentMs.toFixed(2).replace('.', ',')} m/s: hafif takımla kontrol zor (avlanabilirlik); akıntı kesilen tarafı ya da yapının arkasını dene.`]
+    : [];
+}
 function missingNotes(i: TackleInput): string[] {
   const miss = [i.currentMs == null && 'akıntı', i.windKmh == null && 'rüzgar', i.waveM === null && 'dalga'].filter(Boolean);
   return miss.length ? [`${miss.join(', ')} verisi yok: ağırlık sakin suya göre hesaplandı; yerinde misina sürükleniyorsa bir boy ağırlaştır.`] : [];
@@ -127,10 +136,10 @@ export function tackle(i: TackleInput, profiles: TackleProfile[] = DEFAULT_PROFI
   if (light === 'bilinmeyen gece') {
     const lit = tackleOne({ ...i, lampP: 1 }, profiles, legalMinCm);
     const dark = tackleOne({ ...i, lampP: 0 }, profiles, legalMinCm);
-    return { ...lit, light, rows: mergeRows(lit.rows, dark.rows), notes: [UNKNOWN_LAMP_NOTE, ...lit.notes, ...missingNotes(i)] };
+    return { ...lit, light, rows: mergeRows(lit.rows, dark.rows), notes: [UNKNOWN_LAMP_NOTE, ...lit.notes, ...missingNotes(i), ...currentNotes(i)] };
   }
   const t = tackleOne(i, profiles, legalMinCm);
-  return { ...t, notes: [...t.notes, ...missingNotes(i)] };
+  return { ...t, notes: [...t.notes, ...missingNotes(i), ...currentNotes(i)] };
 }
 
 function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number): Tackle {
@@ -183,8 +192,8 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
       why: `hedef ${zone} (~${n1(targetM)} m, ${arm})${cur ? `, akıntı ${n1(cur)} m/s` : ''}${cross > 10 ? `, yan rüzgar ${Math.round(cross)} km/sa` : ''}; ${useSpin ? (jigG >= 8 ? 'mikro metal jig' : 'ağır jighead') : jigType === 'mafsallı' ? 'dip/kaya hedefinde sakin suda mafsallı' : 'istavritte varsayılan sabit ajing kafası'}`,
     },
     {
-      key: 'igne', label: 'İğne', value: '#8', evidence: 'A',
-      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, ${legalMinCm} cm altı oranı yüksek, geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm (R19: ${R19_CITE})`,
+      key: 'igne', label: 'İğne', value: '#8', evidence: 'C',
+      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, ${legalMinCm} cm altı oranı yüksek, geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm — çapari (el oltası) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı (R19b: ${R19_CITE})`,
     },
     {
       key: 'silikon', label: 'Silikon', value: `${lureCm} cm, ${shape}`, evidence: 'C',

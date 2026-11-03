@@ -43,8 +43,8 @@ export const LEVREK_PARAMS = {
   l_twilight_gain: { value: 0.6, unit: '-', evidence: 'C', ref: '' },
   // season: winter (spawning) peak, autumn feeding, base for the resident part
   l_season_base: { value: 0.35, unit: '-', evidence: 'C', ref: 'L2, L4' },
-  l_winter_doy: { value: 20, unit: 'gün', evidence: 'B', ref: 'L22, L2, L3, L5', additive: true },
-  l_winter_w: { value: 45, unit: 'gün', evidence: 'B', ref: 'L22' },
+  l_winter_doy: { value: 20, unit: 'gün', evidence: 'B', ref: 'L22, L2, L3, L5', additive: true, basis: 'literatur' },
+  l_winter_w: { value: 45, unit: 'gün', evidence: 'B', ref: 'L22', basis: 'literatur' },
   l_winter_amp: { value: 0.6, unit: '-', evidence: 'C', ref: '' },
   l_autumn_doy: { value: 300, unit: 'gün', evidence: 'C', ref: '', additive: true },
   l_autumn_w: { value: 30, unit: 'gün', evidence: 'C', ref: '' },
@@ -62,7 +62,7 @@ export const LEVREK_PARAMS = {
   // temperature: 48 h drop and absolute floor
   l_sst_drop_tol: { value: 1.0, unit: '°C/48 sa', evidence: 'C', ref: '' },
   l_sst_drop_scale: { value: 1.5, unit: '°C/48 sa', evidence: 'C', ref: '' },
-  l_sst_floor: { value: 9, unit: '°C', evidence: 'B', ref: 'L22', additive: true },
+  l_sst_floor: { value: 9, unit: '°C', evidence: 'B', ref: 'L22', additive: true, basis: 'literatur' },
   l_river_mm: { value: 20, unit: 'mm/72 sa', evidence: 'C', ref: 'L13' },
 } satisfies Record<string, ParamDef>;
 

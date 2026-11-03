@@ -157,6 +157,10 @@ describe('Copernicus overlay', () => {
     expect(out[2]).toMatchObject({ sst: 16.4, sstSource: 'copernicus' });
     expect(out[2]!.curVel).toBeUndefined();
     expect(applyOcean(pts, undefined)).toBe(pts);
+    // I4: a cell beyond OCEAN_MAX_KM does not describe the spot: Open-Meteo stays
+    const far = applyOcean(pts, { series: { ...ocean!.series!, data: { ...ocean!.series!.data, cell: { lat: 1, lon: 2, distance_km: 3 } } } });
+    expect(far[0]).toMatchObject({ sst: 18, curVel: 0.05 });
+    expect(far[0]!.sstSource).toBeUndefined();
     const onlyNormal = applyOcean(pts, { normal: ocean!.normal });
     expect(onlyNormal[0]!.sst).toBe(18);
     const noCur = applyOcean([], { series: { fetched_at: 'f', data: { ...ocean!.series!.data, cur: null } } });

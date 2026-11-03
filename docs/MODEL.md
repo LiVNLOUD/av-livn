@@ -114,7 +114,8 @@ c_rd = 1 / (1 + x²)
 ```
 τ        = 1 − exp( −(R₄₈ / 15 mm + Hs·E / 1.5 m) )     c_bulanık = 1 − 0.5 · τ     (görsel avcı, yön R11; büyüklük C)
 c_basınç = 1 − 0.2 · σ( (|Δp₃| − 3 hPa) / 1 )            kanıt bulunamadı → en düşük ağırlık
-c_akıntı = 0.7 + 0.3 · σ( (v − 0.05 m/s) / 0.03 )        durgun suda hafif düşüş (C)
+c_akıntı = 0.7 + 0.3 · σ( (v − 0.05 m/s) / 0.03 )        durgun suda hafif düşüş (C) — balığın BULUNABİLİRLİĞİ
+# I4: çok güçlü akıntı bu terimde cezalandırılmaz; hafif takımla AVLANABİLİRLİK (≥ 0,5 m/s) takım kutusunda uyarıdır.
 ```
 
 ## 4. Lamba: üç durum (var / yok / bilinmiyor)
@@ -151,7 +152,6 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 | `bright_k` | 0.8 | - | C | 0.5 | R10 |
 | `struct_pier` | 0.75 | - | C | 0.5 | — |
 | `struct_breakwater` | 0.85 | - | C | 0.5 | — |
-| `struct_len_km` | 0.15 | km | C | 0.5 | — |
 | `len_sat_m` | 300 | m | C | 0.5 | H2: etkin uzunluk 300 m'den sonra en çok +60 m (doymalı) |
 | `struct_promenade` | 0.7 | - | C | 0.5 | H6: kordon (taş tahkimat) |
 | `depth_mid` | 3.5 | m | C | 0.5 | R10 |
@@ -459,7 +459,7 @@ CREATE TABLE catch_log (id TEXT PRIMARY KEY, spot_id TEXT NOT NULL, start_at TEX
   L_eff = L                                    L ≤ len_sat_m (300 m)
   L_eff = 300 + 60 · (1 − e^(−(L − 300)/300))  L > 300 m        (en çok ~360 m)
   ```
-  Hem yapı terimi (`lenF`) hem derinlik önseli (`depthPrior`) `L_eff` kullanır.
+  I4'ten sonra yalnız derinlik önseli (`depthPrior`) `L_eff` kullanır. Yapı terimi artık uzunlukla büyümez (`STRUCT_SHARE` sabit, eski 150 m yapının payı); aynı varsayım iki kez sayılmaz.
 - Kanıt C: uzunluk derinliğin zayıf bir vekilidir; DTM ölçümü ve saha derinliği onun önündedir (§13).
 
 ## 13. Derinlik verisi öncelik zinciri (H4)
