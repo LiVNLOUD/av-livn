@@ -6,7 +6,7 @@ Amaç: kartta, o saatin koşullarına göre **hangi kamış, hangi jighead, hang
 | Profil | Kamış | Makine | Ana misina | Leader | Kullanım alanı |
 |---|---|---|---|---|---|
 | **LRF** | Ares Blue Porter AJ-S 6.3 (≈ 190 cm, ultra hafif, solid tip) | Vanford FA C2000S | Gosen PE 0.2 | FC 0.8–1.2 numara (≈3–5 lb, 60–100 cm) | 0,6–5 g jighead, iskele/mendirek dibi ve iskelenin mevcut aydınlatması, rüzgar ≤ ~20 km/sa |
-| **Spin** | Bassterra XT+ 274 cm (atış 6–32 g) | Nasci FD C3000 HG | Kairiki 8 (PE ≈ 0.6–0.8 varsayımı) | Daiwa Prorex FC | istavritte 6–10 g mikro metal jig / ağır jighead; derin uç, güçlü akıntı |
+| **Spin** | Bassterra XT+ 274 cm (atış 6–32 g) | Nasci FD C3000 HG | Kairiki 8 (PE kalınlığı profilde kayıtlı değil) | Daiwa Prorex FC | istavritte 6–10 g mikro metal jig / ağır jighead; derin uç, güçlü akıntı |
 
 Profil verisi `data/tackle.yaml` (ileride): `{id, ad, atış ağırlığı min–max g, misina PE, leader lb, max rüzgar km/sa}`. Kartta seçilen profil localStorage'da hatırlanır.
 
@@ -56,13 +56,13 @@ Ortak girdiler: derinlik 4 m, akıntı 0,05 m/s, rüzgar 8 km/sa, hamle 12, yan 
 
 | Senaryo | Değişen girdi | Takım | Jighead | Hedef | Saydırma | Renk |
 |---|---|---|---|---|---|---|
-| Gece, sakin, lambalı iskele | — | LRF | 1,2 g sabit | yüzeye yakın | 3 s | şeffaf-simli |
-| Gece, 25 km/sa yan rüzgar, hamle 30 | rüzgar 25, hamle 30, yan 25 | LRF (+ atış notu) | 3 g sabit | yüzeye yakın | 2 s | şeffaf-simli |
-| Gündüz, derin mendirek, sakin | derinlik 10 m, güneş 35° | LRF | 3 g mafsallı | dibe yakın | 16 s | doğal |
-| Alacakaranlık, akıntılı burun | kayalık, 6 m, akıntı 0,3 m/s | LRF | 2 g sabit | orta su | 6 s | doğal |
-| 5–6 g arası | gündüz, 12 m, akıntı 0,3 m/s | LRF (sınırda) | 5 g sabit | dibe yakın | 14 s | doğal |
-| 6 g gerektiren | gündüz, 12 m, akıntı 0,45 m/s | Spin | 6 g ağır jighead / mikro jig | dibe yakın | 13 s | doğal |
-| 8 g gerektiren | gündüz, 14 m, akıntı 0,6 m/s | Spin | 8 g mikro metal jig | dibe yakın | 16 s | doğal |
+| Gece, sakin, lambalı iskele | — | LRF | 1,2 g sabit | yüzeye yakın | 3–5 s | şeffaf-simli |
+| Gece, 25 km/sa yan rüzgar, hamle 30 | rüzgar 25, hamle 30, yan 25 | LRF (+ atış notu) | 3 g sabit | yüzeye yakın | 2–5 s | şeffaf-simli |
+| Gündüz, derin mendirek, sakin | derinlik 10 m, güneş 35° | LRF | 3 g mafsallı | dibe yakın | 16–38 s | doğal |
+| Alacakaranlık, akıntılı burun | kayalık, 6 m, akıntı 0,3 m/s | LRF | 2 g sabit | orta su | 6–14 s | doğal |
+| 5–6 g arası | gündüz, 12 m, akıntı 0,3 m/s | LRF (sınırda; toplam ≈ 5,5 g uyarısı) | 5 g sabit | dibe yakın | 15–36 s | doğal |
+| 6 g gerektiren | gündüz, 12 m, akıntı 0,45 m/s | Spin | 6 g ağır jighead / mikro jig | dibe yakın | 14–33 s | doğal |
+| 8 g gerektiren | gündüz, 14 m, akıntı 0,6 m/s | Spin | 8 g mikro metal jig | dibe yakın | 14–33 s | doğal |
 
 ## Mevzuat (6/2 Tebliğ md. 8/8, REGULATION.md)
 Öneri kutusu ve Sahadayım hiçbir zaman yapay ışık, lamba götürme, su altı ışığı, LED'li/ışıklı yem ya da feneri suya tutma önermez. "Işık" girdisi yalnız iskelenin **mevcut** aydınlatmasıdır. Kafa lambası yalnız güvenlik ve düğüm için, suya tutulmadan kullanılır. Güvenlik aydınlatması en çok 50 W'tır.
@@ -87,3 +87,10 @@ Teknik: iskele ışığının sınırına at, düşüşte bekle
 - Kod yeri: `packages/scoring/src/tackle.ts`, saf ve %100 test.
 - Girdi: `V2Hour` bileşenleri + mera derinliği + profil.
 - Öneri hesabı Worker'a değil puanlama işine konur. Liste JSON'una öneri kimliği eklenir; metni web tarafı üretir.
+
+## I7 — saydırma ve atış ağırlığı
+- Tek batış modeli: `v2/sink.ts` v₀ = 0,25·√g m/s (kanıt C, ±%40). Saha formundaki kalibrasyon (k) varsa onunla çarpılır.
+- Kesin saniye yerine aralık verilir (±%40 hız belirsizliği). Akıntı, misina ve silikon süreyi değiştirir.
+- Yerinde kontrol: misina gevşediği an dip; sayıyı bir kez dipte doğrula.
+- Kamış uygunluğu toplam atış ağırlığıyla bakılır: jighead + silikon (≈ 0,1 g/cm). LRF üst sınırı aşılırsa uyarı yazılır.
+- Profiller (marka, misina) yalnız kayıtlı profilden gelir; kayıtlı olmayan kalınlık tahmin edilmez.

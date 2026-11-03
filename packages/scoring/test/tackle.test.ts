@@ -8,48 +8,48 @@ const base: TackleInput = { depthM: 4, currentMs: 0.05, windKmh: 8, gustKmh: 12,
  * G2 scenario table (docs/TACKLE.md "Örnek senaryolar"): inputs and expected suggestions are fixed here; changing a
  * rule changes this table and the doc together.
  */
-export const SCENARIOS: { name: string; input: TackleInput; expect: { profile: 'lrf' | 'spin'; jig: string; zone: string; sink: number; color: string } }[] = [
+export const SCENARIOS: { name: string; input: TackleInput; expect: { profile: 'lrf' | 'spin'; jig: string; zone: string; sink: string; color: string } }[] = [
   {
     name: 'Gece, sakin, lambalı iskele (4 m)',
     input: base,
-    expect: { profile: 'lrf', jig: '1,2 g sabit', zone: 'yüzeye yakın', sink: 3, color: 'şeffaf-simli' },
+    expect: { profile: 'lrf', jig: '1,2 g sabit', zone: 'yüzeye yakın', sink: '3–5 s', color: 'şeffaf-simli' },
   },
   {
     name: 'Gece, 25 km/sa yan rüzgar, hamle 30',
     input: { ...base, windKmh: 25, gustKmh: 30, crossKmh: 25 },
-    expect: { profile: 'lrf', jig: '3 g sabit', zone: 'yüzeye yakın', sink: 2, color: 'şeffaf-simli' },
+    expect: { profile: 'lrf', jig: '3 g sabit', zone: 'yüzeye yakın', sink: '2–5 s', color: 'şeffaf-simli' },
   },
   {
     name: 'Gündüz, derin mendirek (10 m), sakin',
     input: { ...base, depthM: 10, sunAlt: 35, lampP: null },
-    expect: { profile: 'lrf', jig: '3 g mafsallı', zone: 'dibe yakın', sink: 16, color: 'doğal' },
+    expect: { profile: 'lrf', jig: '3 g mafsallı', zone: 'dibe yakın', sink: '16–38 s', color: 'doğal' },
   },
   {
     name: 'Alacakaranlık, akıntılı burun (kayalık 6 m, 0,3 m/s)',
     input: { ...base, depthM: 6, sunAlt: -3, currentMs: 0.3, crossKmh: 8, kind: 'rocky' },
-    expect: { profile: 'lrf', jig: '2 g sabit', zone: 'orta su', sink: 6, color: 'doğal' },
+    expect: { profile: 'lrf', jig: '2 g sabit', zone: 'orta su', sink: '6–14 s', color: 'doğal' },
   },
   {
     name: '5–6 g arası: gündüz 12 m, akıntı 0,3 m/s → LRF sınırında',
     input: { ...base, depthM: 12, sunAlt: 30, lampP: null, currentMs: 0.3 },
-    expect: { profile: 'lrf', jig: '5 g sabit', zone: 'dibe yakın', sink: 14, color: 'doğal' },
+    expect: { profile: 'lrf', jig: '5 g sabit', zone: 'dibe yakın', sink: '15–36 s', color: 'doğal' },
   },
   {
     name: '6 g gerektiren: gündüz 12 m, akıntı 0,45 m/s',
     input: { ...base, depthM: 12, sunAlt: 30, lampP: null, currentMs: 0.45 },
-    expect: { profile: 'spin', jig: '6 g sabit', zone: 'dibe yakın', sink: 13, color: 'doğal' },
+    expect: { profile: 'spin', jig: '6 g sabit', zone: 'dibe yakın', sink: '14–33 s', color: 'doğal' },
   },
   {
     name: '8 g gerektiren: gündüz 14 m, akıntı 0,6 m/s',
     input: { ...base, depthM: 14, sunAlt: 30, lampP: null, currentMs: 0.6 },
-    expect: { profile: 'spin', jig: '8 g sabit', zone: 'dibe yakın', sink: 16, color: 'doğal' },
+    expect: { profile: 'spin', jig: '8 g sabit', zone: 'dibe yakın', sink: '14–33 s', color: 'doğal' },
   },
 ];
 
 describe('tackle (F0/G2)', () => {
   it.each(SCENARIOS)('$name', ({ input, expect: e }) => {
     const t = tackle(input);
-    expect([t.profile, `${String(t.jigG).replace('.', ',')} g ${t.jigType}`, t.zone, t.sinkS, t.color]).toEqual([e.profile, e.jig, e.zone, e.sink, e.color]);
+    expect([t.profile, `${String(t.jigG).replace('.', ',')} g ${t.jigType}`, t.zone, t.rows.find((r) => r.key === 'saydirma')!.value, t.color]).toEqual([e.profile, e.jig, e.zone, e.sink, e.color]);
   });
 
   it('rows, hook trade-off, legal size, md. 8/8', () => {
@@ -241,5 +241,19 @@ describe('I4: strong current is a fishability note, not an availability penalty'
     expect(tackle({ ...base, currentMs: 0.6 }).notes.at(-1)).toMatch(/^akıntı 0,60 m\/s: hafif takımla kontrol zor \(avlanabilirlik\)/);
     expect(tackle({ ...base, currentMs: 0.6, lampP: null }).notes.at(-1)).toMatch(/avlanabilirlik/);
     expect(tackle({ ...base, currentMs: 0.3 }).notes.some((n) => /avlanabilirlik/.test(n))).toBe(false);
+  });
+});
+
+describe('I7: one sink model, a range, total cast weight', () => {
+  it('uses v2/sink.ts and the field factor; warns when jighead + lure exceed the LRF rod', async () => {
+    const { sinkSpeed } = await import('../src/v2/sink');
+    const t = tackle({ ...base, depthM: 10, sunAlt: 35, lampP: null });
+    expect(t.sinkS).toBe(Math.round(10 / sinkSpeed(3)));
+    const cal = tackle({ ...base, depthM: 10, sunAlt: 35, lampP: null, sinkK: 2 });
+    expect(cal.sinkS).toBe(Math.round(10 / (2 * sinkSpeed(3))));
+    expect(t.totalG).toBe(3.5);
+    const edge = tackle({ ...base, depthM: 12, sunAlt: 30, lampP: null, currentMs: 0.3 });
+    expect(edge.notes.some((n) => n.startsWith('toplam atış ağırlığı ≈ 5,5 g'))).toBe(true);
+    expect(tackle(base).notes.some((n) => n.startsWith('toplam atış'))).toBe(false);
   });
 });

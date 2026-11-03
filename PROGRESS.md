@@ -234,7 +234,7 @@
 - [x] I4 kanıt sınıfları (`basis`), Peksu R19/R19b, mevsim yeniden sınıflı, akıntı bulunabilirlik/avlanabilirlik ayrımı, uzunluk tek sayım (ilk 10 önce/sonra `docs/audit/i4-length-top10.json`), saha derinliği ±30 m, Sentinel-2 sınıf atamıyor, `docs/DATA-SOURCES.md`, ek etkenler RESEARCH.md
 - [ ] I5 kapsam (Bursa batı kıyısı, il etiketi, kıyı kesimi veri tablosu)
 - [~] I6 av günlüğü alanları (migration 0014), başlangıçta dondurma, düzenleme dondurmayı bozmaz, kalibrasyon yalnız ileriye dönük + zaman bölmeli test ✅; 1 Kasım seansı eklendi (`ses-retro-20261101-ido`) ✅; ayrık puanlar ve sıralama kararlılığı bekliyor
-- [ ] I7 takım tutarlılığı
+- [x] I7 takım: tek batış modeli (`v2/sink.ts` + saha k), saydırma aralığı, toplam atış ağırlığı uyarısı, PE varsayımı kaldırıldı; gece aydınlık/karanlık/bilinmiyor koşullu (I3)
 - [ ] I8 referans incelemesi
 - [ ] I9 sade ana ekran + mobil
 - [ ] I10 teslim

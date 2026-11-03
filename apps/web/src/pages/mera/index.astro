@@ -159,6 +159,7 @@ import Base from '../../layouts/Base.astro';
   const tkInput = (v: (number | null)[]): TackleInput => ({
     depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null,
     sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: d.spot.kind,
+    sinkK: d.packed?.meta.sink_calibration?.k ?? null,
   });
   /** H3: one shape for both species' boxes: rows, notes and a short set/weight label for the owner's diff line. */
   const buildTackle = (i: TackleInput) => {

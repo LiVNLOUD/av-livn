@@ -24,6 +24,8 @@ export const DEFAULT_PROFILES: TackleProfile[] = [
   { id: 'spin', name: 'Spin: Bassterra XT+ 274 + Nasci FD C3000 HG', jigMin: 6, jigMax: 32, maxGustKmh: 50, line: 'Kairiki 8 + Daiwa Prorex FC' },
 ];
 
+import { PRIOR_REL_SD, sinkSpeed } from './v2/sink';
+
 /** RESEARCH.md R19, cited verbatim on the hook row (a test checks it against RESEARCH.md). */
 export const R19_CITE = 'Peksu M., Uzer U., Yıldız T., Ayaz A., Karakulak F.S. (2020). J. Appl. Ichthyol. 36(6):893–900';
 /** Ajing jighead sizes on the market (g). */
@@ -48,6 +50,8 @@ export interface TackleInput {
   kind?: string | null;
   /** H3 (levrek): wave height at the spot's sea cell (m). */
   waveM?: number | null;
+  /** I7: field sink calibration factor k for this spot (v2/sink.ts calibrateSink); 1 = prior. */
+  sinkK?: number | null;
 }
 
 export interface TackleRow {
@@ -69,6 +73,8 @@ export interface Tackle {
   zone: 'yüzeye yakın' | 'orta su' | 'dibe yakın';
   targetM: number;
   sinkS: number;
+  /** I7: total cast weight (jighead + soft lure), g. */
+  totalG: number;
   rows: TackleRow[];
   /** Information only, never a suggestion (md. 8/8). */
   notes: string[];
@@ -174,10 +180,18 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
   const lureCm = cold ? 4 : turbid ? 6 : 5;
   const color = turbid ? 'parlak' : light === 'aydınlık gece' ? 'şeffaf-simli' : light === 'karanlık gece' ? 'koyu siluet' : 'doğal';
   const shape = turbid || light === 'karanlık gece' ? 'kürek kuyruk (titreşim)' : 'iğne kuyruk (doğal düşüş)';
-  // sink rate (m/s) grows with weight; count to the target depth (night: short, 2–4 s)
-  const rate = useSpin ? 0.9 : 0.25 + 0.12 * jigG;
+  // I7: one sink model for the tackle box and the field form (v2/sink.ts: v₀ = 0.25·√g m/s, ±PRIOR_REL_SD), times the
+  // angler's own calibration factor when the field form has one. Current, line and lure change it: a range, not a
+  // second count, and the count is checked on the spot (line goes slack = bottom).
+  const rate = sinkSpeed(jigG) * (i.sinkK ?? 1);
   const raw = Math.round(targetM / rate);
   const sinkS = night ? Math.min(4, Math.max(2, raw)) : Math.max(2, raw);
+  const sinkLo = Math.max(1, Math.round(targetM / (rate * (1 + PRIOR_REL_SD))));
+  const sinkHi = Math.max(sinkLo + 1, Math.round(targetM / (rate * (1 - PRIOR_REL_SD))));
+  const sinkTxt = night ? `${Math.min(sinkLo, sinkS)}–${Math.max(Math.min(sinkHi, 5), sinkS)} s` : `${Math.min(sinkLo, sinkS)}–${Math.max(sinkHi, sinkS)} s`;
+  // I7: the rod's casting range is checked against the total cast weight (jighead + soft lure ≈ 0.1 g/cm)
+  const totalG = Math.round((jigG + 0.1 * lureCm) * 10) / 10;
+  const rodNote = !useSpin && totalG > lrf.jigMax ? `toplam atış ağırlığı ≈ ${n1(totalG)} g (jighead + silikon): LRF kamışın üst sınırında (${n1(lrf.jigMax)} g), tam güçle atma.` : null;
   const arm = night ? `modelin gece kolu (${light})` : light === 'alacakaranlık' ? 'modelin alacakaranlık tepesi' : 'modelin gündüz kolu: derinlik';
 
   const rows: TackleRow[] = [
@@ -204,7 +218,7 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
       why: turbid ? 'bulanıkta görünürlük' : light === 'aydınlık gece' ? 'iskelenin mevcut aydınlatması altında ışık–gölge sınırı' : light === 'karanlık gece' ? 'karanlıkta siluet' : 'gün ışığında doğal görünüm',
     },
     {
-      key: 'saydirma', label: 'Saydırma', value: `${sinkS} s`, evidence: 'C',
+      key: 'saydirma', label: 'Saydırma', value: sinkTxt, evidence: 'C',
       why: night
         ? `yüzeye yakın: kısa say (2–4 s), ~${n1(rate)} m/s düşüş; ışık–gölge sınırında düşüşte bekle`
         : zone === 'orta su'
@@ -216,7 +230,8 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
   const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
   if (gustNote) notes.push(`${gustNote.charAt(0).toLocaleUpperCase('tr')}${gustNote.slice(1)}.`);
   if (color === 'koyu siluet') notes.push('Fosforlu (glow) silikon bir boyadır; onu şarj etmek için ışık kullanmanın kapsamı doğrulanmalı.');
-  return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, rows, notes, light };
+  if (rodNote) notes.push(rodNote);
+  return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, totalG, rows, notes, light };
 }
 
 /** One-line version (Sahadayım, home page). */
