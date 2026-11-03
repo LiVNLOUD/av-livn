@@ -153,6 +153,7 @@ if (dryRun) {
   console.log(`wrote ${records.length} rows in ${(performance.now() - t2).toFixed(0)} ms (total ${(performance.now() - t0).toFixed(0)} ms)`);
   // D9: daily summary / opportunity / safety on the hourly run, test requests on every run.
   const names = new Map(rows.map((r) => [r.id, r.name]));
-  const spotsHours = (sp: keyof typeof bySpecies) => bySpecies[sp].map((r) => ({ id: r.spot_id, name: names.get(r.spot_id) ?? r.spot_id, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
+  const access = new Map(rows.map((r) => [r.id, r.access]));
+  const spotsHours = (sp: keyof typeof bySpecies) => bySpecies[sp].map((r) => ({ id: r.spot_id, name: names.get(r.spot_id) ?? r.spot_id, access: access.get(r.spot_id) ?? null, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
   await runNotify(query, { spots: spotsHours('istavrit'), bySpecies: { istavrit: spotsHours('istavrit'), levrek: spotsHours('levrek') }, nowHour: Math.floor(Date.now() / 3_600_000), testOnly: pendingOnly }).catch((e) => console.log(`notify failed: ${(e as Error).message}`));
 }

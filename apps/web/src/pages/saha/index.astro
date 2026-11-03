@@ -227,7 +227,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     return v === '' ? undefined : Number(v);
   };
   function depths(): Depth[] {
-    return [...document.querySelectorAll('#depths .depth')].flatMap((row) => {
+    return [...document.querySelectorAll('#depths .depth')].flatMap((row): Depth[] => {
       const method = (row.querySelector<HTMLButtonElement>('.method button[aria-pressed="true"]')?.dataset.v ?? 'plumb') as 'plumb' | 'sink';
       const distance_m = num(row.querySelector('.d-dist'));
       if (distance_m === undefined) return [];

@@ -229,7 +229,7 @@
 - Plan: `/root/.claude/plans/proje-av-livn-spicy-dragonfly.md` özeti `docs/AUDIT-I.md` §3'te. Adımlar I0–I10.
 - [x] I0 Faz H kapanışı.
 - [x] I1 `docs/AUDIT-I.md`: 23 bulgu, öncelik sırası, karar soruları.
-- [ ] I2 kritik hatalar (takım kutusu, WebGL, erişim, güçlü/görece, eksik veri)
+- [x] I2 kritik hatalar: takım kutusu, astro check (+ Sahadayım api gölgeleme), WebGL2 notu, pencere/bildirim erişim süzgeci, güçlü/görece, eksik veri kuralları (MODEL §15), e2e (CI) — AUDIT-I #1–#6
 - [ ] I3 aydınlatma (üç durumlu ışık, feribot duyarlılığı, Mapillary incelemesi)
 - [ ] I4 kanıt sınıfları ve model çelişkileri
 - [ ] I5 kapsam (Bursa batı kıyısı, il etiketi, kıyı kesimi veri tablosu)

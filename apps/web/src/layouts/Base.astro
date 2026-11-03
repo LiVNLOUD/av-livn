@@ -3,7 +3,7 @@ import '../styles/global.css';
 interface Props { title: string; description?: string; fullscreen?: boolean; app?: boolean }
 const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false, app = false } = Astro.props;
 const path = Astro.url.pathname;
-const cur = (p: string) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined;
+const cur = (p: string): 'page' | undefined => ((p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined);
 const NAV: [string, string][] = [['/', 'Liste'], ['/harita/', 'Harita'], ['/sahadayim/', 'Sahadayım'], ['/gunluk/', 'Günlük'], ['/model/', 'Model'], ['/ayarlar/', 'Ayarlar']];
 const TABS: [string, string, string][] = [
   ['/', 'Liste', 'M4 6h16M4 12h16M4 18h10'],

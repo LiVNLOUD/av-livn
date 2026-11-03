@@ -70,7 +70,36 @@ export interface MapApi {
   flyTo(id: string): void;
 }
 
+/** I2: MapLibre 6 needs WebGL2. Without it the map is replaced by a note; list, plan and heat map keep working. */
+export function webgl2Ok(): boolean {
+  try {
+    return !!document.createElement('canvas').getContext('webgl2');
+  } catch {
+    return false;
+  }
+}
+const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {} };
+function noMap(container: HTMLElement, why: string): MapApi {
+  const note = document.createElement('div');
+  note.className = 'map-loading map-off-note';
+  note.setAttribute('role', 'status');
+  note.textContent = `Harita bu cihazda açılamıyor (${why}). Mera listesi, saatler ve takım önerisi çalışıyor.`;
+  container.replaceChildren(note);
+  container.dataset.noMap = '1';
+  return NOOP;
+}
+
 export function mountMap(o: MapOpts): MapApi {
+  if (!webgl2Ok()) return noMap(o.container, 'tarayıcıda WebGL2 yok');
+  try {
+    return mountMapInner(o);
+  } catch (e) {
+    console.warn('map', e);
+    return noMap(o.container, 'harita motoru başlatılamadı');
+  }
+}
+
+function mountMapInner(o: MapOpts): MapApi {
 setup();
 const ui = (id: string) => document.getElementById(id);
 const loading = document.createElement('div');

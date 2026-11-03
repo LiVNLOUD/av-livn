@@ -3,6 +3,7 @@
 // Differences: turbidity helps (moderate optimum) with a post-storm bonus, a surf-line wave optimum, a winter season
 // peak, rain at river mouths; the pier's existing lighting has a MEDIUM effect (fish hunt bait fish on the
 // light–shadow edge; C). md. 8/8: "light" is only the existing lighting, never a suggestion to bring one.
+import { missingMask } from './data';
 import { indexSeries, safetyGate } from '../engine';
 import { getProfile } from '../profiles';
 import type { HourlyPoint, SpeciesProfile } from '../types';
@@ -286,6 +287,7 @@ export function scoreSeriesLevrek(a: Omit<ScoreV2Args, 'profile'> & { profile?: 
       p90: noWeather ? null : p90,
       gated,
       warnings,
+      missing: missingMask(w),
       lampP: res.lampP,
       wNight: Math.round(res.terms[0]!.wNight * 1000) / 1000,
       components: components(a.spot, res, w),

@@ -313,8 +313,9 @@ export interface ScoreRecordV2 {
 
 /** Main reason of the rank at an hour: driver, score delta vs. the other spots, Turkish one-liner. */
 export type ReasonEntry = [DriverKey, number, string];
-/** [total, p10, p90, rank, gated, first warning, main reason] — p10/p90 null while the band is being recomputed. */
-export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null, ReasonEntry | null];
+/** [total, p10, p90, rank, gated, first warning, main reason, missing-data mask (I2, v2/data.ts; absent = 0)]
+ *  — p10/p90 null while the band is being recomputed. */
+export type ListEntryV2 = [number | null, number | null, number | null, number, 0 | 1, string | null, ReasonEntry | null, number?];
 
 const COMPASS_TR = ['kuzey', 'kuzeydoğu', 'doğu', 'güneydoğu', 'güney', 'güneybatı', 'batı', 'kuzeybatı'];
 const n1 = (x: number) => (Math.round(x * 10) / 10).toString().replace('.', ',');
@@ -384,7 +385,7 @@ export function scoreRecordsV2(
   const rankAt = Array.from({ length: HOURS_V2 }, (_, i) => ranks(res.map((x) => x.hours[i]!.total)));
   const reasons = reasonsFor(res, species);
   return rows.map((r, k) => {
-    const list = res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null, reasons[k]![i]!]);
+    const list = res[k]!.hours.map((h, i): ListEntryV2 => [h.total, h.p10, h.p90, rankAt[i]![k]!, h.gated ? 1 : 0, h.warnings[0] ?? null, reasons[k]![i]!, h.missing]);
     const h0 = res[k]!.hours[0]!;
     return {
       spot_id: r.id,
@@ -430,7 +431,7 @@ export function rescoreSpot(
     const hour = r.startHour + i;
     const old = prev?.list[hour - prev.start_hour];
     const totals = [h.total, ...others.map((o) => o.list[hour - o.start_hour]?.[0] ?? null)];
-    return [h.total, null, null, ranks(totals)[0]!, h.gated ? 1 : 0, h.warnings[0] ?? null, old?.[6] ?? null];
+    return [h.total, null, null, ranks(totals)[0]!, h.gated ? 1 : 0, h.warnings[0] ?? null, old?.[6] ?? null, h.missing];
   });
   return {
     spot_id: row.id,

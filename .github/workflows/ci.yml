@@ -15,6 +15,18 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run typecheck
+      # I2: real user flows on the built site (local Worker + assets, live read-only API data):
+      # open a spot card → tackle box; no WebGL2 → map note, list works; 360/390 px overflow and tap targets
+      - name: e2e (Playwright)
+        env:
+          CLOUDFLARE_API_TOKEN: placeholder
+        run: |
+          npm i --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          (cd workers/api && npx wrangler d1 migrations apply av-livn --local)
+          (cd workers/api && npx wrangler dev --local --port 8787 > /tmp/wd.log 2>&1 &)
+          for i in $(seq 1 60); do curl -sf localhost:8787/api/health >/dev/null && break; sleep 1; done
+          node scripts/e2e.mjs http://localhost:8787 --api https://av.livn.tr
   python:
     runs-on: ubuntu-latest
     steps:

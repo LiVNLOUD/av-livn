@@ -20,6 +20,7 @@ import Base from '../../layouts/Base.astro';
     </section>
     <p class="flag" id="dayflag" hidden></p>
     <p class="flag" id="partial" hidden>Saha girişinden sonra hızlı hesap: puan güncel, belirsizlik bandı bir sonraki saatlik çalışmada yenilenecek.</p>
+    <p class="flag" id="render-err" hidden>Sayfanın bir bölümü gösterilemedi (gösterim hatası). Veriler alındı; sorun bizde, bildirildi.</p>
 
     <section class="tackle card" aria-labelledby="t-tk" hidden>
       <div class="tk-head"><h2 id="t-tk">Takım ve yem</h2><span class="fs-1 muted" id="tk-ver">açık veriyle</span></div>
@@ -160,7 +161,7 @@ import Base from '../../layouts/Base.astro';
     sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: d.spot.kind,
   });
   /** H3: one shape for both species' boxes: rows, notes and a short set/weight label for the owner's diff line. */
-  const box = (i: TackleInput) => {
+  const buildTackle = (i: TackleInput) => {
     if (species === 'levrek') {
       const t = tackleLevrek(i, profiles);
       return { rows: t.rows, notes: t.notes, key: `${t.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(t.weightG).replace('.', ',')} g ${t.lure}` };
@@ -170,14 +171,23 @@ import Base from '../../layouts/Base.astro';
   };
   /** F0 box: open-data version for everyone; the owner also sees the field-depth version and the difference. */
   function renderTackle(i: number) {
+    try {
+      drawTackle(i);
+    } catch (e) {
+      console.error('tackle render', e);
+      const el = document.querySelector<HTMLElement>('.tackle');
+      if (el) { el.hidden = false; $('tk').innerHTML = ''; $('tk-notes').textContent = 'Takım önerisi bu saat için gösterilemedi (gösterim hatası; veri bağlantısı sorunu değil).'; }
+    }
+  }
+  function drawTackle(i: number) {
     const v = TK[i];
-    const box = document.querySelector<HTMLElement>('.tackle')!;
-    box.hidden = !v || H[i]?.[5] === 1; // no box while the safety gate is on
-    if (!v || box.hidden) return;
-    const pub = box(tkInput(v));
+    const tackleEl = document.querySelector<HTMLElement>('.tackle')!;
+    tackleEl.hidden = !v || H[i]?.[5] === 1; // no box while the safety gate is on
+    if (!v || tackleEl.hidden) return;
+    const pub = buildTackle(tkInput(v));
     const depths = priv?.record?.depths ?? [];
     const fieldDepth = depths.length ? 0.4 * fieldBand(depths, 0, 50) + 0.6 * fieldBand(depths, 50, 150) : null;
-    const own = fieldDepth !== null ? box({ ...tkInput(v), depthM: fieldDepth }) : null;
+    const own = fieldDepth !== null ? buildTackle({ ...tkInput(v), depthM: fieldDepth }) : null;
     const t = own ?? pub;
     $('tk-ver').textContent = `${SPECIES_TR[species]} · ${own ? 'saha ölçümüyle inceltildi' : 'açık veriyle'}`;
     const diff = $('tk-diff');
@@ -188,6 +198,16 @@ import Base from '../../layouts/Base.astro';
       .map((r) => `<dt>${esc(r.label)}</dt><dd><b>${esc(r.value)}</b><a class="tag ev ev-${r.evidence}" href="/model/#kanit-${r.evidence}" title="Kanıt düzeyi ${r.evidence}">${r.evidence}</a><span class="y">${esc(r.why)}</span></dd>`)
       .join('');
     $('tk-notes').textContent = t.notes.join(' ');
+  }
+  /** I2: minimal shape check of the spot response; returns what is wrong, or null. */
+  function validateResp(b: unknown): string | null {
+    const r = b as Partial<Resp> | null;
+    if (!r || typeof r !== 'object') return 'boş yanıt';
+    if (!r.spot || typeof r.spot.id !== 'string' || typeof r.spot.name !== 'string') return 'mera bilgisi yok';
+    if (typeof r.from !== 'number' || typeof r.hours !== 'number') return 'saat aralığı yok';
+    if (r.packed && (!Array.isArray(r.packed.h) || !r.packed.meta || !Array.isArray(r.packed.meta.comps))) return 'saatlik veri bozuk';
+    if (r.packed?.tk && !Array.isArray(r.packed.tk)) return 'takım girdisi bozuk';
+    return null;
   }
   let sel = 0;
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık', kisitli_feribot: 'erişim kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
@@ -436,9 +456,26 @@ import Base from '../../layouts/Base.astro';
     $('name').textContent = 'Mera seçilmedi';
     $('sub').innerHTML = '<a href="/">Mera listesine dönün</a>.';
   } else {
-    fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species), { cache: 'no-cache' })
-      .then((r) => (r.status === 404 ? Promise.reject(new Error('404')) : r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then(async (b: Resp) => {
+    // I2: three separate failure stages — fetch (network/HTTP), validation (unexpected shape), drawing (a bug).
+    // Each says what failed; a drawing bug never reads as "check your connection".
+    const fail = (title: string, text: string) => { $('name').textContent = title; $('sub').textContent = text; $('spot').setAttribute('aria-busy', 'false'); };
+    type Got = { stage: 'ok'; body: unknown } | { stage: 'invalid'; why: string } | { stage: 'missing' } | { stage: 'http'; status: number } | { stage: 'network' };
+    const get = async (): Promise<Got> => {
+      let r: Response;
+      try { r = await fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species), { cache: 'no-cache' }); } catch { return { stage: 'network' }; }
+      if (r.status === 404) return { stage: 'missing' };
+      if (!r.ok) return { stage: 'http', status: r.status };
+      try { return { stage: 'ok', body: await r.json() }; } catch { return { stage: 'invalid', why: 'JSON değil' }; }
+    };
+    get()
+      .then(async (res) => {
+        if (res.stage === 'missing') return fail('Bu mera bulunamadı', 'Mera kaldırılmış olabilir. Listeden başka bir mera seçin.');
+        if (res.stage === 'network') return fail('Puanlar alınamadı', 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edip sayfayı yenileyin.');
+        if (res.stage === 'http') return fail('Puanlar alınamadı', `Sunucu hata verdi (HTTP ${res.status}). Birkaç dakika sonra yeniden deneyin.`);
+        if (res.stage === 'invalid') return fail('Veri eksik ya da uyumsuz', `Sunucudan gelen mera verisi okunamadı (${res.why}). Sorun bizde; sayfayı yenilemek düzeltmeyebilir.`);
+        const why = validateResp(res.body);
+        if (why) return fail('Veri eksik ya da uyumsuz', `Sunucudan gelen mera verisi beklenen biçimde değil (${why}). Sorun bizde; sayfayı yenilemek düzeltmeyebilir.`);
+        const b = res.body as Resp;
         d = b;
         const [fr, sp] = await Promise.all([
           adminGet<Priv>(`/api/admin/spots/${encodeURIComponent(id)}/field`),
@@ -447,11 +484,13 @@ import Base from '../../layouts/Base.astro';
         if (fr) priv = { ...fr, has_light: sp?.spots.find((x) => x.id === id)?.has_light ?? null };
         H = b.packed ? b.packed.h.slice(b.from, b.from + b.hours) : [];
         TK = b.packed?.tk ? b.packed.tk.slice(b.from, b.from + b.hours) : [];
-        render();
-      })
-      .catch((e: Error) => {
-        $('name').textContent = e.message === '404' ? 'Bu mera bulunamadı' : 'Puanlar alınamadı';
-        $('sub').textContent = e.message === '404' ? 'Mera kaldırılmış olabilir. Listeden başka bir mera seçin.' : 'Bağlantınızı kontrol edip sayfayı yenileyin.';
+        try {
+          render();
+        } catch (e) {
+          console.error('mera render', e);
+          $('render-err').hidden = false;
+          $('spot').setAttribute('aria-busy', 'false');
+        }
       });
   }
 </script>

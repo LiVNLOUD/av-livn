@@ -479,3 +479,25 @@ Kıyı çizgisine ≤ 25 m paralel tahkimat, deniz duvarı ya da kordon/sahil yo
 |---|---|---|
 | İstavrit | 0,70 | Taş arası yem/küçük balık barınağı. Çoğunlukla aydınlatmalı: lamba olasılığı OSM sokak lambası yoğunluğundan, 0,2–0,85. Sığ eğim: derinlik önseli 2 m |
 | Levrek | 0,65 | Taş arası yengeç/karides. Gece ışık–gölge sınırında yem balığı. Sığ eğim kumsaldan iyi, kayalıktan zayıf |
+
+## 15. Veri yeterliliği kuralları (I2)
+
+Eksik girdi hiçbir zaman "sakin" ya da "berrak" kabul edilmez.
+- Geometrik ortalama eksik terimi dışarıda bırakır; puan kalan terimlerle hesaplanır.
+- Saatin hangi öneride kullanılabileceğine aşağıdaki kurallar karar verir (`packages/scoring/src/v2/data.ts`, saat kaydında `missing` bit maskesi).
+
+| Eksik girdi | Seviye | Sonuç |
+|---|---|---|
+| rüzgar ya da dalga | `yok` | Güvenlik kapısı denetlenemez. Saat hiçbir pencereye ve bildirime girmez. |
+| akıntı ya da bulanıklık (48 sa yağış) | `goreli` | Pencere en fazla "görece" olur ve "eksik veri: …" rozeti taşır. Fırsat bildirimi gönderilmez. |
+| su sıcaklığının 48 sa değişimi | `tam` | Listede eksik olarak yazılır. Terim küçük olduğu için (w_sst 0,05) seviye düşmez. |
+
+**Güçlü / görece ayrımı (`workers/api/src/lib/windows.ts`):**
+- **Güçlü:** zirve ≥ 65 ve veri `tam`.
+- **Görece:** 65'i geçen pencere sayısı yetmediği için eşik, saatlerin %85 yüzdeliğine düşürüldüyse ya da veri `goreli` ise.
+- Güçlü pencere yoksa ana sayfa ve günlük bildirim "Bu aralıkta güçlü öneri yok" der ve görece en iyileri öyle etiketler.
+
+**Erişim süzgeci:**
+- `/api/windows` iki liste döner: tüm meralar ve yalnız erişimi açık meralar (`open`).
+- "Erişimi belirsiz/kısıtlı olanları gizle" seçiliyken sayfa `open` listesini gösterir.
+- Bildirimler varsayılan olarak `open_only` (yalnız açık erişim) ile çalışır.

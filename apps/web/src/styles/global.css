@@ -131,6 +131,7 @@ footer.site p { margin: 0 0 var(--s1); max-width: 68ch; }
 .badge.warn { border-color: var(--warn); color: var(--warn); }
 .badge.legal { border-color: var(--storm); color: var(--storm); }
 .badge.assume { border-style: dashed; }
+.badge.good { border-color: var(--good, #5fbf7f); color: var(--good, #5fbf7f); }
 .tag.ev { font-weight: 700; color: var(--foam); text-decoration: none; }
 .tag.ev-A { border-color: var(--good); color: var(--good); }
 .tag.ev-B { border-color: var(--warn); color: var(--warn); }
@@ -144,7 +145,8 @@ button, .button, .btn {
 .btn { background: var(--sodium); color: #1a1205; }
 .btn.secondary, button.ghost { background: transparent; color: var(--foam); border-color: var(--swell); }
 .btn.secondary:hover, button.ghost:hover { border-color: var(--mist); }
-.btn.small { height: 32px; padding: 0 var(--s3); font-size: var(--fs-2); }
+.btn.small { height: 32px; min-height: 32px; padding: 0 var(--s3); font-size: var(--fs-2); }
+@media (pointer: coarse), (max-width: 600px) { .btn.small { height: 44px; } }
 .btn.touch { height: 44px; }
 .link { color: var(--foam); text-decoration: underline; text-decoration-color: var(--mist); text-underline-offset: 3px; font-size: inherit; }
 .link:hover { text-decoration-color: var(--foam); }
@@ -159,6 +161,8 @@ label { display: grid; gap: var(--s1); font-size: var(--fs-2); line-height: var(
 /* Map (scripts/map.ts) */
 .map-loading { position: absolute; z-index: 3; left: 50%; top: var(--s5); transform: translateX(-50%); padding: var(--s2) var(--s4); border-radius: 999px; background: var(--deep); border: 1px solid var(--swell); font-size: var(--fs-2); color: var(--foam); }
 .map-loading::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: var(--s2); border-radius: 50%; background: var(--sodium); animation: pulse 1s ease-in-out infinite alternate; }
+.map-off-note { position: static; transform: none; margin: var(--s5) auto; max-width: 32rem; border-radius: var(--r2, 10px); text-align: center; }
+.map-off-note::before { display: none; }
 @keyframes pulse { from { opacity: 0.25; } to { opacity: 1; } }
 .av-pop .maplibregl-popup-content { background: var(--deep); color: var(--foam); border: 1px solid var(--swell); border-radius: 12px; padding: var(--s3) var(--s4); font-size: var(--fs-2); line-height: var(--lh-2); }
 .av-pop .maplibregl-popup-content p { margin: var(--s1) 0 var(--s2); color: var(--mist); }

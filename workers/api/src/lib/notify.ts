@@ -16,9 +16,11 @@ export interface NotifySettings {
   channels: Channel;
   /** H3: species to notify about (daily summary and opportunities). */
   species: string[];
+  /** I2: only spots with open access (same filter as the list's "hide uncertain/restricted"); default true. */
+  open_only: boolean;
 }
 
-export const DEFAULT_SETTINGS: NotifySettings = { daily: true, opportunity: true, safety: true, threshold: 80, quiet: [23, 7], favourites: [], channels: 'push', species: ['istavrit'] };
+export const DEFAULT_SETTINGS: NotifySettings = { daily: true, opportunity: true, safety: true, threshold: 80, quiet: [23, 7], favourites: [], channels: 'push', species: ['istavrit'], open_only: true };
 export const NOTIFY_SPECIES = ['istavrit', 'levrek'];
 const SPECIES_TR: Record<string, string> = { istavrit: 'İstavrit', levrek: 'Levrek' };
 export const DAILY_LOCAL_HOUR = 17;
@@ -39,13 +41,13 @@ const hourOk = (h: unknown) => Number.isInteger(h) && (h as number) >= 0 && (h a
 
 export function validateSettings(b: Record<string, unknown>): { ok: true; value: NotifySettings } | { ok: false; error: string } {
   const v = { ...DEFAULT_SETTINGS, ...b } as NotifySettings;
-  for (const k of ['daily', 'opportunity', 'safety'] as const) if (typeof v[k] !== 'boolean') return { ok: false, error: `invalid_${k}` };
+  for (const k of ['daily', 'opportunity', 'safety', 'open_only'] as const) if (typeof v[k] !== 'boolean') return { ok: false, error: `invalid_${k}` };
   if (typeof v.threshold !== 'number' || !(v.threshold >= 50 && v.threshold <= 95)) return { ok: false, error: 'invalid_threshold' };
   if (!Array.isArray(v.quiet) || v.quiet.length !== 2 || !v.quiet.every(hourOk)) return { ok: false, error: 'invalid_quiet' };
   if (!Array.isArray(v.favourites) || v.favourites.length > 50 || !v.favourites.every((f) => typeof f === 'string' && f.length <= 80)) return { ok: false, error: 'invalid_favourites' };
   if (!['push', 'ntfy', 'both'].includes(v.channels)) return { ok: false, error: 'invalid_channels' };
   if (!Array.isArray(v.species) || !v.species.every((x) => NOTIFY_SPECIES.includes(x))) return { ok: false, error: 'invalid_species' };
-  return { ok: true, value: { daily: v.daily, opportunity: v.opportunity, safety: v.safety, threshold: v.threshold, quiet: [v.quiet[0], v.quiet[1]], favourites: v.favourites, channels: v.channels, species: [...new Set(v.species)] } };
+  return { ok: true, value: { daily: v.daily, opportunity: v.opportunity, safety: v.safety, threshold: v.threshold, quiet: [v.quiet[0], v.quiet[1]], favourites: v.favourites, channels: v.channels, species: [...new Set(v.species)], open_only: v.open_only } };
 }
 
 export const localHour = (h: number) => (((h + TZ) % 24) + 24) % 24;
@@ -118,16 +120,19 @@ export function decide(i: DecideInput): Message[] {
     const tag = sp === 'istavrit' ? '' : `${sp}:`;
     const label = sp === 'istavrit' ? '' : ` (${SPECIES_TR[sp] ?? sp})`;
     if (s.daily && localHour(now) === DAILY_LOCAL_HOUR && !sentKeys.has(`daily:${tag}${localDate(now)}`)) {
-      const { windows } = bestWindows(spots, now, 24, { n: 3, perSpot: 1 });
+      const { windows, strong } = bestWindows(spots, now, 24, { n: 3, perSpot: 1, openOnly: s.open_only });
+      // I2: say plainly when nothing is strong; relative picks are labelled as such
+      const lines = windows.map((w) => `${range(w)} ${w.name} · ${n0(w.total)} (${w.rank}.)${w.missing ? ' · eksik veri' : ''}`);
       out.push({
-        key: `daily:${tag}${localDate(now)}`, kind: 'daily', title: `Önümüzdeki 24 saatin en iyileri${label}`,
-        body: windows.length ? windows.map((w) => `${range(w)} ${w.name} · ${n0(w.total)} (${w.rank}.)`).join('\n') : '24 saatte öne çıkan pencere yok.',
+        key: `daily:${tag}${localDate(now)}`, kind: 'daily', title: strong ? `Önümüzdeki 24 saatin en iyileri${label}` : `24 saatte güçlü öneri yok${label}`,
+        body: !windows.length ? '24 saatte öne çıkan pencere yok.' : strong ? lines.join('\n') : `Görece en iyiler:\n${lines.join('\n')}`,
         url: windows[0] ? url(windows[0].spot_id, windows[0].peak, sp) : `${SITE}/`, ttl: 6 * 3600,
       });
     }
     if (s.opportunity) {
-      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1 });
+      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1, openOnly: s.open_only });
       for (const w of windows) {
+        if (w.data !== 'tam') continue; // I2: an opportunity alert needs complete data (current, turbidity)
         if (w.p10 === null || w.p90 === null || w.p90 - w.p10 > NARROW_BAND) continue;
         // Never the same window twice: an earlier alert for this spot (same species) overlapping this window counts as sent.
         const dup = i.sent.some((r) => r.kind === 'opp' && r.key.startsWith(`opp:${tag}`) && r.spot_id === w.spot_id && r.start_hour !== null && r.end_hour !== null && r.start_hour < w.end && w.start < r.end_hour);

@@ -1,5 +1,6 @@
 // v2 hourly scoring of one spot: expected score, Monte Carlo 10–90 % band, per-component value + source +
 // evidence, safety gate (cap, separate from the HSI). Pure; deterministic for a given seed.
+import { missingMask } from './data';
 import { indexSeries, safetyGate, view } from '../engine';
 import type { HourlyPoint, SpeciesProfile } from '../types';
 import { isNum } from '../util';
@@ -30,6 +31,8 @@ export interface V2Hour {
   p90: number | null;
   gated: boolean;
   warnings: string[];
+  /** I2: bit mask of missing decision inputs (v2/data.ts); 0 = complete. */
+  missing: number;
   /** Probability used for an unknown lamp (null when the lamp state is known). */
   lampP: number | null;
   /** Weight of the night arm (0 day … 1 night). */
@@ -169,6 +172,7 @@ export function scoreSeriesV2(a: ScoreV2Args): V2Hour[] {
       p90: noWeather ? null : p90,
       gated,
       warnings,
+      missing: missingMask(w),
       lampP: res.lampP,
       wNight: Math.round(res.dyn[0]!.wNight * 1000) / 1000,
       components: components(a.spot, res, w, sstSource),

@@ -113,6 +113,7 @@ import Base from '../layouts/Base.astro';
   .sec { margin: var(--s5) 0 var(--s3); display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
   .species { display: flex; gap: var(--s2); overflow-x: auto; margin-top: var(--s4); padding-bottom: 2px; }
   .sp { flex: none; height: 32px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font-size: var(--fs-2); font-weight: 600; }
+  @media (pointer: coarse), (max-width: 600px) { .sp { height: 44px; } }
   .sp.on { background: var(--sodium); border-color: var(--sodium); color: #1a1205; }
   .sp:disabled { opacity: 0.5; cursor: not-allowed; }
   .sp-note { margin: var(--s2) 0 0; }
@@ -197,7 +198,7 @@ import Base from '../layouts/Base.astro';
     id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
-  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean };
+  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const app = $('app');
@@ -220,6 +221,7 @@ import Base from '../layouts/Base.astro';
     render();
     heat();
     summary();
+    renderWindows();
   });
 
   // ---------------------------------------------------------------- card drawer
@@ -518,34 +520,45 @@ import Base from '../layouts/Base.astro';
   addEventListener('resize', () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(heat); });
 
   // ---------------------------------------------------------------- best windows (E3)
+  type WinList = { windows: Win[]; threshold: number; strong?: number };
+  let winBody: (WinList & { open?: WinList }) | null = null;
+  /** I2: the access filter applies to windows too (server computes the open-access list separately). */
+  function renderWindows() {
+    const ol = $('windows');
+    if (!winBody) return;
+    const b = box.checked && winBody.open ? winBody.open : winBody;
+    // bodies stored before I2 (until the next hourly run) have no tiers: derive them the old way
+    for (const w of b.windows) w.tier ??= w.total >= 65 ? 'guclu' : 'goreli';
+    b.strong ??= b.windows.filter((w) => w.tier === 'guclu').length;
+    if (!b.windows.length) { ol.innerHTML = '<li class="muted">72 saat içinde öne çıkan pencere yok.</li>'; $('win-note').textContent = ''; return; }
+    const head = b.strong ? '' : '<li class="muted win-none"><b>Bu aralıkta güçlü öneri yok.</b> Aşağıdakiler mevcut seçenekler içinde görece en iyiler; gitmek için güçlü bir gerekçe değil.</li>';
+    ol.innerHTML = head + b.windows
+      .map((w) => {
+        const end = new Date(Date.parse(w.end)).toISOString();
+        const band = w.p10 !== null && w.p90 !== null ? ` · bant ${Math.round(w.p10)}–${Math.round(w.p90)}` : '';
+        const col = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
+        const tier = w.tier === 'guclu' ? '<span class="badge good">güçlü</span>' : '<span class="badge assume">görece</span>';
+        return `<li class="card win">
+          <span class="t">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(end)}</span>
+          <span class="s">${Math.round(w.total)}<small>${w.rank}. sıra</small></span>
+          <span class="n">${esc(w.name)} ${tier}</span>
+          <span class="r">En iyi saat ${fmtTime(w.peak)}${band}.${w.why ? ` ${esc(w.why)}.` : ''} ${w.assumed ? '<span class="badge assume">varsayıma dayanıyor</span>' : ''}${w.missing ? ` <span class="badge warn">${esc(w.missing)}</span>` : ''}</span>
+          <span class="actions"><button type="button" class="btn small" data-open="${esc(w.spot_id)}" data-c="${col}">Merayı aç</button><button type="button" class="btn small secondary" data-c="${col}">Bu saate göre sırala</button></span>
+        </li>`;
+      })
+      .join('');
+    ol.querySelectorAll<HTMLButtonElement>('button').forEach((btn) => btn.addEventListener('click', () => {
+      const c = Number(btn.dataset.c);
+      if (btn.dataset.open) openSpot(btn.dataset.open, c);
+      else setCol(c);
+    }));
+    $('win-note').textContent = b.threshold < 65
+      ? `72 saatte 65'i geçen saat az; en yüksek %15'lik dilim (≥ ${Math.round(b.threshold)}) gösteriliyor.`
+      : 'Güçlü: zirve ≥ 65 ve veri tam. Pencere: zirve saatin çevresinde puanın 65 ve zirve − 8\'in üstünde kaldığı en çok 4 saat; mera başına bir pencere.';
+  }
   const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-    .then((b: { windows: Win[]; threshold: number }) => {
-      const ol = $('windows');
-      if (!b.windows.length) { ol.innerHTML = '<li class="muted">72 saat içinde öne çıkan pencere yok.</li>'; return; }
-      ol.innerHTML = b.windows
-        .map((w) => {
-          const end = new Date(Date.parse(w.end)).toISOString();
-          const band = w.p10 !== null && w.p90 !== null ? ` · bant ${Math.round(w.p10)}–${Math.round(w.p90)}` : '';
-          const col = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
-          return `<li class="card win">
-            <span class="t">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(end)}</span>
-            <span class="s">${Math.round(w.total)}<small>${w.rank}. sıra</small></span>
-            <span class="n">${esc(w.name)}</span>
-            <span class="r">En iyi saat ${fmtTime(w.peak)}${band}.${w.why ? ` ${esc(w.why)}.` : ''} ${w.assumed ? '<span class="badge assume">varsayıma dayanıyor</span>' : ''}</span>
-            <span class="actions"><button type="button" class="btn small" data-open="${esc(w.spot_id)}" data-c="${col}">Merayı aç</button><button type="button" class="btn small secondary" data-c="${col}">Bu saate göre sırala</button></span>
-          </li>`;
-        })
-        .join('');
-      ol.querySelectorAll<HTMLButtonElement>('button').forEach((btn) => btn.addEventListener('click', () => {
-        const c = Number(btn.dataset.c);
-        if (btn.dataset.open) openSpot(btn.dataset.open, c);
-        else setCol(c);
-      }));
-      $('win-note').textContent = b.threshold < 65
-        ? `72 saatte 65'i geçen saat az; en yüksek %15'lik dilim (≥ ${Math.round(b.threshold)}) gösteriliyor.`
-        : 'Pencere: zirve saatin çevresinde puanın 65 ve zirve − 8\'in üstünde kaldığı en çok 4 saat; mera başına bir pencere.';
-    })
+    .then((b: WinList & { open?: WinList }) => { winBody = b; renderWindows(); })
     .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; });
   loadWindows();
 

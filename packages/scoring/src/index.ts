@@ -22,3 +22,4 @@ export { BANDS_V2, bandV2, RANK_FIRST_WIDTH, leadWithRank } from './v2/display';
 export { explain, DRIVERS, type DriverKey, type Reason } from './v2/explain';
 export { KIND_LABEL_TR, kindLabel, kindTitle } from './labels';
 export { LEVREK_PARAMS, LEVREK_DEFAULTS, LEVREK_VERSION, scoreSeriesLevrek, rawLevrek, levrekTerms, levrekAt, calibrateLevrek, explainLevrek, drawLevrek, LEVREK_IDEAL_SPOT, LEVREK_IDEAL_WEATHER, LEVREK_WORST_SPOT, LEVREK_WORST_WEATHER, type LevrekKey, type LevrekParams, type LevrekDriver } from './v2/levrek';
+export { MISSING, MISSING_TR, missingMask, dataTier, missingKeys, missingNote, type MissingKey, type DataTier } from './v2/data';

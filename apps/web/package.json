@@ -7,7 +7,8 @@
     "dev": "astro dev",
     "build": "astro build && node ../../scripts/stamp-sw.mjs",
     "preview": "astro preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "astro check"
   },
   "dependencies": {
     "@av-livn/scoring": "*",
@@ -17,6 +18,8 @@
     "pmtiles": "^4.5.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^6.0.3",
     "vitest": "5.0.5"
   }
 }

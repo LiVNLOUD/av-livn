@@ -75,3 +75,29 @@ describe('GET /api/hours', () => {
     expect(l.scored_at).toBe(b.scored_at);
   });
 });
+
+describe('I2: strong vs relative, missing data, access', () => {
+  const withMask = (id: string, totals: number[], mask: number, access: string | null = 'acik'): SpotHours => ({
+    id, name: id, access, start_hour: 100,
+    list: totals.map((t): ListEntryV2 => [t, t - 5, t + 5, 1, 0, null, null, mask]),
+  });
+  it('a window ≥ 65 with complete data is strong; a lowered floor gives relative windows', () => {
+    const strong = bestWindows([withMask('a', [70, 80, 70], 0)], 100, 3);
+    expect(strong.windows[0]).toMatchObject({ tier: 'guclu', data: 'tam', missing: null });
+    expect(strong.strong).toBe(1);
+    const weak = bestWindows([withMask('b', [40, 50, 45], 0), withMask('c', [30, 35, 30], 0)], 100, 3);
+    expect(weak.threshold).toBeLessThan(65);
+    expect(weak.strong).toBe(0);
+    expect(weak.windows.every((w) => w.tier === 'goreli')).toBe(true);
+  });
+  it('missing current/turbidity caps a high window at relative; missing wind/wave drops the hours', () => {
+    const cur = bestWindows([withMask('a', [90, 90], 4)], 100, 2).windows[0]!;
+    expect(cur).toMatchObject({ tier: 'goreli', data: 'goreli', missing: 'eksik veri: akıntı' });
+    expect(bestWindows([withMask('w', [95, 95], 1)], 100, 2, { threshold: 10 }).windows).toEqual([]);
+  });
+  it('openOnly keeps open-access spots only, and the body carries both lists', () => {
+    const spots = [withMask('ferry', [95, 95], 0, 'kisitli_feribot'), withMask('open', [70, 70], 0)];
+    expect(bestWindows(spots, 100, 2).windows[0]!.spot_id).toBe('ferry');
+    expect(bestWindows(spots, 100, 2, { openOnly: true }).windows.map((w) => w.spot_id)).toEqual(['open']);
+  });
+});

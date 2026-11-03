@@ -9,8 +9,8 @@ import { resetAndSeed } from './helpers';
 // 14 UTC = 17:00 Istanbul
 const H17 = Math.floor(Date.parse('2026-11-02T14:00:00Z') / 3_600_000);
 const e = (t: number, gated: 0 | 1 = 0, band = 10, warn: string | null = null): ListEntryV2 => [t, t - band, t + band, 1, gated, warn, ['lamba', 3, 'lamba var']];
-const spot = (id: string, totals: number[], start = H17, opts: { gatedAt?: number; band?: number } = {}): SpotHours => ({
-  id, name: `Mera ${id}`, start_hour: start, list: totals.map((t, i) => e(t, i === opts.gatedAt ? 1 : 0, opts.band ?? 10, i === opts.gatedAt ? 'Hamle 45 km/sa' : null)),
+const spot = (id: string, totals: number[], start = H17, opts: { gatedAt?: number; band?: number; access?: string | null } = {}): SpotHours => ({
+  id, name: `Mera ${id}`, access: opts.access === undefined ? 'acik' : opts.access, start_hour: start, list: totals.map((t, i) => e(t, i === opts.gatedAt ? 1 : 0, opts.band ?? 10, i === opts.gatedAt ? 'Hamle 45 km/sa' : null)),
 });
 
 describe('notify decisions', () => {
@@ -122,5 +122,19 @@ describe('H3: notifications per species', () => {
     expect(validateSettings({ species: ['levrek'] })).toMatchObject({ ok: true, value: { species: ['levrek'] } });
     expect(validateSettings({ species: ['kalkan'] })).toEqual({ ok: false, error: 'invalid_species' });
     expect(decide({ nowHour: H17, settings: { ...st, species: [] }, spots: [], sent: [] })[0]!.key).toBe('daily:2026-11-02');
+  });
+});
+
+describe('I2: notifications use the access filter and say when nothing is strong', () => {
+  it('open_only (default) skips restricted spots; weak days are labelled', () => {
+    const s = { ...DEFAULT_SETTINGS, opportunity: false };
+    const restricted = [spot('f', Array(24).fill(95), H17, { access: 'kisitli_feribot' }), spot('o', Array(24).fill(40))];
+    const m = decide({ nowHour: H17, settings: s, spots: restricted, sent: [] });
+    expect(m[0]!.title).toBe('24 saatte güçlü öneri yok');
+    expect(m[0]!.body).toMatch(/^Görece en iyiler:\nMera o|^Görece en iyiler:\n.*Mera o/);
+    expect(m[0]!.body).not.toContain('Mera f');
+    const all = decide({ nowHour: H17, settings: { ...s, open_only: false }, spots: restricted, sent: [] });
+    expect(all[0]!.body).toContain('Mera f');
+    expect(validateSettings({ ...s, open_only: 'x' } as never)).toEqual({ ok: false, error: 'invalid_open_only' });
   });
 });

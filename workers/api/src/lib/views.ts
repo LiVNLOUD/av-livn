@@ -12,7 +12,7 @@ const HOUR = 3_600_000;
 export const LIST_SQL = `SELECT s.*, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
        LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const HOURS_SQL = `SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
-export const WINDOWS_SQL = `SELECT s.id, s.name, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
+export const WINDOWS_SQL = `SELECT s.id, s.name, s.access, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const FETCHED_SQL = 'SELECT max(fetched_at) AS at FROM forecast_snapshots';
 export const PRE_KINDS = ['list', 'hours', 'windows'] as const;
 export const preKey = (kind: (typeof PRE_KINDS)[number], hour: number, species = 'istavrit') => `pub:${kind}:${species}:${hour}`;
@@ -21,7 +21,7 @@ export const CLEAR_PRE_SQL = "DELETE FROM meta WHERE key LIKE 'pub:%'";
 
 export type ListRow = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
 export type HoursRow = SpotRow & { start_hour: number; list_json: string; scored_at: string };
-export type WindowsRow = { id: string; name: string; start_hour: number; list_json: string };
+export type WindowsRow = { id: string; name: string; access?: string | null; start_hour: number; list_json: string };
 
 export const fetchedAt = (r: unknown[]) => (r[0] as { at: string | null } | undefined)?.at ?? null;
 
@@ -61,10 +61,14 @@ export function hoursBody(all: HoursRow[], dataFetchedAt: string | null, from: n
   return { ok: true, species, from: new Date(from * HOUR).toISOString(), hours: 72, scored_at: scored, data_fetched_at: dataFetchedAt, spots };
 }
 
+/** Best windows for all spots and, separately, for open-access spots only (I2: the list's access filter applies
+ *  here too, computed server-side so a filtered list is never just the unfiltered top 5 minus the closed ones). */
 export function windowsBody(rows: WindowsRow[], from: number, hours: number, species = 'istavrit') {
-  const { threshold, windows } = bestWindows(rows.map((r) => ({ id: r.id, name: r.name, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] })), from, hours);
+  const spots = rows.map((r) => ({ id: r.id, name: r.name, access: r.access ?? null, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
   const iso = (h: number) => new Date(h * HOUR).toISOString();
-  return { ok: true, species, from: iso(from), hours, threshold, windows: windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) };
+  const out = (b: ReturnType<typeof bestWindows>) => ({ threshold: b.threshold, strong: b.strong, windows: b.windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) });
+  const all = out(bestWindows(spots, from, hours));
+  return { ok: true, species, from: iso(from), hours, ...all, open: out(bestWindows(spots, from, hours, { openOnly: true })) };
 }
 
 /** Bodies for the given hours, as [meta key, JSON text] rows (score job). */

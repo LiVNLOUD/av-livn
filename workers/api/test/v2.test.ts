@@ -130,7 +130,7 @@ describe('single-spot rescore', () => {
 
   it('packV2 keeps component metadata once', () => {
     const p = packV2(
-      [{ ts: 't', total: 1, raw: 0.1, p10: null, p90: null, gated: true, warnings: ['w'], lampP: null, wNight: 1, components: [{ key: 'k', label: 'K', group: 'statik', weight: null, value: null, source: 'saha', evidence: 'C', reason: 'r' }] }],
+      [{ ts: 't', total: 1, raw: 0.1, p10: null, p90: null, gated: true, warnings: ['w'], missing: 0, lampP: null, wNight: 1, components: [{ key: 'k', label: 'K', group: 'statik', weight: null, value: null, source: 'saha', evidence: 'C', reason: 'r' }] }],
       { computed_at: 'c', weather_fetched_at: null, sea_fetched_at: null, sea_grid: null, field_at: null, depth_field_at: null, sink_calibration: null, ocean: null, ocean_normal: null },
     );
     expect(p.meta.comps).toEqual([['k', 'K', 'statik', null, 'saha', 'C']]);

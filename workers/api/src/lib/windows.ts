@@ -1,6 +1,7 @@
 // Best fishing windows (E3). Per spot and local calendar day: the peak hour, widened to the contiguous hours
 // whose score stays above max(floor, peak − DROP), at most MAX_LEN hours. The list shows each spot once.
 // Pure; used by /api/windows (home page) and the notification job.
+import { dataTier, missingNote } from '@av-livn/scoring';
 import type { ListEntryV2 } from '../precompute_v2';
 
 export interface SpotHours {
@@ -8,6 +9,8 @@ export interface SpotHours {
   name: string;
   start_hour: number; // epoch hours of list[0]
   list: ListEntryV2[];
+  /** I2: access estimate (acik / belirsiz / kisitli_feribot); windows use the same filter as the list. */
+  access?: string | null;
 }
 
 export interface Window {
@@ -25,6 +28,13 @@ export interface Window {
   why: string | null;
   /** The main reason rests on a C-level assumption. */
   assumed: boolean;
+  /** I2: 'guclu' = peak ≥ WINDOW_GOOD with complete data; 'goreli' = best of what there is (lowered floor or
+   *  missing current/turbidity). Hours without wind/wave data are never part of a window. */
+  tier: 'guclu' | 'goreli';
+  /** Missing-data note for the peak hour, or null; `data` is its tier (v2/data.ts). */
+  missing: string | null;
+  data: 'tam' | 'goreli';
+  access: string | null;
 }
 
 export const WINDOW_GOOD = 65;
@@ -32,7 +42,7 @@ export const DROP = 8;
 export const MAX_LEN = 4;
 const TZ = 3; // Europe/Istanbul
 
-const ok = (e: ListEntryV2 | undefined): e is ListEntryV2 => !!e && e[0] !== null && e[4] === 0;
+const ok = (e: ListEntryV2 | undefined): e is ListEntryV2 => !!e && e[0] !== null && e[4] === 0 && dataTier(e[7] ?? 0) !== 'yok';
 const localDay = (h: number) => Math.floor((h + TZ) / 24);
 
 export function plainReason(reason: string | null): { why: string | null; assumed: boolean } {
@@ -65,15 +75,21 @@ function around(s: SpotHours, a: number, b: number, floor: number): Window | nul
     else start--;
   }
   const reason = pe[6]?.[2] ?? null;
-  return { spot_id: s.id, name: s.name, start, end, peak, total: pe[0]!, p10: pe[1], p90: pe[2], rank: pe[3], reason, ...plainReason(reason) };
+  const mask = pe[7] ?? 0;
+  const data = dataTier(mask) === 'tam' ? 'tam' : 'goreli'; // 'yok' hours never reach here (ok())
+  const tier = pe[0]! >= WINDOW_GOOD && data === 'tam' ? 'guclu' : 'goreli';
+  return { spot_id: s.id, name: s.name, start, end, peak, total: pe[0]!, p10: pe[1], p90: pe[2], rank: pe[3], reason, ...plainReason(reason), tier, missing: missingNote(mask), data, access: s.access ?? null };
 }
 
 /**
  * Candidate windows: one per spot per local day in [from, from + hours), peak ≥ floor. Sorted by peak score,
  * then earlier start; `perSpot` windows per spot at most (1 = each spot once), `n` in total. When fewer than
- * `n` reach WINDOW_GOOD the floor falls to the 85th percentile of all hours (the page always compares).
+ * `n` reach WINDOW_GOOD the floor falls to the 85th percentile of all hours (the page always compares) and
+ * those windows are marked `goreli` — the page then says "no strong option". `openOnly` keeps only spots
+ * whose access is 'acik' (the list's "hide uncertain/restricted access" filter).
  */
-export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number } = {}): { threshold: number; windows: Window[] } {
+export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number; openOnly?: boolean } = {}): { threshold: number; strong: number; windows: Window[] } {
+  if (opts.openOnly) spots = spots.filter((s) => s.access === 'acik');
   const n = opts.n ?? 5;
   const perSpot = opts.perSpot ?? 1;
   const end = from + hours;
@@ -107,5 +123,6 @@ export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: 
       all = build(threshold);
     }
   }
-  return { threshold, windows: all.slice(0, n) };
+  const windows = all.slice(0, n);
+  return { threshold, strong: windows.filter((w) => w.tier === 'guclu').length, windows };
 }
