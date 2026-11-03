@@ -7,7 +7,7 @@ import { omFetch, resetAndSeed, writeScoresV2 } from './helpers';
 
 const AUTH = { authorization: 'Bearer test-admin-token', 'content-type': 'application/json' };
 const NOW = new Date('2026-11-07T20:30:00Z');
-const base = { spot_id: 'osm-way-1', start_at: '2026-11-07T18:00:00Z', end_at: '2026-11-07T20:00:00Z' };
+const base = { spot_id: 'osm-way-1', start_at: '2026-11-07T18:00:00Z', end_at: '2026-11-07T20:00:00Z', target_species: 'istavrit' };
 
 beforeAll(async () => {
   await resetAndSeed();
@@ -24,6 +24,21 @@ describe('validateSession', () => {
     expect(v.value).toMatchObject({ active_min: 120, rods: 1, zero_catch: false, under_lamp: null });
     expect(v.value.items.map((i) => i.species)).toEqual(['istavrit', 'istavrit', 'kolyoz']);
     expect(v.warnings).toEqual(['12 cm istavrit yasal asgari boyun (13 cm) altında — denize geri bırakın.']);
+  });
+
+  it('I6: target species required, method checked, retro by flag or by entry delay', () => {
+    const { target_species: _t, ...noTarget } = base;
+    expect(validateSession({ ...noTarget, zero_catch: true }, NOW)).toEqual({ ok: false, error: 'invalid_target_species' });
+    expect(validateSession({ ...base, target_species: 'balina', zero_catch: true }, NOW)).toEqual({ ok: false, error: 'invalid_target_species' });
+    expect(validateSession({ ...base, zero_catch: true, method: 'trol' }, NOW)).toEqual({ ok: false, error: 'invalid_method' });
+    expect(validateSession({ ...base, zero_catch: true, retro: 'x' }, NOW)).toEqual({ ok: false, error: 'invalid_retro' });
+    expect(validateSession({ ...base, zero_catch: true, start_forecast: { hours: 1 } }, NOW)).toEqual({ ok: false, error: 'invalid_start_forecast' });
+    const ok = validateSession({ ...base, target_species: 'Levrek', zero_catch: true }, NOW);
+    expect(ok.ok && ok.value).toMatchObject({ target_species: 'levrek', method: null, retro: false, start_forecast: null });
+    const later = validateSession({ ...base, zero_catch: true }, new Date('2026-11-08T08:00:00Z'));
+    expect(later.ok && later.value.retro).toBe(true);
+    const flagged = validateSession({ ...base, zero_catch: true, retro: true }, NOW);
+    expect(flagged.ok && flagged.value.retro).toBe(true);
   });
 
   it('zero catch is explicit and differs from an empty form', () => {
@@ -77,7 +92,7 @@ describe('catch API (admin only)', () => {
     const start = new Date(Math.floor(now.getTime() / 3_600_000) * 3_600_000 - 3_600_000).toISOString();
     const hour = Math.floor(now.getTime() / 3_600_000);
     await env.DB.prepare('INSERT OR REPLACE INTO spot_scores_v2_history (spot_id, hour, json) VALUES (?1, ?2, ?3)').bind('osm-way-1', hour - 1, JSON.stringify({ total: 66, rank: 1, inputs: { cloud: 10 } })).run();
-    const r = await app.request('/api/admin/catch', { method: 'POST', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: start, end_at: now.toISOString(), rods: 2, jig_g: 1.5, under_lamp: true, items: [{ count: 4, length_cm: 11 }] }) }, env);
+    const r = await app.request('/api/admin/catch', { method: 'POST', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: start, end_at: now.toISOString(), rods: 2, jig_g: 1.5, target_species: 'istavrit', under_lamp: true, items: [{ count: 4, length_cm: 11 }] }) }, env);
     expect(r.status).toBe(201);
     const b = await r.json<{ id: string; warnings: string[]; freeze_status: string; cpue: number }>();
     expect(b.warnings).toHaveLength(1);
@@ -88,8 +103,16 @@ describe('catch API (admin only)', () => {
     // H3: the levrek model is frozen too (no levrek history row here: forecast for the scored hour only)
     expect(Object.keys(s.model.species)).toEqual(['levrek']);
     expect(s.items).toHaveLength(1);
-    const put = await app.request(`/api/admin/catch/${b.id}`, { method: 'PUT', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: start, end_at: now.toISOString(), zero_catch: true, note: 'boş, düzeltildi' }) }, env);
-    expect(await put.json()).toMatchObject({ ok: true, cpue: 0 });
+    const put = await app.request(`/api/admin/catch/${b.id}`, { method: 'PUT', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: start, end_at: now.toISOString(), zero_catch: true, target_species: 'istavrit', note: 'boş, düzeltildi' }) }, env);
+    expect(await put.json()).toMatchObject({ ok: true, cpue: 0, refrozen: false, forecast_kind: 'yeniden_hesaplanmis' });
+    // I6: an edit never rewrites the frozen output; only a change of time/spot re-freezes, and says so
+    await env.DB.prepare('INSERT OR REPLACE INTO spot_scores_v2_history (spot_id, hour, json) VALUES (?1, ?2, ?3)').bind('osm-way-1', hour - 1, JSON.stringify({ total: 12, rank: 9 })).run();
+    const after = await (await app.request('/api/admin/catch', { headers: AUTH }, env)).json<{ sessions: { id: string; model: { hours: { total: number }[] }; forecast_kind: string; target_species: string; retro: number }[] }>();
+    const s2 = after.sessions.find((x) => x.id === b.id)!;
+    expect(s2.model.hours[0]!.total).toBe(66);
+    expect(s2).toMatchObject({ forecast_kind: 'yeniden_hesaplanmis', target_species: 'istavrit', retro: 0 });
+    const moved = await app.request(`/api/admin/catch/${b.id}`, { method: 'PUT', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: new Date(Date.parse(start) - 600_000).toISOString(), end_at: now.toISOString(), zero_catch: true, target_species: 'istavrit' }) }, env);
+    expect(await moved.json()).toMatchObject({ ok: true, refrozen: true });
     const csv = await (await app.request('/api/admin/catch/export.csv', { headers: AUTH }, env)).text();
     expect(csv.split('\n')[0]).toContain('cpue_istavrit_per_h_rod');
     expect(csv).toContain(`${b.id},osm-way-1`);
@@ -97,9 +120,25 @@ describe('catch API (admin only)', () => {
     expect((await app.request(`/api/admin/catch/${b.id}`, { method: 'DELETE', headers: AUTH }, env)).status).toBe(404);
   });
 
+  it('I6: a forecast captured before the start makes the session prospective; a late one does not', async () => {
+    const now = new Date();
+    const start = new Date(Math.floor(now.getTime() / 3_600_000) * 3_600_000 - 3_600_000);
+    const sf = (at: Date) => ({ captured_at: at.toISOString(), model_version: 'v2.0', species: 'istavrit', hours: [{ hour: Math.floor(start.getTime() / 3_600_000), total: 83, p10: 70, p90: 90, rank: 1 }] });
+    const post = (b: object) => app.request('/api/admin/catch', { method: 'POST', headers: AUTH, body: JSON.stringify({ spot_id: 'osm-way-1', start_at: start.toISOString(), end_at: now.toISOString(), zero_catch: true, target_species: 'istavrit', method: 'lrf', ...b }) }, env);
+    const pro = await (await post({ start_forecast: sf(new Date(start.getTime() - 600_000)) })).json<{ id: string; forecast_kind: string }>();
+    expect(pro.forecast_kind).toBe('dondurulmus');
+    const late = await (await post({ start_forecast: sf(new Date(start.getTime() + 3_600_000)) })).json<{ forecast_kind: string }>();
+    expect(late.forecast_kind).toBe('yeniden_hesaplanmis');
+    const list = await (await app.request('/api/admin/catch', { headers: AUTH }, env)).json<{ sessions: { id: string; method: string; forecast_meta: string; model: { start_forecast: { hours: { total: number }[] } } }[] }>();
+    const p = list.sessions.find((x) => x.id === pro.id)!;
+    expect(p.method).toBe('lrf');
+    expect(p.model.start_forecast.hours[0]!.total).toBe(83);
+    expect(JSON.parse(p.forecast_meta)).toMatchObject({ model_version: 'v2.0', sources: 'cihazda başlangıç tahmini' });
+  });
+
   it('rejects bad input, unknown spots and sessions; old hours stay partial', async () => {
     const past = new Date(Math.floor(Date.now() / 3_600_000) * 3_600_000 - 3 * 86_400_000);
-    const base = { spot_id: 'osm-way-1', start_at: past.toISOString(), end_at: new Date(past.getTime() + 2 * 3_600_000).toISOString() };
+    const base = { spot_id: 'osm-way-1', start_at: past.toISOString(), end_at: new Date(past.getTime() + 2 * 3_600_000).toISOString(), target_species: 'istavrit' };
     expect((await app.request('/api/admin/catch', { method: 'POST', headers: AUTH, body: 'x' }, env)).status).toBe(400);
     expect((await app.request('/api/admin/catch', { method: 'POST', headers: AUTH, body: JSON.stringify({ ...base }) }, env)).status).toBe(400);
     expect((await app.request('/api/admin/catch', { method: 'POST', headers: AUTH, body: JSON.stringify({ ...base, spot_id: 'yok', zero_catch: true }) }, env)).status).toBe(404);

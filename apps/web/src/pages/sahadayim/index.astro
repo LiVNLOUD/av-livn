@@ -17,6 +17,8 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
       <h2>Yöntem <span class="muted">(seans boyunca; değiştirilebilir)</span></h2>
       <div class="two">
+        <label class="lbl">Hedef tür<select id="target"><option value="istavrit">istavrit</option><option value="levrek">levrek</option><option value="lüfer">lüfer / çinekop</option><option value="kolyoz">kolyoz</option><option value="karagöz">karagöz / mırmır</option><option value="sargos">sargos</option><option value="çipura">çipura</option><option value="mezgit">mezgit</option><option value="diger">diğer</option></select></label>
+        <label class="lbl">Yöntem<select id="method"><option value="lrf">LRF</option><option value="spin">spin</option><option value="capari">çapari</option><option value="diger">diğer</option></select></label>
         <label class="lbl">Jighead (g)<input id="jig" inputmode="decimal" placeholder="1,5" /></label>
         <label class="lbl">İğne no<input id="hook" placeholder="#8" /></label>
       </div>
@@ -140,9 +142,11 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
   type Spot = { id: string; name: string; lat: number; lon: number; place: string | null };
   type Fish = { t: number; species: string; length_cm: number | null };
-  type Method = { jig_g?: number; hook_no?: string; lure_len_cm?: number; lure_color?: string; under_lamp?: boolean; rods: number };
+  type Method = { jig_g?: number; hook_no?: string; lure_len_cm?: number; lure_color?: string; under_lamp?: boolean; rods: number; target_species?: string; method?: string };
+  /** I6: the forecast shown before the start, kept on the device and sent with the session (prospective). */
+  type StartForecast = { captured_at: string; model_version: string; species: string; hours: { hour: number; total: number | null; p10: number | null; p90: number | null; rank: number | null }[] };
   type Seg = { start: number; end?: number; method: Method; fish: Fish[]; pausedMs: number };
-  type Live = { spot: Spot; segs: Seg[]; pauseAt: number | null };
+  type Live = { spot: Spot; segs: Seg[]; pauseAt: number | null; forecast?: StartForecast | null };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const LIVE = 'av-livn-live-session';
@@ -177,12 +181,28 @@ import AdminLogin from '../../components/AdminLogin.astro';
   // ---------------------------------------------------------------- setup
   function methodFromForm(): Method {
     const lamp = $<HTMLSelectElement>('lamp').value;
-    return { jig_g: num('jig'), hook_no: txt('hook'), lure_len_cm: num('lurelen'), lure_color: txt('lurecol'), under_lamp: lamp === '' ? undefined : lamp === '1', rods: Math.max(1, Math.round(num('rods') ?? 1)) };
+    return { jig_g: num('jig'), hook_no: txt('hook'), lure_len_cm: num('lurelen'), lure_color: txt('lurecol'), under_lamp: lamp === '' ? undefined : lamp === '1', rods: Math.max(1, Math.round(num('rods') ?? 1)),
+      target_species: $<HTMLSelectElement>('target').value, method: $<HTMLSelectElement>('method').value };
   }
   function methodToForm(m: Partial<Method>) {
     const set = (id: string, v: unknown) => ($<HTMLInputElement>(id).value = v === undefined || v === null ? '' : String(v).replace('.', ','));
     set('jig', m.jig_g); set('hook', m.hook_no); set('lurelen', m.lure_len_cm); set('lurecol', m.lure_color); set('rods', m.rods ?? 1);
     $<HTMLSelectElement>('lamp').value = m.under_lamp === undefined ? '' : m.under_lamp ? '1' : '0';
+    if (m.target_species) $<HTMLSelectElement>('target').value = m.target_species;
+    if (m.method) $<HTMLSelectElement>('method').value = m.method;
+  }
+  /** I6: capture the public forecast for the next 6 hours at the start (best effort; offline → none). */
+  async function captureForecast(spotId: string, sp: 'istavrit' | 'levrek'): Promise<StartForecast | null> {
+    try {
+      const r = await fetch(speciesUrl(`/api/spots/${encodeURIComponent(spotId)}`, sp), { cache: 'no-cache' });
+      if (!r.ok) return null;
+      const b = await r.json() as { from: number; ranks?: number[]; packed: { meta: { model_version: string }; h: (string | number | null)[][] } | null };
+      if (!b.packed) return null;
+      const hours = b.packed.h.slice(b.from, b.from + 6).map((h, k) => ({ hour: Math.floor(Date.parse(String(h[0])) / 3_600_000), total: h[1] as number | null, p10: h[3] as number | null, p90: h[4] as number | null, rank: b.ranks?.[k] ?? null }));
+      return { captured_at: new Date().toISOString(), model_version: b.packed.meta.model_version, species: sp, hours };
+    } catch {
+      return null;
+    }
   }
   function choose(s: Spot) {
     chosen = s;
@@ -229,7 +249,9 @@ import AdminLogin from '../../components/AdminLogin.astro';
       $('start').textContent = 'Seansı başlat';
     } else {
       if (!chosen) return say('Önce mera seçin.', true);
-      live = { spot: chosen, segs: [{ start: Date.now(), method: m, fish: [], pausedMs: 0 }], pauseAt: null };
+      live = { spot: chosen, segs: [{ start: Date.now(), method: m, fish: [], pausedMs: 0 }], pauseAt: null, forecast: null };
+      const target: 'istavrit' | 'levrek' = m.target_species === 'levrek' ? 'levrek' : 'istavrit';
+      captureForecast(chosen.id, target).then((f) => { if (live && f) { live.forecast = f; save(); } });
     }
     save();
     enter();
@@ -354,6 +376,9 @@ import AdminLogin from '../../components/AdminLogin.astro';
           spot_id: live!.spot.id, start_at: new Date(s.start).toISOString(), end_at: new Date(Math.max(end, s.start + 60000)).toISOString(),
           active_min: Math.min(act, span), rods: s.method.rods, jig_g: s.method.jig_g, hook_no: s.method.hook_no, lure_len_cm: s.method.lure_len_cm,
           lure_color: s.method.lure_color, under_lamp: s.method.under_lamp, zero_catch: zero || items.length === 0, items, note,
+          target_species: s.method.target_species ?? 'istavrit', method: s.method.method,
+          // the start forecast belongs to the first segment only (later segments started after it was captured)
+          start_forecast: i === 0 ? live!.forecast ?? undefined : undefined,
         };
       })
       // A method tried without a catch is a zero-catch session for that method; only sub-minute empty segments are dropped.

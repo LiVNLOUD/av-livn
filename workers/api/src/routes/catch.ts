@@ -33,7 +33,28 @@ export interface SessionInput {
   zero_catch: boolean;
   note: string | null;
   items: CatchItem[];
+  /** I6: what was targeted; a session for another species is never a zero for istavrit. */
+  target_species: string;
+  method: 'lrf' | 'spin' | 'capari' | 'diger' | null;
+  /** Entered afterwards from memory (explicit, or saved > RETRO_H after the end). */
+  retro: boolean;
+  /** Model output the angler saw before starting (Sahadayım "başla"), if captured in time. */
+  start_forecast: StartForecast | null;
 }
+
+/** I6: forecast captured on the device before the session (Sahadayım start / plan screen). */
+export interface StartForecast {
+  captured_at: string;
+  model_version: string;
+  species: string;
+  hours: { hour: number; total: number | null; p10: number | null; p90: number | null; rank: number | null }[];
+}
+export const TARGETS = [...Object.keys(LEGAL_MIN_CM), 'diger'];
+export const METHODS = ['lrf', 'spin', 'capari', 'diger'] as const;
+/** Saved this long after the end without an explicit flag → retrospective. */
+export const RETRO_H = 6;
+/** A start forecast counts as prospective when captured no later than this after the start. */
+export const PROSPECTIVE_GRACE_MIN = 15;
 
 const num = (x: unknown, lo: number, hi: number): x is number => typeof x === 'number' && Number.isFinite(x) && x >= lo && x <= hi;
 const none = (x: unknown) => x === undefined || x === null || x === '';
@@ -66,6 +87,19 @@ export function validateSession(b: Record<string, unknown>, now: Date): { ok: tr
     if (!none(it.length_cm) && !num(it.length_cm, 1, 150)) return { ok: false, error: 'invalid_length' };
     items.push({ species: species.trim().toLocaleLowerCase('tr'), count: it.count, length_cm: none(it.length_cm) ? null : (it.length_cm as number) });
   }
+  const target = none(b.target_species) ? null : String(b.target_species).trim().toLocaleLowerCase('tr');
+  if (!target || !TARGETS.includes(target)) return { ok: false, error: 'invalid_target_species' };
+  if (!none(b.method) && !METHODS.includes(b.method as (typeof METHODS)[number])) return { ok: false, error: 'invalid_method' };
+  if (!none(b.retro) && typeof b.retro !== 'boolean') return { ok: false, error: 'invalid_retro' };
+  let startForecast: StartForecast | null = null;
+  if (!none(b.start_forecast)) {
+    const f = b.start_forecast as Partial<StartForecast>;
+    const ok = f && typeof f === 'object' && typeof f.captured_at === 'string' && !Number.isNaN(Date.parse(f.captured_at)) && typeof f.model_version === 'string'
+      && typeof f.species === 'string' && Array.isArray(f.hours) && f.hours.length <= 48 && f.hours.every((h) => h && Number.isInteger(h.hour));
+    if (!ok) return { ok: false, error: 'invalid_start_forecast' };
+    // only a forecast captured before (or right at) the start is prospective; a later one is just dropped
+    if (Date.parse(f.captured_at!) <= start.getTime() + PROSPECTIVE_GRACE_MIN * 60_000) startForecast = f as StartForecast;
+  }
   const zero = b.zero_catch === true;
   // "Sıfır av" is an explicit answer, not an empty form.
   if (zero && items.length) return { ok: false, error: 'zero_catch_with_items' };
@@ -90,6 +124,10 @@ export function validateSession(b: Record<string, unknown>, now: Date): { ok: tr
       zero_catch: zero,
       note: none(b.note) ? null : (b.note as string),
       items,
+      target_species: target,
+      method: none(b.method) ? null : (b.method as SessionInput['method']),
+      retro: b.retro === true || (none(b.retro) && now.getTime() > end.getTime() + RETRO_H * HOUR),
+      start_forecast: startForecast,
     },
   };
 }
@@ -124,35 +162,62 @@ export function cpue(items: CatchItem[], activeMin: number, rods: number, specie
   return Math.round((n / (activeMin / 60) / rods) * 100) / 100;
 }
 
-async function saveSession(env: Env, id: string, v: SessionInput, now: Date, replace: boolean): Promise<{ freeze_status: string; missing: number }> {
-  const hours = sessionHours(v.start_at, v.end_at);
-  const [hist, live] = await env.DB.batch([
-    env.DB.prepare(`SELECT species, hour, json FROM spot_scores_v2_history WHERE spot_id = ?1 AND hour BETWEEN ?2 AND ?3`).bind(v.spot_id, hours[0], hours[hours.length - 1]),
-    env.DB.prepare('SELECT species, start_hour, list_json FROM spot_scores_v2 WHERE spot_id = ?1').bind(v.spot_id),
-  ]);
-  // H3: the model output is frozen for every species (istavrit at the top level as before, others under `species`)
-  const frozen = (species: string) => {
-    const l = (live!.results as { species: string; start_hour: number; list_json: string }[]).find((r) => r.species === species);
-    const h = (hist!.results as { species: string; hour: number; json: string }[]).filter((r) => r.species === species);
-    return freeze(hours, h, l ? { start_hour: l.start_hour, list: JSON.parse(l.list_json) as ListEntryV2[] } : null);
-  };
-  const f = frozen('istavrit');
-  const others = Object.fromEntries(SPECIES.filter((s) => s !== 'istavrit').map((s) => [s, frozen(s)]));
-  const status = f.missing.length ? 'partial' : 'complete';
-  const model = JSON.stringify({ frozen_at: now.toISOString(), hours: f.hours, missing: f.missing, species: others });
+/** I6: model_json is written once. An edit keeps it unless the spot or the time span changed (then re-frozen and
+ *  marked recomputed). A start forecast (captured before the session) makes it prospective ('dondurulmus'). */
+async function saveSession(env: Env, id: string, v: SessionInput, now: Date, replace: boolean): Promise<{ freeze_status: string; missing: number; forecast_kind: string; refrozen: boolean }> {
+  const prev = replace
+    ? await env.DB.prepare('SELECT spot_id, start_at, end_at, model_json, freeze_status, forecast_kind, forecast_meta FROM catch_session WHERE id = ?1').bind(id).first<{ spot_id: string; start_at: string; end_at: string; model_json: string | null; freeze_status: string; forecast_kind: string; forecast_meta: string | null }>()
+    : null;
+  const keep = !!prev && prev.spot_id === v.spot_id && prev.start_at === v.start_at && prev.end_at === v.end_at && !v.start_forecast;
+  let model: string | null;
+  let status: string;
+  let kind: string;
+  let meta: string | null;
+  let missing = 0;
+  if (keep) {
+    model = prev!.model_json;
+    status = prev!.freeze_status;
+    kind = prev!.forecast_kind;
+    meta = prev!.forecast_meta;
+  } else {
+    const hours = sessionHours(v.start_at, v.end_at);
+    const [hist, live] = await env.DB.batch([
+      env.DB.prepare(`SELECT species, hour, json FROM spot_scores_v2_history WHERE spot_id = ?1 AND hour BETWEEN ?2 AND ?3`).bind(v.spot_id, hours[0], hours[hours.length - 1]),
+      env.DB.prepare('SELECT species, model_version, start_hour, list_json FROM spot_scores_v2 WHERE spot_id = ?1').bind(v.spot_id),
+    ]);
+    // H3: the model output is frozen for every species (istavrit at the top level as before, others under `species`)
+    const lives = live!.results as { species: string; model_version: string; start_hour: number; list_json: string }[];
+    const frozen = (species: string) => {
+      const l = lives.find((r) => r.species === species);
+      const h = (hist!.results as { species: string; hour: number; json: string }[]).filter((r) => r.species === species);
+      return freeze(hours, h, l ? { start_hour: l.start_hour, list: JSON.parse(l.list_json) as ListEntryV2[] } : null);
+    };
+    const f = frozen('istavrit');
+    const others = Object.fromEntries(SPECIES.filter((s) => s !== 'istavrit').map((s) => [s, frozen(s)]));
+    status = f.missing.length ? 'partial' : 'complete';
+    missing = f.missing.length;
+    model = JSON.stringify({ frozen_at: now.toISOString(), hours: f.hours, missing: f.missing, species: others, start_forecast: v.start_forecast });
+    kind = v.start_forecast ? 'dondurulmus' : 'yeniden_hesaplanmis';
+    meta = JSON.stringify(v.start_forecast
+      ? { model_version: v.start_forecast.model_version, captured_at: v.start_forecast.captured_at, valid_hours: v.start_forecast.hours.map((h) => h.hour), species: v.start_forecast.species, sources: 'cihazda başlangıç tahmini' }
+      : { model_version: lives.find((r) => r.species === 'istavrit')?.model_version ?? null, captured_at: now.toISOString(), valid_hours: hours, sources: 'kayıtlı saat çıktıları (history/forecast), sonradan alındı', refrozen_after_edit: !!prev });
+  }
   await env.DB.batch([
     ...(replace ? [env.DB.prepare('DELETE FROM catch_item WHERE session_id = ?1').bind(id)] : []),
     env.DB.prepare(
-      `INSERT INTO catch_session (id, spot_id, start_at, end_at, active_min, rods, jig_g, hook_no, lure_len_cm, lure_color, under_lamp, zero_catch, note, created_at, model_json, freeze_status)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)
+      `INSERT INTO catch_session (id, spot_id, start_at, end_at, active_min, rods, jig_g, hook_no, lure_len_cm, lure_color, under_lamp, zero_catch, note, created_at, model_json, freeze_status,
+         target_species, method, retro, forecast_kind, forecast_meta)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
        ON CONFLICT(id) DO UPDATE SET spot_id = excluded.spot_id, start_at = excluded.start_at, end_at = excluded.end_at, active_min = excluded.active_min,
        rods = excluded.rods, jig_g = excluded.jig_g, hook_no = excluded.hook_no, lure_len_cm = excluded.lure_len_cm, lure_color = excluded.lure_color,
-       under_lamp = excluded.under_lamp, zero_catch = excluded.zero_catch, note = excluded.note, model_json = excluded.model_json, freeze_status = excluded.freeze_status`,
+       under_lamp = excluded.under_lamp, zero_catch = excluded.zero_catch, note = excluded.note, model_json = excluded.model_json, freeze_status = excluded.freeze_status,
+       target_species = excluded.target_species, method = excluded.method, retro = excluded.retro, forecast_kind = excluded.forecast_kind, forecast_meta = excluded.forecast_meta`,
     ).bind(id, v.spot_id, v.start_at, v.end_at, v.active_min, v.rods, v.jig_g, v.hook_no, v.lure_len_cm, v.lure_color,
-      v.under_lamp === null ? null : v.under_lamp ? 1 : 0, v.zero_catch ? 1 : 0, v.note, now.toISOString(), model, status),
+      v.under_lamp === null ? null : v.under_lamp ? 1 : 0, v.zero_catch ? 1 : 0, v.note, now.toISOString(), model, status,
+      v.target_species, v.method, v.retro ? 1 : 0, kind, meta),
     ...v.items.map((i) => env.DB.prepare('INSERT INTO catch_item (session_id, species, count, length_cm) VALUES (?1, ?2, ?3, ?4)').bind(id, i.species, i.count, i.length_cm)),
   ]);
-  return { freeze_status: status, missing: f.missing.length };
+  return { freeze_status: status, missing, forecast_kind: kind, refrozen: !keep && !!prev };
 }
 
 catchRoutes.post('/', async (c) => {
@@ -208,7 +273,7 @@ const csvCell = (v: unknown) => {
 /** One row per catch line (or one row for a zero-catch session) with the session's mean frozen model output. */
 export function toCsv(sessions: { s: Record<string, unknown>; items: CatchItem[] }[]): string {
   const head = ['session_id', 'spot_id', 'spot_name', 'start_at', 'end_at', 'active_min', 'rods', 'jig_g', 'hook_no', 'lure_len_cm', 'lure_color', 'under_lamp',
-    'zero_catch', 'species', 'count', 'length_cm', 'cpue_istavrit_per_h_rod', 'model_hours', 'model_sources', 'model_mean_total', 'model_mean_p10', 'model_mean_p90', 'model_mean_rank'];
+    'zero_catch', 'target_species', 'method', 'retro', 'forecast_kind', 'species', 'count', 'length_cm', 'cpue_istavrit_per_h_rod', 'model_hours', 'model_sources', 'model_mean_total', 'model_mean_p10', 'model_mean_p90', 'model_mean_rank'];
   const rows = [head.join(',')];
   for (const { s, items } of sessions) {
     const m = s.model_json ? (JSON.parse(s.model_json as string) as { hours: FrozenHour[] }) : { hours: [] };
@@ -216,7 +281,7 @@ export function toCsv(sessions: { s: Record<string, unknown>; items: CatchItem[]
       const v = m.hours.map((h) => h[k]).filter((x): x is number => typeof x === 'number');
       return v.length ? Math.round((v.reduce((a, x) => a + x, 0) / v.length) * 10) / 10 : null;
     };
-    const base = [s.id, s.spot_id, s.spot_name, s.start_at, s.end_at, s.active_min, s.rods, s.jig_g, s.hook_no, s.lure_len_cm, s.lure_color, s.under_lamp, s.zero_catch];
+    const base = [s.id, s.spot_id, s.spot_name, s.start_at, s.end_at, s.active_min, s.rods, s.jig_g, s.hook_no, s.lure_len_cm, s.lure_color, s.under_lamp, s.zero_catch, s.target_species, s.method, s.retro, s.forecast_kind];
     const tail = [cpue(items, s.active_min as number, s.rods as number), m.hours.length, [...new Set(m.hours.map((h) => h.source))].join('+'), mean('total'), mean('p10'), mean('p90'), mean('rank')];
     const lines = items.length ? items.map((i) => [i.species, i.count, i.length_cm]) : [['', 0, '']];
     for (const l of lines) rows.push([...base, ...l, ...tail].map(csvCell).join(','));

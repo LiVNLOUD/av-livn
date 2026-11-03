@@ -28,6 +28,11 @@ import AdminLogin from '../../components/AdminLogin.astro';
       <fieldset>
         <legend>Yöntem</legend>
         <div class="two">
+          <label class="lbl">Hedef tür<select id="target"><option value="istavrit">istavrit</option><option value="levrek">levrek</option><option value="lüfer">lüfer / çinekop</option><option value="kolyoz">kolyoz</option><option value="karagöz">karagöz / mırmır</option><option value="sargos">sargos</option><option value="çipura">çipura</option><option value="mezgit">mezgit</option><option value="diger">diğer</option></select></label>
+          <label class="lbl">Yöntem<select id="method"><option value="lrf">LRF</option><option value="spin">spin</option><option value="capari">çapari</option><option value="diger">diğer</option></select></label>
+        </div>
+        <label class="zero"><input type="checkbox" id="retro" /> Sonradan, hatırladığım kadarıyla giriyorum (geriye dönük)</label>
+        <div class="two">
           <label class="lbl">Jighead (g)<input id="jig" inputmode="decimal" placeholder="1,5" /></label>
           <label class="lbl">İğne no<input id="hook" placeholder="#8" /></label>
         </div>
@@ -190,6 +195,10 @@ import AdminLogin from '../../components/AdminLogin.astro';
       lure_color: ($('lurecol') as HTMLInputElement).value.trim() || undefined,
       under_lamp: under === undefined ? undefined : under === 'true',
       zero_catch: ($('zero') as HTMLInputElement).checked,
+      // I6: what was targeted (another species' session is never a zero istavrit), method, retrospective flag
+      target_species: ($('target') as HTMLSelectElement).value,
+      method: ($('method') as HTMLSelectElement).value,
+      retro: ($('retro') as HTMLInputElement).checked || undefined,
       note: ($('note') as HTMLTextAreaElement).value.trim() || undefined,
       items: items(),
     };
@@ -235,13 +244,13 @@ import AdminLogin from '../../components/AdminLogin.astro';
   async function history() {
     try {
       const j = await api('/api/admin/catch', 'GET');
-      const ses = j.sessions as { id: string; spot_name: string; start_at: string; active_min: number; rods: number; zero_catch: number; items: { species: string; count: number }[]; cpue: number; freeze_status: string; model: { hours: { total: number | null; rank: number | null }[] } | null }[];
+      const ses = j.sessions as { id: string; spot_name: string; start_at: string; active_min: number; rods: number; zero_catch: number; items: { species: string; count: number }[]; cpue: number; freeze_status: string; target_species: string | null; retro: number; forecast_kind: string; model: { hours: { total: number | null; rank: number | null }[] } | null }[];
       $('sessions').innerHTML = ses.length
         ? ses.map((s) => {
             const n = s.items.reduce((a, i) => a + i.count, 0);
             const t = s.model?.hours.map((h) => h.total).filter((x): x is number => x !== null) ?? [];
             const mean = t.length ? Math.round(t.reduce((a, x) => a + x, 0) / t.length) : null;
-            return `<li>${new Date(s.start_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })} · ${s.spot_name.replace(/</g, '&lt;')} · ${s.zero_catch ? 'sıfır av' : `${n} balık`} · ${String(s.cpue).replace('.', ',')}/sa/kamış${mean !== null ? ` · model ${mean}` : ''}${s.freeze_status === 'partial' ? ' · model yeniden hesaplanıyor' : ''}<br><button type="button" class="ghost" data-del="${s.id}">Sil</button></li>`;
+            return `<li>${new Date(s.start_at).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' })} · ${s.spot_name.replace(/</g, '&lt;')} · ${s.zero_catch ? 'sıfır av' : `${n} balık`} · ${String(s.cpue).replace('.', ',')}/sa/kamış${mean !== null ? ` · model ${mean} (${s.forecast_kind === 'dondurulmus' ? 'başlangıçta dondurulmuş' : 'sonradan hesaplanmış'})` : ''}${s.freeze_status === 'partial' ? ' · model yeniden hesaplanıyor' : ''} · hedef ${s.target_species ?? 'bilinmiyor'}${s.retro ? ' · geriye dönük' : ''}<br><button type="button" class="ghost" data-del="${s.id}">Sil</button></li>`;
           }).join('')
         : '<li class="hint">Henüz seans yok.</li>';
     } catch {}

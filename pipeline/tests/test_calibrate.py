@@ -87,3 +87,34 @@ def test_h3_species_frozen_model_and_report_keys():
     assert lv.score == 40 and lv.cloud == 0.8
     assert cal.session_from_row({"active_min": 60, "model_json": json.dumps({"hours": [{"total": 50}]})}, "levrek") is None
     assert cal.report_key("istavrit") == "calibration_report" and cal.report_key("levrek") == "calibration_report:levrek"
+
+
+def test_i6_only_prospective_sessions_measure_and_temporal_check():
+    import dataclasses
+
+    ss = cal.fake_sessions(80, beta=1.5, seed=3)
+    for k, s in enumerate(ss):
+        s.start_at = f"2027-{1 + k // 28:02d}-{1 + k % 28:02d}T18:00:00Z"
+        s.spot_id = "a" if k % 2 else "b"
+    retro = [dataclasses.replace(s, retro=True) for s in ss[:40]]
+    recomputed = [dataclasses.replace(s, prospective=False) for s in ss[:40]]
+    r = cal.fit(retro + recomputed + ss[:20])
+    assert r["status"] == "yetersiz veri" and r["n"] == 20 and r["n_total"] == 100 and r["n_retro"] == 40 and r["n_recomputed"] == 40
+    assert "Katsayılar değiştirilmedi" in r["message"] and "100/300" in r["fitted"]
+    ok = cal.fit(ss)
+    t = ok["temporal"]
+    assert t["status"] == "tamam" and t["train"] == 56 and t["test"] == 24
+    assert set(t["loglik"]) == {"model_log_puan", "taban_tek_oran", "taban_saat_bandi", "taban_mera"}
+    assert t["model_beats_baselines"] is True  # synthetic data with a real score effect
+    assert cal.temporal_check(ss[:10])["status"] == "yetersiz veri"
+
+
+def test_i6_row_uses_start_forecast_only_when_frozen_before():
+    fc = {"species": "istavrit", "hours": [{"hour": 1, "total": 83}]}
+    row = {"active_min": 240, "rods": 1, "count": 0, "retro": 1, "start_at": "2026-11-01T15:00:00Z", "spot_id": "x",
+           "model_json": json.dumps({"hours": [{"total": 80.4}], "start_forecast": fc})}
+    late = cal.session_from_row({**row, "forecast_kind": "yeniden_hesaplanmis"})
+    assert late.score == 80.4 and late.prospective is False and late.retro is True
+    pro = cal.session_from_row({**row, "retro": 0, "forecast_kind": "dondurulmus"})
+    assert pro.score == 83 and pro.prospective is True
+    assert "WHERE s.target_species = ?1" in cal.SQL
