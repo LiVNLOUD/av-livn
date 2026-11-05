@@ -1,5 +1,5 @@
 {
- "date": "2026-11-03",
+ "date": "2026-11-05",
  "spots": 90,
  "osm_lamp": {
   "osm-way-479047534-1": "OSM: 1 lamba/fener ≤ 40 m (seamark_light 38 m)",
@@ -466,9 +466,12 @@
   "osm-way-24825429-3": 0.6
  },
  "pruned_mapillary_review": 0,
+ "sentinel2": {
+  "error": "Read failed. See previous exception for details."
+ },
  "manual": {},
  "pruned_openseamap": 0,
- "pruned_ced": 0,
  "pruned_literatur": 0,
+ "pruned_ced": 0,
  "written": 7
 }
