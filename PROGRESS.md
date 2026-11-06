@@ -239,9 +239,10 @@
 - [x] I9 ana ekran: bugün → en yakın güçlü → görece kararı, tek ana öneri + takım görseli + gerekçe + sağlamlık rozetleri, ≤ 2 alternatif, açıklamalar açılır alanda; 390/360 px taşma 0 (e2e). Kalan: canlı ekran görüntüleri (I10)
 - [x] I10 teslim: canlı smoke yeşil, `x-av-pre` iki tür, e2e canlıda tüm adımlar (plan Bursa'dan, takım kutusu, WebGL yok, 390/360 px), ekran görüntüleri `docs/screenshots/i/`. Düzeltilen son hata: plan liste yüklenmeden çiziliyordu ve Yalova merası öneriliyordu
 
-## Faz J — küçük düzeltmeler (2026-11-06) — sürüyor
+## Faz J — küçük düzeltmeler (2026-11-06) ✅ DUR
 - [x] J1 feribot lamba önseli 0,85 → 0,5 (doğrulanmamış). Saha/uzaktan/masa başı bulgu önceliği aynı. Önce/sonra gece ilk 10: `docs/audit/j1-lamp-top10.json`. MODEL.md, /model/, mapillary-review güncel.
 - [x] J2 1 Kasım seansı: takım, jighead ve renk "bilinmiyor" (D1 notu).
 - [x] J3 Ayarlar → "Ana öneriye Bursa dışını da dahil et" (cihazda, varsayılan KAPALI). Plan ve bildirimler buna uyuyor (`outside_bursa`, `bursaOnly`); Bursa dışında il rozeti.
-- [~] J4 aynı adlı yerleşimlere ilçe eki (genel kural `naming.disambiguate_places` + test); geodata çalıştırması bekliyor.
+- [x] J4 aynı adlı yerleşimlere ilçe eki (genel kural `naming.disambiguate_places` + test, OSM `admin_level=6`): Karacabey 9, Gemlik 6 mera ad aldı; OSM adları (Kurşunlu Yat Limanı) korunur, `place` ek alır.
+- Canlı: smoke yeşil, e2e tüm adımlar, 119/119 mera puanlı, İDO lamba bileşeni 0,5; Ayarlar varsayılanı kapalı → plan Bursa'dan, açık → Armutlu/Fıstıklı (Yalova rozeti); Sahadayım ipucu ilk açılışta görünür, "Anladım"dan sonra görünmez. Ekranlar `docs/screenshots/j/`.
 - [x] J5 Sahadayım ilk kullanım ipucu (3 adım); Ayarlar'da "Uzaktan lamba gözlemi" paragrafı.
