@@ -49,6 +49,12 @@
     }
    },
    {
+    "ref": "relation/1273950",
+    "tags": {
+     "name": "Karacabey"
+    }
+   },
+   {
     "ref": "relation/10458771",
     "tags": {
      "name": "Kurşunlu Plaji",
@@ -285,6 +291,12 @@
     "tags": {
      "name": "Yalova"
     }
+   },
+   {
+    "ref": "relation/1273958",
+    "tags": {
+     "name": "Gemlik"
+    }
    }
   ]
  },
@@ -338,6 +350,12 @@
     "tags": {
      "name": "Yalova"
     }
+   },
+   {
+    "ref": "relation/1273958",
+    "tags": {
+     "name": "Gemlik"
+    }
    }
   ]
  },
@@ -359,6 +377,12 @@
     "ref": "relation/223472",
     "tags": {
      "name": "Yalova"
+    }
+   },
+   {
+    "ref": "relation/1273958",
+    "tags": {
+     "name": "Gemlik"
     }
    }
   ]
@@ -479,6 +503,12 @@
     "tags": {
      "name": "Bursa"
     }
+   },
+   {
+    "ref": "relation/1273953",
+    "tags": {
+     "name": "Mudanya"
+    }
    }
   ]
  },
@@ -499,6 +529,12 @@
     "ref": "relation/223463",
     "tags": {
      "name": "Bursa"
+    }
+   },
+   {
+    "ref": "relation/1273953",
+    "tags": {
+     "name": "Mudanya"
     }
    }
   ]
@@ -534,6 +570,12 @@
     "ref": "relation/223463",
     "tags": {
      "name": "Bursa"
+    }
+   },
+   {
+    "ref": "relation/1273953",
+    "tags": {
+     "name": "Mudanya"
     }
    }
   ]

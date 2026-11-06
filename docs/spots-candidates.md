@@ -22,12 +22,13 @@ G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası
 | Yerleşim | Eklenen |
 |---|---|
 | Armutlu | 21 |
-| Kurşunlu | 10 |
 | Fıstıklı | 7 |
+| Kurşunlu (Gemlik) | 7 |
 | — | 5 |
 | Eşkel | 4 |
 | Kumsaz | 4 |
 | Mesudiye | 4 |
+| Kurşunlu (Karacabey) | 3 |
 | Sahil | 3 |
 | İslamköy | 3 |
 | Bayramdere | 2 |
@@ -137,16 +138,16 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kordon (Kumsaz güneyi) 3 | kordon (taş tahkimat) | Kumsaz | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Dere ağzı (Kumsaz) | dere ağzı | Kumsaz | acik (yerleşime 255 m) | way/253063517 |
 | Kordon (Kumyaka doğusu) | kordon (taş tahkimat) | Kumyaka | belirsiz (yerleşimden uzak (> 1,5 km)) | way/534210128 |
-| Kumsal (Kurşunlu doğusu) | kumsal | Kurşunlu | acik (yerleşime 525 m) | relation/10458771 |
-| Kumsal (Kurşunlu doğusu) 2 | kumsal | Kurşunlu | acik (yerleşime 206 m) | relation/10458771 |
-| Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu | belirsiz (marina: giriş kısıtlı olabilir) | way/1165497962 |
-| Kordon (Kurşunlu doğusu) | kordon (taş tahkimat) | Kurşunlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
-| Kordon (Kurşunlu doğusu) 2 | kordon (taş tahkimat) | Kurşunlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
-| Kordon (Kurşunlu doğusu) 3 | kordon (taş tahkimat) | Kurşunlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
-| Kordon (Kurşunlu doğusu) 4 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 1286 m) | way/24825429 |
-| Kordon (Kurşunlu doğusu) 5 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 788 m) | way/24825429 |
-| Kordon (Kurşunlu doğusu) 6 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 547 m) | way/24825429 |
-| Dere ağzı (Kurşunlu) | dere ağzı | Kurşunlu | acik (yerleşime 406 m) | way/1302854356 |
+| Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu (Gemlik) | belirsiz (marina: giriş kısıtlı olabilir) | way/1165497962 |
+| Kordon (Kurşunlu doğusu, Gemlik) | kordon (taş tahkimat) | Kurşunlu (Gemlik) | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
+| Kordon (Kurşunlu doğusu, Gemlik) 2 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
+| Kordon (Kurşunlu doğusu, Gemlik) 3 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
+| Kordon (Kurşunlu doğusu, Gemlik) 4 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | acik (yerleşime 1286 m) | way/24825429 |
+| Kordon (Kurşunlu doğusu, Gemlik) 5 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | acik (yerleşime 788 m) | way/24825429 |
+| Kordon (Kurşunlu doğusu, Gemlik) 6 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | acik (yerleşime 547 m) | way/24825429 |
+| Kumsal (Kurşunlu doğusu, Karacabey) | kumsal | Kurşunlu (Karacabey) | acik (yerleşime 525 m) | relation/10458771 |
+| Kumsal (Kurşunlu doğusu, Karacabey) 2 | kumsal | Kurşunlu (Karacabey) | acik (yerleşime 206 m) | relation/10458771 |
+| Dere ağzı (Kurşunlu, Karacabey) | dere ağzı | Kurşunlu (Karacabey) | acik (yerleşime 406 m) | way/1302854356 |
 | Kumsal (Mesudiye kuzeyi) | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
 | Kumsal (Mesudiye kuzeyi) 2 | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
 | Kumsal (Mesudiye kuzeyi) 3 | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
