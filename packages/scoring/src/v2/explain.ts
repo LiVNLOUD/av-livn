@@ -14,8 +14,9 @@ export interface Reason {
   delta: number;
 }
 
-/** Main reason per spot at one hour (weather per spot). Empty input or a single spot → no reasons. */
-export function explain(spots: SpotV2[], weather: Weather[], p: Params): (Reason | null)[] {
+/** L1: every driver's ablation delta per spot at one hour (score minus the mean with the driver taken from each other
+ *  spot). explain() keeps the largest |delta|. Empty input or a single spot → null. */
+export function explainAll(spots: SpotV2[], weather: Weather[], p: Params): (Record<DriverKey, number> | null)[] {
   if (spots.length < 2) return spots.map(() => null);
   const terms = spots.map((s) => staticTerms(s, p));
   const score = (s: SpotV2, w: Weather, ov?: TermOverrides) => calibrate(rawScore(s, w, p, undefined, ov).raw);
@@ -32,13 +33,22 @@ export function explain(spots: SpotV2[], weather: Weather[], p: Params): (Reason
   };
   return spots.map((s, i) => {
     const base = score(s, weather[i]!);
-    let best: Reason | null = null;
+    const out = {} as Record<DriverKey, number>;
     for (const key of DRIVERS) {
       let sum = 0;
       for (let j = 0; j < spots.length; j++) if (j !== i) sum += swap[key](i, j);
-      const delta = Math.round((base - sum / (spots.length - 1)) * 10) / 10;
-      if (!best || Math.abs(delta) > Math.abs(best.delta)) best = { key, delta };
+      out[key] = Math.round((base - sum / (spots.length - 1)) * 10) / 10;
     }
+    return out;
+  });
+}
+
+/** Main reason per spot at one hour (weather per spot): the driver with the largest |delta| (explainAll). */
+export function explain(spots: SpotV2[], weather: Weather[], p: Params): (Reason | null)[] {
+  return explainAll(spots, weather, p).map((all) => {
+    if (!all) return null;
+    let best: Reason | null = null;
+    for (const key of DRIVERS) if (!best || Math.abs(all[key]) > Math.abs(best.delta)) best = { key, delta: all[key] };
     return best;
   });
 }

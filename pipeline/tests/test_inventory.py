@@ -283,3 +283,15 @@ def test_h2_with_land_uses_eroded_mainland():
     assert r["seaward_m"] == 285 and r["reach_m"] == 300
     # without land the traced coastline hides the pier: seaward 0, the reach is short too
     assert structure_length([(0, 0), (0, -300)], coast)["seaward_m"] == 0
+
+
+def test_l0_access_overrides(tmp_path):
+    import json as _j
+
+    p = tmp_path / "o.json"
+    p.write_text(_j.dumps({"overrides": [{"spot_id": "a", "access": "belirsiz", "private_marina": 1, "source": "kullanıcı"}]}))
+    feats = [{"properties": {"id": "a", "access": None}}, {"properties": {"id": "b", "access": "acik"}}]
+    assert inv.apply_access_overrides(feats, p) == 1
+    assert feats[0]["properties"] == {"id": "a", "access": "belirsiz", "private_marina": 1, "access_note": "kullanıcı"}
+    assert feats[1]["properties"]["access"] == "acik"
+    assert inv.apply_access_overrides(feats, tmp_path / "none.json") == 0

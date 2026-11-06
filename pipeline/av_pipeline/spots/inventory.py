@@ -260,6 +260,22 @@ def nearest_place(xy: tuple[float, float], places: list[dict], max_m: float = 40
 COMPASS = ["kuzeyi", "kuzeydoğusu", "doğusu", "güneydoğusu", "güneyi", "güneybatısı", "batısı", "kuzeybatısı"]
 
 
+def apply_access_overrides(features: list[dict], path: Path) -> int:
+    """L0: set access / private_marina from the user's reported knowledge; returns the number applied."""
+    if not path.exists():
+        return 0
+    by_id = {o["spot_id"]: o for o in json.loads(path.read_text())["overrides"]}
+    n = 0
+    for f in features:
+        o = by_id.get(f["properties"]["id"])
+        if o:
+            f["properties"]["access"] = o["access"]
+            f["properties"]["private_marina"] = o.get("private_marina", 0)
+            f["properties"]["access_note"] = o["source"]
+            n += 1
+    return n
+
+
 def is_private_marina(tags: dict) -> bool:
     """K1: a real yacht marina (name says "Yat Limanı" / "Marina", or an operator runs it). Village piers tagged
     leisure=marina ("… İskelesi") and fishing harbours ("… Limanı") are not."""
@@ -761,6 +777,8 @@ def main(argv: list[str]) -> int:  # pragma: no cover - CLI
 
         eusm.annotate(feats)
     fc["features"] = existing + feats
+    # L0: the user's access knowledge (data/access/overrides.json) — the field form still wins at seed time
+    apply_access_overrides(fc["features"], Path(__file__).resolve().parents[3] / "data/access/overrides.json")
     # I5: province of every spot (OSM admin_level=4) and the coastline coverage report
     from av_pipeline.spots import coverage as cov
 

@@ -12,7 +12,7 @@ import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../work
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
 import { CLEAR_PRE_SQL, FETCHED_SQL, fetchedAt, HOURS_SQL, LIST_SQL, preBodies, WINDOWS_SQL, type HoursRow, type ListRow, type WindowsRow } from '../workers/api/src/lib/views';
 import { FULL_RUN_MIN, needsFullRun } from '../workers/api/src/lib/staleness';
-import { SPECIES, DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
+import { computeSpotV2, SPECIES, DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
 import { runNotify } from './notify-send';
@@ -22,6 +22,8 @@ const dryRun = process.argv.includes('--dry-run');
 let pendingOnly = process.argv.includes('--pending');
 const compareOut = process.argv.includes('--compare-desk') ? process.argv[process.argv.indexOf('--compare-desk') + 1] : null;
 // I3: ferry lamp prior sensitivity (dry run): same weather, LAMP_PRIOR.ferry 0.85 vs 0.5 at every night hour
+// L1: per-driver ablation for spots whose name matches a pattern, next 21:00 local (dry run)
+const ablateOut = process.argv.includes('--ablate') ? process.argv[process.argv.indexOf('--ablate') + 1] : null;
 // I4: istavrit top 10 now and at the next 21:00 local (before/after a model change, same data)
 const topOut = process.argv.includes('--top10') ? process.argv[process.argv.indexOf('--top10') + 1] : null;
 const lampOut = process.argv.includes('--lamp-sensitivity') ? process.argv[process.argv.indexOf('--lamp-sensitivity') + 1] : null;
@@ -99,6 +101,35 @@ const now0 = Math.floor(now.getTime() / 3_600_000);
 for (const r of v2) {
   const e = (JSON.parse(r.list_json) as unknown[][])[now0 - r.start_hour];
   console.log(`  ${r.spot_id.padEnd(20)} total ${e?.[0]} band ${e?.[1]}–${e?.[2]} rank ${e?.[3]} · ${(e?.[6] as unknown[] | null)?.[2] ?? ''}`);
+}
+
+if (ablateOut) {
+  const { explainAll, DEFAULTS, staticTerms, calibrate, rawScore } = await import('@av-livn/scoring');
+  const fr = fieldRecords(obs, depths);
+  const om = oceanMap(oSeries, oNormal);
+  const n21 = now0 + ((18 - (now0 % 24) + 24) % 24);
+  const res = rows.map((r) => computeSpotV2(r, snaps.get(r.wx_cell), r.sea_cell ? snaps.get(r.sea_cell) : undefined, now, fr.get(r.id), 0, om.get(r.id)));
+  const i = n21 - res[0]!.startHour;
+  const spots = res.map((x) => x.spot);
+  const w = res.map((x) => x.weather[i]!);
+  const all = explainAll(spots, w, DEFAULTS);
+  const want = /mendire|Armutlu İskelesi|Karacaali|Kurşunlu Yat|Güzelyalı Yat Limanı – liman/;
+  const out = rows.map((r, k) => ({ r, k })).filter(({ r }) => want.test(r.name)).map(({ r, k }) => {
+    const s0 = spots[k]!;
+    const st = staticTerms(s0, DEFAULTS);
+    const h = res[k]!.hours[i]!;
+    const comp = (key: string) => h.components.find((c) => c.key === key);
+    const at = (lampP: number) => Math.round(calibrate(rawScore({ ...s0, lamp: null, lampP }, w[k]!, DEFAULTS).raw) * 10) / 10;
+    return {
+      name: r.name, total: h.total, deltas: all[k],
+      sources: { derinlik: comp('derinlik')?.source, taban: comp('taban')?.source, yapi: comp('yapi')?.source, lamba: comp('lamba')?.source },
+      data: { depth_200m: r.depth_200m, max_depth_100m: r.max_depth_100m, depth_used_m: Math.round(st.depthM * 10) / 10, depth_term: Math.round(st.depth * 1000) / 1000, struct_term: Math.round(st.struct * 1000) / 1000, substrate: comp('taban')?.reason, fetch_km: s0.fetchKm, length_m: s0.lengthM },
+      lamp_prior_0_3: s0.lamp === null && !s0.lampP ? at(0.3) : null, lamp_prior_0_5: s0.lamp === null && !s0.lampP ? at(0.5) : null,
+    };
+  });
+  const { writeFileSync } = await import('node:fs');
+  writeFileSync(ablateOut, JSON.stringify({ at: new Date(n21 * 3_600_000).toISOString(), method: 'explainAll: score minus mean score with the driver taken from each other spot (same hour/weather), points', spots: out }, null, 1) + '\n');
+  console.log(`ablate → ${ablateOut}`);
 }
 
 if (topOut) {

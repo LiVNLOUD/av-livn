@@ -53,8 +53,8 @@ const localDay = (h: number) => Math.floor((h + TZ) / 24);
 
 export function plainReason(reason: string | null): { why: string | null; assumed: boolean } {
   if (!reason) return { why: null, assumed: false };
-  const assumed = /varsayım|kanıt C|\(C\)/.test(reason);
-  const why = reason.split(' — ')[0]!.replace(/^Öne çıkaran: /, '').replace(/^Geri çeken: /, 'zayıf yanı: ');
+  const assumed = /varsayım|kanıt C|\(C\)|ölçüm değil/.test(reason);
+  const why = reason.split(' — ')[0]!.replace(/^Öne çıkaran(?: \([^)]*\))?: /, '').replace(/^Geri (?:çeken|bırakan)(?: \([^)]*\))?: /, 'zayıf yanı: ');
   return { why: why.charAt(0).toLocaleUpperCase('tr') + why.slice(1), assumed };
 }
 

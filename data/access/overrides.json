@@ -1,0 +1,7 @@
+{
+  "_note": "Kullanıcının bildirdiği erişim bilgisi (L0). Pipeline her çalışmada uygular; saha formundan girilen erişim her zaman önceliklidir (seed kuralı). private_marina=1 → 'kısıtlı olabilir (marina — özel işletme)' rozeti, ana öneri ve bildirimler dışında.",
+  "overrides": [
+    { "spot_id": "osm-way-252356833", "name": "Güzelyalı Yat Limanı – batı mendireği", "access": "belirsiz", "private_marina": 1, "source": "kullanıcı, 7 Kas 2026: halk erişimi kısıtlı" },
+    { "spot_id": "osm-way-252356832", "name": "Güzelyalı Yat Limanı – doğu mendireği", "access": "belirsiz", "private_marina": 1, "source": "kullanıcı, 7 Kas 2026: halk erişimi kısıtlı" }
+  ]
+}

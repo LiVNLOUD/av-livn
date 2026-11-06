@@ -252,3 +252,8 @@
 - [x] K1 kod: yalnız gerçek yat limanları (`private_marina`, migration 0016) plan ve bildirimlerden çıkar; köy iskeleleri ve balıkçı barınakları yerleşim kuralına döner (seed eski "belirsiz" tahminini yeniden değerlendirir, kullanıcı girişi kazanır). Canlı: yalnız Kurşunlu Yat Limanı ve Güzelyalı Yat Limanı – liman içi işaretli; Tirilye Limanı belirsiz → açık; Karacaali, Büyükkumla açık kaldı.
 - [x] K2 lamba önseli: kanıtsız yapılar 0,5; kayalık 0,10, kumsal/dere ağzı 0,15. Önce/sonra `docs/audit/k2-lamp-top10.json`.
 - [x] K3 eşdeğer seçenekler: ilk 3 payı < %60 ve bant örtüşmesi → sırasız "Eşdeğer seçenekler" (MODEL.md §16).
+
+## Faz L — doğrulama (2026-11-07) ✅ DUR
+- [x] L0 Güzelyalı Yat Limanı batı/doğu mendirekleri: kullanıcı bilgisi "kısıtlı" → `data/access/overrides.json` (access belirsiz + private_marina=1). Pipeline uygular, saha formu önceliklidir. Ana öneri ve bildirimler dışında.
+- [x] L1 ablasyon (`docs/audit/l1-ablation.md`): mendireklerde derinlik katkısı 0 (tahmin 1,8–3 m), maruziyet Güzelyalı'da −0,6. Üste taşıyanlar: yapı tipi tercihi +9,8 (C) ve lamba önseli 0,3 → 0,5 (+6,4). K raporundaki "derin ve korunaklı" ifadesi yanlıştı. "Öne çıkaran" metni artık puan katkısı ve kanıt türüyle; "derin" ve "korunaklı" yok (test).
+- [x] L2 zamanlayıcı (son 24 sa): score.yml için beklenen 96 tetikten (24 tam + 72 kısa) yalnız 7'si geldi; aralar 44–366 dk. "3 dakikada bir" ifadesi yanlıştı: kısa çalışmalar saatte 3 kez (:08, :38, :53), tam çalışmayla birlikte nominal 15 dk. Aralık zaten 15 dk olduğu için değiştirilmedi. GitHub zamanlayıcısı güvenilmez; asıl sigorta Cloudflare yedek tetiği. GH_DISPATCH_TOKEN henüz yok (deploy adımı "skipped"), uçtan uca test yapılamadı. NTFY_TOPIC Worker'da: Worker uyarısı çalışır.

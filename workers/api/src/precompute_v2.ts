@@ -328,42 +328,54 @@ const COMPASS_TR = ['kuzey', 'kuzeydoğu', 'doğu', 'güneydoğu', 'güney', 'g�
 const n1 = (x: number) => (Math.round(x * 10) / 10).toString().replace('.', ',');
 
 /** One honest line: the driver, its value and where that value comes from. */
+/** L1: evidence type of a component source, in plain Turkish (what the number rests on). */
+export const EVIDENCE_TR: Record<string, string> = {
+  saha: 'saha ölçümü', uzaktan: 'uzaktan gözlem', masabasi: 'masa başı veri', OSM: 'OSM yapı tipi, tip tercihi varsayım',
+  'DTM-ölçüm': 'EMODnet ölçümü', 'DTM-interpolasyon': 'EMODnet enterpolasyonu, ölçüm değil', 'yapı-uzunluğu-tahmini': 'yapı uzunluğundan tahmin, ölçüm değil',
+  EUSeaMap: 'EUSeaMap bölgesel sınıflandırma', 'önsel': 'varsayım, kanıt yok',
+};
+
+/** L1: one honest line for the main reason: the driver's real contribution (ablation delta, points), what it is and
+ *  what that rests on. No adjective ("derin", "korunaklı") unless the driver itself is that quantity; the evidence
+ *  type is always said, inside the text that the home page shows (plainReason keeps everything before " — "). */
 export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hour, w: Weather): string {
   const c = (k: string) => h.components.find((x) => x.key === k)!;
+  const ev = (src: string) => EVIDENCE_TR[src] ?? src;
+  const pts = `${delta >= 0 ? '+' : '−'}${Math.abs(delta).toFixed(1).replace('.', ',')} puan`;
   const lead = delta >= 0 ? 'Öne çıkaran' : 'Geri bırakan';
   let body: string;
   switch (key) {
     case 'lamba':
       body =
         spot.lamp !== null && spot.lampSource !== null && spot.lampSource !== undefined
-          ? `iskele aydınlatması — ${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi (değer gizli)`
+          ? `iskele aydınlatması (${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi, değer gizli)`
           : spot.lamp !== null
-          ? `iskele aydınlatması ${spot.lamp ? 'var' : 'yok'} — ${c('lamba').source}`
-          : `iskele aydınlatması olasılığı ${lampPrior(spot).toFixed(2).replace(".", ",")} — ${spot.lampSource === 'masabasi' ? 'masa başı veri (onay bekliyor)' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım (C), saha verisi yok'}`;
+          ? `iskele aydınlatması ${spot.lamp ? 'var' : 'yok'} (${ev(c('lamba').source)})`
+          : `iskele aydınlatması olasılığı ${lampPrior(spot).toFixed(2).replace(".", ",")} (${spot.lampSource === 'masabasi' ? 'masa başı veri, onay bekliyor' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım, kanıt yok'})`;
       break;
     case 'yapi':
       body = PRIVATE_SOURCES.has(c('yapi').source)
-        ? `yapı — ${c('yapi').source} bilgisi (değer gizli)`
+        ? `yapı (${c('yapi').source} bilgisi, değer gizli)`
         : SHORE_KINDS.includes(spot.kind as ShoreKind)
-          ? `${kindLabel(spot.kind)} — tip tercihi varsayım, kanıt C`
-          : `${kindLabel(spot.kind)} ${Math.round(spot.lengthM ?? 50)} m — ${c('yapi').source}, kanıt C`;
+          ? `${kindLabel(spot.kind)} tipi (tip tercihi varsayım, kanıt C)`
+          : `${kindLabel(spot.kind)} tipi (tip tercihi varsayım, kanıt C; OSM)`;
       break;
     case 'derinlik': {
       const src = c('derinlik').source;
       body = PRIVATE_SOURCES.has(src)
-        ? `derinlik — ${src === 'saha' ? 'saha ölçümü' : src} var (değer gizli)`
-        : `atış mesafesinde ~${c('derinlik').reason.split(' m')[0]} m — ${src === 'yapı-uzunluğu-tahmini' ? 'yapı uzunluğundan tahmin (C), saha ölçümü yok' : src}`;
+        ? `derinlik (${src === 'saha' ? 'saha ölçümü' : src}, değer gizli)`
+        : `atış mesafesinde ~${c('derinlik').reason.split(' m')[0]} m su (${ev(src)})`;
       break;
     }
     case 'taban':
-      body = PRIVATE_SOURCES.has(c('taban').source) ? `dip — ${c('taban').source} bilgisi (değer gizli)` : `dip ${c('taban').reason} — ${c('taban').source}`;
+      body = PRIVATE_SOURCES.has(c('taban').source) ? `dip (${c('taban').source} bilgisi, değer gizli)` : `dip: ${c('taban').reason} (${ev(c('taban').source)})`;
       break;
     default: {
       const dir = w.windDir === null ? null : COMPASS_TR[Math.round(w.windDir / 45) % 8];
-      body = `${dir ? `${dir} rüzgarına ` : 'rüzgara '}${delta >= 0 ? 'korunaklı' : 'açık'}${w.windKmh === null ? '' : ` (${Math.round(w.windKmh)} km/sa)`} — kıyı OSM, rüzgar Open-Meteo`;
+      body = `${dir ? `${dir} rüzgarına ` : 'rüzgara '}${delta >= 0 ? 'daha az açık' : 'daha açık'}${w.windKmh === null ? '' : ` (${Math.round(w.windKmh)} km/sa)`} (kıyı geometrisinden hesap, OSM; rüzgar Open-Meteo modeli)`;
     }
   }
-  return `${lead}: ${body}`;
+  return `${lead} (${pts}): ${body}`;
 }
 
 /** Main reason per spot for every hour (term ablation across spots, explain.ts). */
