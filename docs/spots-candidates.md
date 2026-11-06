@@ -9,27 +9,33 @@ yönetici yasak alanları içinde değil; c) kumsala md. 16/5 tarihli uyarı roz
 tip meralar ayrı kalır, birbirine "yakın mera" bağlantısı alır. Yalnız aynı noktanın kopyası (≤ 25 m) atılır.
 G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası suyun üzerindeyse havza ortası sayılır (≤ 150 m).
 
-**Eklenen: 74 mera.** Elenen: 4. Ticari liman (erişim yasak katmanı): 28.
+**Eklenen: 97 mera.** Elenen: 38. Ticari liman (erişim yasak katmanı): 36.
 
 | Tip | Eklenen |
 |---|---|
-| kordon (taş tahkimat) | 30 |
-| kumsal | 28 |
-| dere ağzı | 8 |
+| kumsal | 47 |
+| kordon (taş tahkimat) | 31 |
+| dere ağzı | 11 |
 | liman / balıkçı barınağı | 6 |
 | kayalık kıyı | 2 |
 
 | Yerleşim | Eklenen |
 |---|---|
 | Armutlu | 21 |
+| Kurşunlu | 10 |
 | Fıstıklı | 7 |
-| Kurşunlu | 7 |
+| — | 5 |
+| Eşkel | 4 |
 | Kumsaz | 4 |
+| Mesudiye | 4 |
+| Sahil | 3 |
 | İslamköy | 3 |
+| Bayramdere | 2 |
 | Büyükkumla | 2 |
 | Cumhuriyet | 2 |
 | Demirsubaşı | 2 |
 | Dr.Ziya Kaya | 2 |
+| Eğerce | 2 |
 | Güzelyalı Burgaz | 2 |
 | Güzelyalı Siteler | 2 |
 | Güzelyalı Yalı | 2 |
@@ -38,6 +44,7 @@ G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası
 | Orhaniye | 2 |
 | Tirilye | 2 |
 | Ömerbey Mah. | 2 |
+| Ballıkaya | 1 |
 | Balıkpazarı | 1 |
 | Güzelyalı Eğitim | 1 |
 | Hisar | 1 |
@@ -45,7 +52,6 @@ G1: liman/marina çokgeni kenarına göre ölçülür; çokgensiz liman noktası
 | Kayhan | 1 |
 | Kumla | 1 |
 | Kumyaka | 1 |
-| — | 1 |
 
 ## Yeni tipler için istavrit tercih değerleri (kanıt C, literatür yok)
 
@@ -86,7 +92,10 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kordon (Armutlu güneydoğusu) | kordon (taş tahkimat) | Armutlu | acik (yerleşime 1484 m) | way/428743002 |
 | Bülbül Deresi ağzı | dere ağzı | Armutlu | acik (yerleşime 1090 m) | way/253083807 |
 | Kayalık kıyı (Armutlu güneydoğusu) | kayalık kıyı | Armutlu | belirsiz (kayalık: yürüyüş yolu bilinmiyor) | way/1422351411 |
+| Simav Çayı ağzı | dere ağzı | Ballıkaya | belirsiz (yerleşimden uzak (> 1,5 km)) | way/85387365 |
 | Kordon (Balıkpazarı güneybatısı) | kordon (taş tahkimat) | Balıkpazarı | acik (yerleşime 69 m) | way/1217216676 |
+| Kumsal (Bayramdere kuzeybatısı) | kumsal | Bayramdere | belirsiz (yerleşimden uzak (> 1,5 km)) | way/296678701 |
+| Dere ağzı (Bayramdere) | dere ağzı | Bayramdere | belirsiz (yerleşimden uzak (> 1,5 km)) | way/727268657 |
 | Büyükkumla İskelesi | liman / balıkçı barınağı | Büyükkumla | acik (yerleşime 248 m) | node/2794622004 |
 | Büyükkumla Deresi ağzı | dere ağzı | Büyükkumla | acik (yerleşime 330 m) | way/681112515 |
 | Kordon (Cumhuriyet batısı) | kordon (taş tahkimat) | Cumhuriyet | acik (yerleşime 422 m) | way/1217216676 |
@@ -95,6 +104,12 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kordon (Demirsubaşı güneyi) | kordon (taş tahkimat) | Demirsubaşı | acik (yerleşime 277 m) | way/1217216668 |
 | Kordon (Dr.Ziya Kaya batısı) | kordon (taş tahkimat) | Dr.Ziya Kaya | acik (yerleşime 177 m) | way/1217216668 |
 | Karsak Çayı ağzı | dere ağzı | Dr.Ziya Kaya | acik (yerleşime 256 m) | way/700323582 |
+| Kumsal (Eğerce doğusu) | kumsal | Eğerce | acik (yerleşime 700 m) | relation/18071615 |
+| Kumsal (Eğerce doğusu) 2 | kumsal | Eğerce | acik (yerleşime 1162 m) | relation/18071615 |
+| Kumsal (Eşkel batısı) | kumsal | Eşkel | acik (yerleşime 605 m) | way/519553320 |
+| Kumsal (Eşkel batısı) 2 | kumsal | Eşkel | acik (yerleşime 999 m) | way/519553320 |
+| Kumsal (Eşkel kuzeybatısı) | kumsal | Eşkel | acik (yerleşime 482 m) | way/519553320 |
+| Kordon (Eşkel kuzeybatısı) | kordon (taş tahkimat) | Eşkel | acik (yerleşime 711 m) | way/519553274 |
 | Kumsal (Fıstıklı batısı) | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1391521782 |
 | Kumsal (Fıstıklı batısı) 2 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1392831837 |
 | Kumsal (Fıstıklı batısı) 3 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985743 |
@@ -122,17 +137,31 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kordon (Kumsaz güneyi) 3 | kordon (taş tahkimat) | Kumsaz | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Dere ağzı (Kumsaz) | dere ağzı | Kumsaz | acik (yerleşime 255 m) | way/253063517 |
 | Kordon (Kumyaka doğusu) | kordon (taş tahkimat) | Kumyaka | belirsiz (yerleşimden uzak (> 1,5 km)) | way/534210128 |
+| Kumsal (Kurşunlu doğusu) | kumsal | Kurşunlu | acik (yerleşime 525 m) | relation/10458771 |
+| Kumsal (Kurşunlu doğusu) 2 | kumsal | Kurşunlu | acik (yerleşime 206 m) | relation/10458771 |
 | Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu | belirsiz (marina: giriş kısıtlı olabilir) | way/1165497962 |
 | Kordon (Kurşunlu doğusu) | kordon (taş tahkimat) | Kurşunlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Kordon (Kurşunlu doğusu) 2 | kordon (taş tahkimat) | Kurşunlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Kordon (Kurşunlu doğusu) 3 | kordon (taş tahkimat) | Kurşunlu | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Kordon (Kurşunlu doğusu) 4 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 1286 m) | way/24825429 |
-| Kordon (Kurşunlu kuzeydoğusu) | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 788 m) | way/24825429 |
-| Kordon (Kurşunlu kuzeydoğusu) 2 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 547 m) | way/24825429 |
+| Kordon (Kurşunlu doğusu) 5 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 788 m) | way/24825429 |
+| Kordon (Kurşunlu doğusu) 6 | kordon (taş tahkimat) | Kurşunlu | acik (yerleşime 547 m) | way/24825429 |
+| Dere ağzı (Kurşunlu) | dere ağzı | Kurşunlu | acik (yerleşime 406 m) | way/1302854356 |
+| Kumsal (Mesudiye kuzeyi) | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
+| Kumsal (Mesudiye kuzeyi) 2 | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
+| Kumsal (Mesudiye kuzeyi) 3 | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
+| Kumsal (Mesudiye kuzeyi) 4 | kumsal | Mesudiye | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
 | Kordon (Orhaniye batısı) | kordon (taş tahkimat) | Orhaniye | acik (yerleşime 433 m) | way/1217216676 |
 | Kordon (Orhaniye güneybatısı) | kordon (taş tahkimat) | Orhaniye | acik (yerleşime 208 m) | way/1336893175 |
+| Kumsal (Sahil batısı) | kumsal | Sahil | belirsiz (yerleşimden uzak (> 1,5 km)) | relation/10458772 |
+| Kumsal (Sahil doğusu) | kumsal | Sahil | acik (yerleşime 292 m) | relation/10458773 |
+| Kumsal (Sahil kuzeybatısı) | kumsal | Sahil | acik (yerleşime 125 m) | relation/10458773 |
 | Kumsal (Tirilye kuzeybatısı) | kumsal | Tirilye | acik (yerleşime 155 m) | way/519554786 |
 | Tirilye Limanı | liman / balıkçı barınağı | Tirilye | belirsiz (marina: giriş kısıtlı olabilir) | node/11865648199 |
+| Kumsal | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/296678701 |
+| Kumsal 2 | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/296678701 |
+| Kumsal 3 | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/757735806 |
+| Kumsal 4 | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/757735807 |
 | Ayı Burnu | kayalık kıyı | — | belirsiz (kayalık: yürüyüş yolu bilinmiyor) | node/11981818601 |
 | Kordon (Ömerbey Mah. doğusu) | kordon (taş tahkimat) | Ömerbey Mah. | acik (yerleşime 182 m) | way/639389497 |
 | Kordon (Ömerbey Mah. güneydoğusu) | kordon (taş tahkimat) | Ömerbey Mah. | acik (yerleşime 744 m) | way/1073087871 |
@@ -146,6 +175,8 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 |---|---|
 | Borusan Port | node/825452158, way/588510511 |
 | sanayi alanı | way/131982028 |
+| İmralı Yüksek Güvenlikli Cezaevi | way/150882574 |
+| askeri alan | way/150882581 |
 | Gemlik Küçük Sanayi Sitesi | way/478691235 |
 | sanayi alanı | way/479047503 |
 | sanayi alanı | way/479047513 |
@@ -154,8 +185,12 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | T.C. Mudanya Kaymakamlığı İlçe Jandarma Komutanlığı | way/503796445 |
 | Borçelik Çelik Sanayii Ticaret A.Ş | way/588510512 |
 | BURSA SERBEST BÖLGE | way/597831950 |
+| askeri alan | way/746494308 |
+| sanayi alanı | way/785161150 |
 | Togg Gemlik Kampüsü | way/888889309 |
 | sanayi alanı | way/901718629 |
+| sanayi alanı | way/903915616 |
+| askeri alan | way/1028960245 |
 | Cimtas Celik İmalat Montaj ve Tesisat A.Ş. | way/1038697387 |
 | Marmara Entegre Kimya Sanayi | way/1038697388 |
 | sanayi alanı | way/1091677946 |
@@ -165,11 +200,13 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Askeri İrtibat Bürosu | way/1377878675 |
 | Sahil Güvenlik Komutanlığı | way/1377879263 |
 | askeri alan | way/1393123414 |
+| İmralı Adası Yasaklı Bölge | way/1395051803 |
 | sanayi alanı | way/1467351864 |
 | sanayi alanı | way/1467351865 |
 | sanayi alanı | way/1467351866 |
 | sanayi alanı | way/1467351871 |
 | Gemlik Askerlik Şubesi | way/1501002525 |
+| sanayi alanı | way/1571311365 |
 | Tuğgeneral Orhan Öncül Kışlası | relation/2871688 |
 | sanayi alanı | relation/18096373 |
 
@@ -177,15 +214,50 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 
 | Neden | Sayı |
 |---|---|
+| askeri alan | 34 |
 | kıyı çizgisine 52 m | 2 |
 | ticari liman sahası | 1 |
 | OSM access=no | 1 |
 
 | Yer | Tip | Yerleşim | Neden | OSM |
 |---|---|---|---|---|
+| osm-way-1028896233-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028896233 |
+| osm-way-1028888864-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028888864 |
+| osm-way-1028647319-2 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028647319 |
+| osm-way-1028902032-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028902032 |
+| osm-way-1028647319-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028647319 |
+| osm-way-1028892526-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028892526 |
+| osm-way-1028944317-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028944317 |
+| osm-way-1028892528-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028892528 |
 | osm-node-11981834876-1 | kayalık kıyı | Armutlu | kıyı çizgisine 52 m (> 30 m): fiziksel kıyı nesnesi değil | node/11981834876 |
 | osm-node-11981834876-2 | kayalık kıyı | Armutlu | kıyı çizgisine 52 m (> 30 m): fiziksel kıyı nesnesi değil | node/11981834876 |
+| osm-way-1028943932-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028943932 |
+| osm-way-1028892527-1 | kayalık kıyı | — | askeri alan (way/1395051803) | way/1028892527 |
+| osm-way-1028900096-2 | kumsal | — | askeri alan (way/1395051803) | way/1028900096 |
+| osm-way-1028934225-1 | kumsal | — | askeri alan (way/1395051803) | way/1028934225 |
+| osm-way-1028647320-1 | kumsal | — | askeri alan (way/1395051803) | way/1028647320 |
+| osm-way-1028647320-2 | kumsal | — | askeri alan (way/1395051803) | way/1028647320 |
+| osm-way-1028638511-1 | kumsal | — | askeri alan (way/1395051803) | way/1028638511 |
+| osm-way-1028888865-1 | kumsal | — | askeri alan (way/1395051803) | way/1028888865 |
+| osm-way-1028896231-2 | kumsal | — | askeri alan (way/1395051803) | way/1028896231 |
+| osm-way-1028896231-3 | kumsal | — | askeri alan (way/1395051803) | way/1028896231 |
+| osm-way-1028901164-1 | kumsal | — | askeri alan (way/1395051803) | way/1028901164 |
+| osm-way-1028639911-1 | kumsal | — | askeri alan (way/1395051803) | way/1028639911 |
+| osm-way-1028639911-2 | kumsal | — | askeri alan (way/1395051803) | way/1028639911 |
+| osm-way-1028639910-1 | kumsal | — | askeri alan (way/1395051803) | way/1028639910 |
+| osm-way-1028639910-2 | kumsal | — | askeri alan (way/1395051803) | way/1028639910 |
+| osm-way-1028934224-1 | kumsal | — | askeri alan (way/1395051803) | way/1028934224 |
+| osm-way-1028884059-1 | kumsal | — | askeri alan (way/1395051803) | way/1028884059 |
+| osm-way-1028892531-1 | kumsal | — | askeri alan (way/1395051803) | way/1028892531 |
+| osm-way-1028884058-1 | kumsal | — | askeri alan (way/1395051803) | way/1028884058 |
+| osm-way-1028656724-1 | kumsal | — | askeri alan (way/1395051803) | way/1028656724 |
+| osm-way-1028888052-1 | kumsal | — | askeri alan (way/1395051803) | way/1028888052 |
+| osm-way-1028639909-1 | kumsal | — | askeri alan (way/1395051803) | way/1028639909 |
+| osm-way-1028934226-1 | kumsal | — | askeri alan (way/1395051803) | way/1028934226 |
+| osm-way-1028900096-1 | kumsal | — | askeri alan (way/1395051803) | way/1028900096 |
+| osm-way-1028901164-2 | kumsal | — | askeri alan (way/1395051803) | way/1028901164 |
 | osm-way-479047533-1 | kumsal | İslamköy | ticari liman sahası (Borusan Port) | way/479047533 |
+| osm-way-1028896231-1 | kumsal | — | askeri alan (way/1395051803) | way/1028896231 |
 | osm-way-940722066-1 | kordon (taş tahkimat) | Armutlu | OSM access=no | way/940722066 |
 
 ## Kordon (taş tahkimat) — yerleşim raporu (H6)
@@ -200,7 +272,7 @@ Lamba olasılığı: bölgede OSM'de hiç `highway=street_lamp` yok; parçalar k
 | Gemlik | Balıkpazarı, Cumhuriyet, Demirsubaşı, Dr.Ziya Kaya, Hisar, Kayhan, Orhaniye | 12 | 10 | 0 | 2 | — |
 | Kurşunlu | Kumsaz, Kurşunlu | 9 | 9 | 0 | 0 | — |
 | Mudanya | Hasanbey, Kumyaka, Ömerbey Mah. | 5 | 5 | 0 | 0 | — |
-| diğer (odak yerleşimlere > 4 km) | Armutlu, Fıstıklı | 21 | 6 | 14 | 1 | zaten kumsal/kayalık (13); OSM access=no (1) |
+| diğer (odak yerleşimlere > 4 km) | Armutlu, Eşkel, Fıstıklı | 23 | 7 | 15 | 1 | zaten kumsal/kayalık (14); OSM access=no (1) |
 
 Kordon parçası bulunamayan odak yerleşimler: Kumla, Narlı, Umurbey, Güzelyalı — OSM'de kıyı çizgisine ≤ 25 m paralel tahkimat, deniz duvarı, sahil yolu ya da yaya yolu etiketi yok.
 
@@ -239,12 +311,11 @@ uzunluk için çizgi gerekir). Envanter nokta ve alan nesnelerini de alır; ikis
 
 - Narlı: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)
 - Kumyaka: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)
-- Eşkel: OSM'de yerleşim noktası yok
-- **Kurşunlu:** 0 mevcut mera, 7 aday (≤ 2,5 km). osm-way-1165497962 Kurşunlu Yat Limanı (liman / balıkçı barınağı); osm-way-24825429-4 Kordon (Kurşunlu doğusu) (kordon (taş tahkimat)); osm-way-24825429-5 Kordon (Kurşunlu doğusu) 2 (kordon (taş tahkimat)); osm-way-24825429-6 Kordon (Kurşunlu doğusu) 3 (kordon (taş tahkimat)); osm-way-24825429-7 Kordon (Kurşunlu doğusu) 4 (kordon (taş tahkimat)); osm-way-24825429-8 Kordon (Kurşunlu kuzeydoğusu) (kordon (taş tahkimat))
+- **Kurşunlu:** 6 mevcut mera, 3 aday (≤ 2,5 km). osm-relation-10458771-1 Kumsal (Kurşunlu doğusu) (kumsal); osm-relation-10458771-2 Kumsal (Kurşunlu doğusu) 2 (kumsal); osm-way-1302854356 Dere ağzı (Kurşunlu) (dere ağzı)
 - **Gemlik:** 1 mevcut mera, 11 aday (≤ 2,5 km). osm-way-1217216668-1 Kordon (Dr.Ziya Kaya batısı) (kordon (taş tahkimat)); osm-way-1217216668-2 Kordon (Demirsubaşı güneyi) (kordon (taş tahkimat)); osm-way-1217216676-1 Kordon (Cumhuriyet batısı) (kordon (taş tahkimat)); osm-way-1217216676-2 Kordon (Cumhuriyet güneyi) (kordon (taş tahkimat)); osm-way-1217216676-3 Kordon (Orhaniye batısı) (kordon (taş tahkimat)); osm-way-1217216676-6 Kordon (Kayhan güneybatısı) (kordon (taş tahkimat))
 - **Karacaali:** 0 mevcut mera, 3 aday (≤ 2,5 km). osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı); osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı); osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)
 - **Büyükkumla:** 1 mevcut mera, 4 aday (≤ 2,5 km). osm-node-13872728204 Karacaali İskelesi (liman / balıkçı barınağı); osm-node-2794622004 Büyükkumla İskelesi (liman / balıkçı barınağı); osm-way-1218508014 Kumla Deresi ağzı (dere ağzı); osm-way-681112515 Büyükkumla Deresi ağzı (dere ağzı)
 - **Narlı:** 0 mevcut mera, 0 aday (≤ 2,5 km). 
 - **Mudanya:** 1 mevcut mera, 4 aday (≤ 2,5 km). osm-way-1073087871-1 Kordon (Ömerbey Mah. güneydoğusu) (kordon (taş tahkimat)); osm-way-639389497-1 Kordon (Ömerbey Mah. doğusu) (kordon (taş tahkimat)); osm-way-639389497-2 Kordon (Hasanbey kuzeydoğusu) (kordon (taş tahkimat)); osm-way-639389497-3 Kordon (Hasanbey kuzeyi) (kordon (taş tahkimat))
 - **Kumyaka:** 1 mevcut mera, 2 aday (≤ 2,5 km). osm-node-11865648199 Tirilye Limanı (liman / balıkçı barınağı); osm-way-534210128-1 Kordon (Kumyaka doğusu) (kordon (taş tahkimat))
-- **Eşkel:** OSM'de yerleşim noktası yok.
+- **Eşkel:** 0 mevcut mera, 4 aday (≤ 2,5 km). osm-way-519553274-1 Kordon (Eşkel kuzeybatısı) (kordon (taş tahkimat)); osm-way-519553320-1 Kumsal (Eşkel kuzeybatısı) (kumsal); osm-way-519553320-2 Kumsal (Eşkel batısı) (kumsal); osm-way-519553320-3 Kumsal (Eşkel batısı) 2 (kumsal)

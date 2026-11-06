@@ -1,38 +1,58 @@
 {
  "Kurşunlu": {
   "place": [
-   29.02352,
-   40.36037
+   28.28938,
+   40.39655
   ],
   "proposals": [
-   "osm-way-1165497962 Kurşunlu Yat Limanı (liman / balıkçı barınağı)",
-   "osm-way-24825429-4 Kordon (Kurşunlu doğusu) (kordon (taş tahkimat))",
-   "osm-way-24825429-5 Kordon (Kurşunlu doğusu) 2 (kordon (taş tahkimat))",
-   "osm-way-24825429-6 Kordon (Kurşunlu doğusu) 3 (kordon (taş tahkimat))",
-   "osm-way-24825429-7 Kordon (Kurşunlu doğusu) 4 (kordon (taş tahkimat))",
-   "osm-way-24825429-8 Kordon (Kurşunlu kuzeydoğusu) (kordon (taş tahkimat))",
-   "osm-way-24825429-9 Kordon (Kurşunlu kuzeydoğusu) 2 (kordon (taş tahkimat))"
+   "osm-relation-10458771-1 Kumsal (Kurşunlu doğusu) (kumsal)",
+   "osm-relation-10458771-2 Kumsal (Kurşunlu doğusu) 2 (kumsal)",
+   "osm-way-1302854356 Dere ağzı (Kurşunlu) (dere ağzı)"
   ],
-  "existing": [],
+  "existing": [
+   "osm-way-1104376819 Kurşunlu – uzun doğu mendireği",
+   "osm-way-1104376820 Kurşunlu – kısa doğu mendireği",
+   "osm-way-978867059 Kurşunlu – kısa batı mendireği",
+   "osm-way-978867060 Kurşunlu – orta doğu mendireği",
+   "osm-way-978867061 Kurşunlu – uzun batı mendireği",
+   "osm-way-978867062 Kurşunlu – orta batı mendireği"
+  ],
   "osm_within_1km": [
    {
-    "ref": "way/24825429",
+    "ref": "way/1104376819",
     "tags": {
-     "name": "Sahil Yolu Caddesi"
+     "man_made": "breakwater"
     }
    },
    {
-    "ref": "way/861271971",
+    "ref": "way/1104376820",
     "tags": {
-     "name": "Sahil Çıkmazı"
+     "man_made": "breakwater"
     }
    },
    {
-    "ref": "way/1165497962",
+    "ref": "way/1302854356",
     "tags": {
-     "leisure": "marina",
-     "name": "Kurşunlu Yat Limanı",
-     "seamark:type": "harbour"
+     "waterway": "stream"
+    }
+   },
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
+   },
+   {
+    "ref": "relation/223464",
+    "tags": {
+     "name": "Balıkesir"
+    }
+   },
+   {
+    "ref": "relation/10458771",
+    "tags": {
+     "name": "Kurşunlu Plaji",
+     "natural": "beach"
     }
    }
   ]
@@ -253,6 +273,18 @@
      "leisure": "marina",
      "name": "Karacaali İskelesi"
     }
+   },
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
+   },
+   {
+    "ref": "relation/223472",
+    "tags": {
+     "name": "Yalova"
+    }
    }
   ]
  },
@@ -294,6 +326,18 @@
    {
     "ref": "way/1134427223",
     "tags": {}
+   },
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
+   },
+   {
+    "ref": "relation/223472",
+    "tags": {
+     "name": "Yalova"
+    }
    }
   ]
  },
@@ -304,7 +348,20 @@
   ],
   "proposals": [],
   "existing": [],
-  "osm_within_1km": []
+  "osm_within_1km": [
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
+   },
+   {
+    "ref": "relation/223472",
+    "tags": {
+     "name": "Yalova"
+    }
+   }
+  ]
  },
  "Mudanya": {
   "place": [
@@ -416,6 +473,12 @@
    {
     "ref": "way/1486514360",
     "tags": {}
+   },
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
    }
   ]
  },
@@ -431,23 +494,165 @@
   "existing": [
    "osm-way-1456975486 Petek Sitesi İskele"
   ],
-  "osm_within_1km": []
+  "osm_within_1km": [
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
+   }
+  ]
  },
  "Eşkel": {
-  "place": null
+  "place": [
+   28.6823,
+   40.36444
+  ],
+  "proposals": [
+   "osm-way-519553274-1 Kordon (Eşkel kuzeybatısı) (kordon (taş tahkimat))",
+   "osm-way-519553320-1 Kumsal (Eşkel kuzeybatısı) (kumsal)",
+   "osm-way-519553320-2 Kumsal (Eşkel batısı) (kumsal)",
+   "osm-way-519553320-3 Kumsal (Eşkel batısı) 2 (kumsal)"
+  ],
+  "existing": [],
+  "osm_within_1km": [
+   {
+    "ref": "way/519553274",
+    "tags": {}
+   },
+   {
+    "ref": "way/519553320",
+    "tags": {
+     "natural": "beach"
+    }
+   },
+   {
+    "ref": "way/1034991675",
+    "tags": {}
+   },
+   {
+    "ref": "relation/223463",
+    "tags": {
+     "name": "Bursa"
+    }
+   }
+  ]
  },
  "dropped": {
   "duplicate": 2,
-  "excluded": 4,
+  "excluded": 38,
   "not_spot": 6,
   "same_object": 6
  },
  "known_missing": [
   "Narlı: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)",
-  "Kumyaka: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)",
-  "Eşkel: OSM'de yerleşim noktası yok"
+  "Kumyaka: yakında OSM'de fiziksel kıyı nesnesi yok; otomatik eklenmedi (haritadan elle eklenebilir)"
  ],
  "excluded": [
+  {
+   "id": "osm-way-1028896233-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028896233"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.54355,
+    40.530045
+   ]
+  },
+  {
+   "id": "osm-way-1028888864-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028888864"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.54226,
+    40.518614
+   ]
+  },
+  {
+   "id": "osm-way-1028647319-2",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028647319"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.526061,
+    40.511048
+   ]
+  },
+  {
+   "id": "osm-way-1028902032-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028902032"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.525743,
+    40.55249
+   ]
+  },
+  {
+   "id": "osm-way-1028647319-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028647319"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.524609,
+    40.510635
+   ]
+  },
+  {
+   "id": "osm-way-1028892526-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028892526"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.516444,
+    40.520861
+   ]
+  },
+  {
+   "id": "osm-way-1028944317-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028944317"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.525096,
+    40.559661
+   ]
+  },
+  {
+   "id": "osm-way-1028892528-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028892528"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.516838,
+    40.519281
+   ]
+  },
   {
    "id": "osm-node-11981834876-1",
    "type": "kayalık kıyı",
@@ -475,6 +680,331 @@
    ]
   },
   {
+   "id": "osm-way-1028943932-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028943932"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.525772,
+    40.557189
+   ]
+  },
+  {
+   "id": "osm-way-1028892527-1",
+   "type": "kayalık kıyı",
+   "place": null,
+   "osm": [
+    "way/1028892527"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.516422,
+    40.520507
+   ]
+  },
+  {
+   "id": "osm-way-1028900096-2",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028900096"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.526829,
+    40.548551
+   ]
+  },
+  {
+   "id": "osm-way-1028934225-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028934225"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.536878,
+    40.544989
+   ]
+  },
+  {
+   "id": "osm-way-1028647320-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028647320"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.526246,
+    40.511181
+   ]
+  },
+  {
+   "id": "osm-way-1028647320-2",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028647320"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.530959,
+    40.512819
+   ]
+  },
+  {
+   "id": "osm-way-1028638511-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028638511"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.525958,
+    40.541914
+   ]
+  },
+  {
+   "id": "osm-way-1028888865-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028888865"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.543806,
+    40.523621
+   ]
+  },
+  {
+   "id": "osm-way-1028896231-2",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028896231"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.541325,
+    40.534251
+   ]
+  },
+  {
+   "id": "osm-way-1028896231-3",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028896231"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.539462,
+    40.537172
+   ]
+  },
+  {
+   "id": "osm-way-1028901164-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028901164"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.526669,
+    40.555753
+   ]
+  },
+  {
+   "id": "osm-way-1028639911-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028639911"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.523949,
+    40.511773
+   ]
+  },
+  {
+   "id": "osm-way-1028639911-2",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028639911"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.524042,
+    40.50913
+   ]
+  },
+  {
+   "id": "osm-way-1028639910-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028639910"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.524296,
+    40.560533
+   ]
+  },
+  {
+   "id": "osm-way-1028639910-2",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028639910"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.525815,
+    40.557918
+   ]
+  },
+  {
+   "id": "osm-way-1028934224-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028934224"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.535786,
+    40.547967
+   ]
+  },
+  {
+   "id": "osm-way-1028884059-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028884059"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.517118,
+    40.522683
+   ]
+  },
+  {
+   "id": "osm-way-1028892531-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028892531"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.518227,
+    40.524454
+   ]
+  },
+  {
+   "id": "osm-way-1028884058-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028884058"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.521867,
+    40.530678
+   ]
+  },
+  {
+   "id": "osm-way-1028656724-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028656724"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.536874,
+    40.550929
+   ]
+  },
+  {
+   "id": "osm-way-1028888052-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028888052"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.536428,
+    40.514873
+   ]
+  },
+  {
+   "id": "osm-way-1028639909-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028639909"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.550137,
+    40.558958
+   ]
+  },
+  {
+   "id": "osm-way-1028934226-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028934226"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.538433,
+    40.542229
+   ]
+  },
+  {
+   "id": "osm-way-1028900096-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028900096"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.526268,
+    40.551695
+   ]
+  },
+  {
+   "id": "osm-way-1028901164-2",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028901164"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.526268,
+    40.553443
+   ]
+  },
+  {
    "id": "osm-way-479047533-1",
    "type": "kumsal",
    "place": "İslamköy",
@@ -485,6 +1015,19 @@
    "lonlat": [
     29.090982,
     40.41697
+   ]
+  },
+  {
+   "id": "osm-way-1028896231-1",
+   "type": "kumsal",
+   "place": null,
+   "osm": [
+    "way/1028896231"
+   ],
+   "reason": "askeri alan (way/1395051803)",
+   "lonlat": [
+    28.542475,
+    40.532053
    ]
   },
   {
@@ -591,6 +1134,13 @@
    "status": "elendi",
    "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
    "osm": "way/940722066"
+  },
+  {
+   "place": "Eşkel",
+   "town": null,
+   "status": "elendi",
+   "reason": "zaten kumsal/kayalık (natural=beach/bare_rock)",
+   "osm": "way/1034991675"
   },
   {
    "place": "Armutlu",
@@ -901,6 +1451,13 @@
    "osm": "way/24825429"
   },
   {
+   "place": "Eşkel",
+   "town": null,
+   "status": "eklendi",
+   "reason": "lamba verisi yok",
+   "osm": "way/519553274"
+  },
+  {
    "place": "Orhaniye",
    "town": "Gemlik",
    "status": "tekrar",
@@ -909,5 +1466,5 @@
   }
  ],
  "street_lamps": 0,
- "promenade_ways_not_along_shore": 58
+ "promenade_ways_not_along_shore": 60
 }
