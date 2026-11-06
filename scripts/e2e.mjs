@@ -57,6 +57,10 @@ const overflow = (p) => p.evaluate(() => document.documentElement.scrollWidth - 
     await p.waitForFunction(() => document.querySelectorAll('#pick-rig dt').length >= 4, null, { timeout: 8000 }).catch(() => {});
     const dts = await p.locator('#pick-rig dt').count();
     dts >= 4 ? ok(`home: main pick with tackle (${dts} rows)`) : fail('home: main pick without tackle rows');
+    // I5: the plan only picks Bursa spots
+    const pickName = (await p.locator('#pick .nm').innerText()).trim();
+    const listed = (await (await fetch((apiOrigin ?? base) + '/api/spots')).json()).spots.find((x) => x.name === pickName);
+    !listed || !listed.province || listed.province === 'bursa' ? ok(`home: pick in Bursa (${pickName})`) : fail(`home: pick outside Bursa (${pickName}, ${listed.province})`);
     const alts = await p.locator('#alts li').count();
     alts <= 2 ? ok(`home: ${alts} alternatives (≤ 2)`) : fail(`home: ${alts} alternatives`);
   }

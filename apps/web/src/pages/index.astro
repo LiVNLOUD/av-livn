@@ -405,11 +405,13 @@ import Base from '../layouts/Base.astro';
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
         if (my !== seq) return;
+        const first = all.length === 0;
         all = b.spots;
         fetched = b.data_fetched_at;
         render();
         heat();
         summary();
+        if (first) renderPlan(); // the plan's province filter needs the spot list
       })
       .catch(() => { if (my === seq) $('meta').textContent = 'Puanlar alınamadı. Bağlantınızı kontrol edip sayfayı yenileyin.'; });
   }
@@ -601,7 +603,7 @@ import Base from '../layouts/Base.astro';
   let planSeq = 0;
   async function renderPlan() {
     const my = ++planSeq;
-    if (!winBody) return;
+    if (!winBody || !all.length) return; // drawn again when both the windows and the spot list are in
     const b = box.checked && winBody.open ? winBody.open : winBody;
     const inBursa = (w: Win) => !outside(all.find((x) => x.id === w.spot_id) ?? {});
     const ws = b.windows.filter(inBursa);
