@@ -663,7 +663,8 @@ import Base from '../layouts/Base.astro';
     const colOf = (w: Win) => Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
     if (eq.length >= 2) {
       const sorted = [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr'));
-      verdict.innerHTML = `${todayStrong ? 'Bugün' : esc(when)}: birbirinden ayırt edilemeyen ${eq.length} seçenek var.<small>Model bunları ayıramıyor (ilk 3'te kalma payı %${Math.round(EQ_TOP3 * 100)}'ın altında, bantlar örtüşüyor); sıra ada göre, en iyi ilan edilmez. ${scope}</small>`;
+      const lead = todayStrong ? 'Bugün' : nextStrong ? `Bugün güçlü seçenek yok. En yakın güçlü pencere ${esc(when)}` : '72 saatte güçlü öneri yok. Görece en iyiler';
+      verdict.innerHTML = `${lead}: birbirinden ayırt edilemeyen ${eq.length} seçenek var.<small>Model bunları ayıramıyor (ilk 3'te kalma payı %${Math.round(EQ_TOP3 * 100)}'ın altında, bantlar örtüşüyor); sıra ada göre, en iyi ilan edilmez. ${scope}</small>`;
       pick.innerHTML = `<h2 class="eq-h">Eşdeğer seçenekler</h2><div class="eq-grid">${sorted.map((w, i) => `<section class="eq-card">
         <div class="top"><div><p class="nm">${esc(w.name)} ${provBadge(w.spot_id)}</p><span class="tm">${span(w)}</span></div><span class="sc" title="Puan: ideal senaryoya göre yer, yakalama olasılığı değil">${Math.round(w.total)}</span></div>
         <div class="rig" id="eq-rig-${i}"><svg viewBox="0 0 76 96"></svg><dl><dt>Takım</dt><dd>hesaplanıyor…</dd></dl></div>
