@@ -258,3 +258,25 @@
 - [x] L1 ablasyon (`docs/audit/l1-ablation.md`): mendireklerde derinlik katkısı 0 (tahmin 1,8–3 m), maruziyet Güzelyalı'da −0,6. Üste taşıyanlar: yapı tipi tercihi +9,8 (C) ve lamba önseli 0,3 → 0,5 (+6,4). K raporundaki "derin ve korunaklı" ifadesi yanlıştı. "Öne çıkaran" metni artık puan katkısı ve kanıt türüyle; "derin" ve "korunaklı" yok (test).
 - [x] L0 sonrası hata: ana ekran "72 saatte öneri yok" diyordu. Nedeni: API ilk 5 pencereyi döndürüyor; o gün beşi de marina ya da Bursa dışıydı ve sayfa hepsini eledi. Düzeltme: plan adayları sunucuda süzülüyor (`plan.bursa` / `plan.wide`, marina hariç), test eklendi.
 - [x] L2 zamanlayıcı (son 24 sa): score.yml için beklenen 96 tetikten (24 tam + 72 kısa) yalnız 7'si geldi; aralar 44–366 dk. "3 dakikada bir" ifadesi yanlıştı: kısa çalışmalar saatte 3 kez (:08, :38, :53), tam çalışmayla birlikte nominal 15 dk. Aralık zaten 15 dk olduğu için değiştirilmedi. GitHub zamanlayıcısı güvenilmez; asıl sigorta Cloudflare yedek tetiği. GH_DISPATCH_TOKEN henüz yok (deploy adımı "skipped"), uçtan uca test yapılamadı. NTFY_TOPIC Worker'da: Worker uyarısı çalışır.
+
+## Faz M — kullanıcı odaklı ana ekran ve markasız takım (2026-11-07) ✅ DUR
+Model ve veri hattına dokunulmadı.
+- [x] M1 Ana ekran av planıdır. Sekmeler: Plan / Saat çizelgesi / Tüm meralar.
+  - Masaüstünde plan ~%60, kompakt harita ~%40; mobilde tek sütun.
+  - Kart beş soruyu sırayla cevaplar: değer mi, nereye ve ne zaman, ne ile, neden, ne kadar güvenilir.
+  - Güven kuralı (L1): en büyük katkı varsayımsa güven "Düşük" ve gerekçe günlük dille yazılır (`scripts/plan.ts`, test).
+  - Eşdeğer seçenekler "İki/Üç yer de aynı derecede iyi görünüyor; model birini öne çıkaramıyor." diye yazılır; ziyaretçi birini seçer.
+  - Jargon ana ekranda yok; "Neden? Ayrıntılar" çekmecesinde.
+  - 280 px kuralı: etiket üstte, değer altta.
+  - Ziyaretçi menüsü Plan, Harita, Model. Sahadayım, Günlük, Ayarlar'ın yönetici kısmı, Adaylar ve Panel yalnız anahtarla görünür.
+- [x] M2 Takım markasız.
+  - Genel sınıflar: Ultra hafif / LRF 0,5–5 g, Hafif spin 3–15 g, Spin 6–30 g; PE + florokarbon lider genel ölçüleri.
+  - Ayarlar → Takımım: cihazda (localStorage), isteğe bağlı. Girilirse öneri ona göre inceltilir ve "senin takımına göre" yazar.
+  - `/api/tackle` yalnız genel sınıfları döndürür; kişisel set `GET /api/admin/tackle` (ADMIN_TOKEN).
+  - "Sunucudaki profilimi bu cihaza taşı" seçeneği eklendi.
+  - Kaynakça ve kanıt harfleri "Neden?" altında. Markalar docs/TACKLE.md ve levrek TACKLE.md'den de çıkarıldı (git geçmişinde duruyor).
+- [x] M3 Harita.
+  - Yasak alanlar kırmızı taralı alan + lejant; metin etiketi yok.
+  - Uzak zoom'da yalnız yerleşim rozetleri; mera adları zoom ≥ 12'de.
+  - Önerilen mera turuncu halka ve adıyla gösterilir; harita ona ortalanır.
+- [x] M4 Doğrulama (canlı, `scripts/e2e.mjs`): 5 saniye testi 3440/1920/1440/768/390 px'te geçti; 280 px kuralı ana ekran ve kartta; konsol hatası 0; `/api/tackle` markasız; smoke 5/5. Ekran görüntüleri `docs/screenshots/m/`.
