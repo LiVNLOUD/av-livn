@@ -1104,6 +1104,9 @@
     "substrate_biozone": "Infralittoral",
     "substrate_dist_m": 0,
     "substrate_conf": 2,
+    "access": "belirsiz",
+    "private_marina": 1,
+    "access_note": "kullanıcı, 7 Kas 2026: halk erişimi kısıtlı",
     "province": "bursa"
    }
   },
@@ -1189,6 +1192,9 @@
     "substrate_biozone": "Infralittoral",
     "substrate_dist_m": 0,
     "substrate_conf": 2,
+    "access": "belirsiz",
+    "private_marina": 1,
+    "access_note": "kullanıcı, 7 Kas 2026: halk erişimi kısıtlı",
     "province": "bursa"
    }
   },
