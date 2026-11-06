@@ -547,7 +547,8 @@ import Base from '../layouts/Base.astro';
 
   // ---------------------------------------------------------------- best windows (E3)
   type WinList = { windows: Win[]; threshold: number; strong?: number };
-  let winBody: (WinList & { open?: WinList; today?: { all: WinList; open: WinList; hours: number } }) | null = null;
+  type PlanSet = { all: WinList; open: WinList; today: { all: WinList; open: WinList } };
+  let winBody: (WinList & { open?: WinList; today?: { all: WinList; open: WinList; hours: number }; plan?: { bursa: PlanSet; wide: PlanSet } }) | null = null;
   /** I2: the access filter applies to windows too (server computes the open-access list separately). */
   function renderWindows() {
     const ol = $('windows');
@@ -605,7 +606,6 @@ import Base from '../layouts/Base.astro';
   async function renderPlan() {
     const my = ++planSeq;
     if (!winBody || !all.length) return; // drawn again when both the windows and the spot list are in
-    const b = box.checked && winBody.open ? winBody.open : winBody;
     // J3: Ayarlar → "Ana öneriye Bursa dışını da dahil et" (this device; default off)
     let withOutside = false;
     try { withOutside = localStorage.getItem('av-livn-outside-bursa') === '1'; } catch {}
@@ -615,6 +615,9 @@ import Base from '../layouts/Base.astro';
     const provOf = (id: string) => all.find((x) => x.id === id)?.province ?? null;
     const PROV_TR: Record<string, string> = { yalova: 'Yalova', balikesir: 'Balıkesir' };
     const provBadge = (id: string) => { const p = provOf(id); return p && p !== 'bursa' ? `<span class="badge">${PROV_TR[p] ?? p}</span>` : ''; };
+    // L: server-side plan candidates (marinas and outside spots removed before the top 5 is cut)
+    const P = winBody.plan?.[withOutside ? 'wide' : 'bursa'];
+    const b = P ? (box.checked ? P.open : P.all) : box.checked && winBody.open ? winBody.open : winBody;
     const ws = b.windows.filter(inBursa);
     const pick = $('pick');
     const alts = $('alts');
@@ -624,7 +627,7 @@ import Base from '../layouts/Base.astro';
       pick.hidden = true; alts.hidden = true; return;
     }
     // I9: answer "today?" first (until 06:00 tomorrow), then the nearest strong option in 72 h, else the relative best
-    const td = (winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : []).filter(inBursa);
+    const td = (P ? (box.checked ? P.today.open : P.today.all).windows : winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : []).filter(inBursa);
     for (const w of td) w.tier ??= w.total >= 65 ? 'guclu' : 'goreli';
     const todayStrong = td.find((w) => w.tier === 'guclu');
     const nextStrong = ws.find((w) => w.tier === 'guclu');

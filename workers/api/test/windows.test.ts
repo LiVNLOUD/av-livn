@@ -114,3 +114,19 @@ describe('I9: today windows in the body', () => {
     expect(b.today.all.windows[0]).toMatchObject({ tier: 'guclu', top3: 0.5 });
   });
 });
+
+describe('L: plan candidates in the body', () => {
+  it('drop private marinas and outside-Bursa spots even when they fill the overall top 5', async () => {
+    const { windowsBody } = await import('../src/lib/views');
+    const from = 117 + 18;
+    const list = (v: number) => JSON.stringify(Array.from({ length: 80 }, (_, i): ListEntryV2 => [i % 24 === 3 ? v : 50, 40, 90, 1, 0, null, null, 0, 0.5]));
+    const row = (id: string, v: number, province: string, private_marina = 0) => ({ id, name: id, access: 'acik', province, private_marina, start_hour: from, list_json: list(v) });
+    const rows = [row('m1', 95, 'bursa', 1), row('m2', 94, 'bursa', 1), row('y1', 93, 'yalova'), row('y2', 92, 'yalova'), row('y3', 91, 'yalova'), row('b1', 80, 'bursa')];
+    const b = windowsBody(rows, from, 72);
+    expect(b.windows.map((w) => w.spot_id)).not.toContain('b1');
+    expect(b.plan.bursa.all.windows.map((w) => w.spot_id)).toEqual(['b1']);
+    expect(b.plan.bursa.today.all.windows.map((w) => w.spot_id)).toEqual(['b1']);
+    expect(b.plan.wide.all.windows.map((w) => w.spot_id)).toEqual(['y1', 'y2', 'y3', 'b1']);
+    expect(b.plan.wide.open.windows.every((w) => !w.spot_id.startsWith('m'))).toBe(true);
+  });
+});

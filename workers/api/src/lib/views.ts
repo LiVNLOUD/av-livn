@@ -13,7 +13,7 @@ const HOUR = 3_600_000;
 export const LIST_SQL = `SELECT s.*, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
        LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const HOURS_SQL = `SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
-export const WINDOWS_SQL = `SELECT s.id, s.name, s.access, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
+export const WINDOWS_SQL = `SELECT s.id, s.name, s.access, s.province, s.private_marina, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const FETCHED_SQL = 'SELECT max(fetched_at) AS at FROM forecast_snapshots';
 export const PRE_KINDS = ['list', 'hours', 'windows'] as const;
 export const preKey = (kind: (typeof PRE_KINDS)[number], hour: number, species = 'istavrit') => `pub:${kind}:${species}:${hour}`;
@@ -22,7 +22,7 @@ export const CLEAR_PRE_SQL = "DELETE FROM meta WHERE key LIKE 'pub:%'";
 
 export type ListRow = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
 export type HoursRow = SpotRow & { start_hour: number; list_json: string; scored_at: string };
-export type WindowsRow = { id: string; name: string; access?: string | null; start_hour: number; list_json: string };
+export type WindowsRow = { id: string; name: string; access?: string | null; province?: string | null; private_marina?: number | null; start_hour: number; list_json: string };
 
 export const fetchedAt = (r: unknown[]) => (r[0] as { at: string | null } | undefined)?.at ?? null;
 
@@ -66,7 +66,7 @@ export function hoursBody(all: HoursRow[], dataFetchedAt: string | null, from: n
 /** Best windows for all spots and, separately, for open-access spots only (I2: the list's access filter applies
  *  here too, computed server-side so a filtered list is never just the unfiltered top 5 minus the closed ones). */
 export function windowsBody(rows: WindowsRow[], from: number, hours: number, species = 'istavrit') {
-  const spots = rows.map((r) => ({ id: r.id, name: r.name, access: r.access ?? null, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
+  const spots = rows.map((r) => ({ id: r.id, name: r.name, access: r.access ?? null, province: r.province ?? null, private_marina: !!r.private_marina, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
   const iso = (h: number) => new Date(h * HOUR).toISOString();
   const out = (b: ReturnType<typeof bestWindows>) => ({ threshold: b.threshold, strong: b.strong, windows: b.windows.map((w) => ({ ...w, start: iso(w.start), end: iso(w.end), peak: iso(w.peak) })) });
   const all = out(bestWindows(spots, from, hours));
@@ -74,7 +74,18 @@ export function windowsBody(rows: WindowsRow[], from: number, hours: number, spe
   const lh = (from + 3) % 24;
   const todayH = lh >= 6 ? 24 - lh + 6 : 6 - lh;
   const today = { all: out(bestWindows(spots, from, todayH, { n: 3 })), open: out(bestWindows(spots, from, todayH, { n: 3, openOnly: true })), hours: todayH };
-  return { ok: true, species, from: iso(from), hours, ...all, open: out(bestWindows(spots, from, hours, { openOnly: true })), today };
+  // L: the home plan's candidates, filtered server-side (no private marinas; Bursa only unless the device opts in).
+  // Filtering the top 5 on the page could leave nothing when marinas and outside spots fill all five.
+  const planSet = (bursaOnly: boolean) => {
+    const o = { noMarina: true, bursaOnly };
+    return {
+      all: out(bestWindows(spots, from, hours, o)),
+      open: out(bestWindows(spots, from, hours, { ...o, openOnly: true })),
+      today: { all: out(bestWindows(spots, from, todayH, { ...o, n: 3 })), open: out(bestWindows(spots, from, todayH, { ...o, n: 3, openOnly: true })) },
+    };
+  };
+  const plan = { bursa: planSet(true), wide: planSet(false) };
+  return { ok: true, species, from: iso(from), hours, ...all, open: out(bestWindows(spots, from, hours, { openOnly: true })), today, plan };
 }
 
 /** Bodies for the given hours, as [meta key, JSON text] rows (score job). */
