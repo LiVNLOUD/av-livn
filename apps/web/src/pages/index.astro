@@ -215,7 +215,7 @@ import Base from '../layouts/Base.astro';
   import type { MapApi } from '../scripts/map';
 
   type Spot = {
-    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean;
+    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
   type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
@@ -236,6 +236,8 @@ import Base from '../layouts/Base.astro';
   const box = $<HTMLInputElement>('hide-access');
   try { box.checked = localStorage.getItem(HIDE) === '1'; } catch {}
   const hidden = (s: { access: string | null }) => box.checked && !!s.access && s.access !== 'acik';
+  /** I5: spots outside Bursa stay in the list (badge) but not in the home plan. */
+  const outside = (s: { province?: string | null }) => !!s.province && s.province !== 'bursa';
   box.addEventListener('change', () => {
     try { localStorage.setItem(HIDE, box.checked ? '1' : '0'); } catch {}
     render();
@@ -362,7 +364,7 @@ import Base from '../layouts/Base.astro';
           ? '<p class="why">Puan henüz hesaplanmadı</p>'
           : `<p class="why"><b class="rk">${rankLabel(sc.rank, ties.get(sc.rank) ?? 1)}</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
       const legal = swimRule(s.kind, at ?? new Date().toISOString());
-      const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '');
+      const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '') + (outside(s) ? '<span class="badge" title="Bursa ili dışında, yakın çevre">Bursa dışı</span>' : '');
       return `<li><a class="spot" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}" data-id="${esc(s.id)}">
           <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
           <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;
@@ -601,7 +603,8 @@ import Base from '../layouts/Base.astro';
     const my = ++planSeq;
     if (!winBody) return;
     const b = box.checked && winBody.open ? winBody.open : winBody;
-    const ws = b.windows;
+    const inBursa = (w: Win) => !outside(all.find((x) => x.id === w.spot_id) ?? {});
+    const ws = b.windows.filter(inBursa);
     const pick = $('pick');
     const alts = $('alts');
     const verdict = $('verdict');
@@ -610,7 +613,7 @@ import Base from '../layouts/Base.astro';
       pick.hidden = true; alts.hidden = true; return;
     }
     // I9: answer "today?" first (until 06:00 tomorrow), then the nearest strong option in 72 h, else the relative best
-    const td = winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : [];
+    const td = (winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : []).filter(inBursa);
     for (const w of td) w.tier ??= w.total >= 65 ? 'guclu' : 'goreli';
     const todayStrong = td.find((w) => w.tier === 'guclu');
     const nextStrong = ws.find((w) => w.tier === 'guclu');
@@ -618,7 +621,7 @@ import Base from '../layouts/Base.astro';
     const startD = fmtDay(m.start);
     const today = fmtDay(new Date().toISOString());
     const when = startD === today ? 'Bugün' : startD;
-    const scope = `${SPECIES_TR[species]} için, ${box.checked ? 'yalnız erişimi açık meralar' : 'tüm meralar'} arasından.`;
+    const scope = `${SPECIES_TR[species]} için, Bursa kıyısındaki ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'} arasından.`;
     verdict.innerHTML = todayStrong
       ? `Bugün ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}: anlamlı bir seçenek var.<small>${scope}</small>`
       : nextStrong

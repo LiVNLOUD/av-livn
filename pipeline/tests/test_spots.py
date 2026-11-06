@@ -146,7 +146,7 @@ def test_overpass_query_covers_bbox_and_kinds():
     q = build_query()
     assert "pier|breakwater|groyne" in q
     assert 'natural"="coastline' in q
-    assert "40.3,28.7,40.56,29.2" in q
+    assert "40.3,28.15,40.56,29.2" in q  # I5: west edge 28.15 (whole Bursa coast)
     assert 'natural"="cape' in q and "40.25,28.5,40.65,29.3" in q
 
 

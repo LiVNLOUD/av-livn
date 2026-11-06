@@ -34,6 +34,8 @@ export interface SpotRow {
   hidden_reason?: string | null;
   near_json?: string | null;
   lamp_prior?: number | null;
+  /** I5: bursa / yalova / balikesir (OSM admin_level=4); null = not assigned. */
+  province?: string | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -63,6 +65,7 @@ export function publicSpot(r: SpotRow) {
     kind: r.kind,
     status: r.status,
     place: r.place,
+    province: r.province ?? null,
     lat: r.lat,
     lon: r.lon,
     probe: r.probe_lat === null || r.probe_lon === null ? null : { lat: r.probe_lat, lon: r.probe_lon },

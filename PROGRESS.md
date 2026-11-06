@@ -232,7 +232,7 @@
 - [x] I2 kritik hatalar: takım kutusu, astro check (+ Sahadayım api gölgeleme), WebGL2 notu, pencere/bildirim erişim süzgeci, güçlü/görece, eksik veri kuralları (MODEL §15), e2e (CI) — AUDIT-I #1–#6
 - [x] I3 aydınlatma: üç durumlu ışık ve koşullu takım, takımda eksik veri ≠ sakin, feribot duyarlılığı (`docs/audit/lamp-sensitivity.json`: İDO gece 1.liği 27/30 saat → 0,5 önselle 0) ✅; Mapillary: 90 meranın 22'sinde görüntü var. 132 görüntü gözle incelendi; deniz tarafında direk görülen 5 mera 0,6 lamba bulgusu aldı. İDO ve diğer feribot iskelelerinde görüntü yok (`docs/audit/mapillary-review.md`) ✅
 - [x] I4 kanıt sınıfları (`basis`), Peksu R19/R19b, mevsim yeniden sınıflı, akıntı bulunabilirlik/avlanabilirlik ayrımı, uzunluk tek sayım (ilk 10 önce/sonra `docs/audit/i4-length-top10.json`), saha derinliği ±30 m, Sentinel-2 sınıf atamıyor, `docs/DATA-SOURCES.md`, ek etkenler RESEARCH.md
-- [ ] I5 kapsam (Bursa batı kıyısı, il etiketi, kıyı kesimi veri tablosu)
+- [~] I5 kapsam: BBOX batı 28,15, il etiketi (migration 0015), Bursa dışı rozeti / plan dışı, `docs/audit/coverage.md` kodu ✅; geodata çalıştırması ve sonuçlar bekliyor
 - [~] I6 av günlüğü alanları (migration 0014), başlangıçta dondurma, düzenleme dondurmayı bozmaz, kalibrasyon yalnız ileriye dönük + zaman bölmeli test ✅; 1 Kasım seansı eklendi (`ses-retro-20261101-ido`) ✅; eşlenmiş çekimlerle sıralama kararlılığı (ilk 3 payı) ve veri yeterliliği API'de ✅; ayrık rozetler ve puan açıklaması ana ekranda (I9)
 - [x] I7 takım: tek batış modeli (`v2/sink.ts` + saha k), saydırma aralığı, toplam atış ağırlığı uyarısı, PE varsayımı kaldırıldı; gece aydınlık/karanlık/bilinmiyor koşullu (I3)
 - [ ] I8 referans incelemesi

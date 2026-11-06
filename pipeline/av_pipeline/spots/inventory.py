@@ -89,6 +89,7 @@ def build_query() -> str:
   nwr["operator"~"gemport|roda|borusan|limak|marport",i]({b});
   way["natural"="coastline"]({p});
   node["place"~"^(town|village|suburb|neighbourhood|quarter|hamlet)$"]({b});
+  relation["boundary"="administrative"]["admin_level"="4"]["name"~"^(Bursa|Yalova|Balıkesir)$"]({b});
 );
 out geom;"""
 
@@ -751,6 +752,20 @@ def main(argv: list[str]) -> int:  # pragma: no cover - CLI
 
         eusm.annotate(feats)
     fc["features"] = existing + feats
+    # I5: province of every spot (OSM admin_level=4) and the coastline coverage report
+    from av_pipeline.spots import coverage as cov
+
+    polys = cov.province_polygons(raw)
+    for f in fc["features"]:
+        f["properties"]["province"] = cov.province_of(tuple(f["geometry"]["coordinates"]), polys)
+    coast_lines = [LineString(element_xy(el)) for el in raw.get("elements", []) if el.get("type") == "way" and el.get("tags", {}).get("natural") == "coastline" and len(element_xy(el)) >= 2]
+    spots_xy = [(f["properties"]["id"], to_xy(*f["geometry"]["coordinates"])) for f in fc["features"]]
+    share = cov.measured_share_fn(grid)
+    rows = {name: cov.coverage_rows(cov.coast_pieces(coast_lines, g), spots_xy, share) for name, g in polys.items()}
+    counts = {name: sum(1 for f in fc["features"] if f["properties"].get("province") == cov.SLUG[name]) for name in polys}
+    root0 = Path(__file__).resolve().parents[3]
+    (root0 / "docs/audit/coverage.md").write_text(cov.coverage_md(rows, counts))
+    print(f"provinces: {sorted(polys)}; spots per province {counts}; unassigned {sum(1 for f in fc['features'] if not f['properties'].get('province'))}", file=sys.stderr)
     dst.write_text(json.dumps(fc, ensure_ascii=False, indent=1) + "\n")
     root = Path(__file__).resolve().parents[3]
     pub = [{"type": "Feature", "geometry": f["geometry"], "properties": {k: f["properties"][k] for k in ("id", "name", "type_tr", "kind", "place", "access", "osm")}} for f in feats]

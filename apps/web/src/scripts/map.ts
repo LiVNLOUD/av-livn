@@ -16,7 +16,7 @@ const DEPTH_STOPS: [number, string][] = [
 ];
 // Water beyond the bathymetry: mid-depth tone, so the faded edge blends in. BATHY_BBOX mirrors pipeline av_pipeline/__init__.py.
 const OPEN_WATER = '#11293a';
-const BATHY_BBOX = { south: 40.25, west: 28.5, north: 40.65, east: 29.3 };
+const BATHY_BBOX = { south: 40.25, west: 28.05, north: 40.65, east: 29.3 };
 const LAND = '#22313a';
 const OFM = 'https://tiles.openfreemap.org';
 const NAME = ['coalesce', ['get', 'name:tr'], ['get', 'name']];
