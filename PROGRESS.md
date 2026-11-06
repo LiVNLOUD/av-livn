@@ -235,6 +235,6 @@
 - [~] I5 kapsam: BBOX batı 28,15, il etiketi (migration 0015), Bursa dışı rozeti / plan dışı, `docs/audit/coverage.md` kodu ✅; geodata çalıştırması ve sonuçlar bekliyor
 - [~] I6 av günlüğü alanları (migration 0014), başlangıçta dondurma, düzenleme dondurmayı bozmaz, kalibrasyon yalnız ileriye dönük + zaman bölmeli test ✅; 1 Kasım seansı eklendi (`ses-retro-20261101-ido`) ✅; eşlenmiş çekimlerle sıralama kararlılığı (ilk 3 payı) ve veri yeterliliği API'de ✅; ayrık rozetler ve puan açıklaması ana ekranda (I9)
 - [x] I7 takım: tek batış modeli (`v2/sink.ts` + saha k), saydırma aralığı, toplam atış ağırlığı uyarısı, PE varsayımı kaldırıldı; gece aydınlık/karanlık/bilinmiyor koşullu (I3)
-- [ ] I8 referans incelemesi
+- [x] I8 referans incelemesi `docs/REFERENCES-REVIEW.md` (Fishbrain, Windy.com, Navionics, 3 repo; doğrulanamayanlar işaretli)
 - [x] I9 ana ekran: bugün → en yakın güçlü → görece kararı, tek ana öneri + takım görseli + gerekçe + sağlamlık rozetleri, ≤ 2 alternatif, açıklamalar açılır alanda; 390/360 px taşma 0 (e2e). Kalan: canlı ekran görüntüleri (I10)
 - [ ] I10 teslim
