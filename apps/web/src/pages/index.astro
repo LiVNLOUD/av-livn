@@ -215,7 +215,7 @@ import Base from '../layouts/Base.astro';
   import type { MapApi } from '../scripts/map';
 
   type Spot = {
-    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null;
+    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null; private_marina?: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
   type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
@@ -226,6 +226,7 @@ import Base from '../layouts/Base.astro';
   const HOUR = 3_600_000;
   const TZ_OFF = 3;
   const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
+  const MARINA_BADGE = 'kısıtlı olabilir (marina — özel işletme)';
   const HIDE = 'av-livn-hide-access';
   const nowHour = Math.floor(Date.now() / HOUR);
   let sel = 0; // column index from nowHour
@@ -364,7 +365,7 @@ import Base from '../layouts/Base.astro';
           ? '<p class="why">Puan henüz hesaplanmadı</p>'
           : `<p class="why"><b class="rk">${rankLabel(sc.rank, ties.get(sc.rank) ?? 1)}</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
       const legal = swimRule(s.kind, at ?? new Date().toISOString());
-      const badges = (s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '') + (outside(s) ? '<span class="badge" title="Bursa ili dışında, yakın çevre">Bursa dışı</span>' : '');
+      const badges = (s.private_marina ? `<span class="badge warn">${MARINA_BADGE}</span>` : s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '') + (outside(s) ? '<span class="badge" title="Bursa ili dışında, yakın çevre">Bursa dışı</span>' : '');
       return `<li><a class="spot" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}" data-id="${esc(s.id)}">
           <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
           <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;
@@ -515,7 +516,7 @@ import Base from '../layouts/Base.astro';
     const at = atIso() ?? new Date().toISOString();
     const legal = swimRule(s.kind, at);
     const badges = [
-      s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '',
+      s.private_marina ? `<span class="badge warn">${MARINA_BADGE}</span>` : s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '',
       legal ? `<span class="badge legal">${legal}</span>` : '',
       s.auto_added ? '<span class="badge assume">otomatik eklendi — sahada doğrulanmadı</span>' : '',
     ].join('');
@@ -608,7 +609,9 @@ import Base from '../layouts/Base.astro';
     // J3: Ayarlar → "Ana öneriye Bursa dışını da dahil et" (this device; default off)
     let withOutside = false;
     try { withOutside = localStorage.getItem('av-livn-outside-bursa') === '1'; } catch {}
-    const inBursa = (w: Win) => withOutside || !outside(all.find((x) => x.id === w.spot_id) ?? {});
+    // K1: private yacht marinas are never the plan's pick (listed with their badge)
+    const isMarina = (w: Win) => !!all.find((x) => x.id === w.spot_id)?.private_marina;
+    const inBursa = (w: Win) => !isMarina(w) && (withOutside || !outside(all.find((x) => x.id === w.spot_id) ?? {}));
     const provOf = (id: string) => all.find((x) => x.id === id)?.province ?? null;
     const PROV_TR: Record<string, string> = { yalova: 'Yalova', balikesir: 'Balıkesir' };
     const provBadge = (id: string) => { const p = provOf(id); return p && p !== 'bursa' ? `<span class="badge">${PROV_TR[p] ?? p}</span>` : ''; };
@@ -649,6 +652,30 @@ import Base from '../layouts/Base.astro';
       `en iyi saat ${fmtTime(m.peak)}${m.p10 !== null && m.p90 !== null ? `, bant ${Math.round(m.p10)}–${Math.round(m.p90)}` : ''}`,
       m.top3 != null && m.top3 < 0.5 ? 'sıralama kararsız: alternatiflerle arası açık değil' : null,
     ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
+    const pool = todayStrong ? [...td, ...ws] : ws;
+    const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
+    // K3 (MODEL.md §16): when the model cannot separate the pick from its alternatives, show them as equals
+    const EQ_TOP3 = 0.6;
+    const overlaps = (w: Win) => w.p90 !== null && m.p10 !== null && w.p90 >= m.p10;
+    const eq = m.top3 != null && m.top3 < EQ_TOP3 ? [m, ...others.filter(overlaps)] : [m];
+    const rest = others.filter((w) => !eq.includes(w));
+    const span = (w: Win) => `${esc(fmtDay(w.start) === today ? 'Bugün' : fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}`;
+    const colOf = (w: Win) => Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
+    if (eq.length >= 2) {
+      const sorted = [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr'));
+      verdict.innerHTML = `${todayStrong ? 'Bugün' : esc(when)}: birbirinden ayırt edilemeyen ${eq.length} seçenek var.<small>Model bunları ayıramıyor (ilk 3'te kalma payı %${Math.round(EQ_TOP3 * 100)}'ın altında, bantlar örtüşüyor); sıra ada göre, en iyi ilan edilmez. ${scope}</small>`;
+      pick.innerHTML = `<h2 class="eq-h">Eşdeğer seçenekler</h2><div class="eq-grid">${sorted.map((w, i) => `<section class="eq-card">
+        <div class="top"><div><p class="nm">${esc(w.name)} ${provBadge(w.spot_id)}</p><span class="tm">${span(w)}</span></div><span class="sc" title="Puan: ideal senaryoya göre yer, yakalama olasılığı değil">${Math.round(w.total)}</span></div>
+        <div class="rig" id="eq-rig-${i}"><svg viewBox="0 0 76 96"></svg><dl><dt>Takım</dt><dd>hesaplanıyor…</dd></dl></div>
+        <p class="fs-1 muted">${w.why ? esc(w.why) + (w.assumed ? ' (varsayım)' : '') + ' · ' : ''}bant ${w.p10 !== null ? Math.round(w.p10) : '–'}–${w.p90 !== null ? Math.round(w.p90) : '–'}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}${w.missing ? ' · eksik veri' : ''}</p>
+        <div class="go"><button type="button" class="btn small" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}">Merayı aç</button></div>
+      </section>`).join('')}</div>`;
+      pick.hidden = false;
+      pick.querySelectorAll<HTMLButtonElement>('button[data-open]').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
+      renderAlts(rest);
+      await Promise.all(sorted.map((w, i) => fillRig(`eq-rig-${i}`, w, my)));
+      return;
+    }
     pick.innerHTML = `<div class="top"><div><p class="nm">${esc(m.name)}</p><span class="tm">${esc(when)} ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}</span></div><span class="sc" title="Puan: ideal senaryoya göre yer, yakalama olasılığı değil">${Math.round(m.total)}</span></div>
       <div class="rig" id="pick-rig"><svg viewBox="0 0 76 96"></svg><dl><dt>Takım</dt><dd>hesaplanıyor…</dd></dl></div>
       <ul>${reasons}</ul>
@@ -656,22 +683,26 @@ import Base from '../layouts/Base.astro';
       <div class="go"><button type="button" class="btn small" id="pick-open">Merayı ve saatleri aç</button><a class="btn small secondary" href="${link(`/sahadayim/?id=${encodeURIComponent(m.spot_id)}`, species)}">Sahadayım'da başlat</a></div>`;
     pick.hidden = false;
     $('pick-open').addEventListener('click', () => openSpot(m.spot_id, col));
-    const pool = todayStrong ? [...td, ...ws] : ws;
-    const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
-    alts.innerHTML = others.map((w) => {
-      const c = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
-      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${c}"><span class="a-n">${esc(w.name)} ${provBadge(w.spot_id)}</span><span class="a-s">${Math.round(w.total)}</span><span class="a-r">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}${w.tier === 'guclu' ? '' : ' · görece'}${w.missing ? ' · eksik veri' : ''}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}</span></button></li>`;
-    }).join('');
-    alts.hidden = !others.length;
-    alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
-    // tackle for the peak hour (public inputs; owner refinements stay on the card)
-    const d = await detail(m.spot_id);
+    renderAlts(others);
+    await fillRig('pick-rig', m, my);
+
+    function renderAlts(list: Win[]) {
+      alts.innerHTML = list.map((w) => `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)} ${provBadge(w.spot_id)}</span><span class="a-s">${Math.round(w.total)}</span><span class="a-r">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}${w.tier === 'guclu' ? '' : ' · görece'}${w.missing ? ' · eksik veri' : ''}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}</span></button></li>`).join('');
+      alts.hidden = !list.length;
+      alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
+    }
+  }
+
+  /** Tackle picture + rows for a window's peak hour (public inputs; owner refinements stay on the card). */
+  async function fillRig(elId: string, w: Win, my: number) {
+    const d = await detail(w.spot_id);
     if (my !== planSeq) return;
-    const rig = document.getElementById('pick-rig');
-    const v = d?.packed?.tk?.[d.from + col];
+    const rig = document.getElementById(elId);
+    const c = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
+    const v = d?.packed?.tk?.[d.from + c];
     if (!rig) return;
     if (!v) { rig.innerHTML = '<p class="muted fs-2">Takım önerisi için bu saatin girdileri yok.</p>'; return; }
-    const kind = all.find((x) => x.id === m.spot_id)?.kind;
+    const kind = all.find((x) => x.id === w.spot_id)?.kind;
     const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind };
     if (species === 'levrek') {
       const t = tackleLevrek(input, profiles);

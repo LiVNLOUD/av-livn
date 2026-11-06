@@ -203,6 +203,7 @@ if (dryRun) {
   const names = new Map(rows.map((r) => [r.id, r.name]));
   const access = new Map(rows.map((r) => [r.id, r.access]));
   const province = new Map(rows.map((r) => [r.id, r.province ?? null]));
-  const spotsHours = (sp: keyof typeof bySpecies) => bySpecies[sp].map((r) => ({ id: r.spot_id, name: names.get(r.spot_id) ?? r.spot_id, access: access.get(r.spot_id) ?? null, province: province.get(r.spot_id) ?? null, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
+  const marina = new Map(rows.map((r) => [r.id, r.private_marina === 1]));
+  const spotsHours = (sp: keyof typeof bySpecies) => bySpecies[sp].map((r) => ({ id: r.spot_id, name: names.get(r.spot_id) ?? r.spot_id, access: access.get(r.spot_id) ?? null, province: province.get(r.spot_id) ?? null, private_marina: marina.get(r.spot_id) ?? false, start_hour: r.start_hour, list: JSON.parse(r.list_json) as ListEntryV2[] }));
   await runNotify(query, { spots: spotsHours('istavrit'), bySpecies: { istavrit: spotsHours('istavrit'), levrek: spotsHours('levrek') }, nowHour: Math.floor(Date.now() / 3_600_000), testOnly: pendingOnly }).catch((e) => console.log(`notify failed: ${(e as Error).message}`));
 }

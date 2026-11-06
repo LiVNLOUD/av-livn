@@ -220,3 +220,11 @@ html.embed body { padding-bottom: 0; }
 .more-win .windows { margin-top: var(--s2); }
 .to-all { margin: var(--s3) 0 0; } .to-all a { display: inline-flex; min-height: 44px; align-items: center; }
 .badge.good { border-color: #5fbf7f; color: #5fbf7f; }
+
+/* K3: equivalent options (no single "best") */
+.eq-h { margin: 0 0 var(--s2); font-size: var(--fs-3, 1.1rem); }
+.eq-grid { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.eq-card { display: grid; gap: var(--s2); padding: var(--s3); border: 1px solid var(--swell); border-radius: 10px; min-width: 0; }
+.eq-card .top { display: flex; justify-content: space-between; gap: var(--s3); align-items: baseline; }
+.eq-card .nm { font-weight: 700; margin: 0; }
+.eq-card .sc { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }

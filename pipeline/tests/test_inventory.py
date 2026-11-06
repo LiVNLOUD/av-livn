@@ -109,6 +109,12 @@ def test_helpers():
     assert not inv.is_forbidden({"name": "Roda Anadolu İmam Hatip Lisesi", "building": "school"})
     assert inv.access_estimate("harbour", {"amenity": "ferry_terminal"}, 100)[0] == "kisitli_feribot"
     assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Setur Marina"}, 100)[0] == "belirsiz"
+    # K1: yacht marinas only (flag); village piers and fishing harbours tagged leisure=marina keep the place rule
+    assert inv.is_private_marina({"leisure": "marina", "name": "Kurşunlu Yat Limanı"}) and inv.is_private_marina({"leisure": "marina", "name": "Liman", "operator": "X A.Ş."})
+    assert not inv.is_private_marina({"leisure": "marina", "name": "Karacaali İskelesi"}) and not inv.is_private_marina({"leisure": "marina", "name": "Tirilye Limanı"})
+    assert not inv.is_private_marina({"harbour": "yes", "name": "Kurşunlu Yat Limanı"})
+    assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Tirilye Limanı"}, 100)[0] == "acik"
+    assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Büyükkumla İskelesi"}, 3000)[0] == "belirsiz"
     assert inv.access_estimate("harbour", {"leisure": "marina", "name": "Karacaali İskelesi"}, 100)[0] == "acik"
     assert inv.access_estimate("harbour", {"access": "private"}, 100)[0] == "belirsiz"
     assert inv.access_estimate("beach", {}, 3000)[0] == "belirsiz"

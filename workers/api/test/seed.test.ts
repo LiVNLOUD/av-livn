@@ -35,6 +35,28 @@ describe('seed', () => {
     expect(r2).toEqual({ name: "Kumla'nın Mendireği" });
   });
 
+  it('K1: a pipeline access estimate follows the current rule; the user\'s entry never changes', async () => {
+    const f = structuredClone(SPOTS);
+    (f[0]!.properties as { access?: string }).access = 'acik';
+    (f[1]!.properties as { access?: string; private_marina?: number }).access = 'belirsiz';
+    (f[1]!.properties as { private_marina?: number }).private_marina = 1;
+    await env.DB.batch([
+      env.DB.prepare("UPDATE spots SET access = 'belirsiz' WHERE id = 'osm-way-1'"),
+      env.DB.prepare("UPDATE spots SET access = 'acik' WHERE id = 'osm-way-2'"),
+    ]);
+    await runSql(seedSql({ features: f }, 'now'));
+    const acc = async (id: string) => (await env.DB.prepare('SELECT access FROM spots WHERE id = ?1').bind(id).first<{ access: string }>())!.access;
+    expect(await acc('osm-way-1')).toBe('acik'); // old 'belirsiz' estimate re-evaluated
+    expect(await acc('osm-way-2')).toBe('acik'); // 'acik' is never overwritten by the pipeline
+    expect((await env.DB.prepare("SELECT private_marina FROM spots WHERE id = 'osm-way-2'").first<{ private_marina: number }>())!.private_marina).toBe(1);
+    // a field entry for access keeps the user's value
+    await env.DB.prepare("UPDATE spots SET access = 'belirsiz' WHERE id = 'osm-way-1'").run();
+    await env.DB.prepare("INSERT INTO field_obs (id, spot_id, observed_at, access, created_at, source_kind, status) VALUES ('fo-acc', 'osm-way-1', 'now', 'belirsiz', 'now', 'saha', 'onayli')").run();
+    await runSql(seedSql({ features: f }, 'now'));
+    expect(await acc('osm-way-1')).toBe('belirsiz');
+    await env.DB.prepare("DELETE FROM field_obs WHERE id = 'fo-acc'").run();
+  });
+
   it('removes vanished OSM spots and orphan cells but keeps admin-edited ones', async () => {
     await env.DB.prepare("UPDATE spots SET admin_edited_at = 'x' WHERE id = 'osm-way-2'").run();
     await runSql(seedSql({ features: [SPOTS[0]!] }, 'now'));

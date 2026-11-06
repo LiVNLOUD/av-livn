@@ -36,6 +36,8 @@ export interface SpotRow {
   lamp_prior?: number | null;
   /** I5: bursa / yalova / balikesir (OSM admin_level=4); null = not assigned. */
   province?: string | null;
+  /** K1: private yacht marina (pipeline flag). */
+  private_marina?: number | null;
   has_light: number | null;
   status: string;
   place: string | null;
@@ -66,6 +68,7 @@ export function publicSpot(r: SpotRow) {
     status: r.status,
     place: r.place,
     province: r.province ?? null,
+    private_marina: r.private_marina === 1,
     lat: r.lat,
     lon: r.lon,
     probe: r.probe_lat === null || r.probe_lon === null ? null : { lat: r.probe_lat, lon: r.probe_lon },

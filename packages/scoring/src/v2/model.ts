@@ -98,13 +98,12 @@ const SUBSTRATE_FIELD: Record<FieldSubstrate, number> = { camur: 0.7, kum: 0.8, 
 export const SUBSTRATE_PRIOR = 0.75;
 const CONF_WEIGHT = [0.2, 0.4, 0.6, 0.8];
 export const LAMP_PRIOR = {
-  // J1: the ferry-pier prior (was 0.85) was never confirmed (Mapillary has no image of any ferry pier): same as
-  // unknown. Field / remote / desk lamp findings still override it (saha > uzaktan > masabasi > prior).
-  ferry: 0.5, pier: 0.5, breakwater: 0.3, groyne: 0.3, manual: 0.5,
-  // C: quays and harbours are usually lit (working areas); shores only by a promenade, if at all
-  quay: 0.5, harbour: 0.6, rocky: 0.1, beach: 0.2, river_mouth: 0.15,
-  // H6: city promenades are usually lit; the per-spot OSM street-lamp density replaces this when present
-  promenade: 0.5,
+  // K2: one prior for every built structure without evidence — a type difference (ferry 0.85, harbour 0.6,
+  // breakwater 0.3) was never measured. Evidence replaces it: field / remote observation, desk findings (OSM street
+  // lamps, the Mapillary review: 0.6 for the sea-side poles on the Kurşunlu promenade).
+  ferry: 0.5, pier: 0.5, breakwater: 0.5, groyne: 0.5, manual: 0.5, quay: 0.5, harbour: 0.5, promenade: 0.5,
+  // Natural shores: lighting infrastructure is usually absent — prior knowledge, not a measured type effect (C)
+  rocky: 0.1, beach: 0.15, river_mouth: 0.15,
 } as const;
 
 /** Depth prior (m) for shore types: what is typically in reach of a cast from the shore (C). */

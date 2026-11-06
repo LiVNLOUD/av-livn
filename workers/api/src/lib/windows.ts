@@ -13,6 +13,8 @@ export interface SpotHours {
   access?: string | null;
   /** J3: province (bursa / yalova / balikesir; null = not assigned, kept). */
   province?: string | null;
+  /** K1: private yacht marina → never recommended. */
+  private_marina?: boolean;
 }
 
 export interface Window {
@@ -92,9 +94,11 @@ function around(s: SpotHours, a: number, b: number, floor: number): Window | nul
  * those windows are marked `goreli` — the page then says "no strong option". `openOnly` keeps only spots
  * whose access is 'acik' (the list's "hide uncertain/restricted access" filter).
  */
-export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number; openOnly?: boolean; bursaOnly?: boolean } = {}): { threshold: number; strong: number; windows: Window[] } {
+export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number; openOnly?: boolean; bursaOnly?: boolean; noMarina?: boolean } = {}): { threshold: number; strong: number; windows: Window[] } {
   if (opts.openOnly) spots = spots.filter((s) => s.access === 'acik');
   if (opts.bursaOnly) spots = spots.filter((s) => !s.province || s.province === 'bursa');
+  // K1: private yacht marinas are not recommended (they stay in the list with their badge)
+  if (opts.noMarina) spots = spots.filter((s) => !s.private_marina);
   const n = opts.n ?? 5;
   const perSpot = opts.perSpot ?? 1;
   const end = from + hours;

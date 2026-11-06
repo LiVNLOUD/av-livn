@@ -130,7 +130,14 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 - **Önsel p (C):**
   - yolcu ve feribot iskelesi **0.5 (J1; önceden 0.85)**: gece seferi ve yanaşma aydınlatması varsayımı fotoğrafla doğrulanamadı (Mapillary'de hiçbir feribot iskelesinin görüntüsü yok). Tek bir doğrulanmamış varsayım sıralamanın tepesini belirlemesin diye "bilinmiyor" ile aynı. Saha / uzaktan gözlem / masa başı bulgu girilince o meranın değeri buna göre değişir (saha > uzaktan > masa başı > önsel). Önce/sonra gece ilk 10: `docs/audit/j1-lamp-top10.json`
   - diğer iskele 0.50
-  - mendirek ve mahmuz 0.30
+  - **K2 (7 Kas):** kanıtı olmayan tüm yapılarda tek önsel **0.50**: iskele, feribot iskelesi, rıhtım, liman/marina içi (önceden 0.60), mendirek ve mahmuz (önceden 0.30), kordon.
+    - Yapı tipleri arasındaki fark ölçülmedi; tip farkı yalnız kanıtla gelir.
+    - Kanıt türleri: saha ya da uzaktan gözlem, masa başı bulgu (OSM sokak lambası yoğunluğu, Mapillary incelemesi; örneğin Kurşunlu kordonundaki deniz tarafı direkleri 0.6).
+  - **Doğal kıyılar düşük önseli korur:** kayalık 0.10, kumsal 0.15 (önceden 0.20), dere ağzı 0.15.
+    - Gerekçe: bu kıyılarda aydınlatma altyapısı genelde bulunmaz.
+    - Bu bir tip etkisi değil, makul bir ön bilgidir (kanıt C).
+    - Saha girişi her zaman önceliklidir.
+  - Önce/sonra gece ilk 10: `docs/audit/k2-lamp-top10.json`.
 - **Lamba rengi** (beyaz/sarı/LED) formda kaydedilir. v2'de parametre değil: R8 juvenil *T. trachurus*, tank deneyi. Veri birikince değerlendirilir.
 
 ## 5. Parametre tablosu
@@ -501,3 +508,12 @@ Eksik girdi hiçbir zaman "sakin" ya da "berrak" kabul edilmez.
 - `/api/windows` iki liste döner: tüm meralar ve yalnız erişimi açık meralar (`open`).
 - "Erişimi belirsiz/kısıtlı olanları gizle" seçiliyken sayfa `open` listesini gösterir.
 - Bildirimler varsayılan olarak `open_only` (yalnız açık erişim) ile çalışır.
+
+
+## 16. Eşdeğer seçenekler (K3)
+
+Ana ekran tek bir "en iyi" ilan etmez. Şu koşulda ana öneri ve alternatifler **eşdeğer seçenekler** olarak, ada göre sırasız gösterilir:
+- ana pencerenin "ilk 3'te kalma payı" (eşlenmiş Monte Carlo çekimleri, I6) **%60'ın altında**,
+- ve alternatifin %10–90 bandı ana pencerenin bandıyla örtüşüyor (alternatif p90 ≥ ana p10).
+
+Bu pay yalnız parametre belirsizliğini kapsar; tahmin hatası dahil değildir. Eşdeğerlik bu yüzden "model bunları ayıramıyor" demektir, "eşit derecede iyi" demek değildir.

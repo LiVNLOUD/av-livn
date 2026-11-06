@@ -122,7 +122,7 @@ export function decide(i: DecideInput): Message[] {
     const tag = sp === 'istavrit' ? '' : `${sp}:`;
     const label = sp === 'istavrit' ? '' : ` (${SPECIES_TR[sp] ?? sp})`;
     if (s.daily && localHour(now) === DAILY_LOCAL_HOUR && !sentKeys.has(`daily:${tag}${localDate(now)}`)) {
-      const { windows, strong } = bestWindows(spots, now, 24, { n: 3, perSpot: 1, openOnly: s.open_only, bursaOnly: !s.outside_bursa });
+      const { windows, strong } = bestWindows(spots, now, 24, { n: 3, perSpot: 1, openOnly: s.open_only, bursaOnly: !s.outside_bursa, noMarina: true });
       // I2: say plainly when nothing is strong; relative picks are labelled as such
       const lines = windows.map((w) => `${range(w)} ${w.name} · ${n0(w.total)} (${w.rank}.)${w.missing ? ' · eksik veri' : ''}`);
       out.push({
@@ -132,7 +132,7 @@ export function decide(i: DecideInput): Message[] {
       });
     }
     if (s.opportunity) {
-      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1, openOnly: s.open_only, bursaOnly: !s.outside_bursa });
+      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1, openOnly: s.open_only, bursaOnly: !s.outside_bursa, noMarina: true });
       for (const w of windows) {
         if (w.data !== 'tam') continue; // I2: an opportunity alert needs complete data (current, turbidity)
         if (w.p10 === null || w.p90 === null || w.p90 - w.p10 > NARROW_BAND) continue;

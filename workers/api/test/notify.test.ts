@@ -151,3 +151,13 @@ describe('J3: notifications follow the "outside Bursa" preference (default off)'
     expect(validateSettings({ ...s, outside_bursa: 'x' } as never)).toEqual({ ok: false, error: 'invalid_outside_bursa' });
   });
 });
+
+describe('K1: private yacht marinas are not recommended', () => {
+  it('daily summary skips private yacht marinas', () => {
+    const s = { ...DEFAULT_SETTINGS, opportunity: false, open_only: false };
+    const spots = [{ ...spot('m', Array(24).fill(95)), private_marina: true }, spot('p', Array(24).fill(70))];
+    const m = decide({ nowHour: H17, settings: s, spots, sent: [] });
+    expect(m[0]!.body).not.toContain('Mera m');
+    expect(m[0]!.body).toContain('Mera p');
+  });
+});

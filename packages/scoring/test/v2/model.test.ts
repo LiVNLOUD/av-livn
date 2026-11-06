@@ -114,7 +114,7 @@ describe('v2 static terms and sources', () => {
   });
 
   it('lamp priors', () => {
-    expect([lampPrior({ ...BASE, ferry: true }), lampPrior(BASE), lampPrior({ ...BASE, kind: 'breakwater' }), lampPrior({ ...BASE, kind: 'manual' })]).toEqual([0.5, 0.5, 0.3, 0.5]);
+    expect([lampPrior({ ...BASE, ferry: true }), lampPrior(BASE), lampPrior({ ...BASE, kind: 'breakwater' }), lampPrior({ ...BASE, kind: 'manual' })]).toEqual([0.5, 0.5, 0.5, 0.5]);
     // J1: remote / desk findings (lampP) still override the ferry prior
     expect(lampPrior({ ...BASE, ferry: true, lampP: 0.97 })).toBe(0.97);
     expect(lampPrior({ ...BASE, ferry: true, lampP: 0.03 })).toBe(0.03);
@@ -230,9 +230,12 @@ describe('shore types (D1, evidence C)', () => {
     expect(staticTerms({ ...BASE, kind: 'pier', lengthM: 900 }, DEFAULTS).depthM).toBeGreaterThan(staticTerms({ ...BASE, kind: 'pier', lengthM: 30 }, DEFAULTS).depthM);
     expect(staticTerms({ ...BASE, kind: 'beach', fieldStructure: 'mendirek' }, DEFAULTS).struct).toBeGreaterThan(t('beach'));
   });
-  it('lamp priors: lit harbours, dark shores', () => {
-    expect(lampPrior({ ...BASE, kind: 'harbour' })).toBe(0.6);
+  it('K2: one prior (0.5) for built structures without evidence, low priors for natural shores', () => {
+    for (const kind of ['pier', 'breakwater', 'groyne', 'quay', 'harbour', 'promenade', 'manual'] as const) expect(lampPrior({ ...BASE, kind })).toBe(0.5);
     expect(lampPrior({ ...BASE, kind: 'rocky' })).toBe(0.1);
+    expect(lampPrior({ ...BASE, kind: 'beach' })).toBe(0.15);
+    expect(lampPrior({ ...BASE, kind: 'river_mouth' })).toBe(0.15);
+    expect(lampPrior({ ...BASE, kind: 'promenade', lampP: 0.6 })).toBe(0.6); // desk evidence (Mapillary) kept
     expect(SHORE_KINDS).toContain('river_mouth');
   });
 });

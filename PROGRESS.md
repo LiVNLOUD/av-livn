@@ -246,3 +246,9 @@
 - [x] J4 aynı adlı yerleşimlere ilçe eki (genel kural `naming.disambiguate_places` + test, OSM `admin_level=6`): Karacabey 9, Gemlik 6 mera ad aldı; OSM adları (Kurşunlu Yat Limanı) korunur, `place` ek alır.
 - Canlı: smoke yeşil, e2e tüm adımlar, 119/119 mera puanlı, İDO lamba bileşeni 0,5; Ayarlar varsayılanı kapalı → plan Bursa'dan, açık → Armutlu/Fıstıklı (Yalova rozeti); Sahadayım ipucu ilk açılışta görünür, "Anladım"dan sonra görünmez. Ekranlar `docs/screenshots/j/`.
 - [x] J5 Sahadayım ilk kullanım ipucu (3 adım); Ayarlar'da "Uzaktan lamba gözlemi" paragrafı.
+
+## Faz K — puanlama arızası ve küçük model/ekran düzeltmeleri (2026-11-06/07) — sürüyor
+- [x] K0 kök neden: score.yml hata vermedi, GitHub zamanlayıcısı 19:23/20:23/21:23 tetiklerini atladı; 21:44 yalnız `--pending` ("nothing to rescore"). Watchdog da GitHub zamanlayıcısına bağlı (4–7 saatte bir çalışmış) ve push aboneliği 0. Düzeltmeler: `--pending` çalışması 75 dk'dan eski puanda tam çalışmaya geçer; Worker cron'u (Cloudflare) 75 dk'dan eski puanda score.yml'ı dispatch eder (GH_DISPATCH_TOKEN bekleniyor) ve 2 saati aşınca ntfy uyarısını kendisi gönderir (NTFY_TOPIC, deploy.yml aktarır); uyarıda son puanlama saati. Elle puanlama 22:05Z.
+- [x] K1 kod: yalnız gerçek yat limanları (`private_marina`, migration 0016) plan ve bildirimlerden çıkar; köy iskeleleri ve balıkçı barınakları yerleşim kuralına döner (seed eski "belirsiz" tahminini yeniden değerlendirir, kullanıcı girişi kazanır). Geodata bekleniyor.
+- [x] K2 lamba önseli: kanıtsız yapılar 0,5; kayalık 0,10, kumsal/dere ağzı 0,15. Önce/sonra `docs/audit/k2-lamp-top10.json`.
+- [x] K3 eşdeğer seçenekler: ilk 3 payı < %60 ve bant örtüşmesi → sırasız "Eşdeğer seçenekler" (MODEL.md §16).

@@ -260,12 +260,20 @@ def nearest_place(xy: tuple[float, float], places: list[dict], max_m: float = 40
 COMPASS = ["kuzeyi", "kuzeydoğusu", "doğusu", "güneydoğusu", "güneyi", "güneybatısı", "batısı", "kuzeybatısı"]
 
 
+def is_private_marina(tags: dict) -> bool:
+    """K1: a real yacht marina (name says "Yat Limanı" / "Marina", or an operator runs it). Village piers tagged
+    leisure=marina ("… İskelesi") and fishing harbours ("… Limanı") are not."""
+    return tags.get("leisure") == "marina" and bool(re.search(r"yat liman|marina", tags.get("name", ""), re.I) or tags.get("operator"))
+
+
 def access_estimate(typ: str, tags: dict, place_m: float | None) -> tuple[str, str]:
     """(access value, reason). The user's field knowledge always overrides (seed keeps an existing value)."""
     if tags.get("access") in ("private", "no"):
         return "belirsiz", "OSM access=private"
-    if tags.get("leisure") == "marina" and not re.search(r"iskele", tags.get("name", ""), re.I):
-        return "belirsiz", "marina: giriş kısıtlı olabilir"
+    # K1: only real yacht marinas (name says "Yat Limanı" / "Marina", or an operator runs it) and their "liman içi"
+    # records; village piers tagged leisure=marina ("… İskelesi") and fishing harbours keep the place rule
+    if is_private_marina(tags):
+        return "belirsiz", "yat limanı: özel işletme, giriş kısıtlı olabilir"
     if tags.get("amenity") == "ferry_terminal":
         return "kisitli_feribot", "feribot iskelesi: sefer saatlerinde kısıtlı olabilir"
     if typ in ("rocky",):
@@ -437,7 +445,7 @@ def build_inventory(raw: dict, existing: list[dict], land=None) -> tuple[list[di
                 "id": pid, "osm_name": t.get("name"), "kind": kind, "type": typ, "type_tr": TYPE_TR[typ],
                 "length_m": round(length) if length else None, "shore_normal_deg": round(normal, 1), "place": place, "place_m": place_m,
                 **(lamp_props(seg, lamps) if typ == "promenade" else {}),
-                "access": access, "access_note": why, "osm": [ref(el)], "osm_tags": {k2: v for k2, v in t.items() if k2 in ("man_made", "harbour", "leisure", "natural", "waterway", "amenity", "seamark:type", "name", "access")},
+                "access": access, "access_note": why, "private_marina": 1 if is_private_marina(t) else 0, "osm": [ref(el)], "osm_tags": {k2: v for k2, v in t.items() if k2 in ("man_made", "harbour", "leisure", "natural", "waterway", "amenity", "seamark:type", "name", "access")},
             })
 
     # F1: no merging. A point is dropped only if it duplicates a spot (≤ DUP_M) or fails a check (reasons kept);

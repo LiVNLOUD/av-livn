@@ -31,6 +31,8 @@ export interface SpotFeature {
     substrate_dist_m?: number | null;
     substrate_conf?: number | null;
     access?: 'acik' | 'kisitli_feribot' | 'belirsiz' | null;
+    /** K1: real yacht marina (private operator); pipeline-derived. */
+    private_marina?: number | null;
     auto_added?: boolean;
     near?: string[];
     /** H6: lamp prior from OSM street-lamp density (promenades). */
@@ -96,7 +98,7 @@ export function seedSql(fc: { features: SpotFeature[] }, now: string): string {
   const cols = [
     'id', 'name', 'kind', 'lat', 'lon', 'probe_lat', 'probe_lon', 'probe_ok', 'shore_normal_deg', 'length_m', 'depth_200m', 'slope_pct',
     'max_depth_100m', 'profile_json', 'probe_source', 'normal_source', 'osm_normal_deg', 'has_light', 'status', 'place', 'source', 'wx_cell', 'sea_cell', 'updated_at',
-    'alt_lat', 'alt_lon', 'tip_source', 'fetch_json', 'substrate', 'substrate_biozone', 'substrate_dist_m', 'substrate_conf', 'access', 'auto_added', 'near_json', 'lamp_prior', 'province',
+    'alt_lat', 'alt_lon', 'tip_source', 'fetch_json', 'substrate', 'substrate_biozone', 'substrate_dist_m', 'substrate_conf', 'access', 'auto_added', 'near_json', 'lamp_prior', 'province', 'private_marina',
   ];
   // access: the inventory's estimate only fills an empty value; the user's field knowledge wins.
   const geoCols = cols.filter((c) => c !== 'id' && c !== 'access' && !(FIELD_FROM_ADMIN as readonly string[]).includes(c));
@@ -107,11 +109,13 @@ export function seedSql(fc: { features: SpotFeature[] }, now: string): string {
     const vals = [
       p.id, p.name, p.kind, lat, lon, p.probe_lat, p.probe_lon, p.probe_ok, p.shore_normal_deg, p.length_m, p.depth_200m, p.slope_pct,
       p.max_depth_100m, p.profile ? JSON.stringify(p.profile) : null, p.probe_source, p.normal_source, p.osm_normal_deg, p.has_light, p.status, p.place, 'osm', cell.wx, cell.sea, now,
-      p.alt_lat, p.alt_lon, p.tip_source, p.fetch_km ? JSON.stringify(p.fetch_km) : null, p.substrate, p.substrate_biozone, p.substrate_dist_m, p.substrate_conf, p.access ?? null, p.auto_added ? 1 : 0, p.near?.length ? JSON.stringify(p.near) : null, p.lamp_prior ?? null, p.province ?? null,
+      p.alt_lat, p.alt_lon, p.tip_source, p.fetch_km ? JSON.stringify(p.fetch_km) : null, p.substrate, p.substrate_biozone, p.substrate_dist_m, p.substrate_conf, p.access ?? null, p.auto_added ? 1 : 0, p.near?.length ? JSON.stringify(p.near) : null, p.lamp_prior ?? null, p.province ?? null, p.private_marina ?? 0,
     ];
     const set = [
       ...geoCols.map((c) => `${c} = excluded.${c}`),
-      'access = COALESCE(spots.access, excluded.access)',
+      // K1: the user's access (admin edit or a field/remote entry) always wins; otherwise a pipeline estimate that
+      // was 'belirsiz' / 'kisitli_marina' follows the current rule (the old marina rule over-marked village piers)
+      "access = CASE WHEN spots.access IS NULL THEN excluded.access WHEN spots.admin_edited_at IS NULL AND spots.access = 'belirsiz' AND NOT EXISTS (SELECT 1 FROM field_obs o WHERE o.spot_id = spots.id AND o.access IS NOT NULL AND COALESCE(o.source_kind, 'saha') != 'masabasi') THEN excluded.access ELSE spots.access END",
       ...FIELD_FROM_ADMIN.filter((c) => c !== 'notes').map((c) => `${c} = CASE WHEN spots.admin_edited_at IS NULL THEN excluded.${c} ELSE spots.${c} END`),
     ];
     out.push(`INSERT INTO spots (${cols.join(', ')}) VALUES (${vals.map(sql).join(', ')}) ON CONFLICT(id) DO UPDATE SET ${set.join(', ')};`);
