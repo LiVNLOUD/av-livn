@@ -605,7 +605,13 @@ import Base from '../layouts/Base.astro';
     const my = ++planSeq;
     if (!winBody || !all.length) return; // drawn again when both the windows and the spot list are in
     const b = box.checked && winBody.open ? winBody.open : winBody;
-    const inBursa = (w: Win) => !outside(all.find((x) => x.id === w.spot_id) ?? {});
+    // J3: Ayarlar → "Ana öneriye Bursa dışını da dahil et" (this device; default off)
+    let withOutside = false;
+    try { withOutside = localStorage.getItem('av-livn-outside-bursa') === '1'; } catch {}
+    const inBursa = (w: Win) => withOutside || !outside(all.find((x) => x.id === w.spot_id) ?? {});
+    const provOf = (id: string) => all.find((x) => x.id === id)?.province ?? null;
+    const PROV_TR: Record<string, string> = { yalova: 'Yalova', balikesir: 'Balıkesir' };
+    const provBadge = (id: string) => { const p = provOf(id); return p && p !== 'bursa' ? `<span class="badge">${PROV_TR[p] ?? p}</span>` : ''; };
     const ws = b.windows.filter(inBursa);
     const pick = $('pick');
     const alts = $('alts');
@@ -623,7 +629,7 @@ import Base from '../layouts/Base.astro';
     const startD = fmtDay(m.start);
     const today = fmtDay(new Date().toISOString());
     const when = startD === today ? 'Bugün' : todayStrong ? `Bu gece (${startD})` : startD;
-    const scope = `${SPECIES_TR[species]} için, Bursa kıyısındaki ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'} arasından.`;
+    const scope = `${SPECIES_TR[species]} için, ${withOutside ? 'Bursa ve yakın çevre (Yalova) kıyısındaki' : 'Bursa kıyısındaki'} ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'} arasından.`;
     verdict.innerHTML = todayStrong
       ? `${startD === today ? 'Bugün' : `Bu gece (${esc(startD)})`} ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}: anlamlı bir seçenek var.<small>${scope}</small>`
       : nextStrong
@@ -636,6 +642,7 @@ import Base from '../layouts/Base.astro';
       m.top3 != null ? `<span class="badge${m.top3 < 0.5 ? ' assume' : ''}" title="Model parametreleri oynatıldığında bu meranın ilk 3'te kaldığı çekimlerin payı (tahmin hatası dahil değil)">ilk 3'te: çekimlerin %${Math.round(m.top3 * 100)}'i</span>` : '',
       m.access && m.access !== 'acik' ? `<span class="badge warn">${esc(ACCESS_BADGE[m.access] ?? 'erişim belirsiz')}</span>` : '',
       m.assumed ? '<span class="badge assume">ana gerekçe varsayıma dayanıyor</span>' : '',
+      provBadge(m.spot_id),
     ].join('');
     const reasons = [
       m.why ? `${esc(m.why)}${m.assumed ? ' (varsayım)' : ''}` : null,
@@ -653,7 +660,7 @@ import Base from '../layouts/Base.astro';
     const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
     alts.innerHTML = others.map((w) => {
       const c = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
-      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${c}"><span class="a-n">${esc(w.name)}</span><span class="a-s">${Math.round(w.total)}</span><span class="a-r">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}${w.tier === 'guclu' ? '' : ' · görece'}${w.missing ? ' · eksik veri' : ''}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}</span></button></li>`;
+      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${c}"><span class="a-n">${esc(w.name)} ${provBadge(w.spot_id)}</span><span class="a-s">${Math.round(w.total)}</span><span class="a-r">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}${w.tier === 'guclu' ? '' : ' · görece'}${w.missing ? ' · eksik veri' : ''}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}</span></button></li>`;
     }).join('');
     alts.hidden = !others.length;
     alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));

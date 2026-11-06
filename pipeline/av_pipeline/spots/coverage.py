@@ -22,12 +22,13 @@ SEG_KM = 2.0
 REACH_KM = 2.0
 
 
-def province_polygons(raw: dict) -> dict[str, object]:
-    """name → planar (multi)polygon from admin_level=4 relations with member geometry (out geom)."""
+def province_polygons(raw: dict, level: str = "4", names: tuple[str, ...] | None = PROVINCES) -> dict[str, object]:
+    """name → planar (multi)polygon from admin_level relations with member geometry (out geom). J4: level "6"
+    (ilçe) with names=None gives every district in the data."""
     out: dict[str, object] = {}
     for el in raw.get("elements", []):
         t = el.get("tags", {})
-        if el.get("type") != "relation" or t.get("admin_level") != "4" or t.get("name") not in PROVINCES:
+        if el.get("type") != "relation" or t.get("admin_level") != level or (names is not None and t.get("name") not in names) or not t.get("name"):
             continue
         lines = []
         for m in el.get("members", []):

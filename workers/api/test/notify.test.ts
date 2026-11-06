@@ -138,3 +138,16 @@ describe('I2: notifications use the access filter and say when nothing is strong
     expect(validateSettings({ ...s, open_only: 'x' } as never)).toEqual({ ok: false, error: 'invalid_open_only' });
   });
 });
+
+describe('J3: notifications follow the "outside Bursa" preference (default off)', () => {
+  it('leaves Yalova spots out by default and includes them when the setting is on', () => {
+    const s = { ...DEFAULT_SETTINGS, opportunity: false };
+    const spots = [{ ...spot('y', Array(24).fill(95)), province: 'yalova' }, { ...spot('b', Array(24).fill(70)), province: 'bursa' }];
+    const off = decide({ nowHour: H17, settings: s, spots, sent: [] });
+    expect(off[0]!.body).not.toContain('Mera y');
+    expect(off[0]!.body).toContain('Mera b');
+    const on = decide({ nowHour: H17, settings: { ...s, outside_bursa: true }, spots, sent: [] });
+    expect(on[0]!.body).toContain('Mera y');
+    expect(validateSettings({ ...s, outside_bursa: 'x' } as never)).toEqual({ ok: false, error: 'invalid_outside_bursa' });
+  });
+});

@@ -18,9 +18,11 @@ export interface NotifySettings {
   species: string[];
   /** I2: only spots with open access (same filter as the list's "hide uncertain/restricted"); default true. */
   open_only: boolean;
+  /** J3: include spots outside Bursa (Yalova, Balıkesir); default false, same as the home plan. */
+  outside_bursa: boolean;
 }
 
-export const DEFAULT_SETTINGS: NotifySettings = { daily: true, opportunity: true, safety: true, threshold: 80, quiet: [23, 7], favourites: [], channels: 'push', species: ['istavrit'], open_only: true };
+export const DEFAULT_SETTINGS: NotifySettings = { daily: true, opportunity: true, safety: true, threshold: 80, quiet: [23, 7], favourites: [], channels: 'push', species: ['istavrit'], open_only: true, outside_bursa: false };
 export const NOTIFY_SPECIES = ['istavrit', 'levrek'];
 const SPECIES_TR: Record<string, string> = { istavrit: 'İstavrit', levrek: 'Levrek' };
 export const DAILY_LOCAL_HOUR = 17;
@@ -41,13 +43,13 @@ const hourOk = (h: unknown) => Number.isInteger(h) && (h as number) >= 0 && (h a
 
 export function validateSettings(b: Record<string, unknown>): { ok: true; value: NotifySettings } | { ok: false; error: string } {
   const v = { ...DEFAULT_SETTINGS, ...b } as NotifySettings;
-  for (const k of ['daily', 'opportunity', 'safety', 'open_only'] as const) if (typeof v[k] !== 'boolean') return { ok: false, error: `invalid_${k}` };
+  for (const k of ['daily', 'opportunity', 'safety', 'open_only', 'outside_bursa'] as const) if (typeof v[k] !== 'boolean') return { ok: false, error: `invalid_${k}` };
   if (typeof v.threshold !== 'number' || !(v.threshold >= 50 && v.threshold <= 95)) return { ok: false, error: 'invalid_threshold' };
   if (!Array.isArray(v.quiet) || v.quiet.length !== 2 || !v.quiet.every(hourOk)) return { ok: false, error: 'invalid_quiet' };
   if (!Array.isArray(v.favourites) || v.favourites.length > 50 || !v.favourites.every((f) => typeof f === 'string' && f.length <= 80)) return { ok: false, error: 'invalid_favourites' };
   if (!['push', 'ntfy', 'both'].includes(v.channels)) return { ok: false, error: 'invalid_channels' };
   if (!Array.isArray(v.species) || !v.species.every((x) => NOTIFY_SPECIES.includes(x))) return { ok: false, error: 'invalid_species' };
-  return { ok: true, value: { daily: v.daily, opportunity: v.opportunity, safety: v.safety, threshold: v.threshold, quiet: [v.quiet[0], v.quiet[1]], favourites: v.favourites, channels: v.channels, species: [...new Set(v.species)], open_only: v.open_only } };
+  return { ok: true, value: { daily: v.daily, opportunity: v.opportunity, safety: v.safety, threshold: v.threshold, quiet: [v.quiet[0], v.quiet[1]], favourites: v.favourites, channels: v.channels, species: [...new Set(v.species)], open_only: v.open_only, outside_bursa: v.outside_bursa } };
 }
 
 export const localHour = (h: number) => (((h + TZ) % 24) + 24) % 24;
@@ -120,7 +122,7 @@ export function decide(i: DecideInput): Message[] {
     const tag = sp === 'istavrit' ? '' : `${sp}:`;
     const label = sp === 'istavrit' ? '' : ` (${SPECIES_TR[sp] ?? sp})`;
     if (s.daily && localHour(now) === DAILY_LOCAL_HOUR && !sentKeys.has(`daily:${tag}${localDate(now)}`)) {
-      const { windows, strong } = bestWindows(spots, now, 24, { n: 3, perSpot: 1, openOnly: s.open_only });
+      const { windows, strong } = bestWindows(spots, now, 24, { n: 3, perSpot: 1, openOnly: s.open_only, bursaOnly: !s.outside_bursa });
       // I2: say plainly when nothing is strong; relative picks are labelled as such
       const lines = windows.map((w) => `${range(w)} ${w.name} · ${n0(w.total)} (${w.rank}.)${w.missing ? ' · eksik veri' : ''}`);
       out.push({
@@ -130,7 +132,7 @@ export function decide(i: DecideInput): Message[] {
       });
     }
     if (s.opportunity) {
-      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1, openOnly: s.open_only });
+      const { windows } = bestWindows(spots, now, 12, { threshold: s.threshold, n: 20, perSpot: 1, openOnly: s.open_only, bursaOnly: !s.outside_bursa });
       for (const w of windows) {
         if (w.data !== 'tam') continue; // I2: an opportunity alert needs complete data (current, turbidity)
         if (w.p10 === null || w.p90 === null || w.p90 - w.p10 > NARROW_BAND) continue;

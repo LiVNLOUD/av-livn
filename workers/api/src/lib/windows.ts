@@ -11,6 +11,8 @@ export interface SpotHours {
   list: ListEntryV2[];
   /** I2: access estimate (acik / belirsiz / kisitli_feribot); windows use the same filter as the list. */
   access?: string | null;
+  /** J3: province (bursa / yalova / balikesir; null = not assigned, kept). */
+  province?: string | null;
 }
 
 export interface Window {
@@ -90,8 +92,9 @@ function around(s: SpotHours, a: number, b: number, floor: number): Window | nul
  * those windows are marked `goreli` — the page then says "no strong option". `openOnly` keeps only spots
  * whose access is 'acik' (the list's "hide uncertain/restricted access" filter).
  */
-export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number; openOnly?: boolean } = {}): { threshold: number; strong: number; windows: Window[] } {
+export function bestWindows(spots: SpotHours[], from: number, hours = 72, opts: { n?: number; perSpot?: number; threshold?: number; openOnly?: boolean; bursaOnly?: boolean } = {}): { threshold: number; strong: number; windows: Window[] } {
   if (opts.openOnly) spots = spots.filter((s) => s.access === 'acik');
+  if (opts.bursaOnly) spots = spots.filter((s) => !s.province || s.province === 'bursa');
   const n = opts.n ?? 5;
   const perSpot = opts.perSpot ?? 1;
   const end = from + hours;

@@ -48,3 +48,34 @@ def test_coverage_rows_and_report():
     assert "| Bursa |" in md and "merası olmayan kıyı parçaları" in md
     assert cov.measured_share_fn(None) is None
     assert to_lonlat(*to_xy(28.9, 40.4))[0] == 28.9 or abs(to_lonlat(*to_xy(28.9, 40.4))[0] - 28.9) < 1e-9
+
+
+def test_j4_same_name_settlements_get_the_district():
+    from av_pipeline.spots.geo import to_xy
+    from av_pipeline.spots.naming import _suffixed_name, disambiguate_places
+
+    raw = {"elements": [
+        {"type": "relation", "id": 10, "tags": {"admin_level": "6", "name": "Karacabey"}, "members": [{"type": "way", "role": "outer", "geometry": ring(28.2, 40.3, 28.5, 40.5)}]},
+        {"type": "relation", "id": 11, "tags": {"admin_level": "6", "name": "Gemlik"}, "members": [{"type": "way", "role": "outer", "geometry": ring(28.9, 40.3, 29.2, 40.5)}]},
+    ]}
+    districts = cov.province_polygons(raw, level="6", names=None)
+    assert set(districts) == {"Karacabey", "Gemlik"}
+    places = [{"name": "Kurşunlu", "xy": to_xy(28.28, 40.40)}, {"name": "Kurşunlu", "xy": to_xy(29.03, 40.36)}, {"name": "Kumla", "xy": to_xy(29.0, 40.45)}]
+    f = lambda i, name, lon, lat, place, src="generated": {"geometry": {"coordinates": [lon, lat]}, "properties": {"id": i, "name": name, "place": place, "name_source": src}}  # noqa: E731
+    feats = [
+        f("a", "Kurşunlu – uzun doğu mendireği", 28.28, 40.398, "Kurşunlu"),
+        f("b", "Kumsal (Kurşunlu doğusu) 2", 28.29, 40.397, "Kurşunlu"),
+        f("c", "Kurşunlu Yat Limanı", 29.03, 40.364, "Kurşunlu", "osm"),
+        f("d", "Kordon (Kurşunlu doğusu)", 29.05, 40.362, "Kurşunlu"),
+        f("e", "Kumsal (Kumla)", 29.0, 40.45, "Kumla"),
+    ]
+    changed = disambiguate_places(feats, places, districts)
+    names = {x["properties"]["id"]: x["properties"]["name"] for x in feats}
+    assert names["a"] == "Kurşunlu (Karacabey) – uzun doğu mendireği"
+    assert names["b"] == "Kumsal (Kurşunlu doğusu, Karacabey) 2"
+    assert names["c"] == "Kurşunlu Yat Limanı" and feats[2]["properties"]["place"] == "Kurşunlu (Gemlik)"  # OSM name kept
+    assert names["d"] == "Kordon (Kurşunlu doğusu, Gemlik)"
+    assert names["e"] == "Kumsal (Kumla)" and feats[4]["properties"]["place"] == "Kumla"  # one Kumla: no suffix
+    assert len(changed) == 3
+    assert disambiguate_places(feats, places, districts) == []  # idempotent
+    assert _suffixed_name("Dere ağzı (Kurşunlu)", "Kurşunlu", "Karacabey") == "Dere ağzı (Kurşunlu, Karacabey)"

@@ -128,7 +128,7 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 - **Ay terimi de karışımın içinde:** ay ışığı lambalı kolda kontrastı azaltır, lambasız kolda ışık sağlar.
 - **Monte Carlo:** lamba her çekimde `Bernoulli(p)` senaryosu olarak çekilir. Senaryo farkı %10–90 bandını genişletir (yön testi 4: bilinmiyor 55.8, var 52.1, yok 45.2 puan genişlik).
 - **Önsel p (C):**
-  - yolcu ve feribot iskelesi 0.85: gece seferi ve yanaşma aydınlatması varsayımı (#4 Mudanya, #15 İDO)
+  - yolcu ve feribot iskelesi **0.5 (J1; önceden 0.85)**: gece seferi ve yanaşma aydınlatması varsayımı fotoğrafla doğrulanamadı (Mapillary'de hiçbir feribot iskelesinin görüntüsü yok). Tek bir doğrulanmamış varsayım sıralamanın tepesini belirlemesin diye "bilinmiyor" ile aynı. Saha / uzaktan gözlem / masa başı bulgu girilince o meranın değeri buna göre değişir (saha > uzaktan > masa başı > önsel). Önce/sonra gece ilk 10: `docs/audit/j1-lamp-top10.json`
   - diğer iskele 0.50
   - mendirek ve mahmuz 0.30
 - **Lamba rengi** (beyaz/sarı/LED) formda kaydedilir. v2'de parametre değil: R8 juvenil *T. trachurus*, tank deneyi. Veri birikince değerlendirilir.

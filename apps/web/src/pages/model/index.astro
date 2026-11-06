@@ -109,7 +109,7 @@ const anchor = (ref: string) => {
       <p>Her bileşen 0 ile 1 arasında bir değer alır. Parçalar <b>ağırlıklı geometrik ortalamayla</b> birleşir: kötü bir bileşen puanı aşağı çeker, iyi bileşenler onu tamamen telafi edemez. Tek bir bileşen de puanı sıfırlayamaz; her değerin tabanı 0,05'tir.</p>
       <p class="formula">puan ≈ ölçek( statik × dinamik )<br />parça = e<sup>Σ ağırlık · ln(değer) / Σ ağırlık</sup></p>
       <p>Son adımda ham sonuç 0–100'e çevrilir. "En iyi" ve "en kötü" iki örnek senaryo 92 ve 8'e sabitlenir. Bu ölçek sıralamayı değiştirmez.</p>
-      <p>Lamba bilinmiyorsa iki olasılık (var / yok) hesaplanır ve tipine göre bir olasılıkla karıştırılır. Örneğin feribot iskelesinde %85.</p>
+      <p>Lamba bilinmiyorsa iki olasılık (var / yok) hesaplanır ve tipine göre bir olasılıkla karıştırılır. Feribot iskelesi dahil doğrulanmamış iskelelerde %50 (eskiden feribotta %85 varsayılıyordu; fotoğrafla doğrulanamadığı için J1’de kaldırıldı). Saha ya da uzaktan gözlemle “var/yok” girilince o meranın değeri buna göre değişir.</p>
       <p><b>Güvenlik kapısı:</b> rüzgar veya dalga eşiği aşılırsa puan en fazla 30 gösterilir. Bu bir uyarıdır, balığın orada olmadığı anlamına gelmez.</p>
       <p><b>Bant:</b> puanın yanındaki aralık (%10–90) Monte Carlo ile hesaplanır. Her parametre kanıt düzeyine göre oynatılır: A az, C çok. Bant genişse tahmin belirsizdir.</p>
 

@@ -6,6 +6,16 @@ import AdminLogin from '../../components/AdminLogin.astro';
   <div class="wrap sd">
     <h1>Sahadayım</h1>
 
+    <!-- J5: three-step hint, first use only (dismissed per device) -->
+    <aside class="hint-card" id="first-hint" hidden aria-label="Nasıl kullanılır">
+      <ol>
+        <li><b>Merayı seç, seansı başlat.</b> Başlarken o anki tahmin bu telefonda saklanır (ileriye dönük kayıt).</li>
+        <li><b>Her balığı ya da hiç vuruş yoksa “sıfır av”ı kaydet.</b> Sıfır av da veridir; modeli en çok o sınar.</li>
+        <li><b>Bitir ve kaydet.</b> Bağlantı yoksa kayıt sıraya alınır, sonra gönderilir.</li>
+      </ol>
+      <button type="button" class="ghost" id="hint-ok">Anladım</button>
+    </aside>
+
     <AdminLogin />
 
     <section id="setup" hidden>
@@ -80,6 +90,9 @@ import AdminLogin from '../../components/AdminLogin.astro';
 </Base>
 
 <style>
+  .hint-card { border: 1px solid var(--sodium, #f2a93b); border-radius: 12px; padding: 12px 16px; margin: 12px 0; background: var(--deep); }
+  .hint-card ol { margin: 0 0 8px; padding-left: 1.2em; display: grid; gap: 6px; font-size: var(--fs-2); }
+  .hint-card button { min-height: 44px; }
   .sd h1 { font-size: var(--fs-5); font-weight: 750; font-stretch: 80%; margin: 14px 0 6px; }
   .sd h2 { font-size: var(--fs-3); margin: 20px 0 8px; }
   .sd h2 .muted { font-weight: 400; font-size: var(--fs-2); }
@@ -136,6 +149,14 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, mountLogin } from '../../scripts/admin';
+  {
+    const HINT = 'av-livn-saha-hint';
+    const card = document.getElementById('first-hint')!;
+    let seen = false;
+    try { seen = localStorage.getItem(HINT) === '1'; } catch {}
+    card.hidden = seen;
+    document.getElementById('hint-ok')!.addEventListener('click', () => { card.hidden = true; try { localStorage.setItem(HINT, '1'); } catch {} });
+  }
   import { LEGAL_MIN_CM } from '../../scripts/format';
   import { tackle, tackleLevrek, tackleLevrekShort, tackleShort } from '@av-livn/scoring';
   import { api as speciesUrl, currentSpecies } from '../../scripts/species';

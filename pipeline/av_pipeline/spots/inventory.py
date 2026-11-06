@@ -90,6 +90,7 @@ def build_query() -> str:
   way["natural"="coastline"]({p});
   node["place"~"^(town|village|suburb|neighbourhood|quarter|hamlet)$"]({b});
   relation["boundary"="administrative"]["admin_level"="4"]["name"~"^(Bursa|Yalova|Balıkesir)$"]({b});
+  relation["boundary"="administrative"]["admin_level"="6"]({b});
 );
 out geom;"""
 
@@ -758,6 +759,12 @@ def main(argv: list[str]) -> int:  # pragma: no cover - CLI
     polys = cov.province_polygons(raw)
     for f in fc["features"]:
         f["properties"]["province"] = cov.province_of(tuple(f["geometry"]["coordinates"]), polys)
+    # J4: settlements sharing a name (Kurşunlu in Gemlik and in Karacabey) get the district in place and generated names
+    from av_pipeline.spots.naming import disambiguate_places
+
+    places_raw = [{"name": el.get("tags", {}).get("name"), "xy": to_xy(el["lon"], el["lat"])} for el in raw.get("elements", []) if el.get("type") == "node" and "place" in el.get("tags", {})]
+    renamed = disambiguate_places(fc["features"], places_raw, cov.province_polygons(raw, level="6", names=None))
+    print(f"same-name settlements: {len(renamed)} spot names got a district: {[r[2] for r in renamed[:8]]}", file=sys.stderr)
     coast_lines = [LineString(element_xy(el)) for el in raw.get("elements", []) if el.get("type") == "way" and el.get("tags", {}).get("natural") == "coastline" and len(element_xy(el)) >= 2]
     spots_xy = [(f["properties"]["id"], to_xy(*f["geometry"]["coordinates"])) for f in fc["features"]]
     share = cov.measured_share_fn(grid)

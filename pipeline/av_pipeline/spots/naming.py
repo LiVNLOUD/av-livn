@@ -88,3 +88,58 @@ def describe_singles(features: list[dict], places: list[dict]) -> int:
         pr["name"] = name
         n += 1
     return n
+
+
+SAME_NAME_KM = 5.0
+
+
+def _district_of(xy: tuple[float, float], districts: dict[str, object]) -> str | None:
+    from shapely.geometry import Point
+
+    p = Point(xy)
+    best = None
+    for name, g in districts.items():
+        if g.contains(p):
+            return name
+        d = g.distance(p)
+        if d <= 3000 and (best is None or d < best[0]):
+            best = (d, name)
+    return best[1] if best else None
+
+
+def _suffixed_name(name: str, place: str, district: str) -> str:
+    """J4: "Kumsal (Kurşunlu doğusu)" → "Kumsal (Kurşunlu doğusu, Karacabey)";
+    "Kurşunlu – uzun doğu mendireği" → "Kurşunlu (Karacabey) – uzun doğu mendireği"."""
+    import re
+
+    m = re.search(r"\(([^()]*\b" + re.escape(place) + r"\b[^()]*)\)", name)
+    if m:
+        return name[: m.end(1)] + f", {district}" + name[m.end(1):]
+    return re.sub(r"\b" + re.escape(place) + r"\b", f"{place} ({district})", name, count=1)
+
+
+def disambiguate_places(features: list[dict], places: list[dict], districts: dict[str, object]) -> list[tuple[str, str, str]]:
+    """J4: when two settlements share a name (place nodes > SAME_NAME_KM apart), add the district to every spot that
+    uses it: `place` becomes "Kurşunlu (Gemlik)", and a generated name carries the district too. OSM names are kept
+    as they are; ids never change. Returns (id, old name, new name) for the report. places: [{name, xy}]."""
+    by_name: dict[str, list[tuple[float, float]]] = defaultdict(list)
+    for p in places:
+        if p.get("name"):
+            by_name[p["name"]].append(p["xy"])
+    clash = {n for n, pts in by_name.items() if any(math.dist(a, b) > SAME_NAME_KM * 1000 for a in pts for b in pts)}
+    changed = []
+    for f in features:
+        pr = f["properties"]
+        place = pr.get("place")
+        if not place or place not in clash:
+            continue
+        district = _district_of(to_xy(*f["geometry"]["coordinates"]), districts)
+        if not district or district == place:
+            continue
+        pr["place"] = f"{place} ({district})"
+        if pr.get("name_source") == "generated":
+            new = _suffixed_name(pr["name"], place, district)
+            if new != pr["name"]:
+                changed.append((pr["id"], pr["name"], new))
+                pr["name"] = new
+    return changed

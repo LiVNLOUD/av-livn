@@ -1,0 +1,179 @@
+{
+ "note": "J1: feribot lamba önseli 0,85 → 0,5. Aynı D1 verisi, sonraki 21:00 yerel. top_night = tüm iller.",
+ "before": {
+  "now": "2026-11-06T14:00:00.000Z",
+  "night": "2026-11-06T18:00:00.000Z",
+  "top_now": [
+   [
+    "Fıstıklı İskelesi (Fıstıklı güneybatısı)",
+    75
+   ],
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    71
+   ],
+   [
+    "Armutlu Devlet Limanı – uzun batı mendireği",
+    69.3
+   ],
+   [
+    "Mudanya İskelesi",
+    69
+   ],
+   [
+    "Güzelyalı Yat Limanı – doğu mendireği",
+    68.5
+   ],
+   [
+    "Armutlu Devlet Limanı – orta batı mendireği",
+    64.5
+   ],
+   [
+    "Kapaklı İskelesi (Kapaklı güneyi)",
+    64.3
+   ],
+   [
+    "Petek Sitesi İskele",
+    63.4
+   ],
+   [
+    "Güzelyalı Yat Limanı – batı mendireği",
+    62.8
+   ],
+   [
+    "Tirilye Limanı",
+    62.5
+   ]
+  ],
+  "top_night": [
+   [
+    "Armutlu İskelesi",
+    83.4
+   ],
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    81.1
+   ],
+   [
+    "Mudanya İskelesi",
+    80.7
+   ],
+   [
+    "Güzelyalı Yat Limanı – liman içi",
+    77.1
+   ],
+   [
+    "Karacaali İskelesi",
+    76.9
+   ],
+   [
+    "Kurşunlu Yat Limanı",
+    76.9
+   ],
+   [
+    "Tirilye Limanı",
+    76.7
+   ],
+   [
+    "Büyükkumla İskelesi",
+    76.4
+   ],
+   [
+    "Demirsubaşı İskelesi",
+    73.9
+   ],
+   [
+    "Kordon (Kurşunlu doğusu) 3",
+    73.1
+   ]
+  ]
+ },
+ "after": {
+  "now": "2026-11-06T14:00:00.000Z",
+  "night": "2026-11-06T18:00:00.000Z",
+  "top_now": [
+   [
+    "Fıstıklı İskelesi (Fıstıklı güneybatısı)",
+    75
+   ],
+   [
+    "İDO Güzelyalı Feribot İskelesi",
+    71
+   ],
+   [
+    "Armutlu Devlet Limanı – uzun batı mendireği",
+    69.3
+   ],
+   [
+    "Mudanya İskelesi",
+    69
+   ],
+   [
+    "Güzelyalı Yat Limanı – doğu mendireği",
+    68.5
+   ],
+   [
+    "Armutlu Devlet Limanı – orta batı mendireği",
+    64.5
+   ],
+   [
+    "Kapaklı İskelesi (Kapaklı güneyi)",
+    64.3
+   ],
+   [
+    "Petek Sitesi İskele",
+    63.4
+   ],
+   [
+    "Güzelyalı Yat Limanı – batı mendireği",
+    62.8
+   ],
+   [
+    "Tirilye Limanı",
+    62.5
+   ]
+  ],
+  "top_night": [
+   [
+    "Güzelyalı Yat Limanı – liman içi",
+    77.1
+   ],
+   [
+    "Karacaali İskelesi",
+    76.9
+   ],
+   [
+    "Kurşunlu Yat Limanı",
+    76.9
+   ],
+   [
+    "Tirilye Limanı",
+    76.7
+   ],
+   [
+    "Büyükkumla İskelesi",
+    76.4
+   ],
+   [
+    "Armutlu İskelesi",
+    74.4
+   ],
+   [
+    "Demirsubaşı İskelesi",
+    73.9
+   ],
+   [
+    "Kordon (Kurşunlu doğusu) 3",
+    73.1
+   ],
+   [
+    "Kordon (Kumsaz güneyi) 2",
+    73
+   ],
+   [
+    "Kordon (Kumsaz güneyi) 3",
+    73
+   ]
+  ]
+ }
+}

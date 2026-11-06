@@ -2,9 +2,18 @@
 import Base from '../../layouts/Base.astro';
 import AdminLogin from '../../components/AdminLogin.astro';
 ---
-<Base title="Bildirim ayarları — av.livn" description="Bildirimler: günlük özet, fırsat, güvenlik.">
+<Base title="Ayarlar — av.livn" description="Öneri tercihleri ve bildirimler.">
   <div class="wrap st">
-    <h1>Bildirimler</h1>
+    <h1>Ayarlar</h1>
+    <!-- J3/J5: device preferences and how-to, visible without the admin login -->
+    <section aria-labelledby="t-pref">
+      <h2 id="t-pref">Öneriler (bu cihaz)</h2>
+      <label class="chk"><input type="checkbox" id="outside-bursa" /> Ana öneriye Bursa dışını da dahil et <span class="muted">(Yalova kıyısı: Armutlu, Fıstıklı, Kapaklı; il rozeti görünür)</span></label>
+      <p class="hint">Bu cihazda saklanır. Kapalıyken ana öneri ve alternatifler yalnız Bursa meralarından seçilir; Bursa dışı meralar listede rozetle durur. Bildirim alıyorsanız bildirim ayarları da bu tercihe uyar.</p>
+      <h2>Uzaktan lamba gözlemi</h2>
+      <p class="hint">Bir iskelenin gece aydınlatmasını kendiniz kontrol edebilirsiniz: Google Haritalar'da ya da Sokak Görünümü'nde iskeleye ve çevresindeki fotoğraflara bakın. Direk ve armatür görüyorsanız, mümkünse gece çekilmiş bir fotoğrafta ışığın suya düştüğünü görüyorsanız, mera kartındaki “Saha girişi”nden (<code>/saha/</code>) kaynak olarak <b>Uzaktan gözlem</b>'i seçip lambayı <b>var</b> ya da <b>yok</b> olarak girin. Fotoğraf yüklemek gerekmez. Bu giriş o meranın lamba varsayımının yerine geçer (saha &gt; uzaktan &gt; masa başı &gt; varsayım). Site Google görüntülerini otomatik çekmez; bakan ve karar veren sizsiniz.</p>
+    </section>
+    <h2>Bildirimler</h2>
     <AdminLogin />
     <p class="msg" id="msg" role="status"></p>
 
@@ -87,7 +96,17 @@ import AdminLogin from '../../components/AdminLogin.astro';
 <script>
   import { getToken, mountLogin, showLogin } from '../../scripts/admin';
 
-  type Settings = { daily: boolean; opportunity: boolean; safety: boolean; threshold: number; quiet: [number, number]; favourites: string[]; channels: 'push' | 'ntfy' | 'both'; species?: string[] };
+  type Settings = { daily: boolean; opportunity: boolean; safety: boolean; threshold: number; quiet: [number, number]; favourites: string[]; channels: 'push' | 'ntfy' | 'both'; species?: string[]; outside_bursa?: boolean };
+  // J3: "include spots outside Bursa in the home plan" — stored on this device; notifications follow it
+  const OB = 'av-livn-outside-bursa';
+  const obBox = document.getElementById('outside-bursa') as HTMLInputElement;
+  try { obBox.checked = localStorage.getItem(OB) === '1'; } catch {}
+  obBox.addEventListener('change', async () => {
+    try { localStorage.setItem(OB, obBox.checked ? '1' : '0'); } catch {}
+    if (st?.settings) {
+      try { await api('/settings', 'PUT', { ...st.settings, outside_bursa: obBox.checked }); st.settings.outside_bursa = obBox.checked; say('Tercih kaydedildi; bildirimler de buna uyacak.'); } catch { say('Tercih bu cihazda kaydedildi; bildirim ayarı güncellenemedi.', true); }
+    }
+  });
   type Status = {
     vapid_public_key: string; settings: Settings; subscriptions: { id: string }[]; sent: { kind: string; sent_at: string; key: string }[];
     test: { requested_at: string | null; done: string | null; result: Record<string, unknown> | null }; secrets: { push: boolean; ntfy: boolean } | null;
@@ -194,6 +213,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
       favourites: [...document.querySelectorAll<HTMLInputElement>('#favs input:checked')].map((i) => i.value),
       channels: (document.querySelector<HTMLInputElement>('input[name="ch"]:checked')?.value ?? 'push') as Settings['channels'],
       species: [...document.querySelectorAll<HTMLInputElement>('input.sp:checked')].map((i) => i.value),
+      outside_bursa: obBox.checked,
     };
     try {
       await api('/settings', 'PUT', body);

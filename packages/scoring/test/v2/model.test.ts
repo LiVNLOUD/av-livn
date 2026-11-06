@@ -18,7 +18,9 @@ describe('v2 scale calibration (documented log-linear map)', () => {
   });
 
   it('near-ideal variants stay high and near-worst variants stay low', () => {
-    expect(score({ ...IDEAL_SPOT, lamp: null, ferry: true }, IDEAL_WEATHER)).toBeGreaterThanOrEqual(80);
+    // J1: an unconfirmed ferry lamp (prior 0.5) no longer counts as lit; a confirmed lamp restores the top
+    expect(score({ ...IDEAL_SPOT, lamp: null, ferry: true }, IDEAL_WEATHER)).toBeLessThan(score({ ...IDEAL_SPOT, lamp: true, ferry: true }, IDEAL_WEATHER));
+    expect(score({ ...IDEAL_SPOT, lamp: true, ferry: true }, IDEAL_WEATHER)).toBeGreaterThanOrEqual(80);
     expect(score(IDEAL_SPOT, { ...IDEAL_WEATHER, sunAlt: -4 })).toBeGreaterThanOrEqual(75);
     expect(score(WORST_SPOT, { ...WORST_WEATHER, sunAlt: -30 })).toBeLessThanOrEqual(20);
   });
@@ -112,7 +114,10 @@ describe('v2 static terms and sources', () => {
   });
 
   it('lamp priors', () => {
-    expect([lampPrior({ ...BASE, ferry: true }), lampPrior(BASE), lampPrior({ ...BASE, kind: 'breakwater' }), lampPrior({ ...BASE, kind: 'manual' })]).toEqual([0.85, 0.5, 0.3, 0.5]);
+    expect([lampPrior({ ...BASE, ferry: true }), lampPrior(BASE), lampPrior({ ...BASE, kind: 'breakwater' }), lampPrior({ ...BASE, kind: 'manual' })]).toEqual([0.5, 0.5, 0.3, 0.5]);
+    // J1: remote / desk findings (lampP) still override the ferry prior
+    expect(lampPrior({ ...BASE, ferry: true, lampP: 0.97 })).toBe(0.97);
+    expect(lampPrior({ ...BASE, ferry: true, lampP: 0.03 })).toBe(0.03);
   });
 });
 
