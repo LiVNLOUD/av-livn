@@ -118,7 +118,7 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kumsal (Fıstıklı güneybatısı) 2 | kumsal | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1414985744 |
 | Kordon (Fıstıklı batısı) | kordon (taş tahkimat) | Fıstıklı | belirsiz (yerleşimden uzak (> 1,5 km)) | way/1445587670 |
 | Fıstıklı Deresi ağzı | dere ağzı | Fıstıklı | acik (yerleşime 1487 m) | way/698849100 |
-| Güzelyalı Yat Limanı – liman içi | liman / balıkçı barınağı | Güzelyalı Burgaz | belirsiz (marina: giriş kısıtlı olabilir) | way/1552615726 |
+| Güzelyalı Yat Limanı – liman içi | liman / balıkçı barınağı | Güzelyalı Burgaz | belirsiz (yat limanı: özel işletme, giriş kısıtlı olabilir) | way/1552615726 |
 | Dere ağzı (Güzelyalı Burgaz) | dere ağzı | Güzelyalı Burgaz | acik (yerleşime 178 m) | way/1430949806 |
 | Kumsal (Güzelyalı Eğitim kuzeyi) | kumsal | Güzelyalı Eğitim | acik (yerleşime 200 m) | way/665674892 |
 | Kumsal (Güzelyalı Siteler kuzeyi) | kumsal | Güzelyalı Siteler | acik (yerleşime 584 m) | way/1305691028 |
@@ -138,7 +138,7 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kordon (Kumsaz güneyi) 3 | kordon (taş tahkimat) | Kumsaz | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Dere ağzı (Kumsaz) | dere ağzı | Kumsaz | acik (yerleşime 255 m) | way/253063517 |
 | Kordon (Kumyaka doğusu) | kordon (taş tahkimat) | Kumyaka | belirsiz (yerleşimden uzak (> 1,5 km)) | way/534210128 |
-| Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu (Gemlik) | belirsiz (marina: giriş kısıtlı olabilir) | way/1165497962 |
+| Kurşunlu Yat Limanı | liman / balıkçı barınağı | Kurşunlu (Gemlik) | belirsiz (yat limanı: özel işletme, giriş kısıtlı olabilir) | way/1165497962 |
 | Kordon (Kurşunlu doğusu, Gemlik) | kordon (taş tahkimat) | Kurşunlu (Gemlik) | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Kordon (Kurşunlu doğusu, Gemlik) 2 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
 | Kordon (Kurşunlu doğusu, Gemlik) 3 | kordon (taş tahkimat) | Kurşunlu (Gemlik) | belirsiz (yerleşimden uzak (> 1,5 km)) | way/24825429 |
@@ -158,7 +158,7 @@ Kıyı tiplerinde yapı uzunluğu yoktur; uzunluk çarpanı 150 m'lik bir yapın
 | Kumsal (Sahil doğusu) | kumsal | Sahil | acik (yerleşime 292 m) | relation/10458773 |
 | Kumsal (Sahil kuzeybatısı) | kumsal | Sahil | acik (yerleşime 125 m) | relation/10458773 |
 | Kumsal (Tirilye kuzeybatısı) | kumsal | Tirilye | acik (yerleşime 155 m) | way/519554786 |
-| Tirilye Limanı | liman / balıkçı barınağı | Tirilye | belirsiz (marina: giriş kısıtlı olabilir) | node/11865648199 |
+| Tirilye Limanı | liman / balıkçı barınağı | Tirilye | acik (yerleşime 387 m) | node/11865648199 |
 | Kumsal | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/296678701 |
 | Kumsal 2 | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/296678701 |
 | Kumsal 3 | kumsal | — | belirsiz (yerleşimden uzak (> 1,5 km)) | way/757735806 |

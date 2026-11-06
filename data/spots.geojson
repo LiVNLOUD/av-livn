@@ -1891,8 +1891,9 @@
     "shore_normal_deg": 0.0,
     "place": "Tirilye",
     "place_m": 387,
-    "access": "belirsiz",
-    "access_note": "marina: giriş kısıtlı olabilir",
+    "access": "acik",
+    "access_note": "yerleşime 387 m",
+    "private_marina": 0,
     "osm": [
      "node/11865648199"
     ],
@@ -1989,6 +1990,7 @@
     "place_m": null,
     "access": "belirsiz",
     "access_note": "kayalık: yürüyüş yolu bilinmiyor",
+    "private_marina": 0,
     "osm": [
      "node/11981818601"
     ],
@@ -2084,6 +2086,7 @@
     "place_m": 358,
     "access": "acik",
     "access_note": "yerleşime 358 m",
+    "private_marina": 0,
     "osm": [
      "node/13872728204"
     ],
@@ -2179,6 +2182,7 @@
     "place_m": 1455,
     "access": "kisitli_feribot",
     "access_note": "feribot iskelesi: sefer saatlerinde kısıtlı olabilir",
+    "private_marina": 0,
     "osm": [
      "node/2590599404"
     ],
@@ -2274,6 +2278,7 @@
     "place_m": 248,
     "access": "acik",
     "access_note": "yerleşime 248 m",
+    "private_marina": 0,
     "osm": [
      "node/2794622004"
     ],
@@ -2369,6 +2374,7 @@
     "place_m": 525,
     "access": "acik",
     "access_note": "yerleşime 525 m",
+    "private_marina": 0,
     "osm": [
      "relation/10458771"
     ],
@@ -2464,6 +2470,7 @@
     "place_m": 206,
     "access": "acik",
     "access_note": "yerleşime 206 m",
+    "private_marina": 0,
     "osm": [
      "relation/10458771"
     ],
@@ -2559,6 +2566,7 @@
     "place_m": 1893,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "relation/10458772"
     ],
@@ -2654,6 +2662,7 @@
     "place_m": 2262,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "relation/10458772"
     ],
@@ -2749,6 +2758,7 @@
     "place_m": 2329,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "relation/10458772"
     ],
@@ -2844,6 +2854,7 @@
     "place_m": 2454,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "relation/10458772"
     ],
@@ -2939,6 +2950,7 @@
     "place_m": 2630,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "relation/10458772"
     ],
@@ -3034,6 +3046,7 @@
     "place_m": 292,
     "access": "acik",
     "access_note": "yerleşime 292 m",
+    "private_marina": 0,
     "osm": [
      "relation/10458773"
     ],
@@ -3128,6 +3141,7 @@
     "place_m": 125,
     "access": "acik",
     "access_note": "yerleşime 125 m",
+    "private_marina": 0,
     "osm": [
      "relation/10458773"
     ],
@@ -3222,6 +3236,7 @@
     "place_m": 700,
     "access": "acik",
     "access_note": "yerleşime 700 m",
+    "private_marina": 0,
     "osm": [
      "relation/18071615"
     ],
@@ -3316,6 +3331,7 @@
     "place_m": 1162,
     "access": "acik",
     "access_note": "yerleşime 1162 m",
+    "private_marina": 0,
     "osm": [
      "relation/18071615"
     ],
@@ -3412,6 +3428,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 744 m",
+    "private_marina": 0,
     "osm": [
      "way/1073087871"
     ],
@@ -3506,7 +3523,8 @@
     "place": "Kurşunlu (Gemlik)",
     "place_m": 930,
     "access": "belirsiz",
-    "access_note": "marina: giriş kısıtlı olabilir",
+    "access_note": "yat limanı: özel işletme, giriş kısıtlı olabilir",
+    "private_marina": 1,
     "osm": [
      "way/1165497962"
     ],
@@ -3605,6 +3623,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1170373160"
     ],
@@ -3699,6 +3718,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1170373160"
     ],
@@ -3793,6 +3813,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1170373160"
     ],
@@ -3887,6 +3908,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 177 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216668"
     ],
@@ -3981,6 +4003,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 277 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216668"
     ],
@@ -4075,6 +4098,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 422 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216676"
     ],
@@ -4169,6 +4193,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 292 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216676"
     ],
@@ -4263,6 +4288,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 433 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216676"
     ],
@@ -4357,6 +4383,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 136 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216676"
     ],
@@ -4451,6 +4478,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 69 m",
+    "private_marina": 0,
     "osm": [
      "way/1217216676"
     ],
@@ -4543,6 +4571,7 @@
     "place_m": 312,
     "access": "acik",
     "access_note": "yerleşime 312 m",
+    "private_marina": 0,
     "osm": [
      "way/1218508014"
     ],
@@ -4638,6 +4667,7 @@
     "place_m": 406,
     "access": "acik",
     "access_note": "yerleşime 406 m",
+    "private_marina": 0,
     "osm": [
      "way/1302854356"
     ],
@@ -4732,6 +4762,7 @@
     "place_m": 165,
     "access": "acik",
     "access_note": "yerleşime 165 m",
+    "private_marina": 0,
     "osm": [
      "way/1305691023"
     ],
@@ -4826,6 +4857,7 @@
     "place_m": 425,
     "access": "acik",
     "access_note": "yerleşime 425 m",
+    "private_marina": 0,
     "osm": [
      "way/1305691027"
     ],
@@ -4920,6 +4952,7 @@
     "place_m": 584,
     "access": "acik",
     "access_note": "yerleşime 584 m",
+    "private_marina": 0,
     "osm": [
      "way/1305691028"
     ],
@@ -5016,6 +5049,7 @@
     "place_m": 628,
     "access": "acik",
     "access_note": "yerleşime 628 m",
+    "private_marina": 0,
     "osm": [
      "way/1305691029"
     ],
@@ -5114,6 +5148,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 208 m",
+    "private_marina": 0,
     "osm": [
      "way/1336893175"
     ],
@@ -5208,6 +5243,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 226 m",
+    "private_marina": 0,
     "osm": [
      "way/1336893184"
     ],
@@ -5300,6 +5336,7 @@
     "place_m": 2349,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1391521782"
     ],
@@ -5395,6 +5432,7 @@
     "place_m": 1955,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1392831837"
     ],
@@ -5490,6 +5528,7 @@
     "place_m": 2295,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1392831837"
     ],
@@ -5585,6 +5624,7 @@
     "place_m": 2499,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1392831837"
     ],
@@ -5680,6 +5720,7 @@
     "place_m": 2709,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1392831837"
     ],
@@ -5775,6 +5816,7 @@
     "place_m": 3074,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1392831837"
     ],
@@ -5870,6 +5912,7 @@
     "place_m": 3064,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1392831837"
     ],
@@ -5965,6 +6008,7 @@
     "place_m": 1626,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1393123413"
     ],
@@ -6061,6 +6105,7 @@
     "place_m": 1682,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1393123413"
     ],
@@ -6157,6 +6202,7 @@
     "place_m": 1119,
     "access": "acik",
     "access_note": "yerleşime 1119 m",
+    "private_marina": 0,
     "osm": [
      "way/1394208138"
     ],
@@ -6252,6 +6298,7 @@
     "place_m": 1236,
     "access": "acik",
     "access_note": "yerleşime 1236 m",
+    "private_marina": 0,
     "osm": [
      "way/1394208138"
     ],
@@ -6347,6 +6394,7 @@
     "place_m": 1638,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1394523720"
     ],
@@ -6442,6 +6490,7 @@
     "place_m": 1405,
     "access": "acik",
     "access_note": "yerleşime 1405 m",
+    "private_marina": 0,
     "osm": [
      "way/1394523720"
     ],
@@ -6537,6 +6586,7 @@
     "place_m": 1113,
     "access": "acik",
     "access_note": "yerleşime 1113 m",
+    "private_marina": 0,
     "osm": [
      "way/1394523720"
     ],
@@ -6632,6 +6682,7 @@
     "place_m": 1088,
     "access": "acik",
     "access_note": "yerleşime 1088 m",
+    "private_marina": 0,
     "osm": [
      "way/1394523720"
     ],
@@ -6729,6 +6780,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1413355183"
     ],
@@ -6821,6 +6873,7 @@
     "place_m": 1639,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1414985743"
     ],
@@ -6916,6 +6969,7 @@
     "place_m": 1496,
     "access": "acik",
     "access_note": "yerleşime 1496 m",
+    "private_marina": 0,
     "osm": [
      "way/1414985743"
     ],
@@ -7011,6 +7065,7 @@
     "place_m": 1509,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1414985744"
     ],
@@ -7105,6 +7160,7 @@
     "place_m": 1403,
     "access": "belirsiz",
     "access_note": "kayalık: yürüyüş yolu bilinmiyor",
+    "private_marina": 0,
     "osm": [
      "way/1422351411"
     ],
@@ -7199,6 +7255,7 @@
     "place_m": 178,
     "access": "acik",
     "access_note": "yerleşime 178 m",
+    "private_marina": 0,
     "osm": [
      "way/1430949806"
     ],
@@ -7295,6 +7352,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/1445587670"
     ],
@@ -7389,6 +7447,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 164 m",
+    "private_marina": 0,
     "osm": [
      "way/1500766926"
     ],
@@ -7480,7 +7539,8 @@
     "place": "Güzelyalı Burgaz",
     "place_m": 238,
     "access": "belirsiz",
-    "access_note": "marina: giriş kısıtlı olabilir",
+    "access_note": "yat limanı: özel işletme, giriş kısıtlı olabilir",
+    "private_marina": 1,
     "osm": [
      "way/1552615726"
     ],
@@ -7579,6 +7639,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -7675,6 +7736,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -7771,6 +7833,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -7867,6 +7930,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -7963,6 +8027,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -8059,6 +8124,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -8155,6 +8221,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 1286 m",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -8251,6 +8318,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 788 m",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -8347,6 +8415,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 547 m",
+    "private_marina": 0,
     "osm": [
      "way/24825429"
     ],
@@ -8441,6 +8510,7 @@
     "place_m": 255,
     "access": "acik",
     "access_note": "yerleşime 255 m",
+    "private_marina": 0,
     "osm": [
      "way/253063517"
     ],
@@ -8535,6 +8605,7 @@
     "place_m": 1090,
     "access": "acik",
     "access_note": "yerleşime 1090 m",
+    "private_marina": 0,
     "osm": [
      "way/253083807"
     ],
@@ -8630,6 +8701,7 @@
     "place_m": 3899,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/296678701"
     ],
@@ -8724,6 +8796,7 @@
     "place_m": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/296678701"
     ],
@@ -8818,6 +8891,7 @@
     "place_m": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/296678701"
     ],
@@ -8914,6 +8988,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 1484 m",
+    "private_marina": 0,
     "osm": [
      "way/428743002"
     ],
@@ -9006,6 +9081,7 @@
     "place_m": 3188,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/479047534"
     ],
@@ -9100,6 +9176,7 @@
     "place_m": 2810,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/479047534"
     ],
@@ -9194,6 +9271,7 @@
     "place_m": 2532,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/479047535"
     ],
@@ -9290,6 +9368,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 711 m",
+    "private_marina": 0,
     "osm": [
      "way/519553274"
     ],
@@ -9382,6 +9461,7 @@
     "place_m": 482,
     "access": "acik",
     "access_note": "yerleşime 482 m",
+    "private_marina": 0,
     "osm": [
      "way/519553320"
     ],
@@ -9476,6 +9556,7 @@
     "place_m": 605,
     "access": "acik",
     "access_note": "yerleşime 605 m",
+    "private_marina": 0,
     "osm": [
      "way/519553320"
     ],
@@ -9570,6 +9651,7 @@
     "place_m": 999,
     "access": "acik",
     "access_note": "yerleşime 999 m",
+    "private_marina": 0,
     "osm": [
      "way/519553320"
     ],
@@ -9664,6 +9746,7 @@
     "place_m": 155,
     "access": "acik",
     "access_note": "yerleşime 155 m",
+    "private_marina": 0,
     "osm": [
      "way/519554786"
     ],
@@ -9760,6 +9843,7 @@
     "lamp_prior": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/534210128"
     ],
@@ -9854,6 +9938,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 182 m",
+    "private_marina": 0,
     "osm": [
      "way/639389497"
     ],
@@ -9950,6 +10035,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 147 m",
+    "private_marina": 0,
     "osm": [
      "way/639389497"
     ],
@@ -10046,6 +10132,7 @@
     "lamp_prior": null,
     "access": "acik",
     "access_note": "yerleşime 219 m",
+    "private_marina": 0,
     "osm": [
      "way/639389497"
     ],
@@ -10140,6 +10227,7 @@
     "place_m": 200,
     "access": "acik",
     "access_note": "yerleşime 200 m",
+    "private_marina": 0,
     "osm": [
      "way/665674892"
     ],
@@ -10234,6 +10322,7 @@
     "place_m": 330,
     "access": "acik",
     "access_note": "yerleşime 330 m",
+    "private_marina": 0,
     "osm": [
      "way/681112515"
     ],
@@ -10329,6 +10418,7 @@
     "place_m": 337,
     "access": "acik",
     "access_note": "yerleşime 337 m",
+    "private_marina": 0,
     "osm": [
      "way/684554355"
     ],
@@ -10424,6 +10514,7 @@
     "place_m": 1487,
     "access": "acik",
     "access_note": "yerleşime 1487 m",
+    "private_marina": 0,
     "osm": [
      "way/698849100"
     ],
@@ -10519,6 +10610,7 @@
     "place_m": 256,
     "access": "acik",
     "access_note": "yerleşime 256 m",
+    "private_marina": 0,
     "osm": [
      "way/700323582"
     ],
@@ -10614,6 +10706,7 @@
     "place_m": 2378,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/727268657"
     ],
@@ -10708,6 +10801,7 @@
     "place_m": 1044,
     "access": "acik",
     "access_note": "yerleşime 1044 m",
+    "private_marina": 0,
     "osm": [
      "way/757494038"
     ],
@@ -10802,6 +10896,7 @@
     "place_m": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/757735806"
     ],
@@ -10896,6 +10991,7 @@
     "place_m": null,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/757735807"
     ],
@@ -10990,6 +11086,7 @@
     "place_m": 3466,
     "access": "belirsiz",
     "access_note": "yerleşimden uzak (> 1,5 km)",
+    "private_marina": 0,
     "osm": [
      "way/85387365"
     ],
