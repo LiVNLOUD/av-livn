@@ -225,7 +225,7 @@
   - Sanayi ve askeri sınırlar haritada.
   - Overpass yansıları `around.c` filtresini farklı işlediği için yollar bbox ile çekilip kıyı süzgeci yerelde uygulanıyor.
 
-## Faz I — dürüst, sade, sınanabilir karar desteği (2026-11-03) — sürüyor
+## Faz I — dürüst, sade, sınanabilir karar desteği (2026-11-03/06) ✅
 - Plan: `/root/.claude/plans/proje-av-livn-spicy-dragonfly.md` özeti `docs/AUDIT-I.md` §3'te. Adımlar I0–I10.
 - [x] I0 Faz H kapanışı.
 - [x] I1 `docs/AUDIT-I.md`: 23 bulgu, öncelik sırası, karar soruları.
@@ -237,4 +237,4 @@
 - [x] I7 takım: tek batış modeli (`v2/sink.ts` + saha k), saydırma aralığı, toplam atış ağırlığı uyarısı, PE varsayımı kaldırıldı; gece aydınlık/karanlık/bilinmiyor koşullu (I3)
 - [x] I8 referans incelemesi `docs/REFERENCES-REVIEW.md` (Fishbrain, Windy.com, Navionics, 3 repo; doğrulanamayanlar işaretli)
 - [x] I9 ana ekran: bugün → en yakın güçlü → görece kararı, tek ana öneri + takım görseli + gerekçe + sağlamlık rozetleri, ≤ 2 alternatif, açıklamalar açılır alanda; 390/360 px taşma 0 (e2e). Kalan: canlı ekran görüntüleri (I10)
-- [ ] I10 teslim
+- [x] I10 teslim: canlı smoke yeşil, `x-av-pre` iki tür, e2e canlıda tüm adımlar (plan Bursa'dan, takım kutusu, WebGL yok, 390/360 px), ekran görüntüleri `docs/screenshots/i/`. Düzeltilen son hata: plan liste yüklenmeden çiziliyordu ve Yalova merası öneriliyordu

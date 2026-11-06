@@ -622,10 +622,10 @@ import Base from '../layouts/Base.astro';
     const m = todayStrong ?? nextStrong ?? ws[0]!;
     const startD = fmtDay(m.start);
     const today = fmtDay(new Date().toISOString());
-    const when = startD === today ? 'Bugün' : startD;
+    const when = startD === today ? 'Bugün' : todayStrong ? `Bu gece (${startD})` : startD;
     const scope = `${SPECIES_TR[species]} için, Bursa kıyısındaki ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'} arasından.`;
     verdict.innerHTML = todayStrong
-      ? `Bugün ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}: anlamlı bir seçenek var.<small>${scope}</small>`
+      ? `${startD === today ? 'Bugün' : `Bu gece (${esc(startD)})`} ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}: anlamlı bir seçenek var.<small>${scope}</small>`
       : nextStrong
       ? `Bugün güçlü seçenek yok. En yakın güçlü pencere: ${esc(when)} ${fmtTime(m.start)}.<small>${scope}${td[0] ? ` Bugünün görece en iyisi: ${esc(td[0].name)}, ${Math.round(td[0].total)}.` : ''}</small>`
       : `72 saatte güçlü öneri yok.<small>Aşağıdaki, mevcut seçeneklerin görece en iyisi; gitmek için güçlü bir gerekçe değil. ${scope}</small>`;
