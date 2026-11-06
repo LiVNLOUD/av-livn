@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HAS_ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN != '' }}
+      HAS_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN != '' }}
+      HAS_NTFY_TOPIC: ${{ secrets.NTFY_TOPIC != '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -72,6 +74,32 @@ jobs:
           command: whoami
         env:
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      # K0: the Worker cron re-starts skipped score runs (GH_DISPATCH_TOKEN: fine-grained, Actions read/write, this
+      # repo only) and sends the stale alert by ntfy. Values go from repo secrets straight to Worker secrets.
+      - name: Set GH_DISPATCH_TOKEN secret
+        if: env.HAS_DISPATCH_TOKEN == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/api
+          packageManager: npm
+          secrets: GH_DISPATCH_TOKEN
+          command: whoami
+        env:
+          GH_DISPATCH_TOKEN: ${{ secrets.GH_DISPATCH_TOKEN }}
+      - name: Set NTFY_TOPIC secret
+        if: env.HAS_NTFY_TOPIC == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/api
+          packageManager: npm
+          secrets: NTFY_TOPIC
+          command: whoami
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
       - name: Smoke test (av.livn.tr + livn.tr, www, /win untouched)
         run: bash scripts/smoke.sh
       - name: Admin API check (token from secrets, no writes)

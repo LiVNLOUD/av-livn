@@ -72,7 +72,8 @@ const TABS: [string, string, string][] = [
           (document.documentElement as HTMLElement).dataset.scoredAt = String(t);
           if (h > 2) {
             const el = document.getElementById('stale')!;
-            el.textContent = `Veriler ${Math.floor(h)} saat önce güncellendi. Puanlar eski olabilir; hava ve güvenliği ayrıca kontrol edin.`;
+            const hm = new Date(t).toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' });
+            el.textContent = `Veriler ${Math.floor(h)} saat önce güncellendi (son puanlama: ${hm}). Puanlar eski olabilir; hava ve güvenliği ayrıca kontrol edin.`;
             el.classList.add('on');
           }
         })

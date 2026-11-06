@@ -1,6 +1,7 @@
 import { fetchSnapshots, type CellCoord, type FetchStats } from './lib/openmeteo';
 import { valuesAt } from './lib/series';
 import type { Env } from './env';
+import { guardScoring } from './lib/staleness';
 
 const OBS_COLS: Record<string, string> = {
   pressure_msl: 'pressure', wind_speed_10m: 'wind_speed', wind_direction_10m: 'wind_dir', wind_gusts_10m: 'wind_gust',
@@ -74,6 +75,11 @@ export async function refreshWeather(
 export const CRON_FETCH = '7 * * * *';
 
 export async function runCron(cron: string, env: Env, now = new Date()): Promise<unknown> {
-  if (cron === CRON_FETCH) return refreshWeather(env, now);
+  if (cron === CRON_FETCH) {
+    const weather = await refreshWeather(env, now);
+    // K0: the same (only) cron guards scoring freshness — GitHub's scheduler alone is not reliable
+    const scoring = await guardScoring(env, now).catch((e) => ({ error: String(e) }));
+    return { ...weather, scoring };
+  }
   throw new Error(`unknown cron ${cron}`);
 }

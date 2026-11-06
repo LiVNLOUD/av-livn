@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
 import { CLEAR_PRE_SQL, FETCHED_SQL, fetchedAt, HOURS_SQL, LIST_SQL, preBodies, WINDOWS_SQL, type HoursRow, type ListRow, type WindowsRow } from '../workers/api/src/lib/views';
+import { FULL_RUN_MIN, needsFullRun } from '../workers/api/src/lib/staleness';
 import { SPECIES, DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
@@ -18,7 +19,7 @@ import { runNotify } from './notify-send';
 import { forbiddenUpdates, parseArea, type SpotPos } from '../workers/api/src/lib/forbidden';
 
 const dryRun = process.argv.includes('--dry-run');
-const pendingOnly = process.argv.includes('--pending');
+let pendingOnly = process.argv.includes('--pending');
 const compareOut = process.argv.includes('--compare-desk') ? process.argv[process.argv.indexOf('--compare-desk') + 1] : null;
 // I3: ferry lamp prior sensitivity (dry run): same weather, LAMP_PRIOR.ferry 0.85 vs 0.5 at every night hour
 // I4: istavrit top 10 now and at the next 21:00 local (before/after a model change, same data)
@@ -47,6 +48,14 @@ async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
 
 const t0 = performance.now();
 const startedAt = new Date().toISOString();
+if (pendingOnly) {
+  // K0: GitHub skipped hourly runs; a --pending run does the full work when the newest score is too old
+  const last = (await query<{ at: string | null }>('SELECT max(computed_at) AS at FROM spot_scores_v2'))[0]?.at ?? null;
+  if (needsFullRun(last, new Date())) {
+    console.log(`pending: newest score ${last} is older than ${FULL_RUN_MIN} min → full run`);
+    pendingOnly = false;
+  }
+}
 if (pendingOnly) {
   const pending = await query<{ spot_id: string }>('SELECT spot_id FROM pending_rescore');
   if (pending.length === 0) {
