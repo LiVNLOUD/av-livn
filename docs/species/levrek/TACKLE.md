@@ -2,11 +2,11 @@
 
 İstavrit takım kutusuyla aynı yapı: satır başına değer, kısa neden, kanıt rozeti. **Asgari boy 25 cm** (6/2 Tebliğ Çizelge 7; REGULATION.md), altındaki denize geri bırakılır. Işıkla balık toplamak yasak (md. 8/8); kendi ışığınla yem/balık toplama önerilmez.
 
-## Takımlar (kullanıcının setleri)
+## Takımlar (genel sınıflar, M2: marka yok; kişisel set cihazda, Ayarlar → Takımım)
 | Profil | Kamış / makine | Misina | Atış | Ne zaman |
 |---|---|---|---|---|
-| **Spin** (ana) | Bassterra XT+ 274 cm, Nasci FD C3000 HG | Kairiki 8 (PE ≈ 0.8 numara varsayımı) + Daiwa Prorex FC | 6–32 g | Kayalık, dere ağzı, kumsal sörf hattı, mendirek; rüzgar/dalga varken |
-| **LRF ile hafif levrek** | Ares Blue Porter AJ-S 6.3, Vanford FA C2000S | Gosen PE 0.2 + FC 0.8–1.2 numara (≈3–5 lb) | ≤ 5 g | Sakin liman içi/iskele, küçük levrek; büyük balıkta kopma riski. FC'yi 1.5–2 numaraya (≈6–8 lb) çıkarmak önerilir |
+| **Spin** (ana) | spin kamışı ~2,7 m + 3000 boy makine | PE 0.6–1.0 + ≈8–12 lb florokarbon lider | 6–30 g | Kayalık, dere ağzı, kumsal sörf hattı, mendirek; rüzgar/dalga varken |
+| **LRF ile hafif levrek** | ultra hafif / LRF kamışı + 2000 boy makine | PE 0.2–0.4 + ≈3–5 lb florokarbon lider | ≤ 5 g | Sakin liman içi/iskele, küçük levrek; büyük balıkta kopma riski. FC'yi 1.5–2 numaraya (≈6–8 lb) çıkarmak önerilir |
 
 ## Yem türleri
 - **Silikon kum balığı / shad** (7–12 cm), jighead 7–21 g: dipte ve orta suda. Fırtına sonrası bulanıkta en güvenilir seçim (C).

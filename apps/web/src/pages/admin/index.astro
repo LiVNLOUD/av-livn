@@ -34,7 +34,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
       </form>
 
       <h2>Takım profilleri</h2>
-      <p class="muted fs-2">Mera kartındaki takım ve yem kutusu bu iki seti kullanır (docs/TACKLE.md). Ağırlıklar gram, hamle km/sa.</p>
+      <p class="muted fs-2">Sunucuda saklanan kişisel set (yalnız yönetici okur; herkese açık öneri markasız genel sınıfları kullanır). Bu cihazda kullanmak için Ayarlar → Takımım → "Sunucudaki profilimi bu cihaza taşı". Ağırlıklar gram, hamle km/sa.</p>
       <form id="tackle" class="stack">
         <fieldset class="tp" data-id="lrf"><legend>LRF</legend>
           <label>Ad<input name="name" maxlength="120" /></label>
@@ -227,7 +227,8 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
   // F0: tackle profiles
   async function loadTackle() {
-    const b = await (await fetch('/api/tackle', { cache: 'no-cache' })).json();
+    // M2: the personal set is admin-only (the public endpoint returns the generic classes)
+    const b = await (await fetch('/api/admin/tackle', { cache: 'no-store', headers: { authorization: `Bearer ${token}` } })).json();
     for (const p of b.profiles) {
       const fs = document.querySelector<HTMLFieldSetElement>(`.tp[data-id="${p.id}"]`)!;
       for (const k of ['name', 'jigMin', 'jigMax', 'maxGustKmh', 'line']) (fs.querySelector(`[name="${k}"]`) as HTMLInputElement).value = String(p[k]).replace('.', ',');

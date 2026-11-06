@@ -29,13 +29,19 @@ describe('tackle profiles (F0)', () => {
     expect(parseProfiles('{bad')).toEqual(DEFAULT_PROFILES);
     expect(parseProfiles('[]')).toEqual(DEFAULT_PROFILES);
   });
-  it('owner edits, everyone reads; packed detail carries open-data tackle inputs', async () => {
+  it('owner edits and reads, the public gets the generic classes; packed detail carries open-data tackle inputs', async () => {
     expect((await (await app.request('/api/tackle', {}, env)).json<{ profiles: unknown[] }>()).profiles).toEqual(DEFAULT_PROFILES);
     expect((await app.request('/api/admin/tackle', { method: 'PUT', body: '[]' }, env)).status).toBe(401);
     expect((await app.request('/api/admin/tackle', { method: 'PUT', headers: auth, body: '[]' }, env)).status).toBe(400);
     const edited = [{ ...DEFAULT_PROFILES[0]!, jigMax: 2.5 }, DEFAULT_PROFILES[1]!];
     expect((await app.request('/api/admin/tackle', { method: 'PUT', headers: auth, body: JSON.stringify(edited) }, env)).status).toBe(200);
-    expect((await (await app.request('/api/tackle', {}, env)).json<{ profiles: { jigMax: number }[] }>()).profiles[0]!.jigMax).toBe(2.5);
+    // M2: the personal set is never public; the owner reads it with the token
+    const pub = await (await app.request('/api/tackle', {}, env)).json<{ profiles: { jigMax: number }[] }>();
+    expect(pub.profiles).toEqual(DEFAULT_PROFILES);
+    expect(JSON.stringify(pub)).not.toMatch(/Gosen|Bassterra|Ares/);
+    expect((await app.request('/api/admin/tackle', {}, env)).status).toBe(401);
+    const own = await (await app.request('/api/admin/tackle', { headers: auth }, env)).json<{ stored: boolean; profiles: { jigMax: number }[] }>();
+    expect([own.stored, own.profiles[0]!.jigMax]).toEqual([true, 2.5]);
     const d = await (await app.request('/api/spots/osm-way-1', {}, env)).json<{ packed: { h: unknown[]; tk: (number | null)[][] } }>();
     expect(d.packed.tk).toHaveLength(d.packed.h.length);
     expect(d.packed.tk[0]).toHaveLength(10); // H3: + wave height

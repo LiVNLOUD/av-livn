@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { crossWind, DEFAULT_PROFILES, JIG_SIZES, lightCase, R19_CITE, tackle, tackleLevrek, tackleLevrekShort, tackleShort, unitIssues, type TackleInput } from '../src/tackle';
+import { crossWind, tackleClass, tackleLine, tackleLevrekLine, DEFAULT_PROFILES, JIG_SIZES, lightCase, R19_CITE, tackle, tackleLevrek, tackleLevrekShort, tackleShort, unitIssues, type TackleInput } from '../src/tackle';
 
 const base: TackleInput = { depthM: 4, currentMs: 0.05, windKmh: 8, gustKmh: 12, crossKmh: 4, sunAlt: -20, lampP: 0.9, turbidity: 1, sstDev: 0 };
 
@@ -57,10 +57,11 @@ describe('tackle (F0/G2)', () => {
     expect(t.rows.map((r) => r.key)).toEqual(['takim', 'jighead', 'igne', 'silikon', 'renk', 'saydirma', 'yasal']);
     const hook = t.rows.find((r) => r.key === 'igne')!;
     expect([hook.value, hook.evidence]).toEqual(['#8', 'C']);
-    expect(hook.why).toMatch(/çapari \(el oltası\) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı \(R19b:/);
+    expect(hook.why).toMatch(/çapari \(el oltası\) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı \(R19b\)/);
     expect(hook.why).toMatch(/#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş/);
     expect(hook.why).toMatch(/#10: daha çok vuruş, 13 cm altı oranı yüksek, geri bırakma/);
-    expect(hook.why).toContain(R19_CITE);
+    expect(hook.why).not.toContain(R19_CITE); // M2: the citation sits under "Neden?", not in the row
+    expect(hook.source).toBe(R19_CITE);
     expect(t.rows.find((r) => r.key === 'jighead')!.why).toMatch(/modelin gece kolu/);
     expect(t.rows.find((r) => r.key === 'yasal')!.value).toBe('13 cm');
     expect(t.notes.join(' ')).toMatch(/yasak \(md\. 8\/8\)/);
@@ -109,7 +110,19 @@ describe('tackle (F0/G2)', () => {
     const g = tackle({ ...base, gustKmh: 45 });
     expect(g.profile).toBe('lrf');
     expect(g.notes.join(' ')).toMatch(/Hamle 45 km\/sa: atışta misinayı elle frenle, rüzgara yan at/);
-    expect(DEFAULT_PROFILES[1]).toMatchObject({ jigMin: 6, jigMax: 32 });
+    expect(DEFAULT_PROFILES[1]).toMatchObject({ jigMin: 6, jigMax: 30 });
+  });
+
+  it('M2: brand-free defaults, generic classes and the plain one-line', () => {
+    const txt = JSON.stringify(DEFAULT_PROFILES);
+    expect(txt).not.toMatch(/Gosen|Ares|Vanford|Bassterra|Nasci|Kairiki|Daiwa|Shimano/);
+    expect(DEFAULT_PROFILES.map((p) => p.name)).toEqual(['Ultra hafif / LRF (0,5–5 g)', 'Spin (6–30 g)']);
+    expect(DEFAULT_PROFILES[0]!.line).toBe('PE 0.2–0.4 + ≈3–5 lb florokarbon lider');
+    expect([tackleClass('lrf', 2).label, tackleClass('spin', 10).label, tackleClass('spin', 21).label]).toEqual(['Ultra hafif / LRF (0,5–5 g)', 'Hafif spin (3–15 g)', 'Spin (6–30 g)']);
+    expect(tackleLine(tackle(base))).toBe('Ultra hafif LRF · 1,2 g sabit jighead · #8 iğne · 5 cm şeffaf-simli silikon · yüzeye yakın, 3–5 sn say');
+    expect(tackleLevrekLine(tackleLevrek({ ...base, waveM: 0.6 }))).toMatch(/^Hafif spin · \d+ g · /);
+    expect(tackleLevrekLine(tackleLevrek({ ...base, waveM: 0.1, currentMs: 0.05, windKmh: 5, gustKmh: 8, depthM: 2, kind: 'harbour' }))).toMatch(/^Hafif LRF · /);
+    for (const t of [tackle(base), tackleLevrek(base)]) expect(JSON.stringify(t.rows)).not.toMatch(/Gosen|Bassterra|Kairiki|Daiwa/);
   });
 
   it('units in every text (G2)', () => {

@@ -4,7 +4,7 @@ import type { Env } from '../env';
 import { ACTIVE_COUNT_SQL, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, isSpecies, SPECIES, type FieldDepthRow, type FieldObsRow, type ListEntryV2, type Species } from '../precompute_v2';
 import { FETCHED_SQL, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
-import { parseProfiles } from '../lib/tackle';
+import { DEFAULT_PROFILES } from '@av-livn/scoring';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
@@ -34,10 +34,9 @@ publicRoutes.get('/forbidden', async (c) => {
     NO_CACHE,
   );
 });
-publicRoutes.get('/tackle', async (c) => {
-  const r = await c.env.DB.prepare("SELECT value FROM meta WHERE key = 'tackle_profiles'").first<{ value: string }>();
-  return c.json({ ok: true, profiles: parseProfiles(r?.value) }, 200, NO_CACHE);
-});
+// M2: the public endpoint returns the generic, brand-free classes only; the owner's personal set is admin-only
+// (GET /api/admin/tackle) and a visitor's own set lives on their device.
+publicRoutes.get('/tackle', (c) => c.json({ ok: true, profiles: DEFAULT_PROFILES }, 200, NO_CACHE));
 
 type Ctx = Context<{ Bindings: Env }>;
 

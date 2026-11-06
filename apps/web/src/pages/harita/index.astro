@@ -14,7 +14,8 @@ import Base from '../../layouts/Base.astro';
       <p>Meralar uzak görünümde yerleşim rozetinde toplanır ("Armutlu · 18 mera", en iyi puanın rengi); rozete dokununca liste açılır, yakınlaşınca her mera kendi yerinde görünür.</p>
       <p><span class="sw dot"></span> Meralar v2 puan rengiyle: <b class="g">≥ 65</b>, <b class="w">40–65</b>, <b class="b">&lt; 40</b>. Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir.</p>
       <p><label class="lt"><input type="checkbox" id="show-cand" checked /> <span class="sw cand"></span> Aday yerler (OSM envanteri, henüz puanlanmadı)</label></p>
-      <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Erişim yasak: ticari liman, sanayi, askeri alan veya işaretlenmiş yasak alan</label></p>
+      <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Taralı kırmızı alan: ticari liman, sanayi, askeri alan veya işaretlenmiş yasak alan; mera eklenmez</label></p>
+      <p><span class="sw pick"></span> Turuncu halka: ana sayfadaki önerilen mera</p>
       <p>Çizgiler 2, 5, 10, 15, 20, 30, 50, 75, 100 m. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki derinliği göstermez.</p>
     </details>
   </section>
@@ -32,8 +33,9 @@ import Base from '../../layouts/Base.astro';
   .legend p { margin: 6px 0 0; line-height: 1.4; }
   .legend .lt { display: flex; gap: 6px; align-items: center; min-height: 32px; }
   .legend .lt input { width: 18px; height: 18px; margin: 0; }
+  .sw.pick { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--sodium); background: none; }
   .sw.cand { width: 10px; height: 10px; transform: rotate(45deg); border: 2px solid #b9c4c9; display: inline-block; margin: 0 4px; }
-  .sw.forb { width: 14px; height: 10px; background: rgba(214, 80, 72, 0.35); border: 1.5px solid #d65048; display: inline-block; }
+  .sw.forb { width: 14px; height: 10px; background: repeating-linear-gradient(135deg, rgb(214 80 72 / .8) 0 1.6px, transparent 1.6px 5px); border: 1.2px solid #d65048; display: inline-block; }
   .legend b.g { color: var(--good); } .legend b.w { color: var(--warn); } .legend b.b { color: var(--bad); }
   .sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
   .sw.hatch { background: repeating-linear-gradient(135deg, rgb(219 230 234 / .7) 0 1.6px, transparent 1.6px 5.6px), #2f78a6; }

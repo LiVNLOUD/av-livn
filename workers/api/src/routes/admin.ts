@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import type { Env } from '../env';
 import { catchRoutes } from './catch';
 import { notifyRoutes } from './notify';
-import { validateProfiles } from '../lib/tackle';
+import { parseProfiles, validateProfiles } from '../lib/tackle';
 import { forbiddenUpdates, parseArea, validateArea, type SpotPos } from '../lib/forbidden';
 import { CELL_DEG, cellKey } from '../lib/seed';
 import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
@@ -96,6 +96,12 @@ adminRoutes.delete('/forbidden/:id', async (c) => {
   const r = await c.env.DB.prepare('DELETE FROM forbidden_area WHERE id = ?1').bind(c.req.param('id')).run();
   if (!r.meta.changes) return c.json({ ok: false, error: 'not_found' }, 404);
   return c.json({ ok: true, ...(await applyForbidden(c.env.DB)) });
+});
+
+/** M2: the owner's personal set (was public before M2), for moving it to the device profile. */
+adminRoutes.get('/tackle', async (c) => {
+  const r = await c.env.DB.prepare("SELECT value FROM meta WHERE key = 'tackle_profiles'").first<{ value: string }>();
+  return c.json({ ok: true, stored: !!r, profiles: parseProfiles(r?.value) }, 200, { 'cache-control': 'no-store' });
 });
 
 adminRoutes.put('/tackle', async (c) => {

@@ -16,7 +16,7 @@ export { rawScore, staticTerms, STRUCT_SHARE, FIELD_REACH_M, fieldMix, dynamicTe
 export { calibrate, R_IDEAL, R_WORST, SCALE, IDEAL_SPOT, IDEAL_WEATHER, WORST_SPOT, WORST_WEATHER } from './v2/calibrate';
 export { PARAMS, DEFAULTS, SIGMA, drawParams, rng, paramBasis, BASIS_TR, type Evidence, type Basis, type ParamDef, type ParamKey, type Params } from './v2/params';
 export { skyAt, dayOfYear } from './v2/astro';
-export { tackle, tackleShort, tackleLevrek, tackleLevrekShort, LEGAL_MIN_LEVREK_CM, SPIN_SIZES, type LevrekTackle, crossWind, lightCase, unitIssues, DEFAULT_PROFILES, JIG_SIZES, R19_CITE, LEGAL_MIN_ISTAVRIT_CM, type Tackle, type TackleInput, type TackleProfile, type TackleRow } from './tackle';
+export { tackle, tackleShort, tackleLine, tackleLevrekLine, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekShort, LEGAL_MIN_LEVREK_CM, SPIN_SIZES, type LevrekTackle, crossWind, lightCase, unitIssues, DEFAULT_PROFILES, JIG_SIZES, R19_CITE, LEGAL_MIN_ISTAVRIT_CM, type Tackle, type TackleInput, type TackleProfile, type TackleRow } from './tackle';
 export { sinkSpeed, calibrateSink, fieldDepths, PAIR_M, PRIOR_REL_SD, type SinkObs, type PlumbObs, type ConvertedDepth, type SinkCalibration } from './v2/sink';
 export { BANDS_V2, bandV2, RANK_FIRST_WIDTH, leadWithRank } from './v2/display';
 export { explain, explainAll, DRIVERS, type DriverKey, type Reason } from './v2/explain';

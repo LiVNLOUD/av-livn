@@ -2,13 +2,23 @@
 
 Amaç: kartta, o saatin koşullarına göre **hangi kamış, hangi jighead, hangi silikon** sorusuna kısa bir öneri. Öneri puanı değiştirmez. Kurallar sezgiseldir (kanıt C) ve av günlüğündeki yöntem alanlarıyla (jighead g, iğne no, silikon boyu/rengi, lamba altı) kalibre edilir.
 
-## Kullanıcının takım profilleri
-| Profil | Kamış | Makine | Ana misina | Leader | Kullanım alanı |
-|---|---|---|---|---|---|
-| **LRF** | Ares Blue Porter AJ-S 6.3 (≈ 190 cm, ultra hafif, solid tip) | Vanford FA C2000S | Gosen PE 0.2 | FC 0.8–1.2 numara (≈3–5 lb, 60–100 cm) | 0,6–5 g jighead, iskele/mendirek dibi ve iskelenin mevcut aydınlatması, rüzgar ≤ ~20 km/sa |
-| **Spin** | Bassterra XT+ 274 cm (atış 6–32 g) | Nasci FD C3000 HG | Kairiki 8 (PE kalınlığı profilde kayıtlı değil) | Daiwa Prorex FC | istavritte 6–10 g mikro metal jig / ağır jighead; derin uç, güçlü akıntı |
+## Takım sınıfları (M2: markadan bağımsız)
+Herkese açık öneri genel takım sınıflarını kullanır; marka ya da model adı geçmez (`DEFAULT_PROFILES`, `TACKLE_CLASSES`, packages/scoring).
 
-Profil verisi `data/tackle.yaml` (ileride): `{id, ad, atış ağırlığı min–max g, misina PE, leader lb, max rüzgar km/sa}`. Kartta seçilen profil localStorage'da hatırlanır.
+| Sınıf | Atış ağırlığı | İp + lider (genel ölçü) | Kullanım |
+|---|---|---|---|
+| **Ultra hafif / LRF** | 0,5–5 g | PE 0.2–0.4 + ≈3–5 lb florokarbon lider | iskele ve mendirek dibi, iskelenin mevcut aydınlatması, rüzgar ≤ ~20 km/sa |
+| **Hafif spin** | 3–15 g | PE 0.4–0.8 + ≈6–8 lb florokarbon lider | istavritte 6–10 g mikro metal jig ya da ağır jighead; derin uç, güçlü akıntı |
+| **Spin** | 6–30 g | PE 0.6–1.0 + ≈8–12 lb florokarbon lider | levrek; dalga ve uzun atış |
+
+Motor iki set kullanır: hafif (LRF) ve ağır (spin). Ağır set önerilen ağırlık 15 g'a kadarsa "Hafif spin", üstündeyse "Spin" diye adlandırılır.
+
+**Kişisel takım isteğe bağlıdır ve cihazda kalır.** Ayarlar → Takımım'a girilir; tarayıcıda `localStorage` `av-livn-my-tackle` anahtarında saklanır ve sunucuya gönderilmez. İki set girilebilir: hafif ve ağır, her biri atış aralığı, ip ve lider. Girilen set motorda genel sınıfın yerine geçer; ağırlık kendi aralığında sınırlanır ve kartta "senin takımına göre" yazar.
+
+M2 öncesinde yöneticinin kişisel seti sunucuda (`meta.tackle_profiles`) tutuluyordu ve `/api/tackle` bu seti herkese döndürüyordu. Artık:
+- `/api/tackle` yalnız genel sınıfları döndürür;
+- kişisel set yalnız `ADMIN_TOKEN` ile okunur (`GET /api/admin/tackle`);
+- Ayarlar → Takımım → "Sunucudaki profilimi bu cihaza taşı" seti kaybetmeden cihaza aktarır.
 
 ## Kurallar (girdiler model çıktısında zaten var)
 Girdiler: yakın-uç derinliği (DTM/saha, 0–50 ve 50–150 m), akıntı (Copernicus 1–5 m, m/s), rüzgar ve hamle (km/sa), uca göre rüzgar yönü (maruziyet), ışık (ortam lüksü + iskelenin mevcut aydınlatması olasılığı), bulanıklık terimi (yağış/dalga), su sıcaklığı.
@@ -27,7 +37,7 @@ Girdiler: yakın-uç derinliği (DTM/saha, 0–50 ve 50–150 m), akıntı (Cope
 - **Takım geçişi yalnız gramaja göre (H1):**
   - LRF 5 g'a kadar.
   - 5–6 g arası LRF 5 g kalır, saydırma uzar.
-  - Spin YALNIZ ≥ 6 g gerektiğinde; Bassterra XT+ 274'ün alt sınırı 6 g, "spin + < 6 g" testle yasak.
+  - Spin YALNIZ ≥ 6 g gerektiğinde; spin setinin alt sınırı 6 g, "spin + < 6 g" testle yasak.
 - **Hamle takımı değiştirmez:** profil sınırını (25 km/sa) aşınca not eklenir, ör. "hamle 30 km/sa: atışta misinayı elle frenle, rüzgara yan at". Güvenlik kapısı ayrı.
 - **İstavritte spin:**
   - 6–10 g mikro metal jig (derin uç, akıntıda dikine) ya da 6–7 g ağır jighead.

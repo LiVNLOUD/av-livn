@@ -62,12 +62,16 @@ export interface MapOpts {
   bounds?: [[number, number], [number, number]];
   /** H3: species whose scores colour the markers. */
   species?: Species;
+  /** M3: spot to highlight (the plan's pick). */
+  highlight?: string | null;
 }
 export interface MapApi {
   setHour(at: string | null): Promise<void>;
   setSpecies(s: Species): Promise<void>;
   resize(): void;
   flyTo(id: string): void;
+  /** M3: highlight the plan's pick (null clears). */
+  highlight(id: string | null): void;
 }
 
 /** I2: MapLibre 6 needs WebGL2. Without it the map is replaced by a note; list, plan and heat map keep working. */
@@ -78,7 +82,7 @@ export function webgl2Ok(): boolean {
     return false;
   }
 }
-const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {} };
+const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {} };
 function noMap(container: HTMLElement, why: string): MapApi {
   const note = document.createElement('div');
   note.className = 'map-loading map-off-note';
@@ -109,6 +113,8 @@ loading.textContent = 'Meralar yükleniyor…';
 o.container.append(loading);
 let at: string | null = o.at ?? null;
 let species: Species = o.species ?? 'istavrit';
+let pickId: string | null = o.highlight ?? null;
+let setPick: (id: string | null) => void = () => {};
 
 const scaleEl = ui('scale');
 if (scaleEl) scaleEl.innerHTML = DEPTH_STOPS.filter((_, i) => i % 2 === 0)
@@ -229,13 +235,13 @@ map.addControl(
 );
 
 // Diagonal hatch for the optional "belirsiz derinlik" layer (interpolated, GEBCO-filled areas).
-const addHatch = () => {
-  if (map.hasImage('hatch')) return;
+const addHatch = (id = 'hatch', stroke = 'rgba(219,230,234,0.85)') => {
+  if (map.hasImage(id)) return;
   const n = 8;
   const c = document.createElement('canvas');
   c.width = c.height = n;
   const g = c.getContext('2d')!;
-  g.strokeStyle = 'rgba(219,230,234,0.85)';
+  g.strokeStyle = stroke;
   g.lineWidth = 1.6;
   g.beginPath();
   g.moveTo(0, n);
@@ -245,9 +251,11 @@ const addHatch = () => {
   g.moveTo(n / 2, n + n / 2);
   g.lineTo(n + n / 2, n / 2);
   g.stroke();
-  map.addImage('hatch', g.getImageData(0, 0, n, n), { pixelRatio: 1 });
+  map.addImage(id, g.getImageData(0, 0, n, n), { pixelRatio: 1 });
 };
-map.on('styleimagemissing', (e) => e.id === 'hatch' && addHatch());
+// M3: forbidden areas (port, industry, military) are a red hatch with a legend entry, never a text label
+const addForbHatch = () => addHatch('hatch-forb', 'rgba(214,80,72,0.75)');
+map.on('styleimagemissing', (e) => (e.id === 'hatch' ? addHatch() : e.id === 'hatch-forb' ? addForbHatch() : undefined));
 
 const card = (ui('card') ?? document.createElement('aside')) as HTMLElement;
 function showCard(s: Spot) {
@@ -287,13 +295,9 @@ map.on('load', async () => {
   await spotsReady;
   cand.features = (cand.features ?? []).filter((f: { properties: { id: string } }) => !byId.has(f.properties.id));
   map.addSource('forbidden', { type: 'geojson', data: forb });
-  map.addLayer({ id: 'forb-fill', type: 'fill', source: 'forbidden', paint: { 'fill-color': '#d65048', 'fill-opacity': 0.22 } });
-  map.addLayer({ id: 'forb-line', type: 'line', source: 'forbidden', paint: { 'line-color': '#d65048', 'line-width': 1.4 } });
-  map.addLayer({
-    id: 'forb-label', type: 'symbol', source: 'forbidden', minzoom: 11,
-    layout: { 'text-field': ['concat', ['get', 'name'], '\n', ['coalesce', ['get', 'kind'], ['match', ['get', 'source'], 'yönetici', 'işaretlenmiş yasak alan', 'ticari liman']], ' · mera eklenmez'], 'text-font': ['Noto Sans Bold'], 'text-size': 10.5 },
-    paint: { 'text-color': '#f2a29c', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.4 },
-  });
+  addForbHatch();
+  map.addLayer({ id: 'forb-fill', type: 'fill', source: 'forbidden', paint: { 'fill-pattern': 'hatch-forb', 'fill-opacity': 0.9 } });
+  map.addLayer({ id: 'forb-line', type: 'line', source: 'forbidden', paint: { 'line-color': '#d65048', 'line-width': 1.2, 'line-opacity': 0.8 } });
   // Candidates: hollow diamonds (shape differs from the scored discs, not only colour), 14–22 px.
   const D = 32;
   const diamond = new ImageData(2 * D, 2 * D);
@@ -320,7 +324,7 @@ map.on('load', async () => {
     el?.addEventListener('change', () => layers.forEach((l) => map.setLayoutProperty(l, 'visibility', el.checked ? 'visible' : 'none')));
   };
   toggle('show-cand', ['cands', 'cand-labels']);
-  toggle('show-forb', ['forb-fill', 'forb-line', 'forb-label']);
+  toggle('show-forb', ['forb-fill', 'forb-line']);
 
   // E4: the explanation opens next to the point; the owner can approve/reject/rename right there.
   const popup = new maplibregl.Popup({ closeButton: true, maxWidth: '300px', className: 'av-pop' });
@@ -467,7 +471,7 @@ map.on('load', async () => {
     }
   map.addImage('disc', disc, { sdf: true, pixelRatio: 2 });
   map.addLayer({
-    id: 'spot-labels', type: 'symbol', source: 'spots',
+    id: 'spot-labels', type: 'symbol', source: 'spots', minzoom: 12, // M3: far zoom shows settlement badges only
     layout: {
       'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 10.5, 14, 13],
       'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'bottom-right', 'bottom-left', 'top-right'],
@@ -507,6 +511,26 @@ map.on('load', async () => {
     },
     paint: { 'icon-color': color as never, 'icon-halo-color': '#0e1c27', 'icon-halo-width': 1.5, 'text-color': '#0e1c27' },
   });
+
+  // M3: the plan's pick, highlighted at every zoom (ring + name), above badges and markers
+  map.addSource('pick', { type: 'geojson', data: empty });
+  map.addLayer({ id: 'pick-ring', type: 'circle', source: 'pick', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 9, 14, 15], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#f5a83c', 'circle-stroke-width': 3 } });
+  map.addLayer({
+    id: 'pick-label', type: 'symbol', source: 'pick',
+    layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-size': 13, 'text-anchor': 'top', 'text-offset': [0, 1.3], 'text-max-width': 12, 'text-allow-overlap': true },
+    paint: { 'text-color': '#f5a83c', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.8 },
+  });
+  setPick = (id) => {
+    pickId = id;
+    const s = id ? byId.get(id) : undefined;
+    (map.getSource('pick') as maplibregl.GeoJSONSource | undefined)?.setData({
+      type: 'FeatureCollection',
+      features: s ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: [s.lon, s.lat] }, properties: { name: s.name } }] : [],
+    });
+  };
+  setPick(pickId);
+  const p0 = pickId ? byId.get(pickId) : undefined;
+  if (p0 && !o.focusId) map.jumpTo({ center: [p0.lon, p0.lat] });
 
   /**
    * G5: below BADGE_ZOOM the spots of one settlement show as one badge ("Armutlu · 18 mera", best score colour);
@@ -615,6 +639,13 @@ return {
     loading.hidden = true;
   },
   resize: () => map.resize(),
+  highlight(id) {
+    const changed = id !== pickId;
+    pickId = id;
+    setPick(id);
+    const s = id ? byId.get(id) : undefined;
+    if (changed && s) map.easeTo({ center: [s.lon, s.lat] });
+  },
   flyTo(id) {
     const s = byId.get(id);
     if (s) map.easeTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 12.5) });

@@ -19,10 +19,21 @@ export interface TackleProfile {
   line: string;
 }
 
+// M2: brand-free defaults (generic classes and line sizes). A personal set lives on the device (Ayarlar → Takımım).
 export const DEFAULT_PROFILES: TackleProfile[] = [
-  { id: 'lrf', name: 'LRF: Ares Blue Porter AJ-S 6.3 + Vanford FA C2000S', jigMin: 0.6, jigMax: 5, maxGustKmh: 25, line: 'Gosen PE 0.2 + FC 0.8–1.2 numara (≈3–5 lb)' },
-  { id: 'spin', name: 'Spin: Bassterra XT+ 274 + Nasci FD C3000 HG', jigMin: 6, jigMax: 32, maxGustKmh: 50, line: 'Kairiki 8 + Daiwa Prorex FC' },
+  { id: 'lrf', name: 'Ultra hafif / LRF (0,5–5 g)', jigMin: 0.5, jigMax: 5, maxGustKmh: 25, line: 'PE 0.2–0.4 + ≈3–5 lb florokarbon lider' },
+  { id: 'spin', name: 'Spin (6–30 g)', jigMin: 6, jigMax: 30, maxGustKmh: 50, line: 'PE 0.6–1.0 + ≈8–12 lb florokarbon lider' },
 ];
+
+/** M2: generic class of a suggestion by set and cast weight (no brand). */
+export const TACKLE_CLASSES = {
+  lrf: { short: 'Ultra hafif LRF', label: 'Ultra hafif / LRF (0,5–5 g)', line: 'PE 0.2–0.4 + ≈3–5 lb florokarbon lider' },
+  lightSpin: { short: 'Hafif spin', label: 'Hafif spin (3–15 g)', line: 'PE 0.4–0.8 + ≈6–8 lb florokarbon lider' },
+  spin: { short: 'Spin', label: 'Spin (6–30 g)', line: 'PE 0.6–1.0 + ≈8–12 lb florokarbon lider' },
+} as const;
+export function tackleClass(profile: 'lrf' | 'spin', g: number): (typeof TACKLE_CLASSES)[keyof typeof TACKLE_CLASSES] {
+  return profile === 'lrf' ? TACKLE_CLASSES.lrf : g <= 15 ? TACKLE_CLASSES.lightSpin : TACKLE_CLASSES.spin;
+}
 
 import { PRIOR_REL_SD, sinkSpeed } from './v2/sink';
 
@@ -60,6 +71,8 @@ export interface TackleRow {
   value: string;
   why: string;
   evidence: Evidence;
+  /** M2: literature behind the row, shown under "Neden?" (not in the row text). */
+  source?: string;
 }
 
 export interface Tackle {
@@ -207,7 +220,7 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
     },
     {
       key: 'igne', label: 'İğne', value: '#8', evidence: 'C',
-      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, ${legalMinCm} cm altı oranı yüksek, geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm — çapari (el oltası) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı (R19b: ${R19_CITE})`,
+      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, ${legalMinCm} cm altı oranı yüksek, geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm — çapari (el oltası) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı (R19b)`, source: R19_CITE,
     },
     {
       key: 'silikon', label: 'Silikon', value: `${lureCm} cm, ${shape}`, evidence: 'C',
@@ -234,6 +247,12 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
   return { profile: profile.id, jigG, jigType, hook: 8, lureCm, color, zone, targetM, sinkS, totalG, rows, notes, light };
 }
 
+/** M1: one plain line for the home plan: class · jighead · hook · lure · layer and count (no brand). */
+export function tackleLine(t: Tackle): string {
+  const v = (k: TackleRow['key']) => t.rows.find((r) => r.key === k)!.value; // istavrit rows always carry renk and saydirma
+  return `${tackleClass(t.profile, t.jigG).short} · ${n1(t.jigG)} g ${t.jigType} jighead · #${t.hook} iğne · ${t.lureCm} cm ${v('renk')} silikon · ${t.zone}, ${v('saydirma').replace(/ s$/, ' sn')} say`;
+}
+
 /** One-line version (Sahadayım, home page). */
 export function tackleShort(t: Tackle): string {
   return `${t.profile === 'lrf' ? 'LRF' : 'Spin'} · ${n1(t.jigG)} g ${t.jigType} · #${t.hook} · ${t.lureCm} cm ${t.color}`;
@@ -246,7 +265,7 @@ export function crossWind(windKmh: number | null, windDir: number | null, normal
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// H3: levrek tackle (docs/species/levrek/TACKLE.md). Spin by default (Bassterra XT+ 274, 6–32 g); light levrek on the
+// H3: levrek tackle (docs/species/levrek/TACKLE.md). Spin by default (generic 6–30 g class); light levrek on the
 // LRF set only in calm, shallow, sheltered water. All rules C except the legal size (A).
 export const LEGAL_MIN_LEVREK_CM = 25;
 export const SPIN_SIZES = [7, 10, 14, 18, 21, 24, 28, 32];
@@ -314,7 +333,7 @@ function levrekOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
   const rows: TackleRow[] = [
     {
       key: 'takim', label: 'Takım', value: useLrf ? 'LRF (hafif levrek)' : 'Spin', evidence: 'C',
-      why: useLrf ? `sakin (dalga ${n1(wave)} m), sığ (${n1(depth)} m) ve korunaklı: hafif levrek; FC'yi 1.5–2 numaraya (≈6–8 lb) çıkar` : `${spin.name.replace(/^Spin: /, '')}, atış ${n1(spin.jigMin)}–${n1(spin.jigMax)} g; dalga ${n1(wave)} m`,
+      why: useLrf ? `sakin (dalga ${n1(wave)} m), sığ (${n1(depth)} m) ve korunaklı: hafif levrek; FC'yi 1.5–2 numaraya (≈6–8 lb) çıkar` : `spin takımı, atış ${n1(spin.jigMin)}–${n1(spin.jigMax)} g (${spin.line}); dalga ${n1(wave)} m`,
     },
     { key: 'agirlik', label: 'Ağırlık', value: `${n1(weightG)} g`, evidence: 'C', why: useLrf ? 'kısa atış, yavaş düşüş' : `dalga ${n1(wave)} m${cur >= 0.25 ? `, akıntı ${n1(cur)} m/s` : ''}${depth >= 8 ? `, derin uç ${n1(depth)} m` : ''}: kıyıdan atış mesafesi ve dibe temas` },
     { key: 'yem', label: 'Yem', value: `${lure}, ${lureCm}`, evidence: 'C', why: turbid ? 'bulanık su: titreşimli kürek kuyruk, bir boy büyük' : cold ? 'su normalden soğuk: küçük ve yavaş' : lure === 'minnow' ? 'sığ suda alacakaranlık/gece yüzeye yakın av' : lure === 'metal jig' ? 'gündüz derin uç ya da akıntı' : 'yem balığı taklidi' },
@@ -325,6 +344,11 @@ function levrekOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
   const notes = ['Kendi ışığınızla balık toplamak yasak (md. 8/8); kafa lambasını suya tutmayın.'];
   if (gust > spin.maxGustKmh * 0.6) notes.push(`Hamle ${Math.round(gust)} km/sa: rüzgarı arkana ya da yana al, misinayı elle frenle.`);
   return { profile: useLrf ? 'lrf' : 'spin', weightG, lure, lureCm, color, rows, notes, light };
+}
+
+/** M1: plain one-line levrek version for the home plan. */
+export function tackleLevrekLine(t: LevrekTackle): string {
+  return `${t.profile === 'lrf' ? 'Hafif LRF' : tackleClass('spin', t.weightG).short} · ${n1(t.weightG)} g · ${t.lure} ${t.lureCm} · ${t.color}`;
 }
 
 /** One-line levrek version. */

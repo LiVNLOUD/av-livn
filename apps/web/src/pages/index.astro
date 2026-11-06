@@ -1,46 +1,57 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="av.livn — Nereye, ne zaman?" app>
-  <div class="app" id="app" data-tab="map">
+<Base title="av.livn — Av planı" app>
+  <div class="app" id="app" data-view="plan">
+    <!-- M1: the plan is the first view at every width; the hour chart and the full list are one tap away -->
+    <div class="views" role="tablist" aria-label="Görünüm">
+      <button type="button" role="tab" data-v="plan" aria-selected="true">Plan</button>
+      <button type="button" role="tab" data-v="heat" aria-selected="false">Saat çizelgesi</button>
+      <button type="button" role="tab" data-v="spots" aria-selected="false">Tüm meralar</button>
+      <label class="sp-pick"><span class="lbl-t">Tür</span>
+        <select id="species" aria-label="Tür">
+          <option value="istavrit">İstavrit</option>
+          <option value="levrek">Levrek (deneysel)</option>
+          <option disabled>Lüfer / çinekop (araştırılıyor)</option>
+          <option disabled>Mırmır / karagöz (araştırılıyor)</option>
+          <option disabled>Kolyoz (araştırılıyor)</option>
+        </select>
+      </label>
+    </div>
+
     <section class="r-win" aria-labelledby="t-main">
-      <h1 id="t-main">Nereye, ne zaman?</h1>
-      <div class="species" role="radiogroup" aria-label="Tür">
-        <button type="button" role="radio" aria-checked="true" class="sp on" data-sp="istavrit">İstavrit</button>
-        <button type="button" role="radio" aria-checked="false" class="sp" data-sp="levrek" title="Deneysel: kanıtın çoğu C (docs/species/levrek)">Levrek</button>
-        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Lüfer / çinekop</button>
-        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Mırmır / karagöz</button>
-        <button type="button" role="radio" aria-checked="false" class="sp" disabled title="Araştırma aşamasında">Kolyoz</button>
-      </div>
-      <p class="fs-1 muted sp-note" id="sp-note">Levrek deneysel (kanıtın çoğu varsayım); diğer türler araştırma aşamasında.</p>
-
-      <!-- I9: first view = one plan, at most two alternatives; everything else is one tap away -->
+      <h1 id="t-main" class="vh">Av planı</h1>
       <div class="plan" id="plan" aria-live="polite">
-        <p class="verdict" id="verdict">Yükleniyor…</p>
-        <article class="card main-pick" id="pick" hidden></article>
+        <p class="eq-note" id="eq-note" hidden></p>
+        <div class="eq-pick" id="eq-pick" role="radiogroup" aria-label="Eşdeğer seçenekler" hidden></div>
+        <article class="card main-pick" id="pick">
+          <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub" id="verdict-sub"></p></div>
+          <div class="qa q2" hidden><h2 class="q">Nereye, ne zaman?</h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p></div>
+          <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
+          <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
+          <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p></div>
+          <details class="why-more" id="why-more" hidden>
+            <summary>Neden? Ayrıntılar (puan, belirsizlik, kanıt, kaynaklar)</summary>
+            <div id="why-detail"></div>
+            <p class="fs-2">Puan, o saatteki koşulların bu tür için tanımlı <b>ideal senaryoya göre yeri</b> (0–100); sahada doğrulanmış yakalama olasılığı değildir. <b>Bant</b> ve <b>“ilk 3'te”</b> payı yalnız model parametrelerinin belirsizliğini gösterir; hava tahmininin hatası dahil değildir. <b>Güçlü:</b> zirve ≥ 65 ve veri tam; <b>görece:</b> mevcut seçeneklerin en iyisi. Rüzgar ya da dalga verisi yoksa öneri verilmez.</p>
+            <p class="fs-2"><a href="/model/">Model nasıl çalışıyor?</a> · <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/DATA-SOURCES.md">Veri kaynakları</a></p>
+          </details>
+          <div class="go" id="pick-go" hidden><button type="button" class="btn" id="pick-open">Merayı ve saatleri aç</button><a class="btn secondary admin-only" id="pick-field" href="/sahadayim/" hidden>Sahadayım'da başlat</a></div>
+        </article>
+        <h2 class="alts-h" id="alts-h" hidden>Diğer seçenekler</h2>
         <ol class="alts" id="alts" hidden></ol>
-        <details class="why-box">
-          <summary>Puan ne demek? Öneri ne kadar sağlam?</summary>
-          <p>Puan, o saatteki koşulların bu tür için tanımlı <b>ideal senaryoya göre yeri</b> (0–100). Sahada doğrulanmış yakalama olasılığı değildir; av günlüğünde henüz yeterli ileriye dönük seans yok.</p>
-          <p><b>Bant</b> ve <b>“ilk 3'te”</b> oranı yalnız model parametrelerinin belirsizliğini gösterir. Hava tahmininin hatası ve modelin yapısı bu aralığa dahil değildir.</p>
-          <p><b>Güçlü:</b> zirve ≥ 65 ve veri tam. <b>Görece:</b> mevcut seçeneklerin en iyisi. Rüzgar ya da dalga verisi yoksa öneri verilmez.</p>
-          <p>Kanıt düzeyleri ve formüller: <a href="/model/">Model nasıl çalışıyor?</a> · Veri kaynakları ve geçerlilik kuralları: <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/DATA-SOURCES.md">DATA-SOURCES</a></p>
-        </details>
       </div>
-
-      <details class="more-win" id="more-win">
-        <summary>Tüm pencereler <span class="muted fs-2">önümüzdeki 72 saat</span></summary>
-        <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
-        <p class="muted fs-1" id="win-note"></p>
-      </details>
-      <p class="fs-2 to-all"><a href="#t-spots">Tüm meralar, saat çizelgesi ve harita ↓</a></p>
     </section>
 
     <section class="r-heat" aria-labelledby="t-heat">
+      <details class="more-win" id="more-win">
+        <summary>En iyi pencereler <span class="muted fs-2">önümüzdeki 72 saat</span></summary>
+        <ol class="windows" id="windows" aria-live="polite"><li class="muted">Yükleniyor…</li></ol>
+        <p class="muted fs-1" id="win-note"></p>
+      </details>
       <div class="heat-head">
         <h2 id="t-heat">Mera × saat</h2>
         <div class="heat-ctl">
-          <button type="button" class="btn small secondary map-toggle" id="map-toggle" hidden>Haritayı göster</button>
           <div class="seg-sm" role="radiogroup" aria-label="Isı haritası görünümü">
             <button type="button" role="radio" aria-checked="true" data-mode="score">Puan</button>
             <button type="button" role="radio" aria-checked="false" data-mode="diff">Meraya özgü fark</button>
@@ -54,7 +65,7 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <section class="r-spots" aria-labelledby="t-spots">
-      <h2 class="sec" id="t-spots">Meralar</h2>
+      <h2 class="sec" id="t-spots">Tüm meralar</h2>
       <div class="when" role="group" aria-label="Saat seçimi">
         <button type="button" id="now" class="btn secondary on">Şimdi</button>
         <select id="day" aria-label="Gün"></select>
@@ -67,11 +78,8 @@ import Base from '../layouts/Base.astro';
     </section>
 
     <section class="r-map" aria-label="Harita">
-      <div class="tabs" role="tablist" aria-label="Görünüm">
-        <button type="button" role="tab" id="tab-map" aria-selected="true">Harita</button>
-        <button type="button" role="tab" id="tab-heat" aria-selected="false">Isı haritası</button>
-      </div>
       <div class="mapbox" id="map"></div>
+      <p class="mini-legend fs-1"><span class="sw-pick" aria-hidden="true"></span> önerilen mera <span class="sw-forb" aria-hidden="true"></span> liman, sanayi, askeri alan: mera eklenmez · <a href="/harita/">tam harita</a></p>
     </section>
 
     <aside class="r-card" id="drawer" hidden aria-label="Mera kartı">
@@ -88,11 +96,30 @@ import Base from '../layouts/Base.astro';
 </Base>
 
 <style>
-  /* One grid; areas change per breakpoint (docs/DESIGN.md). */
-  .app { display: grid; gap: var(--s5); padding: var(--s4); grid-template-columns: minmax(0, 1fr); grid-template-areas: 'win' 'heat' 'spots'; }
-  .r-win { grid-area: win; } .r-heat { grid-area: heat; min-width: 0; } .r-spots { grid-area: spots; } .r-map { grid-area: map; display: none; } .r-card { grid-area: card; }
+  /* M1: one grid; the plan is the first view. ≥768 px: plan ~60 % | compact map ~40 %; hour chart full width. */
+  .app { display: grid; gap: var(--s4); padding: var(--s4); grid-template-columns: minmax(0, 1fr); grid-template-areas: 'views' 'main'; }
+  .views { grid-area: views; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+  .views button { min-height: 44px; padding: 0 var(--s4); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font: inherit; font-size: var(--fs-2); font-weight: 650; cursor: pointer; }
+  .views button[aria-selected='true'] { background: var(--swell); color: var(--foam); border-color: var(--mist); }
+  .sp-pick { margin-left: auto; display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-2); color: var(--mist); }
+  .sp-pick select { height: 44px; padding-top: 0; padding-bottom: 0; }
+  .r-win, .r-heat, .r-spots { grid-area: main; min-width: 0; }
+  .app:not([data-view='plan']) .r-win, .app:not([data-view='heat']) .r-heat, .app:not([data-view='spots']) .r-spots { display: none; }
+  .r-map { grid-area: map; display: none; }
+  .r-card { grid-area: card; }
+  :global(.vh) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (max-width: 767px) {
+    .views { gap: var(--s1); }
+    .views button { padding: 0 var(--s3); }
+    /* M4: the species picker sits in the header bar on phones so the five answers fit the first screen */
+    .sp-pick { position: absolute; top: calc((var(--header-h) - 44px) / 2); right: var(--s4); z-index: 31; }
+    .sp-pick .lbl-t { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .app { gap: var(--s3); padding-top: var(--s3); }
+  }
   @media (min-width: 768px) {
-    .app { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'win map' 'heat map' 'spots map'; }
+    .app { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); grid-template-areas: 'views views' 'main map'; }
+    .app[data-view='heat'] { grid-template-areas: 'views views' 'main main'; }
+    .app[data-view='heat'] .r-map { display: none !important; }
     .r-map { display: block; position: sticky; top: var(--s4); height: calc(100dvh - var(--header-h) - var(--s6)); }
     .r-card:not([hidden]) { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; height: 62dvh; }
   }
@@ -100,41 +127,16 @@ import Base from '../layouts/Base.astro';
     :global(body.app) { height: 100dvh; overflow: hidden; }
     :global(body.app main) { min-height: 0; }
     :global(body.app footer.site) { display: none; }
-    .app { height: 100%; padding: 0; gap: 0; grid-template-columns: 400px minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: 'win center card' 'spots center card'; }
-    .r-win, .r-spots { padding: var(--s5); border-right: 1px solid var(--swell); overflow: auto; }
-    .r-win { padding-bottom: 0; }
-    .r-spots { padding-top: var(--s4); }
-    .r-heat, .r-map { grid-area: center; position: relative; top: 0; height: auto; min-height: 0; }
-    .r-heat { overflow: auto; padding: var(--s5); padding-top: 64px; }
-    .app[data-tab='map'] .r-heat, .app[data-tab='heat'] .mapbox { display: none; }
-    .r-map { display: block; pointer-events: none; }
-    .r-map > * { pointer-events: auto; }
-    .app[data-tab='heat'] .r-map { z-index: 2; height: 56px; }
-    .tabs { display: flex !important; }
+    .app { height: 100%; padding: 0; gap: 0; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) auto; grid-template-areas: 'views views views' 'main map card'; }
+    .app[data-view='heat'] { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'views views' 'main card'; }
+    .views { padding: var(--s3) var(--s5); border-bottom: 1px solid var(--swell); }
+    .r-win, .r-spots, .r-heat { padding: var(--s5); overflow: auto; }
+    .r-spots > * { max-width: 900px; }
+    .r-map { position: relative; top: 0; height: auto; min-height: 0; border-left: 1px solid var(--swell); }
     .r-card:not([hidden]) { position: static; height: auto; width: 420px; border-left: 1px solid var(--swell); }
   }
-  @media (min-width: 1920px) {
-    /* H5: the heat map gets ≥ 16 px per hour (72 h ≈ 1150 px + 260 px names); the map narrows and can be folded */
-    .app { grid-template-columns: 340px minmax(1460px, 1fr) minmax(360px, 0.8fr) auto; grid-template-areas: 'win heat map card' 'spots heat map card'; }
-    .app.map-off { grid-template-columns: 340px minmax(0, 1fr) 0 auto; }
-    .app.map-off .r-map { display: none !important; }
-    .r-heat { grid-area: heat; padding-top: var(--s5); border-right: 1px solid var(--swell); }
-    .r-map { grid-area: map; }
-    .map-toggle { display: inline-flex !important; }
-    .app[data-tab] .r-heat, .app[data-tab] .mapbox { display: block; }
-    .app[data-tab] .r-map { height: auto; }
-    .tabs { display: none !important; }
-  }
-
-  .r-win h1 { margin-top: var(--s1); }
 
   .sec { margin: var(--s5) 0 var(--s3); display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
-  .species { display: flex; gap: var(--s2); overflow-x: auto; margin-top: var(--s4); padding-bottom: 2px; }
-  .sp { flex: none; height: 32px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font-size: var(--fs-2); font-weight: 600; }
-  @media (pointer: coarse), (max-width: 600px) { .sp { height: 44px; } }
-  .sp.on { background: var(--sodium); border-color: var(--sodium); color: #1a1205; }
-  .sp:disabled { opacity: 0.5; cursor: not-allowed; }
-  .sp-note { margin: var(--s2) 0 0; }
   .windows { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s2); }
   :global(.win) { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s1) var(--s3); }
   :global(.win .t) { font-weight: 700; font-size: var(--fs-3); line-height: var(--lh-3); }
@@ -145,7 +147,6 @@ import Base from '../layouts/Base.astro';
   :global(.win .actions) { grid-column: 1 / -1; margin-top: var(--s2); }
   .heat-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2); margin-bottom: var(--s3); }
   .legend-line { margin: 0 0 var(--s2); display: flex; align-items: center; gap: var(--s1); flex-wrap: wrap; }
-  .map-toggle { display: none; }
   .heat-ctl { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
   .seg-sm { display: inline-flex; border: 1px solid var(--swell); border-radius: 999px; padding: 2px; }
   .seg-sm button { border: 0; background: none; color: var(--mist); font: inherit; font-size: var(--fs-1); font-weight: 600; padding: 0 var(--s3); min-height: 32px; border-radius: 999px; cursor: pointer; }
@@ -198,9 +199,11 @@ import Base from '../layouts/Base.astro';
   .empty { padding: var(--s5) 0; }
   .mapbox { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
   @media (min-width: 1200px) { .mapbox { border-radius: 0; } }
-  .tabs { display: none; position: absolute; z-index: 3; top: var(--s3); left: var(--s3); gap: 2px; padding: 2px; border-radius: 999px; background: var(--deep); border: 1px solid var(--swell); }
-  .tabs button { height: 32px; padding: 0 var(--s3); border-radius: 999px; background: transparent; color: var(--mist); font-size: var(--fs-2); }
-  .tabs button[aria-selected='true'] { background: var(--swell); color: var(--foam); }
+
+  .mini-legend { position: absolute; z-index: 2; left: var(--s3); bottom: var(--s5); margin: 0; padding: var(--s1) var(--s3); border-radius: 8px; background: color-mix(in oklab, var(--deep) 88%, transparent); border: 1px solid var(--swell); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); max-width: calc(100% - 24px); }
+  .mini-legend a { color: var(--foam); }
+  .sw-pick { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--sodium); display: inline-block; }
+  .sw-forb { width: 14px; height: 10px; display: inline-block; border: 1.2px solid #d65048; background: repeating-linear-gradient(135deg, rgb(214 80 72 / .8) 0 1.6px, transparent 1.6px 5px); }
   .r-card { background: var(--deep); display: flex; flex-direction: column; min-height: 0; border-top: 1px solid var(--swell); }
   .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: var(--s2) var(--s3); border-bottom: 1px solid var(--swell); }
   .r-card iframe { flex: 1; width: 100%; border: 0; background: var(--sea); }
@@ -208,7 +211,9 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2, swimRule } from '../scripts/format';
-  import { DEFAULT_PROFILES, kindLabel, leadWithRank, tackle, tackleLevrek, tackleLevrekShort, tackleShort, type TackleProfile } from '@av-livn/scoring';
+  import { kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
+  import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
+  import { driverSentence, equalText, lightSentence, trust, weatherSentence } from '../scripts/plan';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
   import { columnMax, groupSame, isGroup, rankLabel, splitBeaches, tieCounts } from '../scripts/grouping';
@@ -218,7 +223,7 @@ import Base from '../layouts/Base.astro';
     id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null; private_marina?: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
   };
-  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
+  type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; reason?: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const app = $('app');
@@ -264,42 +269,28 @@ import Base from '../layouts/Base.astro';
   $('drawer-close').addEventListener('click', () => { $('drawer').hidden = true; requestAnimationFrame(() => mapApi?.resize()); });
   addEventListener('message', (e) => { if (e.origin === location.origin && e.data === 'close-card') $('drawer-close').click(); });
 
-  // ---------------------------------------------------------------- map (only where it is visible: ≥768 px)
+  // ---------------------------------------------------------------- map (≥768 px, beside the plan and the list)
   let mapApi: MapApi | null = null;
+  let pickId: string | null = null; // M3: the plan's pick, highlighted on the map
   async function ensureMap() {
-    if (mapApi || !wide.matches || app.classList.contains('map-off') || app.dataset.tab === 'heat' && innerWidth < 1920 && innerWidth >= 1200) return;
+    if (mapApi || !wide.matches || app.dataset.view === 'heat') return;
     const { mountMap } = await import('../scripts/map');
-    mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id), species });
+    mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id), species, highlight: pickId });
   }
-  const tab = (t: 'map' | 'heat') => {
-    app.dataset.tab = t;
-    $('tab-map').setAttribute('aria-selected', String(t === 'map'));
-    $('tab-heat').setAttribute('aria-selected', String(t === 'heat'));
-    if (t === 'map') ensureMap().then(() => mapApi?.resize());
-    else heat();
-  };
-  // H5: from 1920 px the map column can be folded so the heat map keeps ≥ 16 px per hour; folded by default < 2400 px
-  const MAPK = 'av-livn-map-off';
-  const xl = matchMedia('(min-width: 1920px)');
-  const mt = $<HTMLButtonElement>('map-toggle');
-  let mapOff = innerWidth < 2400;
-  try { const v = localStorage.getItem(MAPK); if (v !== null) mapOff = v === '1'; } catch {}
-  const applyMap = () => {
-    app.classList.toggle('map-off', xl.matches && mapOff);
-    mt.hidden = !xl.matches;
-    mt.textContent = mapOff ? 'Haritayı göster' : 'Haritayı gizle';
-    requestAnimationFrame(() => { mapApi?.resize(); heat(); });
-  };
-  mt.addEventListener('click', () => {
-    mapOff = !mapOff;
-    try { localStorage.setItem(MAPK, mapOff ? '1' : '0'); } catch {}
-    applyMap();
-    if (!mapOff) ensureMap();
-  });
-  xl.addEventListener('change', applyMap);
-  applyMap();
-  $('tab-map').addEventListener('click', () => tab('map'));
-  $('tab-heat').addEventListener('click', () => tab('heat'));
+  // ---------------------------------------------------------------- M1: views (Plan · Saat çizelgesi · Tüm meralar)
+  const VIEW = 'av-livn-view';
+  type View = 'plan' | 'heat' | 'spots';
+  const viewBtns = [...document.querySelectorAll<HTMLButtonElement>('.views [data-v]')];
+  function setView(v: View, remember = true) {
+    app.dataset.view = v;
+    viewBtns.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === v)));
+    if (remember) try { sessionStorage.setItem(VIEW, v); } catch {}
+    if (v === 'heat') requestAnimationFrame(() => { heat(); summary(); });
+    else ensureMap().then(() => requestAnimationFrame(() => mapApi?.resize()));
+  }
+  viewBtns.forEach((b) => b.addEventListener('click', () => setView(b.dataset.v as View)));
+  // the plan is the first view; a tab chosen in this browser session is kept on reload
+  try { const v = sessionStorage.getItem(VIEW); if (v === 'heat' || v === 'spots') setView(v, false); } catch {}
   wide.addEventListener('change', () => ensureMap());
 
   // ---------------------------------------------------------------- hour picker (Istanbul local time)
@@ -496,8 +487,8 @@ import Base from '../layouts/Base.astro';
     return [...vis].filter((s) => s.score.total !== null).sort((a, b) => (a.score.rank ?? 1e9) - (b.score.rank ?? 1e9))[0]?.id ?? null;
   }
 
-  let profiles: TackleProfile[] = DEFAULT_PROFILES;
-  fetch('/api/tackle').then((r) => (r.ok ? r.json() : null)).then((b) => { if (b?.profiles?.length) profiles = b.profiles; }).catch(() => {});
+  // M2: generic classes unless this device has its own set (Ayarlar → Takımım); nothing personal comes from the server
+  const myTk = toProfiles(loadMy());
   type Detail = { from: number; packed: { tk?: (number | null)[][] } | null };
   const details = new Map<string, Promise<Detail | null>>();
   const detail = (id: string) => {
@@ -533,7 +524,7 @@ import Base from '../layouts/Base.astro';
     if (!tkEl) return;
     if (!v || sc.gated) { tkEl.textContent = sc.gated ? 'Takım: güvenlik uyarısı varken öneri yok.' : 'Takım: veri yok.'; return; }
     const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: s.kind };
-    const short = species === 'levrek' ? tackleLevrekShort(tackleLevrek(input, profiles)) : tackleShort(tackle(input, profiles));
+    const short = species === 'levrek' ? tackleLevrekLine(tackleLevrek(input, myTk.profiles)) : tackleLine(tackle(input, myTk.profiles));
     tkEl.innerHTML = `Takım (${SPECIES_TR[species]}): <b>${esc(short)}</b> · yasal asgari boy ${LEGAL_MIN[species]} cm`;
   }
   const loadHours = () =>
@@ -584,27 +575,15 @@ import Base from '../layouts/Base.astro';
       : 'Güçlü: zirve ≥ 65 ve veri tam. Pencere: zirve saatin çevresinde puanın 65 ve zirve − 8\'in üstünde kaldığı en çok 4 saat; mera başına bir pencere.';
   }
 
-  // ---------------------------------------------------------------- I9: the plan (first view)
-  const COLOR_FILL: [RegExp, string][] = [[/şeffaf|beyaz|gümüş/, '#dfe9ef'], [/koyu|siyah|mor/, '#3a3550'], [/parlak|chartreuse/, '#e8e23a'], [/doğal/, '#c9b28a']];
-  const fillOf = (c: string) => COLOR_FILL.find(([re]) => re.test(c))?.[1] ?? '#c9b28a';
-  const ZONE_Y: Record<string, number> = { 'yüzeye yakın': 24, 'orta su': 52, 'dibe yakın': 80 };
-  /** Small rig picture: water column, target layer, jighead sized by grams, lure in its colour. */
-  function rigSvg(g: number, zone: string, color: string) {
-    const y = ZONE_Y[zone] ?? 52;
-    const r = Math.max(3, Math.min(9, 2.5 + Math.sqrt(g) * 1.6));
-    return `<svg viewBox="0 0 76 96" aria-hidden="true">
-      <rect x="0" y="10" width="76" height="86" rx="6" fill="#10283a"/>
-      <path d="M0 10 Q19 6 38 10 T76 10" stroke="#6fa3bf" fill="none" stroke-width="1.5"/>
-      <rect x="0" y="88" width="76" height="8" fill="#3b3326"/>
-      <line x1="38" y1="0" x2="38" y2="${y - r}" stroke="#dbe6ea" stroke-width="1" stroke-dasharray="2 2"/>
-      <circle cx="38" cy="${y}" r="${r.toFixed(1)}" fill="#b9c4cc"/>
-      <path d="M${38 + r} ${y} q12 -5 22 3 q-10 5 -22 -3z" fill="${fillOf(color)}" stroke="#0e1c27" stroke-width=".6"/>
-      <rect x="2" y="${y - 7}" width="6" height="14" rx="2" fill="var(--sodium, #f2a93b)"/>
-    </svg>`;
-  }
+  // ---------------------------------------------------------------- M1: the plan card (five questions, plain words)
+  const ACCESS_TR: Record<string, string> = { kisitli_feribot: 'erişim kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
   let planSeq = 0;
+  let eqSel = 0;
+  let eqKey = '';
+  const qa = (cls: string, on: boolean) => { pick.querySelector<HTMLElement>(cls)!.hidden = !on; };
+  const pick = $('pick');
   async function renderPlan() {
-    const my = ++planSeq;
+    const myN = ++planSeq;
     if (!winBody || !all.length) return; // drawn again when both the windows and the spot list are in
     // J3: Ayarlar → "Ana öneriye Bursa dışını da dahil et" (this device; default off)
     let withOutside = false;
@@ -612,19 +591,19 @@ import Base from '../layouts/Base.astro';
     // K1: private yacht marinas are never the plan's pick (listed with their badge)
     const isMarina = (w: Win) => !!all.find((x) => x.id === w.spot_id)?.private_marina;
     const inBursa = (w: Win) => !isMarina(w) && (withOutside || !outside(all.find((x) => x.id === w.spot_id) ?? {}));
-    const provOf = (id: string) => all.find((x) => x.id === id)?.province ?? null;
-    const PROV_TR: Record<string, string> = { yalova: 'Yalova', balikesir: 'Balıkesir' };
-    const provBadge = (id: string) => { const p = provOf(id); return p && p !== 'bursa' ? `<span class="badge">${PROV_TR[p] ?? p}</span>` : ''; };
     // L: server-side plan candidates (marinas and outside spots removed before the top 5 is cut)
     const P = winBody.plan?.[withOutside ? 'wide' : 'bursa'];
     const b = P ? (box.checked ? P.open : P.all) : box.checked && winBody.open ? winBody.open : winBody;
     const ws = b.windows.filter(inBursa);
-    const pick = $('pick');
     const alts = $('alts');
-    const verdict = $('verdict');
+    const eqNote = $('eq-note');
+    const eqPick = $('eq-pick');
     if (!ws.length) {
-      verdict.innerHTML = '72 saatte öneri yok.<small>Ya koşullar uygun değil ya da rüzgar/dalga verisi eksik (güvenlik denetlenemiyor). Güvenlik uyarılarını listede görebilirsiniz.</small>';
-      pick.hidden = true; alts.hidden = true; return;
+      $('verdict').textContent = 'Hayır';
+      $('verdict-sub').textContent = '72 saatte öneri yok: koşullar uygun değil ya da rüzgar/dalga verisi eksik (güvenlik denetlenemiyor). Güvenlik uyarıları "Tüm meralar" sekmesinde.';
+      for (const c of ['.q2', '.q3', '.q4', '.q5', '.why-more', '.go']) qa(c, false);
+      alts.hidden = true; $('alts-h').hidden = true; eqNote.hidden = true; eqPick.hidden = true;
+      return;
     }
     // I9: answer "today?" first (until 06:00 tomorrow), then the nearest strong option in 72 h, else the relative best
     const td = (P ? (box.checked ? P.today.open : P.today.all).windows : winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : []).filter(inBursa);
@@ -632,112 +611,112 @@ import Base from '../layouts/Base.astro';
     const todayStrong = td.find((w) => w.tier === 'guclu');
     const nextStrong = ws.find((w) => w.tier === 'guclu');
     const m = todayStrong ?? nextStrong ?? ws[0]!;
-    const startD = fmtDay(m.start);
-    const today = fmtDay(new Date().toISOString());
-    const when = startD === today ? 'Bugün' : todayStrong ? `Bu gece (${startD})` : startD;
-    const scope = `${SPECIES_TR[species]} için, ${withOutside ? 'Bursa ve yakın çevre (Yalova) kıyısındaki' : 'Bursa kıyısındaki'} ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'} arasından.`;
-    verdict.innerHTML = todayStrong
-      ? `${startD === today ? 'Bugün' : `Bu gece (${esc(startD)})`} ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}: anlamlı bir seçenek var.<small>${scope}</small>`
-      : nextStrong
-      ? `Bugün güçlü seçenek yok. En yakın güçlü pencere: ${esc(when)} ${fmtTime(m.start)}.<small>${scope}${td[0] ? ` Bugünün görece en iyisi: ${esc(td[0].name)}, ${Math.round(td[0].total)}.` : ''}</small>`
-      : `72 saatte güçlü öneri yok.<small>Aşağıdaki, mevcut seçeneklerin görece en iyisi; gitmek için güçlü bir gerekçe değil. ${scope}</small>`;
-    const col = Math.floor(Date.parse(m.peak) / HOUR) - nowHour;
-    const robust = [
-      m.tier === 'guclu' ? '<span class="badge good">güçlü</span>' : '<span class="badge assume">görece</span>',
-      m.missing ? `<span class="badge warn">${esc(m.missing)}</span>` : '<span class="badge">veri tam</span>',
-      m.top3 != null ? `<span class="badge${m.top3 < 0.5 ? ' assume' : ''}" title="Model parametreleri oynatıldığında bu meranın ilk 3'te kaldığı çekimlerin payı (tahmin hatası dahil değil)">ilk 3'te: çekimlerin %${Math.round(m.top3 * 100)}'i</span>` : '',
-      m.access && m.access !== 'acik' ? `<span class="badge warn">${esc(ACCESS_BADGE[m.access] ?? 'erişim belirsiz')}</span>` : '',
-      m.assumed ? '<span class="badge assume">ana gerekçe varsayıma dayanıyor</span>' : '',
-      provBadge(m.spot_id),
-    ].join('');
-    const reasons = [
-      m.why ? `${esc(m.why)}${m.assumed ? ' (varsayım)' : ''}` : null,
-      `en iyi saat ${fmtTime(m.peak)}${m.p10 !== null && m.p90 !== null ? `, bant ${Math.round(m.p10)}–${Math.round(m.p90)}` : ''}`,
-      m.top3 != null && m.top3 < 0.5 ? 'sıralama kararsız: alternatiflerle arası açık değil' : null,
-    ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
     const pool = todayStrong ? [...td, ...ws] : ws;
     const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
-    // K3 (MODEL.md §16): when the model cannot separate the pick from its alternatives, show them as equals
+    // K3 (MODEL.md §16): when the model cannot separate the pick from its alternatives, they are shown as equals
     const EQ_TOP3 = 0.6;
     const overlaps = (w: Win) => w.p90 !== null && m.p10 !== null && w.p90 >= m.p10;
     const eq = m.top3 != null && m.top3 < EQ_TOP3 ? [m, ...others.filter(overlaps)] : [m];
     const rest = others.filter((w) => !eq.includes(w));
-    const span = (w: Win) => `${esc(fmtDay(w.start) === today ? 'Bugün' : fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}`;
-    const colOf = (w: Win) => Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
-    if (eq.length >= 2) {
-      const sorted = [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr'));
-      const lead = todayStrong ? 'Bugün' : nextStrong ? `Bugün güçlü seçenek yok. En yakın güçlü pencere ${esc(when)}` : '72 saatte güçlü öneri yok. Görece en iyiler';
-      verdict.innerHTML = `${lead}: birbirinden ayırt edilemeyen ${eq.length} seçenek var.<small>Model bunları ayıramıyor (ilk 3'te kalma payı %${Math.round(EQ_TOP3 * 100)}'ın altında, bantlar örtüşüyor); sıra ada göre, en iyi ilan edilmez. ${scope}</small>`;
-      pick.innerHTML = `<h2 class="eq-h">Eşdeğer seçenekler</h2><div class="eq-grid">${sorted.map((w, i) => `<section class="eq-card">
-        <div class="top"><div><p class="nm">${esc(w.name)} ${provBadge(w.spot_id)}</p><span class="tm">${span(w)}</span></div><span class="sc" title="Puan: ideal senaryoya göre yer, yakalama olasılığı değil">${Math.round(w.total)}</span></div>
-        <div class="rig" id="eq-rig-${i}"><svg viewBox="0 0 76 96"></svg><dl><dt>Takım</dt><dd>hesaplanıyor…</dd></dl></div>
-        <p class="fs-1 muted">${w.why ? esc(w.why) + (w.assumed ? ' (varsayım)' : '') + ' · ' : ''}bant ${w.p10 !== null ? Math.round(w.p10) : '–'}–${w.p90 !== null ? Math.round(w.p90) : '–'}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}${w.missing ? ' · eksik veri' : ''}</p>
-        <div class="go"><button type="button" class="btn small" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}">Merayı aç</button></div>
-      </section>`).join('')}</div>`;
-      pick.hidden = false;
-      pick.querySelectorAll<HTMLButtonElement>('button[data-open]').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
-      renderAlts(rest);
-      await Promise.all(sorted.map((w, i) => fillRig(`eq-rig-${i}`, w, my)));
+    const eqList = eq.length >= 2 ? [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr')) : [m];
+    const key = eqList.map((w) => w.spot_id).join('|');
+    if (key !== eqKey) { eqKey = key; eqSel = 0; }
+    const cur = eqList[Math.min(eqSel, eqList.length - 1)]!;
+
+    // 1) worth going today?
+    $('verdict').textContent = todayStrong ? 'Evet' : 'Hayır';
+    $('verdict-sub').textContent = todayStrong
+      ? (eqList.length > 1 ? 'Bugün iyi pencereler var.' : `${span(m)} arası iyi bir pencere var.`)
+      : nextStrong
+      ? `Bugün güçlü bir zaman yok. En yakın iyi zaman: ${span(m)}.`
+      : '72 saatte güçlü bir zaman yok. Aşağıdaki, mevcut seçeneklerin görece en iyisi; gitmek için güçlü bir gerekçe değil.';
+    // equivalent options: no "best" is declared; the visitor picks one, the card answers for it
+    eqNote.hidden = eqPick.hidden = eqList.length < 2;
+    if (eqList.length >= 2) {
+      eqNote.textContent = equalText(eqList.length);
+      eqPick.innerHTML = eqList.map((w, i) => `<button type="button" role="radio" aria-checked="${i === eqSel}" data-i="${i}">${esc(w.name)}</button>`).join('');
+      eqPick.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => { eqSel = Number(x.dataset.i); renderPlan(); }));
+    }
+    alts.innerHTML = rest.map((w) => `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)}</span><span class="a-r">${span(w)} · puan ${Math.round(w.total)}${w.tier === 'guclu' ? '' : ' · görece'}</span></button></li>`).join('');
+    alts.hidden = $('alts-h').hidden = !rest.length;
+    alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
+    await fillCard(cur, myN, eqList.length, withOutside);
+  }
+  const span = (w: Win) => {
+    const d = fmtDay(w.start);
+    return `${d === fmtDay(new Date().toISOString()) ? 'Bugün' : d} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}`;
+  };
+  const colOf = (w: Win) => Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
+  const PROV_TR: Record<string, string> = { yalova: 'Yalova', balikesir: 'Balıkesir' };
+
+  /** Questions 2–5 for one window; the tackle line and the weather sentence need the spot's hourly inputs. */
+  async function fillCard(w: Win, myN: number, nEq: number, withOutside: boolean) {
+    const s = all.find((x) => x.id === w.spot_id);
+    const prov = s?.province && s.province !== 'bursa' ? PROV_TR[s.province] ?? s.province : null;
+    // 2) where, when
+    $('a-where').textContent = w.name;
+    $('a-when').textContent = [span(w), `en iyi saat ${fmtTime(w.peak)}`, prov, w.access && w.access !== 'acik' ? ACCESS_TR[w.access] ?? 'erişim belirsiz' : null].filter(Boolean).join(' · ');
+    // 4) why (plain); 5) trust (L1 rule)
+    const why = $('a-why');
+    const lead = driverSentence(w.why);
+    why.innerHTML = lead ? `<li>${esc(lead)}</li>` : '';
+    const tr = trust(w);
+    $('a-trust').textContent = tr.level;
+    $('a-trust').dataset.l = tr.level;
+    $('a-trust-sub').textContent = tr.text;
+    for (const c of ['.q2', '.q3', '.q4', '.q5', '.why-more', '.go']) qa(c, true);
+    $('pick-open').onclick = () => openSpot(w.spot_id, colOf(w));
+    $<HTMLAnchorElement>('pick-field').href = link(`/sahadayim/?id=${encodeURIComponent(w.spot_id)}`, species);
+    pickId = w.spot_id;
+    mapApi?.highlight(w.spot_id);
+    // technical detail under "Neden?"
+    const band = w.p10 !== null && w.p90 !== null ? `${Math.round(w.p10)}–${Math.round(w.p90)}` : 'yok';
+    const tech = [
+      w.reason ? `Modelin gerekçesi: ${esc(w.reason)}` : null,
+      `Puan ${Math.round(w.total)} (bant ${band}) · ${w.tier === 'guclu' ? 'güçlü' : 'görece'} pencere${w.top3 != null ? ` · ilk 3'te kalma payı %${Math.round(w.top3 * 100)}` : ''}${w.missing ? ` · ${esc(w.missing)}` : ''}`,
+      nEq > 1 ? `Eşdeğer gösterim: ilk 3'te kalma payı %60'ın altında ve bantlar örtüşüyor; seçenekler ada göre sıralı, en iyi ilan edilmez (MODEL.md §16).` : null,
+      `Kapsam: ${SPECIES_TR[species]}, ${withOutside ? 'Bursa ve yakın çevre' : 'Bursa kıyısı'}, ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'}.`,
+    ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
+    $('why-detail').innerHTML = `<ul>${tech}</ul><ul id="tk-why"></ul>`;
+    // 3) tackle, weather and light at the best hour
+    const d = await detail(w.spot_id);
+    if (myN !== planSeq) return;
+    const v = d?.packed?.tk?.[d.from + colOf(w)];
+    if (!v) {
+      $('a-tackle').textContent = 'Bu saatin girdileri yok; takım için mera kartına bakın.';
+      $('a-tackle-sub').textContent = '';
       return;
     }
-    pick.innerHTML = `<div class="top"><div><p class="nm">${esc(m.name)}</p><span class="tm">${esc(when)} ${fmtTime(m.start)}–${fmtTime(new Date(Date.parse(m.end)).toISOString())}</span></div><span class="sc" title="Puan: ideal senaryoya göre yer, yakalama olasılığı değil">${Math.round(m.total)}</span></div>
-      <div class="rig" id="pick-rig"><svg viewBox="0 0 76 96"></svg><dl><dt>Takım</dt><dd>hesaplanıyor…</dd></dl></div>
-      <ul>${reasons}</ul>
-      <div class="badges">${robust}</div>
-      <div class="go"><button type="button" class="btn small" id="pick-open">Merayı ve saatleri aç</button><a class="btn small secondary" href="${link(`/sahadayim/?id=${encodeURIComponent(m.spot_id)}`, species)}">Sahadayım'da başlat</a></div>`;
-    pick.hidden = false;
-    $('pick-open').addEventListener('click', () => openSpot(m.spot_id, col));
-    renderAlts(others);
-    await fillRig('pick-rig', m, my);
-
-    function renderAlts(list: Win[]) {
-      alts.innerHTML = list.map((w) => `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)} ${provBadge(w.spot_id)}</span><span class="a-s">${Math.round(w.total)}</span><span class="a-r">${esc(fmtDay(w.start))} ${fmtTime(w.start)}–${fmtTime(new Date(Date.parse(w.end)).toISOString())}${w.tier === 'guclu' ? '' : ' · görece'}${w.missing ? ' · eksik veri' : ''}${w.top3 != null ? ` · ilk 3'te %${Math.round(w.top3 * 100)}` : ''}</span></button></li>`).join('');
-      alts.hidden = !list.length;
-      alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
-    }
-  }
-
-  /** Tackle picture + rows for a window's peak hour (public inputs; owner refinements stay on the card). */
-  async function fillRig(elId: string, w: Win, my: number) {
-    const d = await detail(w.spot_id);
-    if (my !== planSeq) return;
-    const rig = document.getElementById(elId);
-    const c = Math.floor(Date.parse(w.peak) / HOUR) - nowHour;
-    const v = d?.packed?.tk?.[d.from + c];
-    if (!rig) return;
-    if (!v) { rig.innerHTML = '<p class="muted fs-2">Takım önerisi için bu saatin girdileri yok.</p>'; return; }
-    const kind = all.find((x) => x.id === w.spot_id)?.kind;
-    const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind };
-    if (species === 'levrek') {
-      const t = tackleLevrek(input, profiles);
-      const row = (k: string) => t.rows.find((r) => r.key === k)?.value ?? '–';
-      rig.innerHTML = `${rigSvg(t.weightG, 'orta su', t.color)}<dl><dt>Takım</dt><dd>${t.profile === 'lrf' ? 'LRF' : 'Spin'} · ${String(t.weightG).replace('.', ',')} g</dd><dt>Yem</dt><dd>${esc(row('yem'))}</dd><dt>Renk</dt><dd>${esc(t.color)}</dd><dt>Teknik</dt><dd>${esc(row('teknik'))}</dd><dt>Yasal</dt><dd>${LEGAL_MIN[species]} cm</dd></dl>`;
-    } else {
-      const t = tackle(input, profiles);
-      const row = (k: string) => t.rows.find((r) => r.key === k)?.value ?? '–';
-      rig.innerHTML = `${rigSvg(t.jigG, t.zone, t.color)}<dl><dt>Takım</dt><dd>${t.profile === 'lrf' ? 'LRF' : 'Spin'} · ${esc(row('jighead'))}</dd><dt>Silikon</dt><dd>${esc(row('silikon'))}</dd><dt>Renk</dt><dd>${esc(row('renk'))}</dd><dt>Katman</dt><dd>${esc(t.zone)} · say ${esc(row('saydirma'))}</dd><dt>Yasal</dt><dd>${LEGAL_MIN[species]} cm</dd></dl>${t.light === 'bilinmeyen gece' ? '<p class="fs-1 muted" style="grid-column:1/-1;margin:0">Lamba durumu bilinmiyor: "/" öncesi lamba suya düşüyorsa, sonrası karanlıksa.</p>' : ''}`;
-    }
+    const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: s?.kind };
+    const t = species === 'levrek' ? tackleLevrek(input, myTk.profiles) : tackle(input, myTk.profiles);
+    const line = species === 'levrek' ? tackleLevrekLine(t as ReturnType<typeof tackleLevrek>) : tackleLine(t as ReturnType<typeof tackle>);
+    const g = species === 'levrek' ? (t as ReturnType<typeof tackleLevrek>).weightG : (t as ReturnType<typeof tackle>).jigG;
+    $('a-tackle').textContent = personalLine(line, t.profile, myTk.personal);
+    const own = myTk.personal[t.profile];
+    // short under the line; the class's line sizes and the legal size are under "Neden?"
+    $('a-tackle-sub').innerHTML = `${own ? 'Senin takımına göre' : 'Genel takım sınıfı'}${t.light === 'bilinmeyen gece' ? ' · "/": iskele ışığı varsa / karanlıksa' : ''} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
+    const cls = t.profile === 'lrf' ? TACKLE_CLASSES.lrf : tackleClass('spin', g);
+    const tkHead = `<li><b>Takım sınıfı:</b> ${own ? `senin takımın (${esc(myTk.profiles.find((p) => p.id === t.profile)!.name)})` : `${esc(tackleClass(t.profile, g).label)}; ip ${esc(cls.line)}`}. Yasal asgari boy ${LEGAL_MIN[species]} cm (6/2 Tebliğ).</li>`;
+    why.innerHTML = [lead, weatherSentence(v[2] ?? null, v[3] ?? null, v[9] ?? null), lightSentence(v[5] ?? null, fmtTime(w.peak))].filter(Boolean).slice(0, 3).map((x) => `<li>${esc(x!)}</li>`).join('');
+    const tkWhy = document.getElementById('tk-why');
+    if (tkWhy) tkWhy.innerHTML = tkHead + t.rows.map((r) => `<li><b>${esc(r.label)}: ${esc(r.value)}</b> — ${esc(r.why)} <span class="tag ev-${r.evidence}" title="Kanıt düzeyi">kanıt ${r.evidence}</span>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`).join('') + t.notes.map((n) => `<li class="muted">${esc(n)}</li>`).join('');
   }
   const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: NonNullable<typeof winBody>) => { winBody = b; renderWindows(); renderPlan(); })
-    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). Liste aşağıda.'; });
+    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Bilinmiyor'; $('verdict-sub').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). "Tüm meralar" sekmesine bakın.'; });
   loadWindows();
 
   // ---------------------------------------------------------------- species (H3)
-  const chips = [...document.querySelectorAll<HTMLButtonElement>('.species .sp[data-sp]')];
+  const spSel = $<HTMLSelectElement>('species');
   const showSpecies = () => {
-    chips.forEach((c) => {
-      const on = c.dataset.sp === species;
-      c.classList.toggle('on', on);
-      c.setAttribute('aria-checked', String(on));
-    });
-    document.title = `av.livn — ${SPECIES_TR[species]}: nereye, ne zaman?`;
+    spSel.value = species;
+    document.title = `av.livn — ${SPECIES_TR[species]}: av planı`;
   };
   showSpecies();
-  chips.forEach((c) => c.addEventListener('click', () => {
-    if (c.dataset.sp === species) return;
-    species = c.dataset.sp as Species;
+  spSel.addEventListener('change', () => {
+    if (spSel.value === species) return;
+    species = spSel.value as Species;
     saveSpecies(species);
     const u = new URL(location.href);
     if (species === 'istavrit') u.searchParams.delete('tur'); else u.searchParams.set('tur', species);
@@ -749,7 +728,7 @@ import Base from '../layouts/Base.astro';
     loadHours();
     loadWindows();
     mapApi?.setSpecies(species);
-  }));
+  });
 
   setCol(0);
   ensureMap();

@@ -13,8 +13,30 @@ import AdminLogin from '../../components/AdminLogin.astro';
       <h2>Uzaktan lamba gözlemi</h2>
       <p class="hint">Bir iskelenin gece aydınlatmasını kendiniz kontrol edebilirsiniz: Google Haritalar'da ya da Sokak Görünümü'nde iskeleye ve çevresindeki fotoğraflara bakın. Direk ve armatür görüyorsanız, mümkünse gece çekilmiş bir fotoğrafta ışığın suya düştüğünü görüyorsanız, mera kartındaki “Saha girişi”nden (<code>/saha/</code>) kaynak olarak <b>Uzaktan gözlem</b>'i seçip lambayı <b>var</b> ya da <b>yok</b> olarak girin. Fotoğraf yüklemek gerekmez. Bu giriş o meranın lamba varsayımının yerine geçer (saha &gt; uzaktan &gt; masa başı &gt; varsayım). Site Google görüntülerini otomatik çekmez; bakan ve karar veren sizsiniz.</p>
     </section>
-    <h2>Bildirimler</h2>
-    <AdminLogin />
+    <!-- M2: the visitor's own tackle, on this device only -->
+    <section id="takimim" aria-labelledby="t-tk">
+      <h2 id="t-tk">Takımım <span class="muted">(isteğe bağlı, yalnız bu cihaz)</span></h2>
+      <p class="hint">Girmezseniz öneriler genel takım sınıflarıyla verilir: <b>Ultra hafif / LRF (0,5–5 g)</b>, <b>Hafif spin (3–15 g)</b>, <b>Spin (6–30 g)</b>; ip PE 0.2–0.4 + ≈3–5 lb florokarbon lider gibi genel ölçülerle. Girerseniz öneri sizin atar aralığınıza göre inceltilir ve kartta “senin takımına göre” yazar. Bilgiler bu tarayıcıda kalır, sunucuya gönderilmez. Boş bıraktığınız takım için genel sınıf kullanılır.</p>
+      <form id="my-tackle" class="stack" novalidate>
+        <fieldset data-set="light"><legend>Hafif takım (LRF)</legend>
+          <div class="two"><label class="lbl">Atar en az (g)<input name="min" inputmode="decimal" placeholder="0,5" /></label><label class="lbl">Atar en çok (g)<input name="max" inputmode="decimal" placeholder="5" /></label></div>
+          <div class="two"><label class="lbl">Ana ip<input name="line" maxlength="60" placeholder="PE 0.3" /></label><label class="lbl">Lider<input name="leader" maxlength="60" placeholder="≈4 lb florokarbon" /></label></div>
+        </fieldset>
+        <fieldset data-set="heavy"><legend>Ağır takım (spin)</legend>
+          <div class="two"><label class="lbl">Atar en az (g)<input name="min" inputmode="decimal" placeholder="6" /></label><label class="lbl">Atar en çok (g)<input name="max" inputmode="decimal" placeholder="30" /></label></div>
+          <div class="two"><label class="lbl">Ana ip<input name="line" maxlength="60" placeholder="PE 0.8" /></label><label class="lbl">Lider<input name="leader" maxlength="60" placeholder="≈10 lb florokarbon" /></label></div>
+        </fieldset>
+        <div class="btns">
+          <button type="submit" class="primary">Bu cihazda kaydet</button>
+          <button type="button" id="tk-clear" class="ghost">Temizle (genel sınıfa dön)</button>
+          <button type="button" id="tk-move" class="ghost admin-only" hidden>Sunucudaki profilimi bu cihaza taşı</button>
+        </div>
+        <p class="hint" id="tk-msg" role="status"></p>
+      </form>
+    </section>
+
+    <h2 class="admin-only" hidden>Bildirimler</h2>
+    <details class="owner-login" id="owner-login"><summary>Yönetici girişi</summary><AdminLogin /></details>
     <p class="msg" id="msg" role="status"></p>
 
     <section id="panel" hidden>
@@ -72,6 +94,10 @@ import AdminLogin from '../../components/AdminLogin.astro';
   .st h2 .muted { font-weight: 400; font-size: var(--fs-2); }
   .hint { font-size: var(--fs-2); color: var(--mist); }
   .stack { display: grid; gap: 12px; }
+  fieldset { border: 1px solid var(--swell); border-radius: 10px; padding: 8px 12px 12px; margin: 0; }
+  legend { padding: 0 4px; font-weight: 600; }
+  .owner-login { margin-top: 32px; border-top: 1px solid var(--swell); padding-top: 8px; }
+  .owner-login summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--mist); }
   .lbl { display: grid; gap: 4px; font-size: var(--fs-2); color: var(--mist); }
   .lbl.inl { grid-template-columns: 1fr 110px; align-items: center; margin: 4px 0 8px 30px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -95,6 +121,47 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, mountLogin, showLogin } from '../../scripts/admin';
+  import { fmtG, fromServer, loadMy, parseMy, saveMy, type MyTackle } from '../../scripts/mytackle';
+
+  // M2: Takımım (device only)
+  const tkForm = document.getElementById('my-tackle') as HTMLFormElement;
+  const tkMsg = document.getElementById('tk-msg')!;
+  const fillTk = (m: MyTackle | null) => {
+    for (const k of ['light', 'heavy'] as const) {
+      const fs = tkForm.querySelector<HTMLFieldSetElement>(`[data-set="${k}"]`)!;
+      const v = m?.[k] ?? null;
+      for (const f of ['min', 'max', 'line', 'leader'] as const) (fs.querySelector(`[name="${f}"]`) as HTMLInputElement).value = v ? (typeof v[f] === 'number' ? fmtG(v[f] as number) : String(v[f])) : '';
+    }
+  };
+  fillTk(loadMy());
+  tkForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const raw: Record<string, unknown> = {};
+    for (const k of ['light', 'heavy']) {
+      const fs = tkForm.querySelector<HTMLFieldSetElement>(`[data-set="${k}"]`)!;
+      const v = (f: string) => (fs.querySelector(`[name="${f}"]`) as HTMLInputElement).value.trim();
+      if (!v('min') && !v('max')) continue;
+      raw[k] = { min: Number(v('min').replace(',', '.')), max: Number(v('max').replace(',', '.')), line: v('line'), leader: v('leader') };
+    }
+    const m = parseMy(JSON.stringify(raw));
+    if (Object.keys(raw).length && (!m || Object.keys(raw).some((k) => !m[k as keyof MyTackle]))) { tkMsg.textContent = 'Atar aralığını gram olarak girin (en az ≤ en çok, 0,1–100 g).'; return; }
+    saveMy(m);
+    tkMsg.textContent = m ? 'Kaydedildi: öneriler bu cihazda senin takımına göre.' : 'Takım girilmedi; genel sınıflar kullanılıyor.';
+  });
+  document.getElementById('tk-clear')!.addEventListener('click', () => { saveMy(null); fillTk(null); tkMsg.textContent = 'Silindi; genel takım sınıfları kullanılıyor.'; });
+  document.getElementById('tk-move')!.addEventListener('click', async () => {
+    const r = await fetch('/api/admin/tackle', { cache: 'no-store', headers: { authorization: `Bearer ${getToken()}` } }).catch(() => null);
+    if (!r || !r.ok) { tkMsg.textContent = 'Sunucudaki profil okunamadı (yönetici anahtarı gerekli).'; return; }
+    const b = (await r.json()) as { stored: boolean; profiles: Parameters<typeof fromServer>[0] };
+    if (!b.stored) { tkMsg.textContent = 'Sunucuda kayıtlı kişisel profil yok.'; return; }
+    const m = fromServer(b.profiles);
+    saveMy(m);
+    fillTk(m);
+    tkMsg.textContent = 'Sunucudaki profiliniz bu cihaza taşındı (sunucudaki kopya yalnız yöneticiye açık olarak duruyor).';
+  });
+  // owner tools: the login stays folded for visitors; with a key on this device it is not shown
+  const ownerLogin = document.getElementById('owner-login') as HTMLDetailsElement;
+  if (getToken()) ownerLogin.hidden = true;
 
   type Settings = { daily: boolean; opportunity: boolean; safety: boolean; threshold: number; quiet: [number, number]; favourites: string[]; channels: 'push' | 'ntfy' | 'both'; species?: string[]; outside_bursa?: boolean };
   // J3: "include spots outside Bursa in the home plan" — stored on this device; notifications follow it
@@ -121,7 +188,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   async function api(path: string, method = 'GET', body?: unknown) {
     const r = await fetch(`/api/admin/notify${path}`, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-cache' });
     const j = await r.json().catch(() => ({}));
-    if (r.status === 401) { $('panel').hidden = true; showLogin('Anahtar artık geçerli değil; yeniden girin.'); throw new Error('Anahtar hatalı.'); }
+    if (r.status === 401) { $('panel').hidden = true; ownerLogin.hidden = false; ownerLogin.open = true; showLogin('Anahtar artık geçerli değil; yeniden girin.'); throw new Error('Anahtar hatalı.'); }
     if (!r.ok) throw new Error(j.error ?? String(r.status));
     return j;
   }
@@ -229,6 +296,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   });
   mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
     token = getToken();
+    document.querySelectorAll<HTMLElement>('.admin-only').forEach((e) => (e.hidden = false));
     await load();
   });
 </script>

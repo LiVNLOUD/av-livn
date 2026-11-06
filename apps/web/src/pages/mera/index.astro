@@ -27,6 +27,7 @@ import Base from '../../layouts/Base.astro';
       <p class="fs-2 tk-diff" id="tk-diff" hidden></p>
       <dl class="tk" id="tk"></dl>
       <p class="fs-1 muted tk-notes" id="tk-notes"></p>
+      <details class="tk-why"><summary>Neden? Gerekçe, kanıt düzeyi ve kaynaklar</summary><ul id="tk-why"></ul></details>
     </section>
 
     <section class="chart-block">
@@ -80,9 +81,14 @@ import Base from '../../layouts/Base.astro';
   .tackle { margin-top: var(--s4); }
   .tk-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
   .tk-head h2 { font-size: var(--fs-4); }
-  .tk { margin: var(--s3) 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s2) var(--s3); }
+  /* M1: label above value (no narrow value column); two columns only where each is ≥ 280 px */
+  .tk { margin: var(--s3) 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s3) var(--s4); }
+  :global(.tk > div) { min-width: 0; }
   :global(.tk dt) { color: var(--mist); font-size: var(--fs-2); line-height: var(--lh-2); }
   :global(.tk dd) { margin: 0; font-size: var(--fs-2); line-height: var(--lh-2); }
+  .tk-why { margin-top: var(--s3); border-top: 1px solid var(--swell); padding-top: var(--s2); }
+  .tk-why summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-weight: 600; font-size: var(--fs-2); }
+  :global(#tk-why li) { font-size: var(--fs-2); line-height: var(--lh-2); margin: var(--s1) 0; }
   :global(.tk dd b) { font-size: var(--fs-3); color: var(--foam); font-weight: 700; }
   :global(.tk dd .y) { display: block; color: var(--mist); }
   :global(.tk .ev) { margin-left: var(--s1); text-decoration: none; }
@@ -122,7 +128,8 @@ import Base from '../../layouts/Base.astro';
   import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR, swimRule } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
   import { adminGet, getToken } from '../../scripts/admin';
-  import { bandOf, bandV2, DEFAULT_PROFILES, fieldBand, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
+  import { loadMy, toProfiles } from '../../scripts/mytackle';
+  import { bandOf, bandV2, fieldBand, tackleClass, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
   import { api, currentSpecies, SPECIES_TR } from '../../scripts/species';
   const species = currentSpecies();
 
@@ -154,8 +161,9 @@ import Base from '../../layouts/Base.astro';
   let priv: Priv | null = null;
   let H: Hour[] = [];
   let TK: (number | null)[][] = [];
-  let profiles: TackleProfile[] = DEFAULT_PROFILES;
-  fetch('/api/tackle').then((r) => (r.ok ? r.json() : null)).then((b) => { if (b?.profiles?.length) profiles = b.profiles; }).catch(() => {});
+  // M2: generic classes unless this device has its own set; nothing personal is fetched from the server
+  const myTk = toProfiles(loadMy());
+  const profiles: TackleProfile[] = myTk.profiles;
   const tkInput = (v: (number | null)[]): TackleInput => ({
     depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null,
     sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: d.spot.kind,
@@ -165,10 +173,10 @@ import Base from '../../layouts/Base.astro';
   const buildTackle = (i: TackleInput) => {
     if (species === 'levrek') {
       const t = tackleLevrek(i, profiles);
-      return { rows: t.rows, notes: t.notes, key: `${t.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(t.weightG).replace('.', ',')} g ${t.lure}` };
+      return { rows: t.rows, notes: t.notes, profile: t.profile, g: t.weightG, key: `${t.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(t.weightG).replace('.', ',')} g ${t.lure}` };
     }
     const t = tackle(i, profiles);
-    return { rows: t.rows, notes: t.notes, key: `${t.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(t.jigG).replace('.', ',')} g ${t.jigType}` };
+    return { rows: t.rows, notes: t.notes, profile: t.profile, g: t.jigG, key: `${t.profile === 'lrf' ? 'LRF' : 'Spin'} ${String(t.jigG).replace('.', ',')} g ${t.jigType}` };
   };
   /** F0 box: open-data version for everyone; the owner also sees the field-depth version and the difference. */
   function renderTackle(i: number) {
@@ -194,15 +202,19 @@ import Base from '../../layouts/Base.astro';
       ? buildTackle({ ...tkInput(v), ...(fieldDepth !== null ? { depthM: fieldDepth } : {}), ...(lamp !== null ? { lampP: lamp ? 1 : 0 } : {}) })
       : null;
     const t = own ?? pub;
-    $('tk-ver').textContent = `${SPECIES_TR[species]} · ${own ? 'saha ölçümüyle inceltildi' : 'açık veriyle'}`;
+    $('tk-ver').textContent = `${SPECIES_TR[species]} · ${myTk.personal[t.profile] ? 'senin takımına göre' : `genel takım: ${tackleClass(t.profile, t.g).label}`}${own ? ' · saha ölçümüyle inceltildi' : ''}`;
     const diff = $('tk-diff');
     const same = !own || own.key === pub.key;
     diff.hidden = same;
     if (!same) diff.textContent = `Açık veri: ${pub.key} → saha: ${own!.key}`;
-    $('tk').innerHTML = t.rows
-      .map((r) => `<dt>${esc(r.label)}</dt><dd><b>${esc(r.value)}</b><a class="tag ev ev-${r.evidence}" href="/model/#kanit-${r.evidence}" title="Kanıt düzeyi ${r.evidence}">${r.evidence}</a><span class="y">${esc(r.why)}</span></dd>`)
-      .join('');
+    // M2: values only in the box; reasons, evidence letters and literature under "Neden?"
+    // the set row names the class (or the visitor's own set), never a brand
+    const setName = myTk.personal[t.profile] ? profiles.find((p) => p.id === t.profile)!.name : tackleClass(t.profile, t.g).label;
+    $('tk').innerHTML = t.rows.map((r) => `<div><dt>${esc(r.label)}</dt><dd><b>${esc(r.key === 'takim' ? (r.value.startsWith('LRF (hafif') ? r.value : setName) : r.value)}</b></dd></div>`).join('');
     $('tk-notes').textContent = t.notes.join(' ');
+    $('tk-why').innerHTML = t.rows
+      .map((r) => `<li><b>${esc(r.label)}:</b> ${esc(r.why)} <a class="tag ev ev-${r.evidence}" href="/model/#kanit-${r.evidence}" title="Kanıt düzeyi ${r.evidence}">kanıt ${r.evidence}</a>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`)
+      .join('');
   }
   /** I2: minimal shape check of the spot response; returns what is wrong, or null. */
   function validateResp(b: unknown): string | null {

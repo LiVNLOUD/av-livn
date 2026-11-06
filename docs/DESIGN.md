@@ -30,23 +30,41 @@ Büyük harf etiket, eğik vurgu, tek kelime renklendirme yok.
 ## Boşluk ve grid
 Boşluk ölçeği `--s1..--s7` = 4/8/12/16/24/32/48 px. Tek grid: CSS grid, bölgeler `grid-template-areas` ile; aralık `--s4`, sayfa kenarı `--s4` (dar) / `--s6` (geniş). Paragraf metni en çok 68ch; liste, harita, ısı haritası tam genişlik.
 
-## Yerleşim (ana sayfa)
+## Yerleşim (ana sayfa) — Faz M
+Ana ekran her genişlikte **av planı**dır. Isı haritası ve tüm meralar ayrı sekmededir.
 ```
-≥1920:  [ pencereler 360 ][ ısı haritası 1fr ][ harita 1fr ][ kart 420 (çekmece) ]
-1200–1919: [ pencereler+liste 400 ][ harita | ısı haritası (sekme) 1fr ][ kart 420 ]
-768–1199:  [ liste 1fr ][ harita 1fr ]   kart = alt panel
-<768:      tek sütun; alt sekme çubuğu: Liste · Harita · Sahadayım · Günlük
+sekmeler: [ Plan ] [ Saat çizelgesi ] [ Tüm meralar ]            Tür ▾
+≥1200:  Plan:        [ plan ~%60 (içerik ≤ 1180 px) ][ kompakt harita ~%40 ][ kart 420 (çekmece) ]
+        Saat çizelg. [ en iyi pencereler + ısı haritası, tam genişlik       ][ kart 420 ]
+        Tüm meralar  [ liste (≤ 900 px)                ][ harita            ][ kart 420 ]
+768–1199: aynı sütunlar, kart = alt panel
+<768:     tek sütun, harita yok (Harita sekmesi); tür seçimi başlık çubuğunda
 ```
-Bölgeler kendi içinde kayar; sayfa yüksekliği ≥1200 px'te görünüm penceresine sabit (100dvh − başlık). Kart çekmecesi kapalıyken harita genişler.
+**Ana öneri kartı beş soruyu sırayla cevaplar.** Her sorunun etiketi üstte, cevabı altta ve büyük puntoyla:
+1. Bugün gitmeye değer mi?
+2. Nereye, ne zaman?
+3. Ne ile başla? (tek satır, markasız takım sınıfı)
+4. Neden? (2–3 madde, günlük dil)
+5. Ne kadar güvenilir? (Düşük / Orta / Yüksek + tek cümle)
+
+Güven kuralı (L1 ablasyonu): öneriyi en çok yukarı taşıyan etken varsayımsa (kanıt C, önsel ya da ölçüm olmayan tahmin), güven **Düşük** olur ve gerekçe günlük dille söylenir.
+
+Teknik ayrıntılar yalnız "Neden? Ayrıntılar" çekmecesindedir: puan, bant, ilk 3 payı, kanıt harfi, takım gerekçesi, kaynakça. Eşdeğer seçenekler ana ekranda "İki/Üç yer de aynı derecede iyi görünüyor; model birini öne çıkaramıyor." diye yazılır; ziyaretçi birini seçer ve kart o yer için cevap verir. Ana öneri dışında en çok 2 kompakt alternatif gösterilir.
+
+**Metin kuralı:** etiket–değer sütunu 280 px'ten dar olmaz. Dar alanda etiket üstte, değer altta durur (`scripts/e2e.mjs` denetler). **5 saniye testi:** 3440, 1920, 1440, 768 ve 390 px'te beş cevap kaydırmadan ilk ekranda görünür (e2e).
+
+**Menü:** ziyaretçi için Plan, Harita, Model. Sahadayım, Günlük, Ayarlar, Adaylar ve Panel yalnız yönetici anahtarı cihazdayken görünür. Ayarlar → Takımım ziyaretçiye açıktır: plan kartındaki "Kendi takımını gir" bağlantısı ve sayfa altındaki bağlantı oraya gider.
+
+**Harita (M3):** liman, sanayi ve askeri alanlar kırmızı taralı alan ve lejantla gösterilir, metin etiketi yoktur. Uzak zoom'da (< 12) yalnız yerleşim rozetleri görünür. Önerilen mera her zoomda turuncu halka ve adıyla işaretlidir; harita ona ortalanır.
 
 ## Bileşenler (her biri tek tanım, `global.css`)
 - `.btn` birincil (sodyum dolgu, koyu metin), `.btn.secondary` (şeffaf, `--swell` kenar, `--foam` metin), `.btn.small` (32 px). Yükseklik 40 px (dokunmatik 44 px'e `.btn.touch`). Hepsi `inline-flex; align-items: center`.
 - `.link`: metin bağlantısı, altı çizili `--mist`, hover `--foam`.
 - `.badge`: 12 px, hap şekli, kenar rengi anlamı taşır (`.badge.warn`, `.badge.legal`, `.badge.assume`).
 - `.card`: `--deep` zemin, 1 px `--swell` kenar, 12 px yarıçap, iç boşluk `--s4`. Kart eylemleri `.actions`: tek satır, `align-items: center`, `gap: --s2`, aynı yükseklik.
-- Başlık menüsü: Liste, Harita, Sahadayım, Günlük, Ayarlar; admin anahtarı cihazdaysa Adaylar, Panel.
+- Başlık menüsü: Plan, Harita, Model; yönetici anahtarı cihazdaysa Sahadayım, Günlük, Ayarlar, Adaylar, Panel.
 
 ## İlkeler
-1. Isı haritası ana görsel; renk yalnız puan anlamına gelir, süs yok.
+1. Ana görsel av planıdır (M1); ısı haritası ikincil sekmededir. Renk yalnız puan anlamına gelir, süs yok.
 2. Belirsizlik görünür: bant genişse hücre taralı/soluk; "varsayıma dayanıyor" rozeti.
 3. Karanlıkta okunur: ≥ 4.5:1 kontrast, 44 px dokunma hedefi, hareket yalnız kullanıcı eylemine yanıt.

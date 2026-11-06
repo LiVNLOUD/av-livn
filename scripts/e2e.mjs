@@ -6,6 +6,9 @@
 //   2. open a spot card: chart and the tackle box render with rows (the H3 `box` shadowing bug blanked it)
 //   3. no WebGL2: the map shows a note instead of hanging; list and windows still work
 //   4. 360 px: no horizontal overflow; tap targets of the main actions ≥ 40 px
+//   5. M4 "5 saniye testi": at 3440/1920/1440/768/390 px the five answers of the plan card are on the first screen
+//      without scrolling; no label/value column under 280 px; no jargon on the first screen; visitor menu; the
+//      public tackle endpoint carries no brand (M2)
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -43,34 +46,73 @@ async function page(w, h, { webgl = true } = {}) {
 }
 const overflow = (p) => p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
-// 1. home list at 390 px
+// helpers for M1/M4
+const ANSWERS = ['#verdict', '#a-where', '#a-tackle', '#a-why li', '#a-trust'];
+/** Every answer visible and inside the first screen (above the bottom tab bar), without scrolling. */
+const firstScreen = (p) => p.evaluate((sels) => {
+  const tab = document.querySelector('nav.tabbar');
+  const bottom = innerHeight - (tab && getComputedStyle(tab).display !== 'none' ? tab.getBoundingClientRect().height : 0);
+  return sels.map((s) => {
+    const e = document.querySelector(s);
+    if (!e || e.closest('[hidden]') || !e.offsetParent) return [s, 'yok'];
+    const r = e.getBoundingClientRect();
+    return [s, r.top >= 0 && r.bottom <= bottom ? 'ok' : `ekran dışı (alt ${Math.round(r.bottom)} > ${Math.round(bottom)})`];
+  }).filter(([, v]) => v !== 'ok');
+}, ANSWERS);
+/** M1 text rule: a value next to its label is at least 280 px wide; narrower values sit under the label. */
+const narrowColumns = (p) => p.evaluate(() => [...document.querySelectorAll('dd, .qa .a')].filter((e) => e.offsetParent).flatMap((dd) => {
+  const r = dd.getBoundingClientRect();
+  if (r.width >= 280) return [];
+  const label = dd.tagName === 'DD' ? dd.previousElementSibling : dd.parentElement?.querySelector('.q');
+  if (!label) return [];
+  const l = label.getBoundingClientRect();
+  return r.top >= l.bottom - 1 ? [] : [`${(label.textContent ?? '').trim().slice(0, 16)}: ${Math.round(r.width)} px`];
+}));
+const waitPlan = (p) => p.waitForFunction(() => {
+  const v = document.querySelector('#verdict')?.textContent ?? '';
+  const t = document.querySelector('#a-tackle')?.textContent ?? '';
+  return v && !/Yükleniyor/.test(v) && (document.querySelector('.q3')?.hidden || !/hesaplanıyor/.test(t));
+}, null, { timeout: 15000 }).catch(() => {});
+
+// 1. home plan at 390 px
 {
   const { p, errors } = await page(390, 844);
   await p.goto(base + '/', { waitUntil: 'networkidle' });
-  await p.waitForTimeout(800);
-  const rows = await p.locator('.r-spots a, .r-spots [data-id], #spots li').count();
-  rows > 0 ? ok(`home: ${rows} list rows`) : fail('home: no spot rows');
-  // I9: the first view answers "is there something today?" with one pick, its tackle and ≤ 2 alternatives
-  const verdict = await p.locator('#verdict').innerText();
-  /Yükleniyor|alınamadı/.test(verdict) ? fail(`home: verdict "${verdict}"`) : ok(`home: verdict "${verdict.split('\n')[0]}"`);
-  if (await p.locator('#pick').isVisible()) {
-    await p.waitForFunction(() => document.querySelectorAll('#pick .rig dt').length >= 4, null, { timeout: 8000 }).catch(() => {});
-    const dts = await p.locator('#pick .rig').first().locator('dt').count();
-    dts >= 4 ? ok(`home: main pick with tackle (${dts} rows)`) : fail('home: main pick without tackle rows');
+  await waitPlan(p);
+  const verdict = (await p.locator('#verdict').innerText()).trim();
+  /Yükleniyor|Bilinmiyor/.test(verdict) ? fail(`home: verdict "${verdict}"`) : ok(`home: 1) "${verdict}" — ${(await p.locator('#verdict-sub').innerText()).trim()}`);
+  if (await p.locator('.q2').isVisible()) {
+    const where = (await p.locator('#a-where').innerText()).trim();
+    ok(`home: 2) ${where} · ${(await p.locator('#a-when').innerText()).trim()}`);
+    const tk = (await p.locator('#a-tackle').innerText()).trim();
+    / · .* g .*iğne|· \d+(,\d+)? g · /.test(tk) ? ok(`home: 3) ${tk}`) : fail(`home: tackle line "${tk}"`);
+    const why = await p.locator('#a-why li').allInnerTexts();
+    why.length >= 1 && why.length <= 3 ? ok(`home: 4) ${why.join(' | ')}`) : fail(`home: ${why.length} reasons`);
+    const tr = (await p.locator('#a-trust').innerText()).trim();
+    /^(Düşük|Orta|Yüksek)$/.test(tr) ? ok(`home: 5) ${tr} — ${(await p.locator('#a-trust-sub').innerText()).trim()}`) : fail(`home: trust "${tr}"`);
     // I5: the plan only picks Bursa spots
-    const pickName = (await p.locator('#pick .nm').first().innerText()).trim();
-    const listed = (await (await fetch((apiOrigin ?? base) + '/api/spots')).json()).spots.find((x) => x.name === pickName);
-    !listed || !listed.province || listed.province === 'bursa' ? ok(`home: pick in Bursa (${pickName})`) : fail(`home: pick outside Bursa (${pickName}, ${listed.province})`);
-    // K3: equivalent options are shown unordered (no single best) when the model cannot separate them
-    const eqCards = await p.locator('#pick .eq-card').count();
-    ok(eqCards ? `home: ${eqCards} equivalent options (no single best)` : 'home: one main pick');
+    const listed = (await (await fetch((apiOrigin ?? base) + '/api/spots')).json()).spots.find((x) => x.name === where);
+    !listed || !listed.province || listed.province === 'bursa' ? ok(`home: pick in Bursa (${where})`) : fail(`home: pick outside Bursa (${where}, ${listed.province})`);
+    // M1: no jargon on the first screen (it lives under "Neden?")
+    const front = await p.evaluate(() => { const c = document.querySelector('#plan').cloneNode(true); c.querySelector('#why-more')?.remove(); return c.innerText; });
+    const jargon = front.match(/ilk 3|bant(lar)?\b|kanıt [ABC]|örtüş|en iyi ilan/);
+    jargon ? fail(`home: jargon on the first screen "${jargon[0]}"`) : ok('home: no jargon on the first screen');
+    const eq = await p.locator('#eq-pick button').count();
+    ok(eq ? `home: ${eq} equivalent options — "${(await p.locator('#eq-note').innerText()).trim()}"` : 'home: one main pick');
     const alts = await p.locator('#alts li').count();
     alts <= 2 ? ok(`home: ${alts} alternatives (≤ 2)`) : fail(`home: ${alts} alternatives`);
   }
+  const tabs = (await p.locator('nav.tabbar a:visible').allInnerTexts()).map((x) => x.trim());
+  JSON.stringify(tabs) === JSON.stringify(['Plan', 'Harita', 'Model']) ? ok('visitor tab bar: Plan, Harita, Model') : fail(`visitor tab bar: ${tabs.join(', ')}`);
   const ov = await overflow(p);
   ov <= 0 ? ok('home 390: no horizontal overflow') : fail(`home 390: horizontal overflow ${ov} px`);
   errors.length ? fail(`home: console errors ${errors.slice(0, 3).join(' | ')}`) : ok('home: no console errors');
-  if (shots) await p.screenshot({ path: `${shots}/e2e-home-390.png` });
+}
+
+// M2: the public tackle endpoint returns the generic classes only
+{
+  const t = await (await fetch((apiOrigin ?? base) + '/api/tackle')).text();
+  /Gosen|Ares|Vanford|Bassterra|Nasci|Kairiki|Daiwa|Shimano/.test(t) ? fail('/api/tackle: brand names in the public response') : ok('/api/tackle: generic classes only');
 }
 
 // 2. spot card with the tackle box
@@ -87,6 +129,10 @@ const overflow = (p) => p.evaluate(() => document.documentElement.scrollWidth - 
   const tkRows = await p.locator('#tk dt').count();
   (await tk.isVisible()) && tkRows >= 4 ? ok(`card: tackle box with ${tkRows} rows`) : fail(`card: tackle box missing (visible ${await tk.isVisible()}, rows ${tkRows})`);
   (await p.locator('#render-err').isVisible()) ? fail('card: render error banner shown') : ok('card: no render error');
+  const tkText = await p.locator('.tackle').innerText();
+  /Peksu|J\. Appl\./.test(tkText) ? fail('card: article citation visible in the tackle box') : ok('card: citation only under "Neden?"');
+  const narrowCard = await narrowColumns(p);
+  narrowCard.length ? fail(`card: value columns under 280 px: ${narrowCard.slice(0, 4).join(', ')}`) : ok('card: no value column under 280 px');
   errors.length ? fail(`card: console errors ${errors.slice(0, 3).join(' | ')}`) : ok('card: no console errors');
   const ov = await overflow(p);
   ov <= 0 ? ok('card 390: no horizontal overflow') : fail(`card 390: horizontal overflow ${ov} px`);
@@ -117,11 +163,43 @@ for (const path of ['/', '/harita/']) {
   await p.waitForTimeout(600);
   const ov = await overflow(p);
   ov <= 0 ? ok('home 360: no horizontal overflow') : fail(`home 360: horizontal overflow ${ov} px`);
-  const small = await p.evaluate(() => [...document.querySelectorAll('.tabbar a, button.btn, .species .sp')]
+  const small = await p.evaluate(() => [...document.querySelectorAll('.tabbar a, button.btn, .views button, #eq-pick button')]
     .filter((e) => e.offsetParent !== null)
     .map((e) => [e.textContent.trim().slice(0, 20), Math.round(e.getBoundingClientRect().height)])
     .filter(([, h]) => h < 40));
   small.length ? fail(`360: tap targets under 40 px: ${JSON.stringify(small.slice(0, 6))}`) : ok('360: main tap targets ≥ 40 px');
+}
+
+// 5. M4: five-second test, text rule and screenshots at five widths (home + spot card)
+for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [768, 1024], [390, 844]]) {
+  const { p, errors } = await page(w, h);
+  await p.goto(base + '/', { waitUntil: 'networkidle' });
+  await waitPlan(p);
+  await p.waitForTimeout(1200);
+  const miss = await firstScreen(p);
+  miss.length ? fail(`5 sn testi ${w}: ${miss.map(([s, v]) => `${s} ${v}`).join(', ')}`) : ok(`5 sn testi ${w}: beş cevap ilk ekranda`);
+  const narrow = await narrowColumns(p);
+  narrow.length ? fail(`${w}: value columns under 280 px: ${narrow.slice(0, 4).join(', ')}`) : ok(`${w}: no value column under 280 px`);
+  const ov = await overflow(p);
+  ov <= 0 ? ok(`${w}: no horizontal overflow`) : fail(`${w}: horizontal overflow ${ov} px`);
+  errors.length ? fail(`${w}: console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w}: no console errors`);
+  if (w >= 768) {
+    const nav = (await p.locator('header.site nav a:visible').allInnerTexts()).map((x) => x.trim());
+    JSON.stringify(nav) === JSON.stringify(['Plan', 'Harita', 'Model']) ? ok(`${w}: visitor menu Plan, Harita, Model`) : fail(`${w}: visitor menu ${nav.join(', ')}`);
+  }
+  if (shots) await p.screenshot({ path: `${shots}/home-${w}.png` });
+  const where = (await p.locator('#a-where').innerText().catch(() => '')).trim();
+  const list = await (await fetch((apiOrigin ?? base) + '/api/spots')).json();
+  const s = list.spots.find((x) => x.name === where) ?? list.spots.find((x) => x.score?.total != null && !x.score.gated);
+  if (shots && s) {
+    const { p: c, errors: ce } = await page(w, h);
+    await c.goto(`${base}/mera/?id=${encodeURIComponent(s.id)}`, { waitUntil: 'networkidle' });
+    await c.waitForTimeout(1200);
+    await c.screenshot({ path: `${shots}/card-${w}.png` });
+    const n2 = await narrowColumns(c);
+    n2.length ? fail(`card ${w}: value columns under 280 px: ${n2.slice(0, 4).join(', ')}`) : ok(`card ${w}: no value column under 280 px`);
+    ce.length ? fail(`card ${w}: console errors ${ce.slice(0, 3).join(' | ')}`) : ok(`card ${w}: no console errors`);
+  }
 }
 
 await browser.close();
