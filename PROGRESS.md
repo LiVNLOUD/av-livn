@@ -302,3 +302,12 @@ Model ve veri hattına dokunulmadı.
   - Site bandıyla aynı kaynak: `freshness()`; ana sayfada bant kart uyarısıyla tekrarlanmaz.
 - Canlı: e2e tamamı geçti (5 sn testi 5 genişlikte), smoke 5/5. Ekran görüntüleri `docs/screenshots/n/`.
 - Not: doğrulama sırasında puanlar 2 saati aşmıştı. GitHub zamanlayıcısı yine tetikleri atladı; GH_DISPATCH_TOKEN hâlâ yok, Worker yedek tetiği devrede değil. Puanlama elle tetiklendi.
+
+## Yedek tetik canlı testi (2026-11-07) ✅ DUR
+- GH_DISPATCH_TOKEN: deploy run 140'ta "Set GH_DISPATCH_TOKEN secret" adımı `success`.
+- Puan yapay olarak eskitilmeden uçtan uca test:
+  - `meta.score_dispatch_test = {"status":"requested"}` yazılır (`wrangler d1 execute`).
+  - Bir sonraki :07 cron'u gerçek dispatch koduyla (`dispatchScore`) `score.yml`'ı `dry_run=true` girdisiyle tetikler ve sonucu aynı anahtara yazar.
+  - Kuru iş D1'e yazmaz ("dry run: nothing written").
+  - `score_dispatch_at`'a dokunulmaz; test tek seferliktir.
+- Her saat `meta.score_guard_last`: `{at, scoredAt, dispatched, alert, token}`. Token için yalnız varlığı yazılır, değeri asla.
