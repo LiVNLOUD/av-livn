@@ -28,3 +28,11 @@ N5 bölümleri: 6 Kas 16:08–18:06, 19:08–22:08; 7 Kas 01:08–01:24, 04:08�
 - Böylece kullanılan çekim yaşı en çok ~63 dk olur; uyarı eşiği 120 dk.
 - **Beklenen: günde 0 uyarı.** Uyarı ancak bir saatlik çekim ya da dispatch başarısız olursa çıkar; tek bir kaçırılan saat yaşı ~123 dk'ya, yani birkaç dakikalık uyarıya çıkarır.
 - Model üretim zamanı kuralı (MODEL.md §18) yalnız Open-Meteo modeli olağan aralığının 2 katı kadar gecikirse uyarır. ICON-EU 3 saatte bir güncellenir, sınır 6 saat; normal işleyişte uyarı beklenmez.
+
+## Canlı doğrulama (7 Kas 16:07Z, düzeltmeden sonraki ilk cron)
+- Cron 16:07:32Z'de çekti. Puanlar (15:55Z) bu çekimden eskiydi, cron "new weather" diye score.yml'ı tetikledi. Puanlar 16:07:56Z'de, yani çekimden 24 sn sonra, yeni havayla yazıldı.
+- Sayfa: "Hava verisi: 3 dk önce", uyarı yok, konsol hatası yok.
+- Model tanıma:
+  - **deniz → `meteofrance_wave`** (dalga yüksekliği birebir eşleşti; 12 saatte bir güncellenir, uyarı sınırı 24 sa);
+  - **hava → tanınamadı.** `best_match`, ICON-EU, ICON global, ECMWF IFS ve GFS'in hiçbiriyle birebir eşleşmedi; Open-Meteo'nun bu konumda modelleri harmanladığı düşünülüyor (doğrulanmadı).
+- Hava için model yaşı bu yüzden "bilinmiyor"; yalnız çekim kuralı (a) ve çekim hatası kuralı (c) uygulanıyor. Model zamanı uydurulmadı.

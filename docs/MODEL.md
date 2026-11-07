@@ -559,6 +559,7 @@ Eski hava verisiyle hesaplanan taze puan da eskidir; uyarı yalnız puan yaşın
   - deniz: Météo-France dalga, DWD EWAM, ECMWF WAM, DWD GWAM.
 - Hiçbir aday tam eşleşmezse o tür için model yaşı **bilinmiyor** sayılır ve yalnız (a) ile (c) uygulanır. Uydurulmuş bir model zamanı kullanılmaz.
 - Deniz verisinde `best_match` değişkene göre farklı modellerden gelebilir. Tanıma dalga yüksekliğiyle yapılır, çünkü güvenlik kapısı dalgaya dayanır.
+- **İlk sonuç (7 Kas):** deniz `meteofrance_wave` olarak tanındı. Hava hiçbir adayla birebir eşleşmedi, bu yüzden hava için model yaşı bilinmiyor ve yalnız (a) ile (c) geçerli. Gerekirse `models` parametresiyle hava modeli sabitlenebilir; bu, veri hattında bir değişiklik olur ve ayrı karar gerektirir.
 
 **Sıra.** Cloudflare cron her saat önce havayı çeker, sonra puanlar bu çekimden eskiyse puanlamayı tetikler (`shouldRescoreAfterFetch`). GitHub zamanlaması yedektir; puanlar zaten en yeni havayla hesaplanmışsa hemen çıkar (`nothingNew`). Deploy ve veri yenilemesi `force` ile her zaman yeniden puanlar.
 
