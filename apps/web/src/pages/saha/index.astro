@@ -369,11 +369,15 @@ import AdminLogin from '../../components/AdminLogin.astro';
   const fmtScore = (s: { total: number | null; p10: number | null; p90: number | null; rank: number }) =>
     s.total === null ? 'puan yok (hava verisi bekleniyor)' : `puan ${Math.round(s.total)}, ${spots.length} mera içinde ${s.rank}.`;
   /** What happened to the score after an edit (immediate point score or the 15-minute run). */
-  const status = (j: { rescore?: string; score?: Parameters<typeof fmtScore>[0] | null }) =>
+  // A: the Worker starts scoring at once ("started"), or within 10 minutes with other recent edits ("queued");
+  // without the dispatch token only the hourly run updates it ("off")
+  const status = (j: { rescore?: string; dispatch?: string; score?: Parameters<typeof fmtScore>[0] | null }) =>
     j.rescore === 'immediate' && j.score
       ? `Puan güncellendi: ${fmtScore(j.score)} Belirsizlik bandı birkaç dakika içinde gelecek.`
       : j.rescore === 'deferred'
-        ? 'Puan bir sonraki saatlik puanlamada (en geç ~1 saat) güncellenecek.'
+        ? j.dispatch === 'started' || j.dispatch === 'queued'
+          ? 'Puan birkaç dakika içinde güncellenecek.'
+          : 'Puan bir sonraki saatlik puanlamada (en geç ~1 saat) güncellenecek.'
         : '';
 
   $('rescore').addEventListener('click', async () => {

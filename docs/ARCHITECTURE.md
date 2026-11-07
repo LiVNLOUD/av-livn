@@ -39,6 +39,7 @@
   - `new weather`: bu cron'un çekimi başarılı ve puanlar bu çekimden eski (normal saatlik yol);
   - `stale weather`: çekim başarısız ve veri > 60 dk. Başlayan iş önce `POST /api/admin/weather/refresh` ile havayı yeniden çeker;
   - `stale scores`: puan > 75 dk.
+  - `saha düzeltmesi`: puanı etkileyen bir saha kaydı (lamba, derinlik, erişim, dip; saha formu ve yöneticinin lamba durumu) kaydedilince Worker hemen tetikler. En fazla 10 dk'da bir (`meta.field_dispatch_at`, atomik). Arada gelen kayıtlar aynı çalışmanın `--field-followup` adımında, pencere dolunca birlikte puanlanır. Av günlüğü kaydı puan girdisi değildir, tetiklemez.
 - İki dispatch arası en az 30 dk. Her dispatch `meta.score_dispatch_log`'a yazılır (son 200); son durum `meta.score_guard_last`'ta.
 - Puanlama işi başlarken hava > 60 dk ise önce taze çekim ister; puanlar en yeni havayı zaten kullanıyorsa ve bekleyen saha düzenlemesi yoksa hemen çıkar (`nothingNew`).
 - **Yedek: GitHub zamanlaması `23 * * * *`.** Ölçülen başlama oranı %8 (72 sa, 288 beklenen yuvadan 23; `docs/audit/monitor-72h.md`). Bu yüzden yalnız yedektir; 15 dakikalık `:08/:38/:53` yuvaları kaldırıldı.

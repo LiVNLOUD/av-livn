@@ -76,14 +76,41 @@ const setMeta = (env: Env, key: string, value: string) =>
   env.DB.prepare('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(key, value).run();
 
 /** POST a workflow_dispatch for score.yml (the Worker's primary scoring trigger). */
-async function dispatchScore(env: Env, fetcher: typeof fetch): Promise<string> {
+async function dispatchScore(env: Env, fetcher: typeof fetch, inputs?: Record<string, string>): Promise<string> {
   if (!env.GH_DISPATCH_TOKEN) return 'no token';
   const r = await fetcher(`https://api.github.com/repos/${REPO}/actions/workflows/score.yml/dispatches`, {
     method: 'POST',
     headers: { authorization: `Bearer ${env.GH_DISPATCH_TOKEN}`, accept: 'application/vnd.github+json', 'user-agent': 'av-livn-worker', 'content-type': 'application/json' },
-    body: JSON.stringify({ ref: 'main' }),
+    body: JSON.stringify(inputs ? { ref: 'main', inputs } : { ref: 'main' }),
   });
   return r.status === 204 ? 'dispatched' : `dispatch failed ${r.status}`;
+}
+
+/** A field edit that changes a score input starts scoring at once, at most once per this many minutes. */
+export const FIELD_DISPATCH_GAP_MIN = 10;
+export type FieldDispatch = 'started' | 'queued' | 'off';
+
+/**
+ * Field edit → scoring now ("saha düzeltmesi"). The slot is claimed atomically (one upsert that only moves
+ * meta.field_dispatch_at when the last field dispatch is ≥ 10 min old), so concurrent edits never start two runs.
+ * Edits inside the window stay in pending_rescore: the running job's follow-up step (score-job --field-followup)
+ * scores them together once the window has passed. 'off' = no dispatch token (hourly Worker trigger only).
+ */
+export async function claimFieldDispatch(env: Env, now: Date): Promise<FieldDispatch> {
+  if (!env.GH_DISPATCH_TOKEN) return 'off';
+  const cutoff = new Date(now.getTime() - FIELD_DISPATCH_GAP_MIN * 60_000).toISOString();
+  const r = await env.DB.prepare(
+    "INSERT INTO meta (key, value) VALUES ('field_dispatch_at', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE meta.value <= ?2",
+  ).bind(now.toISOString(), cutoff).run();
+  return r.meta.changes ? 'started' : 'queued';
+}
+
+/** Second half of a claimed slot (run after the response): dispatch, log; on failure release the slot. */
+export async function fireFieldDispatch(env: Env, now: Date, fetcher: typeof fetch = fetch): Promise<string> {
+  const status = await dispatchScore(env, fetcher, { reason: 'field' });
+  if (status !== 'dispatched') await env.DB.prepare("DELETE FROM meta WHERE key = 'field_dispatch_at' AND value = ?1").bind(now.toISOString()).run();
+  await setMeta(env, 'score_dispatch_log', JSON.stringify(appendLog(await meta(env, 'score_dispatch_log'), { at: now.toISOString(), reason: 'saha düzeltmesi', status })));
+  return status;
 }
 
 /** Hourly from the Worker cron: re-start a skipped score run and alert the owner on stale scores. */

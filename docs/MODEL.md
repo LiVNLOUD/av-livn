@@ -239,8 +239,8 @@ Her bileşen değeriyle birlikte bir **kaynak** döner (UI rozeti):
 
 - Worker'da anında nokta puanı ölçüldü (Workers Observability, canlı): POST 42 ms, PATCH 24 ms, DELETE 27 ms CPU. Ücretsiz katmanın ~10 ms sınırını aştığı için `meta.rescore_mode = 'deferred'` (migration 0009).
 - Düzenleme Worker'da yalnız kaydedilir ve `pending_rescore`'a yazılır.
-- Bekleyen düzenlemeler bir sonraki saatlik tam çalışmada (Worker :07 tetiği) Monte Carlo dahil puanlanır. 15 dakikalık GitHub çalışmaları (`:08/:38/:53`) kaldırıldı (izleme 2026-11-07: GitHub zamanlayıcısı çalışmaların %8'ini başlattı; `docs/audit/monitor-72h.md`).
-- Form "Puan bir sonraki saatlik puanlamada (en geç ~1 saat) güncellenecek" der.
+- Düzenleme kaydedilince Worker puanlamayı hemen başlatır (sebep "saha düzeltmesi", en fazla 10 dk'da bir; arada gelenler aynı çalışmanın ikinci geçişinde birlikte). Bekleyen düzenlemeler böylece birkaç dakika içinde Monte Carlo dahil puanlanır; tetik anahtarı yoksa bir sonraki saatlik tam çalışmada. 15 dakikalık GitHub çalışmaları (`:08/:38/:53`) kaldırıldı (izleme 2026-11-07: GitHub zamanlayıcısı çalışmaların %8'ini başlattı; `docs/audit/monitor-72h.md`).
+- Form "Puan birkaç dakika içinde güncellenecek." der (tetik anahtarı yoksa "en geç ~1 saat").
 
 ## 7. Duyarlılık analizi: v1 ve v2, 16 mera × 72 sa
 

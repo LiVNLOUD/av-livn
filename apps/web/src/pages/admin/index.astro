@@ -192,13 +192,13 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const id = $<HTMLSelectElement>('pick').value;
     const light = $<HTMLSelectElement>('e-light').value;
     try {
-      await api(`/api/admin/spots/${encodeURIComponent(id)}`, 'PATCH', {
+      const r = await api(`/api/admin/spots/${encodeURIComponent(id)}`, 'PATCH', {
         name: $<HTMLInputElement>('e-name').value,
         has_light: light === '' ? null : light === 'true',
         status: $<HTMLSelectElement>('e-status').value,
         notes: $<HTMLTextAreaElement>('e-notes').value || null,
       });
-      say('Değişiklikler kaydedildi.');
+      say((r as { dispatch?: string }).dispatch === 'started' || (r as { dispatch?: string }).dispatch === 'queued' ? 'Değişiklikler kaydedildi. Puan birkaç dakika içinde güncellenecek.' : 'Değişiklikler kaydedildi.');
       await load();
       $<HTMLSelectElement>('pick').value = id;
       fill();

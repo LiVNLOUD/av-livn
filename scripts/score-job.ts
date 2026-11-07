@@ -21,6 +21,8 @@ import { forbiddenUpdates, parseArea, type SpotPos } from '../workers/api/src/li
 
 const dryRun = process.argv.includes('--dry-run');
 let pendingOnly = process.argv.includes('--pending');
+// A: second pass of a field-triggered run (score.yml reason=field): edits that arrived inside the 10-minute window
+const fieldFollowup = process.argv.includes('--field-followup');
 // staleness fix: deploys and data refreshes force a run even when the scores already use the newest weather
 const force = process.argv.includes('--force');
 const compareOut = process.argv.includes('--compare-desk') ? process.argv[process.argv.indexOf('--compare-desk') + 1] : null;
@@ -51,6 +53,19 @@ async function query<T>(sql: string, params: unknown[] = []): Promise<T[]> {
   }
 }
 
+if (fieldFollowup) {
+  // Edits saved while this run was scoring (the Worker answered "queued") wait in pending_rescore. Keep the
+  // 10-minute pacing: wait until the window of the last field dispatch has passed, claim the next one, then score
+  // them together through the --pending path. Edits after that wait for the next trigger (field or hourly).
+  const n = (await query<{ n: number }>('SELECT COUNT(*) AS n FROM pending_rescore'))[0]?.n ?? 0;
+  if (!n) { console.log('field follow-up: nothing waiting'); process.exit(0); }
+  const last = (await query<{ value: string }>("SELECT value FROM meta WHERE key = 'field_dispatch_at'"))[0]?.value ?? null;
+  const waitMs = last ? Math.min(10 * 60_000, Math.max(0, Date.parse(last) + 10 * 60_000 - Date.now())) : 0;
+  console.log(`field follow-up: ${n} spot(s) waiting; next pass in ${Math.round(waitMs / 1000)} s`);
+  await new Promise((r) => setTimeout(r, waitMs));
+  await query("INSERT INTO meta (key, value) VALUES ('field_dispatch_at', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [new Date().toISOString()]);
+  pendingOnly = true;
+}
 const t0 = performance.now();
 const startedAt = new Date().toISOString();
 if (pendingOnly) {

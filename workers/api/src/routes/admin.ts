@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { refreshOnRequest } from '../cron';
+import { claimFieldDispatch, fireFieldDispatch, type FieldDispatch } from '../lib/staleness';
 import type { Env } from '../env';
 import { catchRoutes } from './catch';
 import { notifyRoutes } from './notify';
@@ -146,6 +147,7 @@ adminRoutes.patch('/spots/:id', async (c) => {
   const v = validateFields(body);
   if (!v.ok) return c.json(v, 400);
   const now = new Date().toISOString();
+  const before = await c.env.DB.prepare('SELECT has_light FROM spots WHERE id = ?1').bind(c.req.param('id')).first<{ has_light: number | null }>();
   const cols = Object.keys(v.set);
   const n = cols.length;
   const res = await c.env.DB.prepare(
@@ -155,7 +157,12 @@ adminRoutes.patch('/spots/:id', async (c) => {
     .run();
   if (!res.meta.changes) return c.json({ ok: false, error: 'not_found' }, 404);
   const row = await c.env.DB.prepare('SELECT * FROM spots WHERE id = ?1').bind(c.req.param('id')).first<SpotRow>();
-  // Scores reflect the edit after the next hourly scoring run (GitHub Actions, score.yml).
+  // The owner's lamp state is a score input: rescore and start scoring now (other fields wait for the hourly run).
+  if ('has_light' in v.set && v.set.has_light !== (before?.has_light ?? null)) {
+    const t = new Date(now);
+    await rescoreNow(c.env.DB, c.req.param('id'), t);
+    return c.json({ ok: true, spot: adminSpot(row!), ...(await startScoring(c, t)) });
+  }
   return c.json({ ok: true, spot: adminSpot(row!) });
 });
 
@@ -344,6 +351,16 @@ const scoreJson = (r: ListEntryV2 | 'deferred' | null) =>
     ? { rescore: 'deferred' as const, score: null }
     : { rescore: 'immediate' as const, score: { total: r[0], p10: r[1], p90: r[2], rank: r[3], gated: r[4] === 1 } };
 
+/** A score input changed: start scoring now (at most every 10 min; the GitHub call runs after the response). */
+async function startScoring(c: { env: Env; executionCtx: { waitUntil(p: Promise<unknown>): void } }, now: Date): Promise<{ dispatch: FieldDispatch }> {
+  const d = await claimFieldDispatch(c.env, now);
+  if (d === 'started') {
+    const p = fireFieldDispatch(c.env, now).catch((e) => `error ${String(e)}`);
+    try { c.executionCtx.waitUntil(p); } catch { await p; } // no execution context (tests): wait here
+  }
+  return { dispatch: d };
+}
+
 /** Statements writing one observation (insert or full replace) and the spot fields it drives. */
 function obsStatements(db: D1Database, obsId: string, spotId: string, f: FieldInput, now: Date, replace: boolean): D1PreparedStatement[] {
   const light = f.has_light === undefined || f.has_light === null ? null : f.has_light ? 1 : 0;
@@ -395,7 +412,7 @@ adminRoutes.post('/spots/:id/field', async (c) => {
   const obsId = `obs-${crypto.randomUUID().slice(0, 12)}`;
   await c.env.DB.batch([...obsStatements(c.env.DB, obsId, id, v.value, now, false), syncLamp(c.env.DB, id, now)]);
   const r = c.req.query('rescore') === '0' ? null : await rescoreNow(c.env.DB, id, now);
-  return c.json({ ok: true, obs_id: obsId, ...(r === null ? { rescore: 'skipped', score: null } : scoreJson(r)) }, 201);
+  return c.json({ ok: true, obs_id: obsId, ...(r === null ? { rescore: 'skipped', score: null } : { ...scoreJson(r), ...(await startScoring(c, now)) }) }, 201);
 });
 
 adminRoutes.patch('/field/:obs', async (c) => {
@@ -414,7 +431,7 @@ adminRoutes.patch('/field/:obs', async (c) => {
     if (!v.ok) return c.json(v, 400);
     await c.env.DB.batch([...obsStatements(c.env.DB, obsId, o.spot_id, v.value, now, true), syncLamp(c.env.DB, o.spot_id, now)]);
   }
-  return c.json({ ok: true, obs_id: obsId, ...scoreJson(await rescoreNow(c.env.DB, o.spot_id, now)) });
+  return c.json({ ok: true, obs_id: obsId, ...scoreJson(await rescoreNow(c.env.DB, o.spot_id, now)), ...(await startScoring(c, now)) });
 });
 
 adminRoutes.get('/spots/:id/field', async (c) => {
@@ -442,11 +459,12 @@ adminRoutes.delete('/field/:obs', async (c) => {
     c.env.DB.prepare('DELETE FROM field_obs WHERE id = ?1').bind(c.req.param('obs')),
     syncLamp(c.env.DB, o.spot_id, now),
   ]);
-  return c.json({ ok: true, ...scoreJson(await rescoreNow(c.env.DB, o.spot_id, now)) });
+  return c.json({ ok: true, ...scoreJson(await rescoreNow(c.env.DB, o.spot_id, now)), ...(await startScoring(c, now)) });
 });
 
 adminRoutes.post('/spots/:id/rescore', async (c) => {
-  const r = await rescoreNow(c.env.DB, c.req.param('id'));
+  const now = new Date();
+  const r = await rescoreNow(c.env.DB, c.req.param('id'), now);
   if (r === null) return c.json({ ok: false, error: 'not_found' }, 404);
-  return c.json({ ok: true, ...scoreJson(r) });
+  return c.json({ ok: true, ...scoreJson(r), ...(await startScoring(c, now)) });
 });

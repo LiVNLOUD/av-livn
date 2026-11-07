@@ -18,6 +18,10 @@ on:
         description: 'Puanlar en yeni havayla hesaplanmış olsa da yeniden puanla (deploy, veri yenileme)'
         type: boolean
         default: false
+      reason:
+        description: 'Tetik sebebi (Worker: field = saha düzeltmesi; boş = hava/yedek)'
+        type: string
+        default: ''
 concurrency:
   group: score
   cancel-in-progress: false
@@ -26,7 +30,7 @@ permissions:
 jobs:
   score:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25 # a field-triggered run may wait up to 10 min for its follow-up pass
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,6 +56,15 @@ jobs:
           # Q1: fresh weather first when the newest fetch is older than 60 min (POST /api/admin/weather/refresh)
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || '' }} ${{ inputs.force && '--force' || '' }}
+      - name: Field edits saved during this run (10-minute pacing, A)
+        if: inputs.reason == 'field' && !inputs.dry_run
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: node .score/job.mjs --field-followup
       - name: Alert the owner on failure (E8)
         if: failure()
         env:

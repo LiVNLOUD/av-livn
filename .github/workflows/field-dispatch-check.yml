@@ -1,0 +1,54 @@
+name: field-dispatch-check
+# TEMPORARY (A, 2026-11-07): live check of "field edit → scoring now". Posts two note-only field records on a
+# test spot (the second inside the 10-minute window), checks the dispatch, the score run and the log, then deletes
+# both records. Secrets stay in env and are never printed. Removed after the check.
+on:
+  workflow_dispatch:
+    inputs:
+      spot:
+        description: 'Test spot id'
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GH_TOKEN: ${{ github.token }}
+      SPOT: ${{ inputs.spot }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Two field records, scoring dispatch, cleanup
+        run: |
+          set -euo pipefail
+          DB=$(sed -n 's/^database_id *= *"\(.*\)"/\1/p' workers/api/wrangler.toml)
+          d1() { curl -fsS -X POST "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database/$DB/query" -H "authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'content-type: application/json' -d "$1" | jq -c '.result[0].results'; }
+          post() { curl -fsS -X POST "https://av.livn.tr/api/admin/spots/$SPOT/field" -H "authorization: Bearer $ADMIN_TOKEN" -H 'content-type: application/json' -d '{"note":"otomatik test kaydı — silinecek"}'; }
+          T0=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          R1=$(post); echo "first:  $(echo "$R1" | jq -c '{obs_id, rescore, dispatch}')"
+          sleep 20
+          R2=$(post); echo "second: $(echo "$R2" | jq -c '{obs_id, rescore, dispatch}')"
+          O1=$(echo "$R1" | jq -r .obs_id); O2=$(echo "$R2" | jq -r .obs_id)
+          fail=0
+          [ "$(echo "$R1" | jq -r .dispatch)" = started ] || { echo "FAIL first record did not start scoring"; fail=1; }
+          [ "$(echo "$R2" | jq -r .dispatch)" = queued ] || { echo "FAIL second record inside 10 min was not queued"; fail=1; }
+          RUN=""
+          for i in $(seq 1 18); do
+            RUN=$(gh run list --workflow score.yml --event workflow_dispatch --limit 10 --json databaseId,createdAt --jq "[.[] | select(.createdAt >= \"$T0\")] | last | .databaseId // empty")
+            [ -n "$RUN" ] && break; sleep 10
+          done
+          if [ -z "$RUN" ]; then echo "FAIL no score.yml dispatch after $T0"; fail=1; else
+            echo "score.yml run $RUN started"; gh run watch "$RUN" --exit-status >/dev/null && echo "score.yml run $RUN finished OK" || { echo "FAIL score run"; fail=1; }
+          fi
+          echo "dispatch log (last 2): $(d1 '{"sql":"SELECT value FROM meta WHERE key = '"'"'score_dispatch_log'"'"'"}' | jq -c '.[0].value | fromjson | .[-2:]')"
+          echo "newest score: $(d1 '{"sql":"SELECT max(computed_at) AS at FROM spot_scores_v2"}')  (records at $T0)"
+          echo "pending: $(d1 '{"sql":"SELECT COUNT(*) AS n FROM pending_rescore"}')"
+          for O in "$O1" "$O2"; do curl -fsS -X DELETE "https://av.livn.tr/api/admin/field/$O" -H "authorization: Bearer $ADMIN_TOKEN" | jq -c '{ok, dispatch}'; done
+          echo "test records left: $(d1 "{\"sql\":\"SELECT COUNT(*) AS n FROM field_obs WHERE note = 'otomatik test kaydı — silinecek'\"}")"
+          exit $fail
