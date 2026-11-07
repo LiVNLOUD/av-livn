@@ -188,15 +188,7 @@ def forecast(d1: D1, now: dt.datetime) -> int:
         vo = read(cp, "vo")[4]
     sst = depth_mean(thetao, depths, 0.5, 20.5)
     speed = depth_mean(np.sqrt(uo ** 2 + vo ** 2), cdepths, 0.5, 5.5)
-    # P5: current field for the map layer (u, v separately; stored as meta.grid_cur, served by the Worker as is)
-    try:
-        from_hour = int(now.timestamp() // 3600)
-        grid = current_grid(ctimes, clats, clons, depth_mean(uo, cdepths, 0.5, 5.5), depth_mean(vo, cdepths, 0.5, 5.5), from_hour)
-        grid["built_at"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-        d1.query("INSERT INTO meta (key, value) VALUES ('grid_cur', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [json.dumps(grid, separators=(",", ":"))])
-        print(f"grid_cur: {grid['nlat']}x{grid['nlon']} points, {grid['hours']} hours")
-    except Exception as e:  # noqa: BLE001 — the layer is optional; the per-spot series below must still be written
-        print(f"grid_cur skipped: {type(e).__name__}")
+
     if ctimes != times or not (np.allclose(clats, lats) and np.allclose(clons, lons)):
         speed = None  # grids differ: keep temperature only
     series = series_for(spots, times, lats, lons, sst, speed)
@@ -204,6 +196,15 @@ def forecast(d1: D1, now: dt.datetime) -> int:
     for sid, s in series.items():
         d1.query("INSERT INTO ocean_series (spot_id, fetched_at, json) VALUES (?1, ?2, ?3) ON CONFLICT(spot_id) DO UPDATE SET fetched_at = excluded.fetched_at, json = excluded.json",
                  [sid, fetched, json.dumps(s)])
+    # P5: current field for the map layer (u, v separately; stored as meta.grid_cur, served by the Worker as is)
+    try:
+        from_hour = int(now.timestamp() // 3600)
+        grid = current_grid(ctimes, clats, clons, depth_mean(uo, cdepths, 0.5, 5.5), depth_mean(vo, cdepths, 0.5, 5.5), from_hour)
+        grid["built_at"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        d1.query("INSERT INTO meta (key, value) VALUES ('grid_cur', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [json.dumps(grid, separators=(",", ":"))])
+        print(f"grid_cur: {grid['nlat']}x{grid['nlon']} points, {grid['hours']} hours")
+    except Exception as e:  # noqa: BLE001 — the layer is optional; the per-spot series above are already written
+        print(f"grid_cur skipped: {type(e).__name__}")
     print(f"ocean forecast: {len(series)}/{len(spots)} spots, {len(times)} hours {times[0]:%Y-%m-%dT%H}Z → {times[-1]:%Y-%m-%dT%H}Z, "
           f"max cell distance {max((s['cell']['distance_km'] for s in series.values()), default=0):.2f} km")
     return len(series)
