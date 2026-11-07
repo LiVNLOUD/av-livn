@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ambientLogLux, calibrate, DEFAULTS, depthPrior, effLength, drawParams, dynamicTerms, exposure, fieldBand, fieldWeight, IDEAL_SPOT, IDEAL_WEATHER, lampPrior,
-  PARAMS, STRUCT_SHARE, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, SHORE_KINDS, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type StructureKind, type Weather,
+  PARAMS, satWeight, STRUCT_SHARE, R_IDEAL, R_WORST, rawScore, rng, SCALE, season, SHORE_KINDS, staticTerms, WORST_SPOT, WORST_WEATHER, type SpotV2, type StructureKind, type Weather,
 } from '../../src';
 import { BASE, CALM } from './fixtures';
 
@@ -270,5 +270,26 @@ describe('I4: a single field sounding speaks only for its surroundings', () => {
     const s = staticTerms({ ...BASE, fieldDepths: one }, DEFAULTS);
     const wide = staticTerms({ ...BASE, fieldDepths: [{ distance_m: 20, depth_m: 8 }, { distance_m: 120, depth_m: 8 }] }, DEFAULTS);
     expect(s.depthM).toBeLessThan(wide.depthM);
+  });
+});
+
+describe('Faz R: satellite depth (ICESat-2 ATL24, Sentinel-2 SDB)', () => {
+  it('weight falls with uncertainty, capped by kind, floored at 0.3', () => {
+    expect(satWeight({ depthM: 4, sigmaM: 0.2, kind: 'atl24' })).toBe(0.9);
+    expect(satWeight({ depthM: 4, sigmaM: 0.2, kind: 'sdb' })).toBe(0.7);
+    expect(satWeight({ depthM: 4, sigmaM: 1.5, kind: 'atl24' })).toBeCloseTo(0.5, 6);
+    expect(satWeight({ depthM: 4, sigmaM: 9, kind: 'sdb' })).toBe(0.3);
+  });
+  it('lidar band pulls the depth towards the measurement; source says so; field soundings still win', () => {
+    const base = staticTerms(BASE, P);
+    const lid = staticTerms({ ...BASE, satDepth: [{ depthM: 6, sigmaM: 0.3, kind: 'atl24' }, { depthM: 8, sigmaM: 0.3, kind: 'atl24' }] }, P);
+    expect(lid.sources.depth).toBe('uydu-lidar');
+    expect(lid.depthM).toBeGreaterThan(base.depthM);
+    expect(lid.depthM).toBeCloseTo(0.4 * (0.9 * 6 + 0.1 * (base.depthM)) + 0.6 * (0.9 * 8 + 0.1 * base.depthM), 0);
+    const sdb = staticTerms({ ...BASE, satDepth: [null, { depthM: 5, sigmaM: 1.0, kind: 'sdb' }] }, P);
+    expect(sdb.sources.depth).toBe('uydu-tahmini');
+    expect(staticTerms({ ...BASE, satDepth: [null, null] }, P).sources.depth).toBe('yapı-uzunluğu-tahmini');
+    const field = staticTerms({ ...BASE, satDepth: [{ depthM: 9, sigmaM: 0.3, kind: 'atl24' }, null], fieldDepths: [{ distance_m: 20, depth_m: 2 }] }, P);
+    expect(field.sources.depth).toBe('saha');
   });
 });

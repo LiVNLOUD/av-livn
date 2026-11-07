@@ -67,13 +67,15 @@ export function trust(w: PlanWin, opts: { calibrated?: boolean; weather?: 'gate'
   return { level: 'Yüksek', text: 'Koşullar güçlü, öne çıkaran etken ölçülmüş veriye dayanıyor ve model ileriye dönük av kaydında basit tahminleri geçti.' };
 }
 
-type Ev = 'saha' | 'uzaktan' | 'masabasi' | 'varsayim' | 'olcum' | 'enterp' | 'uzunluk' | 'bolgesel' | 'hesap' | null;
+type Ev = 'saha' | 'uzaktan' | 'masabasi' | 'varsayim' | 'olcum' | 'enterp' | 'uzunluk' | 'bolgesel' | 'hesap' | 'lidar' | 'uydu' | null;
 /** N2: evidence type of a reason line, from its source note (precompute_v2 EVIDENCE_TR texts). */
 export function evidenceOf(text: string | null | undefined): Ev {
   const t = (text ?? '').toLocaleLowerCase('tr');
   if (/saha/.test(t)) return 'saha';
   if (/uzaktan/.test(t)) return 'uzaktan';
   if (/masa başı/.test(t)) return 'masabasi';
+  if (/icesat|uydu lazer/.test(t)) return 'lidar';
+  if (/sentinel|uydu görüntüsünden/.test(t)) return 'uydu';
   if (/enterpolasyon/.test(t)) return 'enterp';
   if (/yapı uzunluğundan/.test(t)) return 'uzunluk';
   if (/emodnet ölçümü/.test(t)) return 'olcum';
@@ -99,7 +101,7 @@ export function driverSentence(why: string | null | undefined): string | null {
     case 'yapi':
       return ev === 'saha' ? 'Yapı sahada doğrulandı; model bu yer tipini avantajlı sayıyor.' : `${Kind}: model bu yer tipini avantajlı sayıyor (tip tercihi varsayım, av kaydıyla doğrulanmadı).`;
     case 'derinlik': {
-      const src = ev === 'saha' ? 'sahada ölçüldü' : ev === 'olcum' ? 'deniz haritası ölçümü' : ev === 'enterp' ? 'harita tahmini, ölçülmedi' : ev === 'uzunluk' ? 'yapı boyundan tahmin, ölçülmedi' : 'kaynağı doğrulanmadı';
+      const src = ev === 'saha' ? 'sahada ölçüldü' : ev === 'olcum' ? 'deniz haritası ölçümü' : ev === 'lidar' ? 'uydu lazer ölçümü' : ev === 'uydu' ? 'uydu görüntüsünden tahmin, ölçülmedi' : ev === 'enterp' ? 'harita tahmini, ölçülmedi' : ev === 'uzunluk' ? 'yapı boyundan tahmin, ölçülmedi' : 'kaynağı doğrulanmadı';
       return `Atış mesafesinde yeterli su var (${src}).`;
     }
     case 'maruziyet': return 'Bu saatte rüzgardan diğer yerlere göre az etkileniyor (kıyı şekli ve rüzgar tahmininden hesap).';

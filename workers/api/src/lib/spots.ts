@@ -1,7 +1,20 @@
 import type { SpotInput } from '@av-livn/scoring';
 import type { Snapshot } from './openmeteo';
 
+export interface SatBandRow { band: number; kind: 'atl24' | 'sdb'; depth_m: number; sigma_m: number }
+/** Faz R: lidar first, then the image estimate, per band; null where neither exists. */
+export function satBands(rows: SatBandRow[] | undefined): [{ depthM: number; sigmaM: number; kind: 'atl24' | 'sdb' } | null, { depthM: number; sigmaM: number; kind: 'atl24' | 'sdb' } | null] | null {
+  if (!rows?.length) return null;
+  const pick = (b: number) => {
+    const r = rows.find((x) => x.band === b && x.kind === 'atl24') ?? rows.find((x) => x.band === b && x.kind === 'sdb');
+    return r ? { depthM: r.depth_m, sigmaM: r.sigma_m, kind: r.kind } : null;
+  };
+  return [pick(0), pick(1)];
+}
+
 export interface SpotRow {
+  /** Faz R: satellite cast-band depths attached by the scorer (sat_depth_band), not a column. */
+  sat?: SatBandRow[];
   id: string;
   name: string;
   kind: string;

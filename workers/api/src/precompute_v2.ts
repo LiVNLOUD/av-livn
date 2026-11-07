@@ -7,7 +7,7 @@ import {
 import type { HourlyPoint } from '@av-livn/scoring';
 import type { Snapshot } from './lib/openmeteo';
 import { mergeSnapshots } from './lib/series';
-import { ACTIVE, haversineKm, type SpotRow } from './lib/spots';
+import { ACTIVE, haversineKm, satBands, type SpotRow } from './lib/spots';
 
 export const HOURS_V2 = 75;
 export const DRAWS = 200;
@@ -149,6 +149,7 @@ export function spotV2(row: SpotRow, field?: FieldRecord): SpotV2 & { lat: numbe
     lengthM: row.length_m,
     // profile: 25 m steps from the tip; DTM cells near shore are all interpolated (docs/DATA-AUDIT.md §1).
     dtm: { d0_50: bandMean(profile, 0, 3), d50_150: bandMean(profile, 2, 7), interpolated: true },
+    satDepth: satBands(row.sat),
     fieldDepths: field?.depths.length ? field.depths : null,
     fieldDepthKind: field?.depthKind ?? undefined,
     substrate: {
@@ -331,6 +332,7 @@ const n1 = (x: number) => (Math.round(x * 10) / 10).toString().replace('.', ',')
 /** L1: evidence type of a component source, in plain Turkish (what the number rests on). */
 export const EVIDENCE_TR: Record<string, string> = {
   saha: 'saha ölçümü', uzaktan: 'uzaktan gözlem', masabasi: 'masa başı veri', OSM: 'OSM yapı tipi, tip tercihi varsayım',
+  'uydu-lidar': 'uydu lazer ölçümü (ICESat-2 ATL24)', 'uydu-tahmini': 'uydu görüntüsünden tahmin (Sentinel-2), ölçüm değil',
   'DTM-ölçüm': 'EMODnet ölçümü', 'DTM-interpolasyon': 'EMODnet enterpolasyonu, ölçüm değil', 'yapı-uzunluğu-tahmini': 'yapı uzunluğundan tahmin, ölçüm değil',
   EUSeaMap: 'EUSeaMap bölgesel sınıflandırma', 'önsel': 'varsayım, kanıt yok',
 };

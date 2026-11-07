@@ -126,6 +126,10 @@ if (!dryRun) {
   if (u.hide.length || u.unhide.length) console.log(`forbidden areas: hid ${u.hide.length}, released ${u.unhide.length}`);
 }
 const rows = await query<SpotRow>(`SELECT * FROM spots WHERE ${ACTIVE} ORDER BY id`);
+// Faz R: satellite cast-band depths (satbathy.yml → sat_depth_band); the engine weighs them by their uncertainty
+const satRows = await query<{ spot_id: string; band: number; kind: 'atl24' | 'sdb'; depth_m: number; sigma_m: number }>('SELECT spot_id, band, kind, depth_m, sigma_m FROM sat_depth_band').catch(() => []);
+for (const r of rows) r.sat = satRows.filter((x) => x.spot_id === r.id);
+if (satRows.length) console.log(`satellite depth: ${new Set(satRows.map((x) => x.spot_id)).size} spot(s), ${satRows.length} band value(s)`);
 const snapRows = await query<{ cell_id: string; fetched_at: string; json: string }>('SELECT cell_id, fetched_at, json FROM forecast_snapshots');
 // MODEL.md §18: model run behind this weather (Worker cron, meta.weather_runs), stored with the public bodies
 const weatherRun = parseWeatherRun((await query<{ value: string }>(WEATHER_RUNS_SQL))[0]?.value);

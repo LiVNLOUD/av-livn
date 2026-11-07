@@ -83,6 +83,23 @@ export async function runNotify(query: Query, opts: { spots: SpotHours[]; bySpec
  * E8 operations alert for the owner: scoring failed, or the newest score is older than 2 h. Goes to every
  * registered PWA push subscription and to ntfy only when NTFY_TOPIC is set. At most once per 6 h per fault.
  */
+/** Owner alert through the existing channels (push + ntfy), at most once per `gapH` per meta key. */
+export async function opsAlert(query: Query, o: { metaKey: string; gapH: number; title: string; body: string; url: string; now?: Date; force?: boolean }): Promise<string> {
+  const now = o.now ?? new Date();
+  const last = (await query<{ value: string }>('SELECT value FROM meta WHERE key = ?1', [o.metaKey]))[0]?.value;
+  if (!o.force && last && now.getTime() - Date.parse(last) < o.gapH * 3_600_000) return `already alerted at ${last}`;
+  const m: Message = { key: `ops:${o.metaKey}:${now.toISOString()}`, kind: 'test', ttl: 24 * 3600, url: o.url, title: o.title, body: o.body };
+  const key = process.env.VAPID_PRIVATE_KEY ?? '';
+  const topic = process.env.NTFY_TOPIC ?? '';
+  const subs = await query<Sub>('SELECT id, endpoint, p256dh, auth, fail_count FROM push_subscription');
+  const r: Record<string, unknown> = {};
+  r.push = key && subs.length ? await viaPush(subs, m, query, key) : key ? 'abonelik yok' : 'VAPID_PRIVATE_KEY yok';
+  if (topic) r.ntfy = await viaNtfy(topic, m);
+  const delivered = (typeof r.push === 'object' && (r.push as { ok: number }).ok > 0) || r.ntfy === true;
+  if (delivered) await query('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value', [o.metaKey, now.toISOString()]);
+  return JSON.stringify(r);
+}
+
 export async function runWatchdog(query: Query, o: { failed: boolean; scoredAt: string | null; now?: Date }): Promise<string> {
   const now = o.now ?? new Date();
   const ageH = o.scoredAt ? (now.getTime() - Date.parse(o.scoredAt)) / 3_600_000 : Infinity;

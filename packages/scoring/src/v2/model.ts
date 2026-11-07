@@ -5,7 +5,7 @@ import type { Params } from './params';
 
 export const FLOOR = 0.05;
 
-export type Source = 'saha' | 'uzaktan gözlem' | 'masa başı' | 'Copernicus' | 'EUSeaMap' | 'DTM-interpolasyon' | 'DTM-ölçüm' | 'yapı-uzunluğu-tahmini' | 'önsel' | 'OSM' | 'Open-Meteo' | 'astronomi';
+export type Source = 'saha' | 'uzaktan gözlem' | 'masa başı' | 'Copernicus' | 'EUSeaMap' | 'DTM-interpolasyon' | 'DTM-ölçüm' | 'yapı-uzunluğu-tahmini' | 'uydu-lidar' | 'uydu-tahmini' | 'önsel' | 'OSM' | 'Open-Meteo' | 'astronomi';
 
 export type StructureKind = 'pier' | 'breakwater' | 'groyne' | 'manual' | ShoreKind;
 /** D1 inventory types without a single structure tip (docs/spots-candidates.md); static preferences, evidence C. */
@@ -40,6 +40,9 @@ export interface SpotV2 {
   lengthM: number | null;
   /** DTM mean depth (m, positive down) in the 0–50 m and 50–150 m bands from the tip. */
   dtm: { d0_50: number | null; d50_150: number | null; interpolated: boolean };
+  /** Faz R: satellite depth per cast band [0–50 m, 50–150 m]: ICESat-2 ATL24 (measured) or Sentinel-2 SDB (estimate,
+   *  only when it passed validation), with its uncertainty. null = no satellite value for that band. */
+  satDepth?: [SatBand | null, SatBand | null] | null;
   /** Field-measured (or sink-time converted) depth pairs along the cast; overrides the DTM. */
   fieldDepths?: FieldDepth[] | null;
   /** Source kind of fieldDepths (default saha). */
@@ -163,6 +166,13 @@ export function fieldBand(pairs: FieldDepth[], a: number, b: number): number {
   return sum / 11;
 }
 
+export interface SatBand { depthM: number; sigmaM: number; kind: 'atl24' | 'sdb' }
+/** Faz R: weight of a satellite band against the DTM/prior estimate — falls with its uncertainty, capped by kind
+ *  (lidar measurement 0.9, image-derived estimate 0.7), never below 0.3. Field soundings still come first. */
+export function satWeight(b: SatBand): number {
+  return Math.min(b.kind === 'atl24' ? 0.9 : 0.7, Math.max(0.3, 1 - b.sigmaM / 3));
+}
+
 export interface StaticTerms {
   struct: number;
   substrate: number;
@@ -189,8 +199,11 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   const prior = depthPrior(s, p.len_sat_m);
   const w = s.dtm.interpolated ? p.dtm_weight_interp : 0.9;
   const est = (d: number | null) => (d === null || Number.isNaN(d) ? prior : w * d + (1 - w) * prior);
-  const open0 = est(s.dtm.d0_50);
-  const open1 = est(s.dtm.d50_150);
+  // Faz R: saha > uydu lidar (ATL24) > uydu tahmini (SDB) > DTM > yapı boyundan tahmin
+  const sat = (b: SatBand | null | undefined, open: number) => (b ? satWeight(b) * b.depthM + (1 - satWeight(b)) * open : open);
+  const open0 = sat(s.satDepth?.[0], est(s.dtm.d0_50));
+  const open1 = sat(s.satDepth?.[1], est(s.dtm.d50_150));
+  const satKinds = (s.satDepth ?? []).flatMap((b) => (b ? [b.kind] : []));
   if (s.fieldDepths && s.fieldDepths.length > 0) {
     // Field pairs dominate where they were measured; I4: only within FIELD_REACH_M of a measured distance — a single
     // sounding is not the depth of the whole 0–150 m band (beyond its reach the DTM / structure estimate stays).
@@ -200,7 +213,7 @@ export function staticTerms(s: SpotV2, p: Params): StaticTerms {
   } else {
     depthM = 0.4 * open0 + 0.6 * open1;
     const hasDtm = s.dtm.d0_50 !== null || s.dtm.d50_150 !== null;
-    depthSrc = !hasDtm || s.dtm.interpolated ? 'yapı-uzunluğu-tahmini' : 'DTM-ölçüm';
+    depthSrc = satKinds.includes('atl24') ? 'uydu-lidar' : satKinds.length ? 'uydu-tahmini' : !hasDtm || s.dtm.interpolated ? 'yapı-uzunluğu-tahmini' : 'DTM-ölçüm';
   }
   const depth = FLOOR + (1 - FLOOR) * sig((depthM - p.depth_mid) / p.depth_slope);
 

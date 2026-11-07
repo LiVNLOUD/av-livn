@@ -1,0 +1,79 @@
+name: satbathy
+# Faz R: coastal depth from satellites. Monthly (new ICESat-2 passes, new Sentinel-2 scenes) and on demand.
+# 1) EARTHDATA_TOKEN check: expiry from the JWT, owner warned ≤ 10 days before / after expiry; missing or invalid
+#    token stops this workflow only (with a plain message). 2) ICESat-2 ATL24 v002 (SlideRule first, NSIDC with the
+#    token as fallback). 3) Sentinel-2 SDB calibrated/validated on ATL24 (enters the model only when accepted).
+# 4) Per-spot depths → D1, reports and data committed; deploy (map layer) and a re-score follow.
+on:
+  schedule:
+    - cron: '11 4 2 * *'
+  workflow_dispatch:
+    inputs:
+      test_alert:
+        description: 'Token uyarı kanalını bir kez dene (gerçek bildirim)'
+        type: boolean
+        default: false
+      source:
+        description: 'ATL24 kaynağı: auto (önce SlideRule), sliderule, nsidc'
+        type: string
+        default: auto
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: satbathy
+jobs:
+  satbathy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Earthdata token (expiry, warning; value never printed)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          node_modules/.bin/esbuild scripts/earthdata-token.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/earthdata.mjs --log-level=warning
+          node .score/earthdata.mjs ${{ inputs.test_alert && '--test-alert' || '' }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e './pipeline[dev]' h5py rasterio pystac-client pyproj scipy pillow sliderule
+      - run: pytest pipeline/tests/test_satbathy_core.py
+      - name: ICESat-2 ATL24 (SlideRule, else NSIDC)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: python -m av_pipeline.satbathy.atl24 data/satbathy --source ${{ inputs.source || 'auto' }}
+      - name: Sentinel-2 SDB (calibration, grouped validation, acceptance)
+        continue-on-error: true
+        run: python -m av_pipeline.satbathy.sdb data/satbathy
+      - name: Per-spot depths → D1, reports
+        run: python -m av_pipeline.satbathy.spots data/satbathy
+      - name: Commit data and reports
+        id: commit
+        run: |
+          cp data/satbathy/atl24.geojson apps/web/public/tiles/atl24.geojson
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/satbathy apps/web/public/tiles/atl24.geojson docs/audit/atl24-coverage.md docs/audit/sdb-validation.md
+          git add apps/web/public/tiles/sdb.png apps/web/public/tiles/sdb.json 2>/dev/null || true
+          git reset -q data/satbathy/sdb_grid.npz 2>/dev/null || true
+          if git diff --cached --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; else
+            git commit -m "data: satellite depth (ICESat-2 ATL24, Sentinel-2 SDB report)"
+            for i in 1 2 3; do git pull --rebase origin main && git push origin HEAD:main && break; sleep $((i * 10)); done
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy (map layer) and re-score with the new depths
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ steps.commit.outputs.changed }}" = true ]; then gh workflow run deploy.yml --ref main; else gh workflow run score.yml --ref main -f force=true; fi

@@ -7,7 +7,7 @@ import { notifyRoutes } from './notify';
 import { parseProfiles, validateProfiles } from '../lib/tackle';
 import { forbiddenUpdates, parseArea, validateArea, type SpotPos } from '../lib/forbidden';
 import { CELL_DEG, cellKey } from '../lib/seed';
-import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SpotRow } from '../lib/spots';
+import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SatBandRow, type SpotRow } from '../lib/spots';
 import { fieldRecords, oceanMap, rescoreSpot, SPECIES, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 import { CLEAR_PRE_SQL } from '../lib/views';
@@ -320,16 +320,18 @@ export async function rescoreNow(db: D1Database, id: string, now = new Date()): 
 }
 
 async function pointRescore(db: D1Database, id: string, now: Date): Promise<ListEntryV2 | null> {
-  const [spotRes, obsRes, depthRes, scoreRes, oSeries, oNormal] = await db.batch([
+  const [spotRes, obsRes, depthRes, scoreRes, oSeries, oNormal, satRes] = await db.batch([
     db.prepare('SELECT * FROM spots WHERE id = ?1').bind(id),
     db.prepare('SELECT * FROM field_obs WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
     db.prepare(`SELECT v.spot_id, v.species, v.start_hour, v.list_json FROM spot_scores_v2 v JOIN spots s ON s.id = v.spot_id WHERE s.${ACTIVE}`),
     db.prepare('SELECT * FROM ocean_series WHERE spot_id = ?1').bind(id),
     db.prepare('SELECT * FROM ocean_normal WHERE spot_id = ?1').bind(id),
+    db.prepare('SELECT band, kind, depth_m, sigma_m FROM sat_depth_band WHERE spot_id = ?1').bind(id),
   ]);
   const row = spotRes!.results[0] as SpotRow | undefined;
   if (!row) return null;
+  row.sat = satRes!.results as SatBandRow[]; // Faz R
   const snaps = await loadSnapshots(db, row.sea_cell ? [row.wx_cell, row.sea_cell] : [row.wx_cell]);
   const field = fieldRecords(obsRes!.results as FieldObsRow[], depthRes!.results as FieldDepthRow[]).get(id);
   const ocean = oceanMap(oSeries!.results as never[], oNormal!.results as never[]).get(id);
