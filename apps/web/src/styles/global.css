@@ -41,6 +41,9 @@ body {
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  /* Q4: one column that never grows past the viewport. With an implicit 'auto' column a wide child (e.g. the
+     forecast table inside its scroll box) set the page's minimum width and the whole page scrolled sideways. */
+  grid-template-columns: minmax(0, 1fr);
   background: var(--sea);
   color: var(--foam);
   font-size: var(--fs-3);
@@ -49,7 +52,8 @@ body {
 }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--sodium); outline-offset: 2px; border-radius: 4px; }
-.wrap { width: 100%; max-width: 44rem; margin: 0 auto; padding: 0 var(--gutter); }
+.wrap { width: 100%; max-width: 44rem; margin: 0 auto; padding: 0 var(--gutter); min-width: 0; }
+body > main { min-width: 0; }
 .wrap.wide { max-width: none; padding: 0 var(--s4); }
 @media (min-width: 1200px) { .wrap.wide { padding: 0 var(--s5); } }
 .prose { max-width: 68ch; }
@@ -273,8 +277,9 @@ body.app .stale.on { display: none; }
 .eq-pick { display: flex; flex-wrap: wrap; gap: var(--s2); }
 @media (max-width: 767px) {
   .eq-note { font-size: var(--fs-2); }
-  .eq-pick { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--s4)); padding-right: var(--s4); }
-  .eq-pick button { flex: none; }
+  /* Q4: equal options side by side in equal columns, names wrap inside the button (no sideways scroll) */
+  .eq-pick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .eq-pick button { padding: 2px var(--s2); font-size: var(--fs-1); line-height: 1.2; overflow-wrap: anywhere; }
   .main-pick { gap: 10px; padding: var(--s3) var(--s4); }
   .qa .tk-line { font-size: var(--fs-3); }
   .plan { gap: var(--s2); }

@@ -66,7 +66,9 @@ import Base from '../../layouts/Base.astro';
 
 <style>
   .back { display: inline-block; margin: 10px 0 6px; color: var(--mist); font-size: var(--fs-2); text-underline-offset: 3px; }
-  h1 { margin: 0; font-size: var(--fs-6); line-height: 1.05; font-weight: 740; font-stretch: 80%; letter-spacing: -0.015em; }
+  /* Q4: the card sizes to its box (page or drawer): the title shrinks with the box and wraps */
+  #spot { container-type: inline-size; }
+  h1 { margin: 0; font-size: clamp(1.6rem, 9cqi, var(--fs-6)); line-height: 1.05; font-weight: 740; font-stretch: 80%; letter-spacing: -0.015em; overflow-wrap: anywhere; }
   .sub { margin: 4px 0 0; font-size: var(--fs-2); }
   h2 { font-size: var(--fs-3); font-weight: 650; margin: 26px 0 8px; }
   .now { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; margin-top: 18px; }
@@ -85,10 +87,12 @@ import Base from '../../layouts/Base.astro';
   .spot-badges { margin: var(--s2) 0 0; display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
   .spot-badges:empty { display: none; }
   .tackle { margin-top: var(--s4); }
-  .tk-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s2); }
+  .tk-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--s2); }
   .tk-head h2 { font-size: var(--fs-4); }
   /* M1: label above value (no narrow value column); two columns only where each is ≥ 280 px */
-  .tk { margin: var(--s3) 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s3) var(--s4); }
+  .tk { margin: var(--s3) 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: var(--s3) var(--s4); }
+  /* Q4: below 480 px one column, label above value */
+  @container (max-width: 480px) { .tk { grid-template-columns: minmax(0, 1fr); } }
   :global(.tk > div) { min-width: 0; }
   :global(.tk dt) { color: var(--mist); font-size: var(--fs-2); line-height: var(--lh-2); }
   :global(.tk dd) { margin: 0; font-size: var(--fs-2); line-height: var(--lh-2); }

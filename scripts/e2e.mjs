@@ -10,6 +10,7 @@
 //      without scrolling; no label/value column under 280 px; no jargon on the first screen; visitor menu; the
 //      public tackle endpoint carries no brand (M2)
 //   6. Faz O/P0: go-to-spot, labels, time bar, spots table (≤ 2 lines per cell), "now" label
+//   8. Q4: no horizontal scrolling on any page/panel at 3440…390 px (allow-list: heat map, forecast table)
 //   7. Faz P: plan model line, 72 h map slider at the plan's hour, weather layers + glyphs, spot forecast table, timings
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
@@ -378,6 +379,67 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1440, 900], [390, 844]]) {
   if (shots) { await p.locator('#fc-block').scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await p.screenshot({ path: `${shots}/mera-fc-${w}.png` }); }
   console.log(`time ${w}: plan card ${homeMs} ms, map+layers ready ${mapMs} ms, spot card+table ${meraMs} ms; load event ${await timing(p)} ms (spot card)`);
   errors.length ? fail(`${w} (P): console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w} (P): no console errors`);
+}
+
+// 8. Q4: no horizontal scrolling anywhere. Every page and panel at 7 widths: the document must not be wider than
+//    the viewport, and no scroll container may scroll sideways — except the ones designed to (allow-list below,
+//    each with a fixed first column). The spot card is checked as a full page and inside the drawer (iframe).
+const SIDE_SCROLL_OK = ['.heat', '.fc-scroll']; // heat map, point forecast table
+const sideAudit = (p, where) => p.evaluate(({ ok, where }) => {
+  const bad = [];
+  const de = document.documentElement;
+  if (de.scrollWidth > de.clientWidth + 1) bad.push(`${where}: document ${de.scrollWidth} > ${de.clientWidth}`);
+  if (document.body.scrollWidth > document.body.clientWidth + 1 && getComputedStyle(document.body).overflowX !== 'visible') bad.push(`${where}: body ${document.body.scrollWidth} > ${document.body.clientWidth}`);
+  for (const e of document.querySelectorAll('body *')) {
+    const ox = getComputedStyle(e).overflowX;
+    if (ox !== 'auto' && ox !== 'scroll') continue;
+    if (!e.offsetParent && getComputedStyle(e).position !== 'fixed') continue;
+    if (e.scrollWidth <= e.clientWidth + 1) continue;
+    if (ok.some((sel) => e.matches(sel))) continue;
+    bad.push(`${where}: ${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}.${String(e.className).split(' ')[0]} ${e.scrollWidth} > ${e.clientWidth}`);
+  }
+  return bad;
+}, { ok: SIDE_SCROLL_OK, where });
+const someSpot = await fetch((apiOrigin ?? base) + '/api/spots').then((r) => r.json()).then((b) => b.spots.find((s) => /Cumhuriyet bat/.test(s.name))?.id ?? b.spots[0].id);
+for (const [w, h] of [[3440, 1440], [2576, 1440], [1920, 1080], [1440, 900], [1024, 768], [768, 1024], [390, 844]]) {
+  const { p, errors } = await page(w, h);
+  const bad = [];
+  await p.goto(base + '/', { waitUntil: 'networkidle' });
+  await waitPlan(p);
+  await p.waitForTimeout(800);
+  bad.push(...await sideAudit(p, 'Plan'));
+  for (const [v, name] of [['heat', 'Saat çizelgesi'], ['spots', 'Tüm meralar']]) {
+    await p.locator(`.views [data-v="${v}"]`).click();
+    await p.waitForTimeout(900);
+    bad.push(...await sideAudit(p, name));
+  }
+  await p.locator('.views [data-v="plan"]').click();
+  if (w >= 768) {
+    // spot card in the drawer (opened as from the map / plan)
+    await p.locator('#pick-open').click();
+    await p.waitForTimeout(800);
+    const fr = p.frameLocator('#drawer-frame');
+    await fr.locator('#fc-block:not([hidden])').waitFor({ timeout: 20000 }).catch(() => {});
+    const frame = p.frames().find((f) => /embed=1/.test(f.url()));
+    if (frame) bad.push(...await sideAudit(frame, 'çekmece'));
+    else bad.push('çekmece: iframe not found');
+    bad.push(...await sideAudit(p, 'Plan + çekmece'));
+    const dw = await p.evaluate(() => Math.round(document.getElementById('drawer').getBoundingClientRect().width));
+    if (w >= 1200 && (dw < 420 || dw > 481)) bad.push(`çekmece width ${dw} (420–480)`);
+    if (w < 1200 && dw < w - 1) bad.push(`çekmece not full width (${dw} < ${w})`);
+    if (shots && (w === 2576 || w === 1440)) await p.screenshot({ path: `${shots}/drawer-${w}.png` });
+  }
+  for (const [path, name, ready] of [['/harita/', 'Harita', () => p.waitForFunction(() => document.documentElement.dataset.layersReady === '1', null, { timeout: 30000 })],
+    [`/mera/?id=${encodeURIComponent(someSpot)}`, 'Mera kartı', () => p.waitForSelector('#fc-block:not([hidden])', { timeout: 20000 })],
+    ['/model/', 'Model', () => p.waitForLoadState('networkidle')], ['/ayarlar/', 'Ayarlar', () => p.waitForLoadState('networkidle')],
+    [`/sahadayim/?id=${encodeURIComponent(someSpot)}`, 'Sahadayım', () => p.waitForLoadState('networkidle')]]) {
+    await p.goto(base + path);
+    await ready().catch(() => {});
+    await p.waitForTimeout(600);
+    bad.push(...await sideAudit(p, name));
+  }
+  bad.length ? fail(`${w}: horizontal overflow — ${bad.slice(0, 6).join(' | ')}`) : ok(`${w}: no horizontal scrolling on 9 views (allowed: heat map, forecast table)`);
+  errors.length ? fail(`${w} (Q4): console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w} (Q4): no console errors`);
 }
 
 await browser.close();

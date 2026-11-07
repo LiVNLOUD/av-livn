@@ -282,7 +282,7 @@ const anchor = (ref: string) => {
   .toc { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); margin-top: var(--s5); font-size: var(--fs-2); }
   .formula { font-family: ui-monospace, monospace; font-size: var(--fs-2); background: var(--deep); border: 1px solid var(--swell); border-radius: var(--radius); padding: var(--s3); }
   .t { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
-  .t th, .t td { text-align: left; padding: var(--s2); border-bottom: 1px solid var(--swell); vertical-align: top; }
+  .t th, .t td { text-align: left; padding: var(--s2); border-bottom: 1px solid var(--swell); vertical-align: top; overflow-wrap: anywhere; } /* Q4: long sources/codes wrap */
   .t th { color: var(--mist); font-weight: 600; }
   .t .num { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .t code { color: var(--mist); font-size: var(--fs-1); }

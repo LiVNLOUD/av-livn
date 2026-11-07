@@ -48,8 +48,8 @@ import Base from '../../layouts/Base.astro';
   :global(.ts-out) { grid-column: 2; grid-row: 1 / 3; font-size: var(--fs-2); color: var(--foam); font-weight: 600; min-width: 9.5em; text-align: right; }
   @media (max-width: 600px) { .mapwrap { --slider-h: 76px; } .slider { grid-template-columns: 1fr; grid-template-rows: 20px 1fr 18px; } :global(.ts-out) { grid-column: 1; grid-row: 3; text-align: left; min-width: 0; font-size: var(--fs-1); } }
   /* P5: layer picker and its legend */
-  .layers { position: absolute; z-index: 3; top: calc(var(--header-h) + 4px); left: 10px; right: 56px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-  .layers label { flex: none; }
+  .layers { position: absolute; z-index: 3; top: calc(var(--header-h) + 4px); left: 10px; right: 56px; display: flex; flex-wrap: wrap; gap: 4px; } /* Q4: wraps, never scrolls sideways */
+  .layers label { flex: none; position: relative; }
   .layers input { position: absolute; opacity: 0; pointer-events: none; }
   .layers span { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border-radius: 16px; background: color-mix(in oklab, var(--sea) 92%, transparent); border: 1px solid var(--swell); color: var(--foam); font-size: var(--fs-1); cursor: pointer; white-space: nowrap; }
   .layers input:checked + span { background: var(--sodium); color: #0e1c27; border-color: var(--sodium); font-weight: 650; }
@@ -96,7 +96,7 @@ import Base from '../../layouts/Base.astro';
   :global(.maplibregl-ctrl-scale) { background: rgb(14 28 39 / .8); color: var(--foam); border-color: var(--foam); font-size: var(--fs-1); }
   :global(.maplibregl-ctrl-top-right) { top: 48px; }
   .card { top: calc(var(--header-h) + 48px); }
-  @media (max-width: 600px) { .legend:not([open]) { bottom: calc(var(--slider-h) + 30px); } .layer-info { left: 10px; right: auto; bottom: calc(var(--slider-h) + 70px); } }
+  @media (max-width: 600px) { .card { top: calc(var(--header-h) + 84px); } .legend:not([open]) { bottom: calc(var(--slider-h) + 30px); } .layer-info { left: 10px; right: auto; bottom: calc(var(--slider-h) + 70px); } }
 </style>
 
 <script>
