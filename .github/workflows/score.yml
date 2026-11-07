@@ -1,16 +1,17 @@
 name: score
 # Hourly precomputation of spot scores into D1 (spot_scores). Runs here instead of a Worker cron because
 # scoring all spots needs ~100 ms CPU, far above the Workers free plan's ~10 ms per invocation.
-# The Worker's :07 cron fetches weather and then dispatches this workflow (Cloudflare is the reliable clock);
-# the schedules below are the backup and exit at once when the scores already use the newest weather.
+# Primary trigger: the Worker's Cloudflare cron (:07) fetches weather and then dispatches this workflow
+# (workflow_dispatch; reasons in meta.score_dispatch_log). GitHub's own schedule is only the backup: it started
+# 8 % of its runs over 72 h (docs/audit/monitor-72h.md), so one hourly slot is kept; it exits in ~20 s when the
+# scores already use the newest weather. Field edits (pending_rescore) are scored by the next full run.
 on:
   schedule:
-    - cron: '23 * * * *'          # full hourly run (v1 + v2)
-    - cron: '8,38,53 * * * *'     # field edits: v2 with Monte Carlo only when pending_rescore has rows
+    - cron: '23 * * * *'          # backup only (see above)
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Kuru çalıştırma: puan hesaplanır, D1''e yazılmaz (yedek tetik testi)'
+        description: 'Kuru çalıştırma: puan hesaplanır, D1''e yazılmaz'
         type: boolean
         default: false
       force:
@@ -50,7 +51,7 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           # Q1: fresh weather first when the newest fetch is older than 60 min (POST /api/admin/weather/refresh)
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-        run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || (github.event.schedule == '8,38,53 * * * *' && '--pending' || '') }} ${{ inputs.force && '--force' || '' }}
+        run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || '' }} ${{ inputs.force && '--force' || '' }}
       - name: Alert the owner on failure (E8)
         if: failure()
         env:

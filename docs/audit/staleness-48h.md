@@ -1,6 +1,6 @@
 # Bayatlık denetimi, 48 saat (2026-11-05 18:52Z – 2026-11-07 18:52Z) — Faz Q1
 
-Betik: `staleness-48h.py`. Veri: `staleness-48h-runs.json` (GitHub Actions score.yml çalışmaları) ve D1 kayıtları; hepsi salt okunur.
+Betik: `staleness-audit.py`. Veri: `staleness-48h-runs.json` (GitHub Actions score.yml çalışmaları) ve D1 kayıtları; hepsi salt okunur.
 
 ## Kök neden ve durum
 - **Kök neden** (önceki faz): Hava her saat :07'de Cloudflare cron'uyla çekiliyor. Puanlama ise GitHub zamanlayıcısına bağlıydı ve GitHub saatlik çalışmaların çoğunu atladı. Puanlar en yeni havayla yeniden hesaplanmadı.

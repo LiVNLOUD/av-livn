@@ -3,7 +3,7 @@ name: watchdog
 # score is older than 2 h. At most once per 6 h per fault (meta.alert_<kind>_at). Prints no secrets.
 on:
   schedule:
-    - cron: '47 * * * *'
+    - cron: '47 */6 * * *'   # the Worker cron alerts hourly itself; this is the independent check in case it stops
   workflow_dispatch:
 permissions:
   contents: read

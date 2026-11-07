@@ -4,7 +4,8 @@
 //
 // Bundle + run:  node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/job.mjs
 //                node .score/job.mjs [--dry-run] [--pending] [--compare-desk out.json]
-//   --pending       15-minute run: exit at once unless a field edit left a spot in pending_rescore; then a full v2 run
+//   --pending       manual / notify-smoke only (the 15-minute schedule was removed): exit at once unless a field edit
+//                   left a spot in pending_rescore; then a full v2 run
 //   --compare-desk  write the current-hour v2 ranking with and without desk (masabasi) findings to out.json
 // Env: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID (database id is read from workers/api/wrangler.toml).
 import { readFileSync } from 'node:fs';

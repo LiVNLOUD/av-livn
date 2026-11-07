@@ -243,7 +243,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const sec = st.secrets;
     const missing = sec ? [!sec.push && 'VAPID_PRIVATE_KEY', !sec.ntfy && 'NTFY_TOPIC'].filter(Boolean) : [];
     $('test-state').textContent = [
-      t.requested_at && t.requested_at !== t.done ? `Test istendi (${new Date(t.requested_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}); en geç 15 dakika içinde gönderilir.` : '',
+      t.requested_at && t.requested_at !== t.done ? `Test istendi (${new Date(t.requested_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}); bir sonraki saatlik puanlamada (en geç ~1 saat) gönderilir.` : '',
       t.result ? `Son test: ${Object.entries(t.result).filter(([k]) => k !== 'at').map(([k, v]) => `${k} ${typeof v === 'object' ? `${(v as { ok: number }).ok} cihaz` : v === true ? 'iletildi' : v}`).join(', ')}.` : '',
       missing.length ? `Eksik repo secret: ${missing.join(', ')}.` : '',
     ].filter(Boolean).join(' ');
@@ -291,7 +291,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   });
   $('test').addEventListener('click', async () => {
     await api('/test', 'POST').catch((e) => say((e as Error).message, true));
-    say('Test istendi: puanlama işinin 15 dakikalık çalışmasında gönderilir.');
+    say('Test istendi: bir sonraki saatlik puanlamada (en geç ~1 saat) gönderilir.');
     await load();
   });
   mountLogin(document.getElementById('login') as HTMLFormElement, async () => {

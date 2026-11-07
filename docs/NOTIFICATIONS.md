@@ -34,7 +34,7 @@ Açık VAPID anahtarı tasarım gereği herkese açıktır ve repoda durur. Öze
 | Günlük özet | 17:00 (Europe/Istanbul) saatlik çalışmada | Önümüzdeki 24 saatin en iyi 3 penceresi (mera + saat aralığı + puan/sıra). Günde bir. |
 | Fırsat | Her saatlik çalışmada | 12 saat içinde puanı eşiği (varsayılan 80, 50–95 ayarlanır) geçen ve bandı dar (%10–90 genişliği ≤ 30) pencere. Aynı merada çakışan bir pencere için daha önce gönderildiyse tekrar gönderilmez. |
 | Güvenlik | Her saatlik çalışmada | Favori merada 12 saat içinde güvenlik kapısı (hamle/dalga) devreye girerse, mera başına günde bir. |
-| Test | /ayarlar/ → "Test bildirimi gönder" | 15 dakikalık çalışmada (en geç ~15 dk) tüm yapılandırılmış kanallara gider; sonuç /ayarlar/'da görünür. |
+| Test | /ayarlar/ → "Test bildirimi gönder" | bir sonraki saatlik puanlamada (en geç ~1 saat) tüm yapılandırılmış kanallara gider; sonuç /ayarlar/'da görünür. |
 
 - **Sessiz saatler** (varsayılan 23:00–07:00): test dışında hiçbir şey gönderilmez. Bekleyen fırsat/güvenlik uyarısı hâlâ geçerliyse sessiz saat bitince gider.
 - **Dokununca** kart o saatte açılır: `/mera/?id=<mera>&t=<saat>`; günlük özet en iyi pencerenin kartını açar.

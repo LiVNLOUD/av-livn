@@ -1,7 +1,7 @@
 import { fetchSnapshots, type CellCoord, type FetchStats } from './lib/openmeteo';
 import { valuesAt } from './lib/series';
 import type { Env } from './env';
-import { dispatchTest, guardScoring, WEATHER_REFRESH_GAP_MIN } from './lib/staleness';
+import { guardScoring, WEATHER_REFRESH_GAP_MIN } from './lib/staleness';
 import { recordWeatherRuns } from './lib/modelrun';
 
 const OBS_COLS: Record<string, string> = {
@@ -96,9 +96,7 @@ export async function runCron(cron: string, env: Env, now = new Date()): Promise
     const runs = await recordWeatherRuns(env, now, weather.wx + weather.sea > 0, weather.errors.length).catch((e) => ({ error: String(e) }));
     // weather first, then scoring with it (Cloudflare is the reliable clock; GitHub's schedule is the backup)
     const scoring = await guardScoring(env, now, fetch, weather.wx + weather.sea > 0).catch((e) => ({ error: String(e) }));
-    // dry end-to-end test of the backup trigger, only when requested in meta (never ages scores)
-    const dispatchTestResult = await dispatchTest(env, now).catch((e) => `error ${String(e)}`);
-    return { ...weather, runs, scoring, dispatchTest: dispatchTestResult };
+    return { ...weather, runs, scoring };
   }
   throw new Error(`unknown cron ${cron}`);
 }

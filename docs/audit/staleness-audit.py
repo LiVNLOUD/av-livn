@@ -1,4 +1,5 @@
-# Q1: 48 h staleness audit (2026-11-05 18:52Z – 2026-11-07 18:52Z). Inputs (read-only):
+# Staleness/trigger audit. Usage: python3 <this> runs.json [END_ISO] [HOURS] (default: Q1 window, 48 h to
+# 2026-11-07 18:52Z; the 72 h monitor report used 2026-11-07T20:55:00Z 72). Inputs (read-only):
 #   - score.yml runs from the GitHub Actions API (runs.json: number, event, status, conclusion, created, started,
 #     updated, actor, id, title), list_workflow_runs on 2026-11-07 18:5xZ;
 #   - D1 observations: one row set per hour for all 50 hours 2026-11-05 17:00Z … 2026-11-07 18:00Z (no hourly
@@ -10,7 +11,7 @@ import json, statistics, sys
 from datetime import datetime, timedelta, timezone
 t = lambda s: datetime.fromisoformat(s.replace('Z', '+00:00'))
 rows = json.load(open(sys.argv[1]))
-END = t('2026-11-07T18:52:00Z'); START = END - timedelta(hours=48)
+END = t(sys.argv[2] if len(sys.argv) > 2 else '2026-11-07T18:52:00Z'); HOURS = int(sys.argv[3]) if len(sys.argv) > 3 else 48; START = END - timedelta(hours=HOURS)
 FIX = t('2026-11-07T15:54:00Z')  # staleness fix live (deploy run 203 started 15:54)
 writes = sorted([(t(r[5]), t(r[6]), r[0]) for r in rows if r[3] == 'success' and (t(r[6]) - t(r[5])).total_seconds() >= 90 and r[0] != 199], key=lambda x: x[1])
 def fetch_before(x):
@@ -33,7 +34,7 @@ def episodes(rule, a, b):
     if cur is not None: eps.append((cur, b))
     return eps, worst
 out = {}
-for name, a, b in [('48h', START, END), ('before fix', START, FIX), ('after fix', FIX, END)]:
+for name, a, b in [(f'{HOURS}h', START, END), ('before fix', START, FIX), ('after fix', FIX, END)]:
     e, worst = episodes('N5', a, b)
     out[name] = {'episodes': len(e), 'minutes': sum(int((y - x).total_seconds() // 60) for x, y in e), 'worst_age_min': round(worst), 'list': [f'{x:%d %H:%M}–{y:%d %H:%M}' for x, y in e]}
 ends = [w[1] for w in writes if START <= w[1] <= END]
@@ -46,6 +47,6 @@ out['score_writes'] = len(ends)
 out['score_gap_min'] = {'min': round(min(gaps)), 'median': round(statistics.median(gaps)), 'max': round(max(gaps))}
 out['after_fix_writes'] = [f'{x:%H:%M}' for x in ends if x >= FIX]
 out['schedule_runs'] = len(sched)
-out['schedule_expected'] = 48 * 4  # :23 full + :08/:38/:53 pending, every hour
-out['dispatch_runs'] = {'deploy (github-actions bot)': sum(r[7] == 'github-actions[bot]' for r in disp), 'Worker backup trigger (:07–:08)': [f'#{r[0]} {r[5][11:16]}' for r in worker], 'dry backup test': [f'#{r[0]} {r[5][5:16]}' for r in disp if r[0] == 199], 'manual': [f'#{r[0]} {r[5][5:16]}' for r in disp if r[7] == 'LiVNLOUD' and r not in worker and r[0] != 199]}
+out['schedule_expected'] = HOURS * 4  # :23 full + :08/:38/:53 pending, every hour
+out['dispatch_runs'] = {'deploy (github-actions bot)': sum(r[7] == 'github-actions[bot]' for r in disp), 'Worker trigger (:07–:08)': [f'#{r[0]} {r[5][11:16]}' for r in worker], 'dry backup test': [f'#{r[0]} {r[5][5:16]}' for r in disp if r[0] == 199], 'manual': [f'#{r[0]} {r[5][5:16]}' for r in disp if r[7] == 'LiVNLOUD' and r not in worker and r[0] != 199]}
 print(json.dumps(out, indent=1, ensure_ascii=False))

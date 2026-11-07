@@ -417,3 +417,20 @@ Yeni özellik yok.
   - e2e akış 8: Plan, Saat çizelgesi, Tüm meralar, çekmece, Harita, mera kartı, Model, Ayarlar, Sahadayım; 3440/2576/1920/1440/1024/768/390 px. Belge ya da izinsiz bir kaydırma kabı yana taşarsa test kırılır; izinli kaplar ısı haritası ve tahmin tablosu.
   - Önce/sonra görüntüsü: `docs/screenshots/q/drawer-2576-once.png`, `drawer-2576-sonra.png`.
 - Canlı: e2e tüm akışlar yeşil, smoke yeşil, konsol hatası 0.
+
+## İzleme, 72 sa (2026-11-07) ✅ DUR
+Yeni özellik yok. Rapor: `docs/audit/monitor-72h.md`.
+
+**Ölçümler:**
+- Hava çekimi 73 saatin 73'ünde yapıldı; aralık 60 dk (medyan ve en uzun).
+- Puan yazımı aralığı: 72 saatte medyan 9 dk, en uzun 510 dk. Düzeltmeden sonra medyan 10 dk, en uzun 60 dk.
+- Bayatlık uyarısı: 15 bölüm, ~44 sa; hepsi düzeltmeden önce. Sonra 0 (örnek ~5 sa).
+- GitHub zamanlanmış çalışmalar: 288 yuvadan 23'ü başladı, **%8**.
+- Cloudflare tetiği: 5 dispatch, hepsi `new weather`.
+
+**Tetik düzeni:**
+- Cloudflare `7 * * * *` resmen birincil tetik; `docs/ARCHITECTURE.md` → Tetikler.
+- score.yml'de yalnız `23 * * * *` yedek kaldı; 15 dakikalık `:08/:38/:53` kaldırıldı. Saha düzenlemeleri ve bildirim testi bir sonraki saatlik çalışmada işleniyor; Ayarlar, saha formu, MODEL.md ve NOTIFICATIONS.md metinleri güncellendi.
+- watchdog saatlikten 6 saatlik bağımsız kontrole indi.
+
+**Temizlik:** kuru tetik testi (`dispatchTest`) ve testleri kaldırıldı. `dry_run` girdisi elle kuru çalıştırma için kalıyor. Denetim betiği `docs/audit/staleness-audit.py` artık pencere parametreli.

@@ -373,7 +373,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     j.rescore === 'immediate' && j.score
       ? `Puan güncellendi: ${fmtScore(j.score)} Belirsizlik bandı birkaç dakika içinde gelecek.`
       : j.rescore === 'deferred'
-        ? 'Puan en geç 20 dakika içinde güncellenecek.'
+        ? 'Puan bir sonraki saatlik puanlamada (en geç ~1 saat) güncellenecek.'
         : '';
 
   $('rescore').addEventListener('click', async () => {
