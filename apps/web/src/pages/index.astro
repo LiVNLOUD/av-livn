@@ -987,9 +987,22 @@ import Base from '../layouts/Base.astro';
     el.hidden = !txt;
     el.textContent = txt ?? '';
   }
+  /** Q2: the server's plan candidates are already filtered (marinas, outside Bursa), so the likely pick is known
+   *  from the windows alone: ask for its hourly detail now instead of after the spot list arrives (one round trip
+   *  less on the plan card's critical path). A wrong guess only costs one cached request. */
+  function prefetchPick(b: NonNullable<typeof winBody>) {
+    let outsideOk = false;
+    try { outsideOk = localStorage.getItem('av-livn-outside-bursa') === '1'; } catch {}
+    const P = b.plan?.[outsideOk ? 'wide' : 'bursa'];
+    if (!P) return;
+    const today = (box.checked ? P.today.open : P.today.all).windows;
+    const all72 = (box.checked ? P.open : P.all).windows;
+    const w = today.find((x) => (x.tier ?? (x.total >= 65 ? 'guclu' : 'goreli')) === 'guclu') ?? all72.find((x) => x.tier === 'guclu') ?? all72[0];
+    if (w) void detail(w.spot_id);
+  }
   const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-    .then((b: NonNullable<typeof winBody>) => { winBody = b; renderWindows(); renderPlan(); })
+    .then((b: NonNullable<typeof winBody>) => { winBody = b; prefetchPick(b); renderWindows(); renderPlan(); })
     .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Bilinmiyor'; $('verdict-sub').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). "Tüm meralar" sekmesine bakın.'; planReady(); });
   loadWindows();
 
