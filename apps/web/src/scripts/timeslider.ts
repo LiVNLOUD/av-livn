@@ -35,7 +35,12 @@ export function mountSlider(el: HTMLElement, from: number, hours: number, initia
   const nowFirst = L.nowFrac * hours < 1;
   if (nowFirst && L.days[0]) L.days[0].label = `şimdi · ${L.days[0].label}`;
   // a partial first day too short for its name keeps only "şimdi" (or nothing)
-  if (L.days[0] && L.days[1] && L.days[1].col - L.days[0].col < 9) L.days[0].label = nowFirst ? 'şimdi' : '';
+  // (measured in pixels: on a 390 px phone one hour is ~5 px)
+  const pxPerHour = (el.clientWidth || 1200) / hours;
+  if (L.days[0] && L.days[1]) {
+    const room = (L.days[1].col - L.days[0].col) * pxPerHour;
+    if (room < L.days[0].label.length * 7 + 8) L.days[0].label = nowFirst && room >= 46 ? 'şimdi' : '';
+  }
   el.innerHTML = `<div class="ts-band" aria-hidden="true">${L.night.map(([a, b]) => `<span class="ts-night" style="left:${pct(a)};width:${pct(b - a)}"></span>`).join('')}${L.days.map((d) => `<span class="ts-day" style="left:${pct(d.col)}"><b>${d.label}</b></span>`).join('')}<span class="ts-now" style="left:${(L.nowFrac * 100).toFixed(3)}%">${nowFirst ? '' : '<i>şimdi</i>'}</span></div>
     <input class="ts-range" type="range" min="0" max="${hours - 1}" step="1" value="${initial - from}" aria-label="Haritanın saati" />
     <output class="ts-out"></output>`;

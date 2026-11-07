@@ -333,3 +333,45 @@ Model ve veri hattına dokunulmadı.
 - Düzeltme: Worker cron her çekimden sonra, puanlar çekimden eskiyse puanlamayı hemen tetikliyor ("new weather"). GitHub zamanlaması yedek; `nothingNew` ile erken çıkıyor. Deploy ve veri yenileme `force`. Testli.
 - Eşik (MODEL.md §18): kullanılan çekim > 2 sa, ya da model çalıştırması > 2 × olağan aralık (Open-Meteo meta.json; `best_match` modeli Worker'da değer karşılaştırmasıyla tanınır), ya da son çekim başarısız ve veri > 1 sa.
 - Son 24 sa: 7 uyarı bölümü, toplam ~12 sa. Düzeltme sonrası beklenen günde 0 (`docs/audit/staleness-24h.md`).
+
+## Faz P — Windy.com'dan esinlenen görseller, kendi açık verimizle (2026-11-07) ✅ DUR
+Windy embed/API kullanılmadı. Ana ekrana yalnız "haritada aç" bağlantısı ve model uyum satırı eklendi; yeni görseller Harita sekmesinde ve mera kartında.
+- [x] P0 Tüm meralar tablosu:
+  - liste bölgesinin tamamını kullanır (≥ 1920 px'te ≥ 1100 px);
+  - erişim kısa rozetle, ad tek satır ve "…" ile kısalır;
+  - başlık "Puan (bugün 18:00)"; güvenlik rozeti;
+  - güven sütunu yalnız fark varsa görünür;
+  - sıralanabilir başlıklar;
+  - hiçbir hücre 2 satırı geçmez (e2e, metin satırı sayımı).
+- [x] P0 Derinlik: dolgu zoom 15→16 arasında soluklaşıp kapanır; yalnız ≤ 10 m konturlar kesikli kalır; "bu ölçekte derinlik verisi yetersiz" notu.
+- [x] P1 REFERENCES-REVIEW'da Windy.com ayrıntısı (zaman kaydırıcısı, meteogram, Compare, katman menüsü, kullanım koşulları). RainViewer eklenmedi: kişisel/eğitim amaçlı kullanım şartı, en çok zoom 7, Bursa kapsamı doğrulanamadı.
+- [x] P2 Model karşılaştırması:
+  - Actions'ta saatlik ICON, ECMWF IFS, GFS, Météo-France (tek çok noktalı istek) → `model_spread`;
+  - plan kartında "Hava modelleri uyuşuyor / farklı şeyler söylüyor (rüzgar a–b km/sa) / güvenlik konusunda ayrışıyor"; ayrıntı "Neden?" altında;
+  - güven etkisi: güvenlik eşiğinde ayrışma → Düşük, geniş yayılım → en çok Orta;
+  - yayılım puan bandına girmez (MODEL.md §19).
+- [x] P3 Harita sekmesi 72 saat kaydırıcısı: gün ayraçları, gece bandı, "şimdi" çizgisi. Mera işaretleri, katmanlar ve glifler o saate geçer; `?t=` adreste tutulur. Plan kartındaki "haritada aç" bağlantısı merada ve önerilen saatte açar (e2e).
+- [x] P4 Mera kartında saatlik tahmin tablosu:
+  - 3 saatte bir sütun;
+  - satırlar: Puan, Güvenlik, Rüzgar (modellerin aralık çubuğu), Hamle, Yön, Dalga, Yağış, Bulut, Su, Akıntı, Ay;
+  - ilk sütun sabit, telefonda yana kayar.
+- [x] P5 Katmanlar: Puan, Rüzgar, Dalga, Akıntı, Su sıcaklığı, Yağış, Bulut.
+  - Izgaralar Actions'ta saatlik üretilir (`scripts/weather-grids.ts`: Open-Meteo 0,1°; `ocean.yml`: Copernicus Marmara 500 m akıntı) ve D1'den olduğu gibi sunulur (`/api/grid/:name`, 10 dk önbellek).
+  - Renk alanı doğrusal yumuşatmalı, sahte ayrıntı yok; yağış "tahmin, radar değil"; bulutta gece ay ışığı notu.
+  - Rüzgar ve akıntı parçacıkları kendi küçük canvas çizicimizle. `@sakitam-gis/maplibre-wind` (MIT) incelendi; MapLibre 6 özel katman imzasıyla uyumu belirsiz olduğu için kullanılmadı.
+  - Zoom ≥ 14'te mera glifi (ok + hız, damla, güvenlik üçgeni); etiketler glifin yolundan çekilir. Uzak zoomda gizli.
+  - WebGL yoksa katmanlar sessizce kapalı; azaltılmış hareket tercihinde parçacık yok.
+- Doğrulama (canlı, av.livn.tr):
+  - e2e tüm akışlar geçti (yeni akış 7: model satırı, kaydırıcı, 7 katman, glif, tahmin tablosu); konsol hatası 0; smoke yeşil;
+  - görüntüler 3440/2576/1440/390 → `docs/screenshots/p/`.
+- Yükleme süreleri (canlı, e2e, ms):
+
+  | Ekran genişliği | Plan hazır | Harita + katmanlar hazır | Mera kartı + tablo |
+  |---|---|---|---|
+  | 3440 | 4346 | 2514 | 1366 |
+  | 2576 | 2758 | 2235 | 1286 |
+  | 1440 | 3398 | 2040 | 1210 |
+  | 390 | 1596 | 1954 | 1234 |
+
+- Parçacık başarımı (390 px): 60 fps, 4× CPU yavaşlatmada da 60 fps (en kötü kare 24 ms). Parçacık sayısı (~300) azaltılmadı.
+- Not: akıntı ızgarası JSON'u ~420 KB (sıkıştırılmadan); yalnız Akıntı katmanı ya da mera tablosu açılınca indirilir.
