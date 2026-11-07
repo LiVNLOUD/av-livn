@@ -173,8 +173,13 @@ def main(argv: list[str]) -> None:
     if source in ("auto", "sliderule"):
         try:
             feats = via_sliderule()
-            used = "sliderule"
-            old = []  # SlideRule returns the whole archive each time
+            if feats or source == "sliderule":
+                used = "sliderule"
+                old = []  # SlideRule returns the whole archive each time
+            else:
+                # an empty answer is not evidence of "no data" (the request may not have matched the archive):
+                # read the NSIDC granules themselves before concluding anything
+                print("sliderule returned no photons; checking the NSIDC granules directly")
         except Exception as e:  # noqa: BLE001
             print(f"sliderule unavailable for ATL24: {type(e).__name__}: {str(e)[:200]}")
             if source == "sliderule":
