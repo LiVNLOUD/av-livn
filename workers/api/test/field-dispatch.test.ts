@@ -55,7 +55,7 @@ describe('A: field edit starts scoring at once, at most every 10 min', () => {
     await reset();
     const spy = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(null, { status: 204 }));
     const auth = { authorization: 'Bearer test-admin-token', 'content-type': 'application/json' };
-    const patch = (body: object) => app.request('/api/admin/spots/osm-way-2', { method: 'PATCH', headers: auth, body: JSON.stringify(body) }, withToken).then((r) => r.json<{ dispatch?: string }>());
+    const patch = async (body: object) => (await app.request('/api/admin/spots/osm-way-2', { method: 'PATCH', headers: auth, body: JSON.stringify(body) }, withToken)).json<{ dispatch?: string }>();
     const cur = (await env.DB.prepare("SELECT has_light FROM spots WHERE id = 'osm-way-2'").first<{ has_light: number | null }>())!.has_light;
     expect((await patch({ has_light: cur === null ? null : cur === 1, notes: 'x' })).dispatch).toBeUndefined();
     expect((await patch({ has_light: cur === 1 ? false : true })).dispatch).toBe('started');
