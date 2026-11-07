@@ -107,11 +107,13 @@ async function windowsV2(c: Ctx, species: Species) {
 async function detailV2(c: Ctx, species: Species) {
   const id = c.req.param('id')!;
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
-  const [spotRes, obsRes, depthRes, countRes] = await c.env.DB.batch([
+  const [spotRes, obsRes, depthRes, countRes, satPts, satBand] = await c.env.DB.batch([
     c.env.DB.prepare("SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?2 WHERE s.id = ?1 AND s.status != 'proposed'").bind(id, species),
     c.env.DB.prepare('SELECT * FROM field_obs WHERE spot_id = ?1 ORDER BY observed_at').bind(id),
     c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
     c.env.DB.prepare(ACTIVE_COUNT_SQL),
+    c.env.DB.prepare('SELECT dist_m, depth_m, sigma_m, obs_date FROM sat_depth_points WHERE spot_id = ?1 ORDER BY dist_m').bind(id),
+    c.env.DB.prepare('SELECT band, kind, depth_m, sigma_m, n FROM sat_depth_band WHERE spot_id = ?1').bind(id),
   ]);
   const r = spotRes!.results[0] as (SpotRow & { start_hour: number | null; detail_json: string | null; list_json: string | null; partial: number | null }) | undefined;
   if (!r) return c.json({ ok: false, error: 'not_found' }, 404);
@@ -131,6 +133,8 @@ async function detailV2(c: Ctx, species: Species) {
       desk_pending: obs.filter((o) => o.source_kind === 'masabasi' && o.status === 'onaysiz').length,
       kinds: { lamba: rec.lamp?.kind ?? null, derinlik: rec.depthKind, taban: rec.substrateKind, yapi: rec.structureKind },
     },
+    // Faz R: public satellite depth (ICESat-2 ATL24 points within 150 m, measured; cast-band values incl. SDB if accepted)
+    sat: { points: satPts!.results, bands: satBand!.results },
     spot_count: (countRes!.results[0] as { n: number }).n,
     partial: r.partial === 1,
     from,

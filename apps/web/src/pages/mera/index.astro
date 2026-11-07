@@ -183,6 +183,7 @@ import Base from '../../layouts/Base.astro';
     };
     /** Public: which kinds of field knowledge exist (badges), never values. */
     field: { observations: number; desk_pending: number; kinds: Record<'lamba' | 'derinlik' | 'taban' | 'yapi', string | null> } | null;
+    sat?: { points: { dist_m: number; depth_m: number; sigma_m: number | null; obs_date: string }[]; bands: { band: number; kind: 'atl24' | 'sdb'; depth_m: number; sigma_m: number; n: number }[] };
     spot_count: number; partial: boolean; from: number; hours: number; ranks: number[]; reasons: (string | null)[];
     packed: { meta: Meta; h: Hour[]; tk?: (number | null)[][] } | null;
   };
@@ -262,7 +263,7 @@ import Base from '../../layouts/Base.astro';
   }
   let sel = 0;
   const ACCESS_TR: Record<string, string> = { acik: 'erişim açık', kisitli_feribot: 'erişim kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
-  const SRC_TR: Record<string, string> = { 'yapı-uzunluğu-tahmini': 'tahmin', 'DTM-interpolasyon': 'DTM enterp.', 'DTM-ölçüm': 'DTM ölçüm' };
+  const SRC_TR: Record<string, string> = { 'uydu-lidar': 'uydu lazer', 'uydu-tahmini': 'uydu tahmini', 'yapı-uzunluğu-tahmini': 'tahmin', 'DTM-interpolasyon': 'DTM enterp.', 'DTM-ölçüm': 'DTM ölçüm' };
   const ci = (key: string) => d.packed!.meta.comps.findIndex((c) => c[0] === key);
   const val = (h: Hour, key: string) => h[9][ci(key)] ?? null;
   const why = (h: Hour, key: string) => h[10][ci(key)] ?? '';
@@ -316,7 +317,7 @@ import Base from '../../layouts/Base.astro';
   }
 
   const n1 = (v: number) => v.toLocaleString('tr-TR', { maximumFractionDigits: 1 });
-  const isEstimate = (src: string) => src === 'yapı-uzunluğu-tahmini' || src === 'önsel' || src === 'DTM-interpolasyon';
+  const isEstimate = (src: string) => src === 'uydu-tahmini' || src === 'yapı-uzunluğu-tahmini' || src === 'önsel' || src === 'DTM-interpolasyon';
 
   function select(i: number): void {
     sel = i;
@@ -405,14 +406,20 @@ import Base from '../../layouts/Base.astro';
     $('depth-src').innerHTML = kind
       ? `Derinlik: <b class="band-good">${kind === 'saha' ? 'saha ölçümü' : kind === 'uzaktan' ? 'uzaktan gözlem' : 'masa başı veri'} var</b>${own ? ` (${own.lastDepthAt ? fmtDay(own.lastDepthAt) : '–'})${own.calibration ? `, batma süreleri ${own.calibration.pairs} dikine ölçümle kalibre` : ''}` : ' — değerler yalnız yöneticiye görünür'}`
       : `Derinlik: <b class="band-warn">tahmini — yapı uzunluğundan, saha ölçümü yok</b>. DTM bu kıyıda tamamen enterpolasyon (kesikli çizgi).`;
+    // Faz R: satellite depth near the tip — ICESat-2 laser soundings (measured) and the Sentinel-2 estimate band
+    const satPts = (d.sat?.points ?? []).filter((p) => p.dist_m <= 150);
+    const sdb = (d.sat?.bands ?? []).filter((b) => b.kind === 'sdb');
+    if (satPts.length || sdb.length)
+      $('depth-src').insertAdjacentHTML('beforeend', `<br>Uydu: ${satPts.length ? `<b class="band-good">${satPts.length} uydu lazer ölçümü (ICESat-2, ${[...new Set(satPts.map((p) => p.obs_date.slice(0, 4)))].join(', ')})</b>` : 'uydu lazer ölçümü yok'}${sdb.length ? ` · uydu görüntüsünden tahmin (Sentinel-2): ${sdb.map((b) => `${b.band === 0 ? '0–50' : '50–150'} m'de ${n1(b.depth_m)} ± ${n1(b.sigma_m)} m`).join(', ')}` : ''}.`);
+    else $('depth-src').insertAdjacentHTML('beforeend', '<br>Uydu derinliği: bilinmiyor (bu meranın 150 m çevresinde uydu lazer ölçümü yok).');
     const valid = prof.map((v, i) => [i * 25, v] as const).filter((p): p is readonly [number, number] => p[1] !== null);
-    if (!valid.length && !field.length) {
+    if (!valid.length && !field.length && !satPts.length) {
       $('profile').innerHTML = '';
       $('depth-note').textContent = 'Bu mera için derinlik verisi yok.';
       return;
     }
     const PW = 432, PH = 180, L = 36, R = 10, T = 14, B = 26, XMAX = 300;
-    const maxD = Math.max(5, ...valid.filter(([m]) => m <= XMAX).map(([, v]) => v), ...field.map((f) => f.depth_m + f.sd_m)) * 1.1;
+    const maxD = Math.max(5, ...valid.filter(([m]) => m <= XMAX).map(([, v]) => v), ...field.map((f) => f.depth_m + f.sd_m), ...satPts.map((p) => p.depth_m + (p.sigma_m ?? 0)), ...sdb.map((b) => b.depth_m + b.sigma_m)) * 1.1;
     const px = (m: number) => L + (Math.min(m, XMAX) / XMAX) * (PW - L - R);
     const py = (v: number) => T + (v / maxD) * (PH - T - B);
     const pts = valid.filter(([m]) => m <= XMAX);
@@ -434,15 +441,26 @@ import Base from '../../layouts/Base.astro';
         return err + mark;
       })
       .join('');
+    const sat = satPts.map((p) => {
+      const cx = px(p.dist_m), cy = py(p.depth_m), sg = p.sigma_m ?? 0;
+      return `${sg ? `<line x1="${cx}" x2="${cx}" y1="${py(Math.max(0, p.depth_m - sg))}" y2="${py(p.depth_m + sg)}" stroke="#c49bf2" stroke-width="1.2"/>` : ''}<path d="M${cx},${cy - 5}L${cx + 4.5},${cy + 3.5}L${cx - 4.5},${cy + 3.5}Z" fill="#c49bf2"><title>Uydu lazer ölçümü ${p.obs_date}: ${n1(p.depth_m)} m</title></path>`;
+    }).join('');
+    const sdbBand = sdb.map((b) => {
+      const [a, e] = b.band === 0 ? [0, 50] : [50, 150];
+      return `<rect x="${px(a)}" y="${py(Math.max(0, b.depth_m - b.sigma_m))}" width="${px(e) - px(a)}" height="${py(b.depth_m + b.sigma_m) - py(Math.max(0, b.depth_m - b.sigma_m))}" fill="#c49bf2" fill-opacity=".18"/><line x1="${px(a)}" x2="${px(e)}" y1="${py(b.depth_m)}" y2="${py(b.depth_m)}" stroke="#c49bf2" stroke-dasharray="3 3"/>`;
+    }).join('');
     $('profile').innerHTML = `<svg viewBox="0 0 ${PW} ${PH}" role="img" aria-label="Meranın ucundan denize 0–300 m derinlik profili">
       <rect x="${L}" y="${T}" width="${PW - L - R}" height="${PH - T - B}" fill="#0c1a24"/>${cast}${ticksD}
       <path d="${band}" fill="#8ba2ad" fill-opacity=".14"/>
-      <path d="${path}" fill="none" stroke="#7cc4e4" stroke-width="2" stroke-dasharray="6 4"/>${dots}${ticksX}
+      <path d="${path}" fill="none" stroke="#7cc4e4" stroke-width="2" stroke-dasharray="6 4"/>${sdbBand}${sat}${dots}${ticksX}
     </svg>`;
     const fieldTxt = field.length
       ? ` Yeşil: saha ölçümleri (● kurşunla dikine, ■ kalibre batma süresi, ◇ kalibresiz batma süresi; çizgi ± belirsizlik).`
       : '';
-    $('depth-note').textContent = `Yatay eksen: meranın ucundan denize metre (profil uçtan başlar). Kesikli çizgi ve gri bant: EMODnet DTM, bu kıyıda yerinde ölçüm yok (enterpolasyon), belirsizlik büyük.${fieldTxt}`;
+    const satTxt = satPts.length || sdb.length
+      ? ` Mor ▲: uydu lazer ölçümü (ICESat-2 ATL24, ölçüm; uca uzaklığa göre, yönü farklı olabilir; çizgi ± ürünün belirsizliği). Mor bant: uydu görüntüsünden tahmin (Sentinel-2, ölçüm değil).`
+      : '';
+    $('depth-note').textContent = `Yatay eksen: meranın ucundan denize metre (profil uçtan başlar). Kesikli çizgi ve gri bant: EMODnet DTM, bu kıyıda yerinde ölçüm yok (enterpolasyon), belirsizlik büyük.${fieldTxt}${satTxt}`;
   }
 
   function render(): void {

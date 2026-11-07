@@ -193,7 +193,10 @@ const anchor = (ref: string) => {
             <li>Lambanın etkisi sayısal olarak ne kadar? Yerel ölçüm yok.</li>
             <li>Rüzgar, basınç ve akıntının kıyı avına etkisi: kanıt yok.</li>
             <li>Mevsim tepelerinin yüksekliği. Aylık kıyı av serisi <b>bulunamadı</b>. Hal girişi kışın tepe yapıyor; bu ticari av, kıyı avı değil.</li>
-            <li>Her meranın gerçek derinliği ve tabanı. Çoğu tahmin; saha ölçümüyle düzelir.</li>
+            <li>Her meranın gerçek derinliği ve tabanı. Çoğu tahmin; saha ölçümüyle düzelir. Uydu verisi (Faz R) bunu sahaya gitmeden daraltmayı dener:
+              <a href="https://doi.org/10.5067/ATLAS/ATL24.002">NASA NSIDC ICESat-2 ATL24 v002</a> uydu lazer ölçümleri (gerçek ölçüm, belirsizliğiyle) ve onlarla kalibre edilen
+              Copernicus Sentinel-2 görüntüsünden derinlik tahmini. Tahmin yalnız doğrulama eşiğini (0–8 m'de RMSE ≤ 1,5 m, R² ≥ 0,6, ≥ 30 bağımsız nokta) geçerse modele girer.
+              Kaynak sırası: saha &gt; uydu lazer &gt; uydu tahmini &gt; deniz haritası (DTM) &gt; yapı boyundan tahmin.</li>
             <li>Otomatik eklenen meralara gerçekten erişilebiliyor mu?</li>
           </ul>
         </div>

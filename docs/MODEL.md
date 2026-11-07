@@ -470,7 +470,13 @@ CREATE TABLE catch_log (id TEXT PRIMARY KEY, spot_id TEXT NOT NULL, start_at TEX
 - Kanıt C: uzunluk derinliğin zayıf bir vekilidir; DTM ölçümü ve saha derinliği onun önündedir (§13).
 
 ## 13. Derinlik verisi öncelik zinciri (H4)
-**saha ölçümü > akademik çok ışınlı (multibeam) batimetri > EMODnet ölçüm hücresi > GEBCO dolgusu / enterpolasyon > tip önseli (yapı uzunluğu)**
+**saha ölçümü > akademik çok ışınlı (multibeam) batimetri > uydu lazer ölçümü (ICESat-2 ATL24) > uydu görüntüsünden tahmin (Sentinel-2 SDB, yalnız doğrulama eşiği geçilirse) > EMODnet ölçüm hücresi > GEBCO dolgusu / enterpolasyon > tip önseli (yapı uzunluğu)**
+
+**Faz R — uydu derinliği:**
+- Saha çifti yoksa bant başına uydu değeri DTM/önsel tahminiyle karışır: `d = w·d_uydu + (1 − w)·d_açık`.
+- `w = clamp(1 − σ/3 m, 0,3, tavan)`; tavan ATL24 için 0,9, SDB için 0,7 (`satWeight`).
+- Kaynak etiketi `uydu-lidar` ya da `uydu-tahmini`; gerekçe metninde "uydu lazer ölçümü" ya da "uydu görüntüsünden tahmin, ölçülmedi".
+- Veri `satbathy.yml` (aylık) → D1 `sat_depth_band`, `sat_depth_points`. Takım kutusunun saydırma hesabı aynı derinliği kullanır.
 
 - Gemlik Körfezi çok ışınlı verisi gelirse (talep taslağı `docs/outreach/gemlik-batimetri-talep.md`):
   1. `pipeline/av_pipeline/bathy/` içinde ayrı bir ızgara (GeoTIFF/XYZ → 25–50 m) okunur.

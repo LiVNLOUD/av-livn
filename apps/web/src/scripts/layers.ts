@@ -4,7 +4,7 @@
 // invented detail); wind and current also get a light particle animation on a 2D canvas (no extra library).
 import type maplibregl from 'maplibre-gl';
 
-export type LayerName = 'puan' | 'ruzgar' | 'dalga' | 'akinti' | 'sst' | 'yagis' | 'bulut';
+export type LayerName = 'puan' | 'ruzgar' | 'dalga' | 'akinti' | 'sst' | 'yagis' | 'bulut' | 'uydu';
 export interface Grid { from_hour: number; hours: number; lat0: number; lon0: number; dlat: number; dlon: number; nlat: number; nlon: number; source: string; built_at?: string; vars: Record<string, (number | null)[][]> }
 
 const cache = new Map<string, Promise<Grid | null>>();
@@ -179,7 +179,38 @@ export function weatherLayers(map: maplibregl.Map, container: HTMLElement, onInf
     if (map.getLayer(SRC)) map.removeLayer(SRC);
     if (map.getSource(SRC)) map.removeSource(SRC);
   };
+  // Faz R: satellite depth — ICESat-2 laser soundings (measured points) and, only when it passed validation, the
+  // Sentinel-2 estimate (opacity = uncertainty). Static files from satbathy.yml; missing files = "no data yet".
+  const SAT = ['sat-pts', 'sat-sdb'];
+  const clearSat = () => SAT.forEach((id) => { if (map.getLayer(id)) map.removeLayer(id); if (map.getSource(id)) map.removeSource(id); });
+  async function drawSat() {
+    const [pts, sdb] = await Promise.all([fetch('/tiles/atl24.geojson').then((r) => (r.ok ? r.json() : null)).catch(() => null), fetch('/tiles/sdb.json').then((r) => (r.ok ? r.json() : null)).catch(() => null)]);
+    if (name !== 'uydu') return;
+    clearSat();
+    if (sdb?.bounds) {
+      const [w, s0, e, n] = sdb.bounds as number[];
+      map.addSource('sat-sdb', { type: 'image', url: '/tiles/sdb.png', coordinates: [[w!, n!], [e!, n!], [e!, s0!], [w!, s0!]] });
+      map.addLayer({ id: 'sat-sdb', type: 'raster', source: 'sat-sdb', paint: { 'raster-resampling': 'nearest', 'raster-fade-duration': 0 } }, 'land');
+    }
+    const nPts = pts?.features?.length ?? 0;
+    if (nPts) {
+      map.addSource('sat-pts', { type: 'geojson', data: pts });
+      map.addLayer({ id: 'sat-pts', type: 'circle', source: 'sat-pts', paint: {
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 15, 4], 'circle-stroke-width': 0.5, 'circle-stroke-color': '#0e1c27',
+        'circle-color': ['interpolate', ['linear'], ['get', 'depth'], 0, '#e6d4fb', 5, '#b48ae8', 10, '#7a4cc4', 20, '#4a2a86'],
+      } }, 'spot-labels');
+    }
+    const years = nPts ? [...new Set((pts.features as { properties: { date: string } }[]).map((f) => f.properties.date.slice(0, 4)))].sort() : [];
+    onInfo(nPts || sdb
+      ? `<span class="ramp-bar" style="background:linear-gradient(90deg,#e6d4fb,#b48ae8,#7a4cc4,#4a2a86)"></span><span class="ramp-ends"><span>0</span><span>20 m</span></span>`
+        + `<span>${nPts ? `Mor noktalar: uydu lazer ölçümü (ICESat-2 ATL24), ${nPts} nokta, ${years[0]}–${years[years.length - 1]}. Her nokta ölçümdür, ara değer üretilmez.` : 'Bu kıyıda uydu lazer ölçümü yok.'}</span>`
+        + `<span>${sdb ? 'Renkli alan: uydu görüntüsünden derinlik tahmini (Sentinel-2), 0–10 m; soluk = belirsiz. Ölçüm değil.' : 'Uydu görüntüsünden tahmin doğrulama eşiğini geçmedi; gösterilmiyor.'}</span>`
+        + `<span class="muted">Kaynak: NASA NSIDC ICESat-2 ATL24 v002 (doi:10.5067/ATLAS/ATL24.002)${sdb ? '; Copernicus Sentinel-2' : ''}</span>`
+      : '<b>Uydu derinliği:</b> veri henüz yok.');
+  }
   async function draw() {
+    if (name !== 'uydu') clearSat();
+    if (name === 'uydu') { clear(); particles.set(null, null, 1); await drawSat(); return; }
     if (name === 'puan') { clear(); particles.set(null, null, 1); onInfo(''); return; }
     const spec = SPEC[name];
     const g = await loadGrid(spec.grid);
