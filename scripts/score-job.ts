@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
 import { CLEAR_PRE_SQL, FETCHED_SQL, WEATHER_RUNS_SQL, parseWeatherRun, fetchedAt, HOURS_SQL, LIST_SQL, preBodies, WINDOWS_SQL, type HoursRow, type ListRow, type WindowsRow } from '../workers/api/src/lib/views';
-import { FULL_RUN_MIN, needsFullRun, nothingNew } from '../workers/api/src/lib/staleness';
+import { FULL_RUN_MIN, needsFullRun, needsWeatherRefresh, nothingNew } from '../workers/api/src/lib/staleness';
 import { computeSpotV2, SPECIES, DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
@@ -70,6 +70,20 @@ if (pendingOnly) {
   }
   console.log(`pending: ${pending.map((p) => p.spot_id).join(', ')}`);
 }
+// Q1: scoring never starts on weather older than 60 min when fresh weather can be had: ask the Worker to fetch
+// first (same code as its cron; it refuses within 15 min of the last fetch). On failure, score with what is there.
+if (!pendingOnly && !dryRun) {
+  const newest = (await query<{ at: string | null }>('SELECT max(fetched_at) AS at FROM forecast_snapshots'))[0]?.at ?? null;
+  if (!needsWeatherRefresh(newest, new Date())) console.log(`weather: fresh (newest fetch ${newest})`);
+  else if (!process.env.ADMIN_TOKEN) console.log(`weather: newest fetch ${newest} is older than 60 min; no ADMIN_TOKEN, scoring with it`);
+  else {
+    const r = await fetch('https://av.livn.tr/api/admin/weather/refresh', { method: 'POST', headers: { authorization: `Bearer ${process.env.ADMIN_TOKEN}`, 'user-agent': 'av-livn-score-job' } })
+      .then(async (x) => `${x.status} ${(await x.text()).slice(0, 200)}`)
+      .catch((e) => `error ${String(e)}`);
+    const after = (await query<{ at: string | null }>('SELECT max(fetched_at) AS at FROM forecast_snapshots'))[0]?.at ?? null;
+    console.log(`weather: newest fetch ${newest} was older than 60 min; refresh → ${r}; newest now ${after}`);
+  }
+}
 // The Worker cron (:07) fetches weather and then starts this job; a GitHub-scheduled run that finds the scores
 // already computed from the newest weather (and no field edit waiting) has nothing to do.
 if (!pendingOnly && !force && !dryRun) {
@@ -79,7 +93,6 @@ if (!pendingOnly && !force && !dryRun) {
     query<{ n: number }>('SELECT COUNT(*) AS n FROM pending_rescore'),
   ]);
   const scoredAt = sc[0]?.at ?? null, newestFetch = fe[0]?.at ?? null;
-  if (newestFetch && (Date.now() - Date.parse(newestFetch)) / 60_000 > 60) console.log(`weather: newest fetch ${newestFetch} is older than 60 min (Worker cron); scoring with it`);
   if (nothingNew(scoredAt, newestFetch, pe[0]?.n ?? 0)) {
     console.log(`nothing new: scores ${scoredAt} already use the newest weather ${newestFetch}`);
     await runNotify(query, { spots: [], nowHour: Math.floor(Date.now() / 3_600_000), testOnly: true });

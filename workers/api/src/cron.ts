@@ -1,7 +1,7 @@
 import { fetchSnapshots, type CellCoord, type FetchStats } from './lib/openmeteo';
 import { valuesAt } from './lib/series';
 import type { Env } from './env';
-import { dispatchTest, guardScoring } from './lib/staleness';
+import { dispatchTest, guardScoring, WEATHER_REFRESH_GAP_MIN } from './lib/staleness';
 import { recordWeatherRuns } from './lib/modelrun';
 
 const OBS_COLS: Record<string, string> = {
@@ -70,6 +70,19 @@ export async function refreshWeather(
   await env.DB.batch(stmts);
   console.log(JSON.stringify({ event: 'open_meteo', calls: stats.calls, statuses: stats.statuses, wx: counts.wx, sea: counts.sea, errors: errors.length }));
   return result;
+}
+
+/**
+ * Q1: weather refresh on request (POST /api/admin/weather/refresh, called by the score job when the newest fetch
+ * is older than 60 min). Same work as the cron's fetch; skipped when the last fetch is under 15 min old.
+ */
+export async function refreshOnRequest(env: Env, now = new Date(), fetcher: typeof fetch = fetch): Promise<{ skipped: 'recent'; last: string } | (RefreshResult & { skipped: null })> {
+  const last = (await env.DB.prepare("SELECT value FROM meta WHERE key = 'om_last_run'").first<{ value: string }>())?.value;
+  const at = last ? (JSON.parse(last) as { at?: string }).at ?? null : null;
+  if (at && (now.getTime() - Date.parse(at)) / 60_000 < WEATHER_REFRESH_GAP_MIN) return { skipped: 'recent', last: at };
+  const weather = await refreshWeather(env, now, fetcher);
+  await recordWeatherRuns(env, now, weather.wx + weather.sea > 0, weather.errors.length, fetcher).catch(() => null);
+  return { ...weather, skipped: null };
 }
 
 /** Cron schedule (must match wrangler.toml). Scoring runs hourly in GitHub Actions (score.yml), not here. */

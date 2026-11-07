@@ -48,6 +48,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          # Q1: fresh weather first when the newest fetch is older than 60 min (POST /api/admin/weather/refresh)
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
         run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || (github.event.schedule == '8,38,53 * * * *' && '--pending' || '') }} ${{ inputs.force && '--force' || '' }}
       - name: Alert the owner on failure (E8)
         if: failure()

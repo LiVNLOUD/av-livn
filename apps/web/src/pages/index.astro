@@ -327,6 +327,20 @@ import Base from '../layouts/Base.astro';
   addEventListener('message', (e) => { if (e.origin === location.origin && e.data === 'close-card') $('drawer-close').click(); });
 
   // ---------------------------------------------------------------- map (≥768 px, beside the plan and the list)
+  // Q2: the plan card comes first. The map (MapLibre, WebGL, tiles) and other secondary work start only after the card
+  // is complete ("plan-ready"), or after 1.5 s at the latest, so they never compete with it.
+  let planIsReady = false;
+  const afterPlan: (() => void)[] = [];
+  function planReady() {
+    if (planIsReady) return;
+    planIsReady = true;
+    performance.mark('plan-ready');
+    const run = () => afterPlan.splice(0).forEach((f) => f());
+    if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 300 }); else setTimeout(run, 0);
+  }
+  /** Runs f once the plan card is drawn (immediately if it already is). */
+  const whenPlanReady = (f: () => void) => (planIsReady ? f() : afterPlan.push(f));
+  setTimeout(planReady, 1500); // the windows request failed or is slow: secondary work must not wait forever
   let mapApi: MapApi | null = null;
   let pickId: string | null = null; // M3: the plan's pick, highlighted on the map
   async function ensureMap() {
@@ -760,6 +774,7 @@ import Base from '../layouts/Base.astro';
       $('verdict').textContent = 'Hayır';
       $('verdict-sub').textContent = '72 saatte öneri yok: koşullar uygun değil ya da rüzgar/dalga verisi eksik (güvenlik denetlenemiyor). Güvenlik uyarıları "Tüm meralar" sekmesinde.';
       for (const c of ['.q2', '.q3', '.q4', '.q5', '.why-more', '.go']) qa(c, false);
+      planReady();
       $('alts-box').hidden = true; $('strip-card').hidden = true; $('rig-card').hidden = true; eqNote.hidden = true; eqPick.hidden = true;
       return;
     }
@@ -868,6 +883,7 @@ import Base from '../layouts/Base.astro';
     const v = d?.packed?.tk?.[d.from + col];
     nowLine(w, d);
     if (!v) {
+      planReady();
       $('a-tackle').textContent = 'Bu saatin girdileri yok; takım için mera kartına bakın.';
       $('a-tackle-sub').textContent = '';
       $('rig-card').hidden = true;
@@ -892,6 +908,7 @@ import Base from '../layouts/Base.astro';
       $('a-when').textContent += ` · kart şu saate göre: ${fmtTime(colIso)}${sc != null ? ` (puan ${Math.round(sc)})` : ''}`;
     }
     drawRig(t, colIso);
+    planReady();
     const tkWhy = document.getElementById('tk-why');
     if (tkWhy) tkWhy.innerHTML = tkHead + t.rows.map((r) => `<li><b>${esc(r.label)}: ${esc(r.value)}</b> — ${esc(r.why)} <span class="tag ev-${r.evidence}" title="Kanıt düzeyi">kanıt ${r.evidence}</span>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`).join('') + t.notes.map((n) => `<li class="muted">${esc(n)}</li>`).join('');
   }
@@ -973,7 +990,7 @@ import Base from '../layouts/Base.astro';
   const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: NonNullable<typeof winBody>) => { winBody = b; renderWindows(); renderPlan(); })
-    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Bilinmiyor'; $('verdict-sub').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). "Tüm meralar" sekmesine bakın.'; });
+    .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Bilinmiyor'; $('verdict-sub').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). "Tüm meralar" sekmesine bakın.'; planReady(); });
   loadWindows();
 
   // ---------------------------------------------------------------- species (H3)
@@ -1001,5 +1018,6 @@ import Base from '../layouts/Base.astro';
   });
 
   setCol(0);
-  ensureMap();
+  // the map is needed at once only when the page opens on a view other than the plan
+  if (app.dataset.view === 'plan') whenPlanReady(() => void ensureMap()); else void ensureMap();
 </script>

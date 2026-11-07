@@ -270,11 +270,16 @@ export function glyphFeatures(g: Grid | null, hour: number, spots: GlyphSpot[]):
 }
 /** Adds the glyph layer (zoom ≥ 14) under a 'glyphs' source; returns a refresher for (hour, spots). */
 export function spotGlyphs(map: maplibregl.Map): (hour: number, spots: GlyphSpot[]) => Promise<void> {
-  map.on('styleimagemissing', (e: { id: string }) => {
-    if (!e.id.startsWith('gl:') || map.hasImage(e.id)) return;
-    const img = drawGlyph(e.id);
-    if (img) map.addImage(e.id, img, { pixelRatio: 2 });
-  });
+  // MapLibre 6: only a missing-image resolver can supply the image for the current layout (a 'styleimagemissing'
+  // listener is too late, the glyph then appeared only on a later placement)
+  const resolve = (id: string) => {
+    if (!id.startsWith('gl:') || map.hasImage(id)) return;
+    const img = drawGlyph(id);
+    if (img) map.addImage(id, img, { pixelRatio: 2 });
+  };
+  const m = map as maplibregl.Map & { setMissingStyleImageResolver?: (f: (id: string) => void) => void };
+  if (m.setMissingStyleImageResolver) m.setMissingStyleImageResolver(resolve);
+  else map.on('styleimagemissing', (e: { id: string }) => resolve(e.id));
   map.addSource('glyphs', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   // below the disc; placed before the labels (top layer), so spot names move out of its way; glyphs never overlap each other
   map.addLayer({ id: 'glyphs', type: 'symbol', source: 'glyphs', minzoom: 14, layout: { 'icon-image': ['get', 'img'], 'icon-anchor': 'top', 'icon-offset': [0, 12], 'icon-allow-overlap': false, 'icon-ignore-placement': false, 'icon-padding': 1 } });

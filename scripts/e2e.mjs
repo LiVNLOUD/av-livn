@@ -300,10 +300,17 @@ const LAYERS = ['puan', 'ruzgar', 'dalga', 'akinti', 'sst', 'yagis', 'bulut'];
 const timing = (p) => p.evaluate(() => { const n = performance.getEntriesByType('navigation')[0]; return n ? Math.round(n.loadEventEnd) : null; });
 for (const [w, h] of [[3440, 1440], [2576, 1440], [1440, 900], [390, 844]]) {
   const { p, errors } = await page(w, h);
-  const t0 = Date.now();
-  await p.goto(base + '/', { waitUntil: 'networkidle' });
+  // Q2: plan card time = navigation start → performance mark 'plan-ready' (the card's answers are complete);
+  // the map and other secondary work start after it. Target ≤ 1.5 s at every width.
+  await p.goto(base + '/', { waitUntil: 'commit' });
+  const homeMs = await p.evaluate(() => new Promise((ok) => {
+    const t0 = performance.now();
+    const f = () => { const m = performance.getEntriesByName('plan-ready')[0]; if (m) ok(Math.round(m.startTime)); else if (performance.now() - t0 > 15000) ok(null); else requestAnimationFrame(f); };
+    f();
+  }));
+  homeMs !== null && homeMs <= 1500 ? ok(`${w}: plan card ready in ${homeMs} ms (≤ 1500)`) : fail(`${w}: plan card ready in ${homeMs} ms (> 1500)`);
   await waitPlan(p);
-  const homeMs = Date.now() - t0;
+  await p.waitForLoadState('networkidle').catch(() => {});
   const models = await p.evaluate(() => { const e = document.getElementById('a-models'); return e && !e.hidden ? e.textContent : null; });
   models && /^Hava modelleri (uyuşuyor|farklı şeyler söylüyor|güvenlik konusunda ayrışıyor) \(/.test(models) ? ok(`${w}: plan model line "${models}"`) : fail(`${w}: plan model line missing (${models})`);
   if (shots) await p.screenshot({ path: `${shots}/plan-${w}.png` });
@@ -318,6 +325,15 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1440, 900], [390, 844]]) {
   const want = Math.floor(Date.parse(t) / 3_600_000) - Math.floor(Date.now() / 3_600_000);
   sl.max === '71' && sl.nights >= 2 && sl.days >= 3 && sl.now ? ok(`${w}: 72 h slider (days ${sl.days}, nights ${sl.nights}, now mark)`) : fail(`${w}: slider ${JSON.stringify(sl)}`);
   want < 0 || want > 71 || sl.v === want ? ok(`${w}: slider opened at the plan's hour (${sl.out})`) : fail(`${w}: slider at ${sl.v}, plan hour ${want}`);
+  // Q3: no slider label touches another ("şimdi" vs the day names), at every width
+  const clashTs = await p.evaluate(() => {
+    const els = [...document.querySelectorAll('.ts-day b, .ts-now i')].filter((e) => e.textContent.trim());
+    const r = els.map((e) => [e.textContent.trim(), e.getBoundingClientRect()]);
+    const hits = [];
+    for (let i = 0; i < r.length; i++) for (let j = i + 1; j < r.length; j++) { const [na, a] = r[i], [nb, b] = r[j]; if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) hits.push(`${na} / ${nb}`); }
+    return hits;
+  });
+  clashTs.length ? fail(`${w}: slider labels overlap: ${clashTs.join(', ')}`) : ok(`${w}: slider labels clear of each other`);
   await p.waitForTimeout(1200);
   for (const l of LAYERS) {
     await p.locator(`.layers input[value=${l}] + span`).click();
@@ -360,7 +376,7 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1440, 900], [390, 844]]) {
   if (w < 500) fc.scrolls ? ok(`${w}: forecast table scrolls sideways`) : fail(`${w}: forecast table does not scroll`);
   (await overflow(p)) <= 0 ? ok(`${w}: spot card without page overflow`) : fail(`${w}: spot card page overflow`);
   if (shots) { await p.locator('#fc-block').scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await p.screenshot({ path: `${shots}/mera-fc-${w}.png` }); }
-  console.log(`time ${w}: plan ${homeMs} ms, map+layers ready ${mapMs} ms, spot card+table ${meraMs} ms; load event ${await timing(p)} ms (spot card)`);
+  console.log(`time ${w}: plan card ${homeMs} ms, map+layers ready ${mapMs} ms, spot card+table ${meraMs} ms; load event ${await timing(p)} ms (spot card)`);
   errors.length ? fail(`${w} (P): console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w} (P): no console errors`);
 }
 

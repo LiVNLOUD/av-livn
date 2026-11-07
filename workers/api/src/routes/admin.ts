@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { refreshOnRequest } from '../cron';
 import type { Env } from '../env';
 import { catchRoutes } from './catch';
 import { notifyRoutes } from './notify';
@@ -66,6 +67,11 @@ export function validateFields(body: Fields): Valid {
 }
 
 adminRoutes.get('/ping', (c) => c.json({ ok: true }));
+// Q1: the score job asks for fresh weather when the newest fetch is older than 60 min (cron missed or failed)
+adminRoutes.post('/weather/refresh', async (c) => {
+  const r = await refreshOnRequest(c.env);
+  return c.json(r.skipped ? { ok: true, skipped: r.skipped, last: r.last } : { ok: r.wx + r.sea > 0, wx: r.wx, sea: r.sea, errors: r.errors.length });
+});
 adminRoutes.route('/catch', catchRoutes);
 adminRoutes.route('/notify', notifyRoutes);
 

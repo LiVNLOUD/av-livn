@@ -11,6 +11,11 @@ export const DISPATCH_MIN = 75;
 export const DISPATCH_GAP_MIN = 30;
 export const STALE_ALERT_H = 2;
 export const ALERT_GAP_H = 6;
+/** Q1: the score job fetches weather itself first when the newest fetch is older than this. */
+export const WEATHER_REFRESH_MIN = 60;
+/** Q1: the refresh endpoint fetches at most once per this many minutes (the Worker cron included). */
+export const WEATHER_REFRESH_GAP_MIN = 15;
+export const DISPATCH_LOG_MAX = 200;
 const REPO = 'LiVNLOUD/av-livn';
 
 const minutesSince = (iso: string | null | undefined, now: Date) => (iso ? (now.getTime() - Date.parse(iso)) / 60_000 : Infinity);
@@ -39,6 +44,27 @@ export function shouldRescoreAfterFetch(o: { scoredAt: string | null; newestFetc
 /** Score job: nothing to do when the newest scores already use the newest weather and no field edit waits. */
 export function nothingNew(scoredAt: string | null, newestFetch: string | null, pending: number): boolean {
   return pending === 0 && scoredAt !== null && newestFetch !== null && Date.parse(scoredAt) >= Date.parse(newestFetch);
+}
+
+/** Q1: scoring is about to start on weather older than 60 min (or none): fetch fresh weather first. */
+export function needsWeatherRefresh(newestFetch: string | null, now: Date): boolean {
+  return minutesSince(newestFetch, now) > WEATHER_REFRESH_MIN;
+}
+
+/**
+ * Q1: the backup trigger also covers weather. When this cron's own fetch failed and the stored weather is older
+ * than 60 min, a score run is started anyway: it fetches weather itself first (needsWeatherRefresh), a second
+ * attempt from another moment and another machine.
+ */
+export function shouldDispatchForWeather(o: { newestFetch: string | null; fetchOk: boolean; lastDispatch: string | null; now: Date }): boolean {
+  return !o.fetchOk && needsWeatherRefresh(o.newestFetch, o.now) && minutesSince(o.lastDispatch, o.now) > DISPATCH_GAP_MIN;
+}
+
+/** Q1: keep the last DISPATCH_LOG_MAX dispatches (newest last) so reports read a record, not a reconstruction. */
+export function appendLog<T>(raw: string | null, entry: T, max = DISPATCH_LOG_MAX): T[] {
+  let xs: T[] = [];
+  try { const v = raw ? JSON.parse(raw) : []; if (Array.isArray(v)) xs = v as T[]; } catch { /* corrupt log: start again */ }
+  return [...xs, entry].slice(-max);
 }
 
 export function shouldAlert(scoredAt: string | null, lastAlert: string | null, now: Date): boolean {
@@ -83,10 +109,12 @@ export async function guardScoring(env: Env, now: Date, fetcher: typeof fetch = 
   let reason: string | null = null;
   const lastDispatch = await meta(env, 'score_dispatch_at');
   if (shouldRescoreAfterFetch({ scoredAt, newestFetch, fetchOk, lastDispatch, now })) reason = 'new weather';
+  else if (shouldDispatchForWeather({ newestFetch, fetchOk, lastDispatch, now })) reason = 'stale weather';
   else if (shouldDispatch(scoredAt, lastDispatch, now)) reason = 'stale scores';
   if (reason) {
     dispatched = await dispatchScore(env, fetcher);
     if (dispatched === 'dispatched') await setMeta(env, 'score_dispatch_at', now.toISOString());
+    await setMeta(env, 'score_dispatch_log', JSON.stringify(appendLog(await meta(env, 'score_dispatch_log'), { at: now.toISOString(), reason, status: dispatched })));
   }
   let alert = 'ok';
   if (shouldAlert(scoredAt, await meta(env, 'alert_stale_at'), now)) {

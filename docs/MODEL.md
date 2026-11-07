@@ -565,6 +565,12 @@ Eski hava verisiyle hesaplanan taze puan da eskidir; uyarı yalnız puan yaşın
 
 Ölçülen durum ve beklenen sıklık: `docs/audit/staleness-24h.md`.
 
+**Q1 eki (2026-11-07):**
+- Puanlama işi başlarken en yeni hava çekimi 60 dk'dan eskiyse (ya da hiç yoksa) önce Worker'dan taze çekim ister (`POST /api/admin/weather/refresh`). Bu, cron'la aynı kodu çalıştırır; son çekim 15 dk'dan yeniyse çekmez. Çekim başarısız olursa iş eldeki veriyle puanlar ve logda nedeni yazar.
+- Yedek tetik havayı da kapsar: Worker'ın kendi çekimi başarısız olduysa ve veri 60 dk'dan eskiyse sebep "stale weather" ile puanlamayı başlatır. Başlayan iş havayı yeniden çeker.
+- Her dispatch `meta.score_dispatch_log`'a yazılır (son 200; zaman, sebep, sonuç).
+- 48 saatlik denetim: `docs/audit/staleness-48h.md`.
+
 ## 19. Hava tahmini belirsizliği: model karşılaştırması (P2)
 
 **Ne ölçülür.** Saatlik olarak Actions'ta (`scripts/weather-grids.ts`), Open-Meteo'dan dört model çekilir:
