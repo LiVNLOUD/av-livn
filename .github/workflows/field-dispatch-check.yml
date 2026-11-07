@@ -40,7 +40,7 @@ jobs:
           [ "$(echo "$R2" | jq -r .dispatch)" = queued ] || { echo "FAIL second record inside 10 min was not queued"; fail=1; }
           RUN=""
           for i in $(seq 1 18); do
-            RUN=$(gh run list --workflow score.yml --event workflow_dispatch --limit 10 --json databaseId,createdAt --jq "[.[] | select(.createdAt >= \"$T0\")] | last | .databaseId // empty")
+            RUN=$(gh run list --workflow score.yml --event workflow_dispatch --user LiVNLOUD --limit 10 --json databaseId,createdAt --jq "[.[] | select(.createdAt >= \"$T0\")] | last | .databaseId // empty")
             [ -n "$RUN" ] && break; sleep 10
           done
           if [ -z "$RUN" ]; then echo "FAIL no score.yml dispatch after $T0"; fail=1; else
