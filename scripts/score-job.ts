@@ -32,6 +32,8 @@ const ablateOut = process.argv.includes('--ablate') ? process.argv[process.argv.
 // I4: istavrit top 10 now and at the next 21:00 local (before/after a model change, same data)
 const topOut = process.argv.includes('--top10') ? process.argv[process.argv.indexOf('--top10') + 1] : null;
 const lampOut = process.argv.includes('--lamp-sensitivity') ? process.argv[process.argv.indexOf('--lamp-sensitivity') + 1] : null;
+// R1: value of depth information (dry run): each spot's cast-range depth fixed at 1…10 m, everything else unchanged
+const voiOut = process.argv.includes('--depth-voi') ? process.argv[process.argv.indexOf('--depth-voi') + 1] : null;
 const token = process.env.CLOUDFLARE_API_TOKEN;
 const account = process.env.CLOUDFLARE_ACCOUNT_ID;
 if (!token || !account) throw new Error('CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are required');
@@ -188,6 +190,70 @@ if (topOut) {
   const { writeFileSync } = await import('node:fs');
   writeFileSync(topOut, JSON.stringify({ now: new Date(now0 * 3_600_000).toISOString(), night: new Date(n21 * 3_600_000).toISOString(), top_now: at(now0), top_night: at(n21) }, null, 1) + '\n');
   console.log(`top10 → ${topOut}`);
+}
+
+if (voiOut) {
+  // R1 (docs/audit/depth-voi.md). Same pure engine, no Monte Carlo (draws 0), istavrit. A spot's depth is fixed by
+  // plumb-quality pairs every 25 m over 0–150 m (they dominate the DTM/prior there). Measured per depth:
+  // best non-gated score over 72 h and today (until 06:00 local), its rank among all spots, membership of today's
+  // top 3 (the plan's pick and its two alternatives) and the tackle at that spot's best hour.
+  const { tackle, staticTerms, DEFAULTS } = await import('@av-livn/scoring');
+  const DEPTHS = [1, 2, 3, 4, 6, 8, 10];
+  const fr = fieldRecords(obs, depths);
+  const om = oceanMap(oSeries, oNormal);
+  const todayEnd = now0 + ((27 - (now0 % 24)) % 24 || 24); // next 03:00 UTC = 06:00 local
+  type Run = ReturnType<typeof computeSpotV2>;
+  const summary = (r: Run) => {
+    let b72 = -1, b72i = -1, bToday = -1;
+    r.hours.forEach((h, i) => {
+      if (h.gated || h.total === null) return;
+      if (h.total > b72) { b72 = h.total; b72i = i; }
+      if (r.startHour + i < todayEnd && h.total > bToday) bToday = h.total;
+    });
+    return { b72, b72i, bToday };
+  };
+  const run = (row: SpotRow, field?: ReturnType<typeof fr.get>) => computeSpotV2(row, snaps.get(row.wx_cell), row.sea_cell ? snaps.get(row.sea_cell) : undefined, now, field, 0, om.get(row.id));
+  const base = rows.map((r) => run(r, fr.get(r.id)));
+  const baseSum = base.map(summary);
+  const rankOf = (vals: number[], k: number) => 1 + vals.filter((v, j) => j !== k && v > vals[k]!).length;
+  const top3 = (vals: number[]) => new Set(vals.map((v, j) => [v, j] as const).filter(([v]) => v >= 0).sort((a, b) => b[0] - a[0]).slice(0, 3).map(([, j]) => j));
+  const baseTop = top3(baseSum.map((x) => x.bToday));
+  const tk = (r: Run, i: number, row: SpotRow, depthM: number) => {
+    const w = r.weather[i]!;
+    const t = tackle({ depthM, currentMs: w.currentMs, windKmh: w.windKmh, gustKmh: w.gustKmh, crossKmh: null, sunAlt: w.sunAlt, lampP: null, turbidity: null, sstDev: w.sstDev, waveM: w.waveM, kind: row.kind } as never);
+    return `${t.profile} ${t.jigG} g ${t.zone}`;
+  };
+  const out = rows.map((row, k) => {
+    const f0 = fr.get(row.id);
+    const per = DEPTHS.map((d) => {
+      const pairs = [0, 25, 50, 75, 100, 125, 150].map((m) => ({ distance_m: m, depth_m: d, quality: 'plumb' }));
+      const field = { ...(f0 ?? { latestAt: now.toISOString(), substrate: null, substrateKind: null, substrateWeight: 0, snag: null, structure: null, structureKind: null, lightColor: null, lamp: null, calibration: null, lastDepthAt: null }), depths: pairs, depthKind: 'saha' } as never;
+      const r = run(row, field);
+      const s0 = summary(r);
+      const today = baseSum.map((x) => x.bToday); today[k] = s0.bToday;
+      const all72 = baseSum.map((x) => x.b72); all72[k] = s0.b72;
+      const depthM = staticTerms(r.spot, DEFAULTS).depthM;
+      return { d, depthM: Math.round(depthM * 10) / 10, b72: Math.round(s0.b72 * 10) / 10, rank72: rankOf(all72, k), inTop3: top3(today).has(k), inTop3_72: top3(all72).has(k), tackle: s0.b72i >= 0 ? tk(r, s0.b72i, row, depthM) : null };
+    });
+    const ranks = per.map((p) => p.rank72);
+    const tackles = new Set(per.map((p) => p.tackle));
+    const inTop = per.filter((p) => p.inTop3).length;
+    const inTop72 = per.filter((p) => p.inTop3_72).length;
+    return {
+      id: row.id, name: row.name, kind: row.kind,
+      base: { depthM: Math.round(staticTerms(base[k]!.spot, DEFAULTS).depthM * 10) / 10, src: base[k]!.hours[0]?.components.find((c) => c.key === 'derinlik')?.source ?? null, b72: Math.round(baseSum[k]!.b72 * 10) / 10, inTop3: baseTop.has(k) },
+      per,
+      score_range: Math.round((Math.max(...per.map((p) => p.b72)) - Math.min(...per.map((p) => p.b72))) * 10) / 10,
+      rank_range: [Math.min(...ranks), Math.max(...ranks)],
+      plan_flip: inTop > 0 && inTop < per.length, // enters or leaves today's top 3 depending on depth
+      flip72: inTop72 > 0 && inTop72 < per.length, // same for the best 72 h windows (day hours included)
+      tackle_variants: tackles.size,
+    };
+  });
+  out.sort((a, b) => Number(b.plan_flip) - Number(a.plan_flip) || Number(b.flip72) - Number(a.flip72) || (b.rank_range[1] - b.rank_range[0]) - (a.rank_range[1] - a.rank_range[0]) || b.tackle_variants - a.tackle_variants || b.score_range - a.score_range);
+  const { writeFileSync } = await import('node:fs');
+  writeFileSync(voiOut, JSON.stringify({ at: now.toISOString(), depths: DEPTHS, today_until: new Date(todayEnd * 3_600_000).toISOString(), spots: out }, null, 1) + '\n');
+  console.log(`depth-voi → ${voiOut} (${out.length} spots, today flips ${out.filter((x) => x.plan_flip).length}, 72 h flips ${out.filter((x) => x.flip72).length})`);
 }
 
 if (lampOut) {

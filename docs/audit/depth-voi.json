@@ -1,0 +1,10011 @@
+{
+ "at": "2026-11-07T21:51:06.399Z",
+ "depths": [
+  1,
+  2,
+  3,
+  4,
+  6,
+  8,
+  10
+ ],
+ "today_until": "2026-11-08T03:00:00.000Z",
+ "spots": [
+  {
+   "id": "osm-way-519553274-1",
+   "name": "Kordon (Eşkel kuzeybatısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 72.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 72.5,
+     "rank72": 60,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 72.5,
+     "rank72": 60,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.2,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 76.7,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 81.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.5,
+   "rank_range": [
+    1,
+    60
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-639389497-3",
+   "name": "Kordon (Hasanbey kuzeyi)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 72.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 72.5,
+     "rank72": 60,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 72.5,
+     "rank72": 60,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.2,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 76.7,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.3,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 81.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.5,
+   "rank_range": [
+    1,
+    60
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-639389497-2",
+   "name": "Kordon (Hasanbey kuzeydoğusu)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.6,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 72.6,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 72.6,
+     "rank72": 59,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 72.6,
+     "rank72": 59,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.4,
+     "rank72": 41,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 76.9,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.5,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 81.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.5,
+   "rank_range": [
+    1,
+    59
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-534210128-1",
+   "name": "Kordon (Kumyaka doğusu)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 3,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 72.7,
+     "rank72": 58,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 72.7,
+     "rank72": 58,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 75,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.6,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.8,
+   "rank_range": [
+    1,
+    58
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-639389497-1",
+   "name": "Kordon (Ömerbey Mah. doğusu)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.1,
+     "rank72": 58,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.1,
+     "rank72": 58,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.8,
+     "rank72": 37,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.1,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.5,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.4,
+   "rank_range": [
+    1,
+    58
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1073087871-1",
+   "name": "Kordon (Ömerbey Mah. güneydoğusu)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.2,
+     "rank72": 57,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.2,
+     "rank72": 57,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.6,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.4,
+   "rank_range": [
+    1,
+    57
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1217216668-1",
+   "name": "Kordon (Dr.Ziya Kaya batısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.8,
+     "rank72": 54,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.8,
+     "rank72": 54,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 76.9,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.2,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 81.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.5,
+   "rank_range": [
+    1,
+    54
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 7
+  },
+  {
+   "id": "osm-way-1336893184-1",
+   "name": "Kordon (Hisar kuzeybatısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.8,
+     "rank72": 54,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.8,
+     "rank72": 54,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 76.9,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.2,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 81.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.5,
+   "rank_range": [
+    1,
+    54
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 7
+  },
+  {
+   "id": "osm-way-24825429-1",
+   "name": "Kordon (Kumsaz güneyi)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.8,
+     "rank72": 54,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.8,
+     "rank72": 54,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.2,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.9,
+     "rank72": 18,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    54
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1217216676-2",
+   "name": "Kordon (Cumhuriyet güneyi)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.2,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.9,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    50
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1217216676-3",
+   "name": "Kordon (Orhaniye batısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.2,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.9,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    50
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1336893175-1",
+   "name": "Kordon (Orhaniye güneybatısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.2,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.9,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    50
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-24825429-4",
+   "name": "Kordon (Kurşunlu doğusu, Gemlik)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 73.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.1,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.7,
+     "rank72": 21,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.9,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    50
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1217216668-2",
+   "name": "Kordon (Demirsubaşı güneyi)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.1,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.4,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.5,
+   "rank_range": [
+    1,
+    45
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 7
+  },
+  {
+   "id": "osm-way-1217216676-6",
+   "name": "Kordon (Kayhan güneybatısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.1,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.4,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.5,
+   "rank_range": [
+    1,
+    45
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 7
+  },
+  {
+   "id": "osm-way-1217216676-7",
+   "name": "Kordon (Balıkpazarı güneybatısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.1,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.4,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.5,
+   "rank_range": [
+    1,
+    45
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 7
+  },
+  {
+   "id": "osm-way-1500766926-1",
+   "name": "Kordon (Demirsubaşı güneybatısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.1,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.4,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.5,
+   "rank_range": [
+    1,
+    45
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 7
+  },
+  {
+   "id": "osm-way-1170373160-2",
+   "name": "Kordon (Armutlu batısı) 2",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.6,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.9,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.6,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.8,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 5 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    45
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-24825429-9",
+   "name": "Kordon (Kurşunlu doğusu, Gemlik) 6",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.1,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.1,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.6,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.6,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.6,
+   "rank_range": [
+    1,
+    43
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1217216676-1",
+   "name": "Kordon (Cumhuriyet batısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.1,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.1,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.2,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.6,
+   "rank_range": [
+    1,
+    43
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1170373160-1",
+   "name": "Kordon (Armutlu batısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 74.3,
+     "rank72": 42,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.3,
+     "rank72": 42,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 74.8,
+     "rank72": 37,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.3,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 83.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    42
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1170373160-3",
+   "name": "Kordon (Armutlu batısı) 3",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.4,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.4,
+     "rank72": 41,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.4,
+     "rank72": 41,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.6,
+     "rank72": 35,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 78.3,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 83.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    41
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-node-11981818601-1",
+   "name": "Ayı Burnu",
+   "kind": "rocky",
+   "base": {
+    "depthM": 2.3,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 74.4,
+     "rank72": 40,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 76.3,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 78.8,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 81.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 84.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 85.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 86,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.6,
+   "rank_range": [
+    1,
+    40
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-428743002-1",
+   "name": "Kordon (Armutlu güneydoğusu)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.6,
+     "rank72": 35,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 78.3,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 83.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    38
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-24825429-8",
+   "name": "Kordon (Kurşunlu doğusu, Gemlik) 5",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.6,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 78.4,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 83.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    38
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1413355183-1",
+   "name": "Kordon (Armutlu batısı) 4",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.6,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.5,
+     "rank72": 38,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 78.4,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 83,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 83.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    }
+   ],
+   "score_range": 8.9,
+   "rank_range": [
+    1,
+    38
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1456975486",
+   "name": "Petek Sitesi İskele",
+   "kind": "pier",
+   "base": {
+    "depthM": 2.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 76.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 74.6,
+     "rank72": 37,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.7,
+     "rank72": 37,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 76.9,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 79.2,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.8,
+   "rank_range": [
+    1,
+    37
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1445587670-1",
+   "name": "Kordon (Fıstıklı batısı)",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 74.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.8,
+     "rank72": 37,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 74.9,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 76,
+     "rank72": 30,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 78.7,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 83.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 83.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.9,
+   "rank_range": [
+    1,
+    37
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1422351411-1",
+   "name": "Kayalık kıyı (Armutlu güneydoğusu)",
+   "kind": "rocky",
+   "base": {
+    "depthM": 1.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 76.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 74.6,
+     "rank72": 37,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 76.7,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 79.4,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 85.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    1,
+    37
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1233883494",
+   "name": "Mudanya İskelesi",
+   "kind": "pier",
+   "base": {
+    "depthM": 3.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 74.8,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2.1,
+     "b72": 74.8,
+     "rank72": 36,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 76.8,
+     "rank72": 24,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 4,
+     "b72": 79,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.9,
+     "b72": 82.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.8,
+     "b72": 83.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.7,
+     "b72": 84.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.4,
+   "rank_range": [
+    1,
+    36
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-483965349",
+   "name": "Tirilye İskelesi",
+   "kind": "pier",
+   "base": {
+    "depthM": 1.6,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 75.4,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 75.4,
+     "rank72": 35,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.4,
+     "rank72": 35,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 76.8,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 79.2,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.1,
+   "rank_range": [
+    1,
+    35
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-24825429-2",
+   "name": "Kordon (Kumsaz güneyi) 2",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 75.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.9,
+   "rank_range": [
+    1,
+    33
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-24825429-3",
+   "name": "Kordon (Kumsaz güneyi) 3",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 75.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.7,
+     "rank72": 33,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.9,
+   "rank_range": [
+    1,
+    33
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-24825429-7",
+   "name": "Kordon (Kurşunlu doğusu, Gemlik) 4",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 75.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.6,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.8,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.8,
+   "rank_range": [
+    1,
+    31
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-24825429-5",
+   "name": "Kordon (Kurşunlu doğusu, Gemlik) 2",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 75.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.6,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 80.8,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.8,
+   "rank_range": [
+    1,
+    31
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1170373161",
+   "name": "Armutlu İskelesi (Armutlu batısı)",
+   "kind": "pier",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 75.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 75.9,
+     "rank72": 30,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.9,
+     "rank72": 30,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 76.8,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 79.5,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 5 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    30
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1005837524",
+   "name": "Kapaklı İskelesi (Kapaklı güneyi)",
+   "kind": "pier",
+   "base": {
+    "depthM": 2.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 75.9,
+     "rank72": 29,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 75.9,
+     "rank72": 29,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 77.5,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 80.2,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 83.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    29
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1218507890",
+   "name": "Küçükkumla İskelesi",
+   "kind": "pier",
+   "base": {
+    "depthM": 1.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 76.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 76.1,
+     "rank72": 27,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 76.1,
+     "rank72": 27,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 79.8,
+     "rank72": 5,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 83,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.6,
+   "rank_range": [
+    1,
+    27
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-24825429-6",
+   "name": "Kordon (Kurşunlu doğusu, Gemlik) 3",
+   "kind": "promenade",
+   "base": {
+    "depthM": 1.6,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 76.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 76.1,
+     "rank72": 27,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 76.1,
+     "rank72": 27,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 76.1,
+     "rank72": 27,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 81.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 82.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.8,
+   "rank_range": [
+    1,
+    27
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-503770078",
+   "name": "İDO Güzelyalı Feribot İskelesi",
+   "kind": "pier",
+   "base": {
+    "depthM": 3.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 79.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 76.1,
+     "rank72": 26,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2.1,
+     "b72": 76.1,
+     "rank72": 26,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 77.3,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 4,
+     "b72": 79.7,
+     "rank72": 7,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.9,
+     "b72": 83.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.8,
+     "b72": 84.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.7,
+     "b72": 84.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    26
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1414984335",
+   "name": "Fıstıklı İskelesi (Fıstıklı güneybatısı)",
+   "kind": "pier",
+   "base": {
+    "depthM": 4.1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 80.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.2,
+     "b72": 76.1,
+     "rank72": 26,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2.1,
+     "b72": 76.1,
+     "rank72": 26,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3.1,
+     "b72": 77.4,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 4,
+     "b72": 80,
+     "rank72": 3,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.9,
+     "b72": 83.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.8,
+     "b72": 84.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.7,
+     "b72": 84.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    26
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-479047532",
+   "name": "İskele (İslamköy)",
+   "kind": "pier",
+   "base": {
+    "depthM": 1.3,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 76.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 76.3,
+     "rank72": 26,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 76.3,
+     "rank72": 26,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 77.3,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 79.9,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 83.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.6,
+   "rank_range": [
+    1,
+    26
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-node-11865648199",
+   "name": "Tirilye Limanı",
+   "kind": "harbour",
+   "base": {
+    "depthM": 2.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 77.3,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 77.3,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 78.7,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 81.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 84.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 86.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.1,
+   "rank_range": [
+    1,
+    22
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-978867060",
+   "name": "Kurşunlu (Karacabey) – orta doğu mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 77.7,
+     "rank72": 21,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 77.7,
+     "rank72": 21,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 79.9,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 87.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.9,
+   "rank_range": [
+    1,
+    21
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-77362926",
+   "name": "Demirsubaşı İskelesi",
+   "kind": "pier",
+   "base": {
+    "depthM": 2.2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 77.7,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 0.8 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 77.7,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 77.8,
+     "rank72": 20,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 79.1,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 82.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 84.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 84.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.7,
+   "rank_range": [
+    1,
+    20
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1104376820",
+   "name": "Kurşunlu (Karacabey) – kısa doğu mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 77.8,
+     "rank72": 19,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 77.9,
+     "rank72": 18,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 80,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 87.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.8,
+   "rank_range": [
+    1,
+    19
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1104376819",
+   "name": "Kurşunlu (Karacabey) – uzun doğu mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 1.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 77.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 77.9,
+     "rank72": 18,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 77.9,
+     "rank72": 18,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 80,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 87.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.8,
+   "rank_range": [
+    1,
+    18
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-978867059",
+   "name": "Kurşunlu (Karacabey) – kısa batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 1.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 80,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 87.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.7,
+   "rank_range": [
+    1,
+    14
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-978867061",
+   "name": "Kurşunlu (Karacabey) – uzun batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 80.1,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 87.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.7,
+   "rank_range": [
+    1,
+    14
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-978867062",
+   "name": "Kurşunlu (Karacabey) – orta batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 80,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 87.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 9.7,
+   "rank_range": [
+    1,
+    14
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1165497962",
+   "name": "Kurşunlu Yat Limanı",
+   "kind": "harbour",
+   "base": {
+    "depthM": 2.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 78.1,
+     "rank72": 12,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78.1,
+     "rank72": 12,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 79.2,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 81.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 84.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 86.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    12
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1552615726",
+   "name": "Güzelyalı Yat Limanı – liman içi",
+   "kind": "harbour",
+   "base": {
+    "depthM": 2.1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 78.1,
+     "rank72": 12,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78.1,
+     "rank72": 12,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 79.4,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 85.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 86.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    12
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-node-2794622004",
+   "name": "Büyükkumla İskelesi",
+   "kind": "harbour",
+   "base": {
+    "depthM": 2.1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 78.2,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78.2,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 79.1,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 81.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 84.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 86.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.6,
+   "rank_range": [
+    1,
+    10
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-node-2590599404",
+   "name": "Armutlu İskelesi",
+   "kind": "harbour",
+   "base": {
+    "depthM": 2.1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 78.2,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78.2,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 79.4,
+     "rank72": 8,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 85.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    10
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-node-13872728204",
+   "name": "Karacaali İskelesi",
+   "kind": "harbour",
+   "base": {
+    "depthM": 2.1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 78.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 78.5,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 78.5,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 79.9,
+     "rank72": 4,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 82.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 85.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 86.8,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 87.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    9
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-252356832",
+   "name": "Güzelyalı Yat Limanı – doğu mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 3,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 80.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 79.6,
+     "rank72": 7,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2.1,
+     "b72": 79.6,
+     "rank72": 7,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 80.6,
+     "rank72": 2,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 4,
+     "b72": 83.1,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.9,
+     "b72": 86.5,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.8,
+     "b72": 87.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.7,
+     "b72": 88.3,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.7,
+   "rank_range": [
+    1,
+    7
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-252356833",
+   "name": "Güzelyalı Yat Limanı – batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2.3,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 79.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 79.6,
+     "rank72": 7,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 79.6,
+     "rank72": 7,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 81,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 83.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 88,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 88.4,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    7
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1422122108",
+   "name": "Armutlu Devlet Limanı – kısa batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 79.8,
+    "inTop3": true
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 79.8,
+     "rank72": 5,
+     "inTop3": true,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 79.8,
+     "rank72": 5,
+     "inTop3": true,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 80.7,
+     "rank72": 2,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 83.4,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86.6,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 88.2,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 88.6,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 4 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    5
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-1364814104",
+   "name": "Armutlu Devlet Limanı – doğu mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 1.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 79.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 79.8,
+     "rank72": 5,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 79.8,
+     "rank72": 5,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 81,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 83.7,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 86.9,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 88.2,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 88.6,
+     "rank72": 1,
+     "inTop3": false,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    5
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1394208144",
+   "name": "Armutlu Devlet Limanı – orta batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2.4,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 79.9,
+    "inTop3": true
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 79.9,
+     "rank72": 4,
+     "inTop3": true,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 79.9,
+     "rank72": 4,
+     "inTop3": true,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 81.2,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 83.8,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 87,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 88.3,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 88.7,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    4
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1413355181",
+   "name": "Armutlu Devlet Limanı – uzun batı mendireği",
+   "kind": "breakwater",
+   "base": {
+    "depthM": 2.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 81,
+    "inTop3": true
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1.1,
+     "b72": 79.9,
+     "rank72": 3,
+     "inTop3": true,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 79.9,
+     "rank72": 3,
+     "inTop3": true,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 3,
+     "b72": 81.3,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 83.9,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 87,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 88.3,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 88.7,
+     "rank72": 1,
+     "inTop3": true,
+     "inTop3_72": true,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 8.8,
+   "rank_range": [
+    1,
+    3
+   ],
+   "plan_flip": false,
+   "flip72": true,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-253083807",
+   "name": "Bülbül Deresi ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 65.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.1,
+     "rank72": 69,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 73.5,
+     "rank72": 57,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 76.8,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 78.5,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.9,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 4 g dibe yakın"
+    }
+   ],
+   "score_range": 12.8,
+   "rank_range": [
+    9,
+    69
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-way-85387365",
+   "name": "Simav Çayı ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.5,
+     "rank72": 65,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 73.5,
+     "rank72": 57,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 76.8,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 78.1,
+     "rank72": 12,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.5,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    9,
+    65
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-698849100",
+   "name": "Fıstıklı Deresi ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.6,
+     "rank72": 64,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 71.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 78.6,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.9,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.3,
+   "rank_range": [
+    9,
+    64
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-253063517",
+   "name": "Dere ağzı (Kumsaz)",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.3,
+     "rank72": 65,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 73.5,
+     "rank72": 57,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 76.8,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 77.9,
+     "rank72": 18,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.3,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    10,
+    65
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1218508014",
+   "name": "Kumla Deresi ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.7,
+     "rank72": 64,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 73.6,
+     "rank72": 57,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 76.8,
+     "rank72": 25,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 78.1,
+     "rank72": 12,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.5,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.8,
+   "rank_range": [
+    9,
+    64
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1430949806",
+   "name": "Dere ağzı (Güzelyalı Burgaz)",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.6,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.8,
+     "rank72": 63,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 71.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 73.9,
+     "rank72": 50,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 78.5,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.8,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    9,
+    63
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-681112515",
+   "name": "Büyükkumla Deresi ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 67,
+     "rank72": 63,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 71.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 74,
+     "rank72": 45,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 78.4,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.8,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.8,
+   "rank_range": [
+    9,
+    63
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-684554355",
+   "name": "Kapaklı Deresi ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 67.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 67.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 71.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 74.1,
+     "rank72": 43,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 77.4,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 78.4,
+     "rank72": 10,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78.9,
+     "rank72": 9,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.7,
+   "rank_range": [
+    9,
+    62
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1302854356",
+   "name": "Dere ağzı (Kurşunlu, Karacabey)",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 65.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 65.5,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 67.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 72.8,
+     "rank72": 59,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 76.2,
+     "rank72": 27,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 77.5,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 77.9,
+     "rank72": 18,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    18,
+    71
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-757735807-1",
+   "name": "Kumsal 4",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.5,
+     "rank72": 113,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65,
+     "rank72": 72,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    113
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458771-1",
+   "name": "Kumsal (Kurşunlu doğusu, Karacabey)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.5,
+     "rank72": 113,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65,
+     "rank72": 72,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.3,
+   "rank_range": [
+    62,
+    113
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458771-2",
+   "name": "Kumsal (Kurşunlu doğusu, Karacabey) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.5,
+     "rank72": 113,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65,
+     "rank72": 72,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.2,
+   "rank_range": [
+    62,
+    113
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-296678701-1",
+   "name": "Kumsal (Bayramdere kuzeybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.4,
+     "rank72": 113,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.8,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.2,
+   "rank_range": [
+    62,
+    113
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-296678701-2",
+   "name": "Kumsal",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.4,
+     "rank72": 113,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.8,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.2,
+   "rank_range": [
+    62,
+    113
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-700323582",
+   "name": "Karsak Çayı ağzı",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 66.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 66.6,
+     "rank72": 64,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 68.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 72.5,
+     "rank72": 60,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 75.8,
+     "rank72": 31,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 77.6,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 78,
+     "rank72": 14,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    }
+   ],
+   "score_range": 11.4,
+   "rank_range": [
+    14,
+    64
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-757735806-1",
+   "name": "Kumsal 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.6,
+     "rank72": 111,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.1,
+     "rank72": 72,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    111
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-727268657",
+   "name": "Dere ağzı (Bayramdere)",
+   "kind": "river_mouth",
+   "base": {
+    "depthM": 0.7,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 65,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 65.4,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 67.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 70,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 72.7,
+     "rank72": 59,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 76,
+     "rank72": 30,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 77.2,
+     "rank72": 23,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 77.5,
+     "rank72": 22,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.1,
+   "rank_range": [
+    22,
+    71
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-296678701-3",
+   "name": "Kumsal 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.4,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.6,
+     "rank72": 111,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    111
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-519553320-1",
+   "name": "Kumsal (Eşkel kuzeybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.6,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.8,
+     "rank72": 103,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 61.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.4,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 67.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.9,
+   "rank_range": [
+    62,
+    103
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-519553320-2",
+   "name": "Kumsal (Eşkel batısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.6,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.8,
+     "rank72": 103,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 61.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.4,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 67.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.9,
+   "rank_range": [
+    62,
+    103
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458772-1",
+   "name": "Kumsal (Sahil batısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.9,
+     "rank72": 101,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    101
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-18071615-1",
+   "name": "Kumsal (Eğerce doğusu)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.9,
+     "rank72": 101,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.7,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 67.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    101
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-18071615-2",
+   "name": "Kumsal (Eğerce doğusu) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.9,
+     "rank72": 101,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.7,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 67.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    101
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458773-1",
+   "name": "Kumsal (Sahil doğusu)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 57.9,
+     "rank72": 101,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.8,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.9,
+   "rank_range": [
+    62,
+    101
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1305691023-1",
+   "name": "Kumsal (Güzelyalı Yalı kuzeydoğusu)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58,
+     "rank72": 98,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.1,
+   "rank_range": [
+    62,
+    98
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1305691027-1",
+   "name": "Kumsal (Güzelyalı Yalı kuzeybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58,
+     "rank72": 98,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.1,
+   "rank_range": [
+    62,
+    98
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-519553320-3",
+   "name": "Kumsal (Eşkel batısı) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58,
+     "rank72": 98,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.7,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 67.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    98
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1305691028-1",
+   "name": "Kumsal (Güzelyalı Siteler kuzeyi)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.1,
+     "rank72": 95,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    95
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1305691029-1",
+   "name": "Kumsal (Güzelyalı Siteler kuzeyi) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.1,
+     "rank72": 95,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 59.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    95
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1394523720-4",
+   "name": "Kumsal (Armutlu güneyi) 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 57.9,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.2,
+     "rank72": 89,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.8,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.5,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 4 g dibe yakın"
+    }
+   ],
+   "score_range": 12.7,
+   "rank_range": [
+    62,
+    89
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 6
+  },
+  {
+   "id": "osm-relation-10458772-2",
+   "name": "Kumsal (Mesudiye kuzeyi)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.2,
+     "rank72": 89,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.1,
+     "rank72": 72,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    89
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1414985743-1",
+   "name": "Kumsal (Fıstıklı batısı) 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.3,
+     "rank72": 86,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.8,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.5,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    86
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458772-5",
+   "name": "Kumsal (Mesudiye kuzeyi) 4",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.3,
+     "rank72": 86,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.2,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12,
+   "rank_range": [
+    62,
+    86
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458772-3",
+   "name": "Kumsal (Mesudiye kuzeyi) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.3,
+     "rank72": 86,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.3,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.9,
+   "rank_range": [
+    62,
+    86
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458772-4",
+   "name": "Kumsal (Mesudiye kuzeyi) 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.3,
+     "rank72": 86,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.3,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.9,
+   "rank_range": [
+    62,
+    86
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-relation-10458773-2",
+   "name": "Kumsal (Sahil kuzeybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.3,
+     "rank72": 86,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.2,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 69.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    }
+   ],
+   "score_range": 11.9,
+   "rank_range": [
+    62,
+    86
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1392831837-1",
+   "name": "Kumsal (Armutlu güneydoğusu)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.4,
+     "rank72": 85,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.8,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.5,
+   "rank_range": [
+    62,
+    85
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1393123413-1",
+   "name": "Kumsal (Armutlu güneydoğusu) 6",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.4,
+     "rank72": 85,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.8,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.5,
+   "rank_range": [
+    62,
+    85
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1393123413-2",
+   "name": "Kumsal (Armutlu güneydoğusu) 7",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.4,
+     "rank72": 85,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.8,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.5,
+   "rank_range": [
+    62,
+    85
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1391521782-1",
+   "name": "Kumsal (Fıstıklı batısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.5,
+     "rank72": 84,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.9,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.6,
+   "rank_range": [
+    62,
+    84
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1392831837-2",
+   "name": "Kumsal (Armutlu güneydoğusu) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.5,
+     "rank72": 84,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.9,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    84
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1414985743-2",
+   "name": "Kumsal (Fıstıklı güneybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 1.5,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 59.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.4,
+     "rank72": 84,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 60.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 65.6,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 68.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.3,
+   "rank_range": [
+    62,
+    84
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1394523720-1",
+   "name": "Kumsal (Armutlu güneybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.5,
+     "rank72": 84,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.9,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.6,
+   "rank_range": [
+    62,
+    84
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1394523720-2",
+   "name": "Kumsal (Armutlu güneybatısı) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.2,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.5,
+     "rank72": 84,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.9,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.6,
+   "rank_range": [
+    62,
+    84
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1394523720-3",
+   "name": "Kumsal (Armutlu güneybatısı) 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.5,
+     "rank72": 84,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.9,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.6,
+   "rank_range": [
+    62,
+    84
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1414985744-1",
+   "name": "Kumsal (Fıstıklı güneybatısı) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.4,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.6,
+     "rank72": 82,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 66,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.3,
+   "rank_range": [
+    62,
+    82
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-519554786-1",
+   "name": "Kumsal (Tirilye kuzeybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.5,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.6,
+     "rank72": 82,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 64.9,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2 g dibe yakın"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.7,
+   "rank_range": [
+    62,
+    82
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1394208138-2",
+   "name": "Kumsal (Armutlu güneyi) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.3,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.6,
+     "rank72": 82,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 66,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    82
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1394208138-1",
+   "name": "Kumsal (Armutlu güneyi)",
+   "kind": "beach",
+   "base": {
+    "depthM": 1.2,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 59,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.6,
+     "rank72": 81,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 60.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 66,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 69.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 71,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    81
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1392831837-3",
+   "name": "Kumsal (Armutlu güneydoğusu) 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.6,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.9,
+     "rank72": 78,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 66.2,
+     "rank72": 67,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    78
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1392831837-4",
+   "name": "Kumsal (Armutlu güneydoğusu) 4",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.6,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.9,
+     "rank72": 78,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.6,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 66.2,
+     "rank72": 67,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    78
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-665674892-1",
+   "name": "Kumsal (Güzelyalı Eğitim kuzeyi)",
+   "kind": "beach",
+   "base": {
+    "depthM": 1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.8,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.8,
+     "rank72": 78,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.5,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.8,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.1,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.2,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.8,
+   "rank_range": [
+    62,
+    78
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-757494038-1",
+   "name": "Kumsal (Kapaklı güneydoğusu)",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 58.8,
+     "rank72": 78,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.4,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 62.9,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.6,
+     "rank72": 71,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.8,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.5,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.7,
+   "rank_range": [
+    62,
+    78
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  },
+  {
+   "id": "osm-way-1392831837-5",
+   "name": "Kumsal (Armutlu güneydoğusu) 5",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 59,
+     "rank72": 77,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 61,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 66.3,
+     "rank72": 65,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 71,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    77
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-1392831837-6",
+   "name": "Kumsal (Fıstıklı batısı) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 58.7,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 59,
+     "rank72": 77,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 61,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.7,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 66.3,
+     "rank72": 65,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69.6,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 71,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 71.4,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 12.4,
+   "rank_range": [
+    62,
+    77
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-479047534-2",
+   "name": "Kumsal (İslamköy kuzeybatısı) 2",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.9,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 59.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 59.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.8,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.1,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.7,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 68.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.4,
+   "rank_range": [
+    62,
+    74
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-479047535-1",
+   "name": "Kumsal (İslamköy kuzeybatısı) 3",
+   "kind": "beach",
+   "base": {
+    "depthM": 0.8,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 59.1,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 59.3,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 2,
+     "depthM": 1.9,
+     "b72": 60.8,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g orta su"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 63.2,
+     "rank72": 74,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.2 g orta su"
+    },
+    {
+     "d": 4,
+     "depthM": 3.8,
+     "b72": 65.8,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.7,
+     "b72": 69,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.6,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.5,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 11.4,
+   "rank_range": [
+    62,
+    74
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 5
+  },
+  {
+   "id": "osm-way-479047534-1",
+   "name": "Kumsal (İslamköy kuzeybatısı)",
+   "kind": "beach",
+   "base": {
+    "depthM": 1,
+    "src": "yapı-uzunluğu-tahmini",
+    "b72": 64,
+    "inTop3": false
+   },
+   "per": [
+    {
+     "d": 1,
+     "depthM": 1,
+     "b72": 64,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 2,
+     "depthM": 2,
+     "b72": 64,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 3,
+     "depthM": 2.9,
+     "b72": 64,
+     "rank72": 73,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1 g yüzeye yakın"
+    },
+    {
+     "d": 4,
+     "depthM": 3.9,
+     "b72": 65.7,
+     "rank72": 70,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 6,
+     "depthM": 5.8,
+     "b72": 68.9,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 1.5 g orta su"
+    },
+    {
+     "d": 8,
+     "depthM": 7.7,
+     "b72": 70.3,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 2.5 g dibe yakın"
+    },
+    {
+     "d": 10,
+     "depthM": 9.6,
+     "b72": 70.7,
+     "rank72": 62,
+     "inTop3": false,
+     "inTop3_72": false,
+     "tackle": "lrf 3 g dibe yakın"
+    }
+   ],
+   "score_range": 6.7,
+   "rank_range": [
+    62,
+    73
+   ],
+   "plan_flip": false,
+   "flip72": false,
+   "tackle_variants": 4
+  }
+ ]
+}
