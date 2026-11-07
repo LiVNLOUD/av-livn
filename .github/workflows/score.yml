@@ -7,6 +7,11 @@ on:
     - cron: '23 * * * *'          # full hourly run (v1 + v2)
     - cron: '8,38,53 * * * *'     # field edits: v2 with Monte Carlo only when pending_rescore has rows
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Kuru çalıştırma: puan hesaplanır, D1''e yazılmaz (yedek tetik testi)'
+        type: boolean
+        default: false
 concurrency:
   group: score
   cancel-in-progress: false
@@ -30,7 +35,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: node .score/job.mjs ${{ github.event.schedule == '8,38,53 * * * *' && '--pending' || '' }}
+        run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || (github.event.schedule == '8,38,53 * * * *' && '--pending' || '') }}
       - name: Alert the owner on failure (E8)
         if: failure()
         env:

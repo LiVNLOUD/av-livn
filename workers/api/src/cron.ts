@@ -1,7 +1,7 @@
 import { fetchSnapshots, type CellCoord, type FetchStats } from './lib/openmeteo';
 import { valuesAt } from './lib/series';
 import type { Env } from './env';
-import { guardScoring } from './lib/staleness';
+import { dispatchTest, guardScoring } from './lib/staleness';
 
 const OBS_COLS: Record<string, string> = {
   pressure_msl: 'pressure', wind_speed_10m: 'wind_speed', wind_direction_10m: 'wind_dir', wind_gusts_10m: 'wind_gust',
@@ -79,7 +79,9 @@ export async function runCron(cron: string, env: Env, now = new Date()): Promise
     const weather = await refreshWeather(env, now);
     // K0: the same (only) cron guards scoring freshness — GitHub's scheduler alone is not reliable
     const scoring = await guardScoring(env, now).catch((e) => ({ error: String(e) }));
-    return { ...weather, scoring };
+    // dry end-to-end test of the backup trigger, only when requested in meta (never ages scores)
+    const dispatchTestResult = await dispatchTest(env, now).catch((e) => `error ${String(e)}`);
+    return { ...weather, scoring, dispatchTest: dispatchTestResult };
   }
   throw new Error(`unknown cron ${cron}`);
 }

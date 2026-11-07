@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { guardScoring, needsFullRun, shouldAlert, shouldDispatch } from '../src/lib/staleness';
+import { dispatchTest, guardScoring, needsFullRun, shouldAlert, shouldDispatch } from '../src/lib/staleness';
 import { resetAndSeed } from './helpers';
 
 const NOW = new Date('2026-11-06T22:07:00Z');
@@ -41,5 +41,46 @@ describe('K0: guardScoring (Worker cron)', () => {
     expect(r2).toMatchObject({ dispatched: 'fresh', alert: 'ok' });
     const bad = await guardScoring(e, new Date(NOW.getTime() + 60 * 60_000), fake(403));
     expect(bad.dispatched).toBe('dispatch failed 403');
+  });
+});
+
+describe('backup trigger: dry end-to-end test on request', () => {
+  beforeAll(async () => { await resetAndSeed(); });
+  const calls: { url: string; init: RequestInit }[] = [];
+  const fake = (status: number) => (async (url: string, init: RequestInit) => { calls.push({ url, init }); return new Response(null, { status }); }) as unknown as typeof fetch;
+  const read = async (k: string) => (await env.DB.prepare('SELECT value FROM meta WHERE key = ?1').bind(k).first<{ value: string }>())?.value ?? null;
+  const request = () => env.DB.prepare("INSERT INTO meta (key, value) VALUES ('score_dispatch_test', '{\"status\":\"requested\"}') ON CONFLICT(key) DO UPDATE SET value = excluded.value").run();
+  const e = { ...env, GH_DISPATCH_TOKEN: 'secret-value', NTFY_TOPIC: 't' };
+
+  it('does nothing without a request', async () => {
+    await env.DB.prepare("DELETE FROM meta WHERE key = 'score_dispatch_test'").run();
+    expect(await dispatchTest(e, NOW, fake(204))).toBeNull();
+    await env.DB.prepare("INSERT INTO meta (key, value) VALUES ('score_dispatch_test', '{bad')").run();
+    expect(await dispatchTest(e, NOW, fake(204))).toBeNull();
+    expect(calls).toHaveLength(0);
+  });
+  it('requested: dispatches score.yml with dry_run through the real path, records the result once, leaves score_dispatch_at alone', async () => {
+    await env.DB.prepare("DELETE FROM meta WHERE key = 'score_dispatch_at'").run();
+    await request();
+    expect(await dispatchTest(e, NOW, fake(204))).toBe('dispatched');
+    expect(calls[0]!.url).toBe('https://api.github.com/repos/LiVNLOUD/av-livn/actions/workflows/score.yml/dispatches');
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ ref: 'main', inputs: { dry_run: 'true' } });
+    expect(JSON.parse((await read('score_dispatch_test'))!)).toEqual({ at: NOW.toISOString(), status: 'dispatched', token: true });
+    expect(await read('score_dispatch_at')).toBeNull();
+    expect(await dispatchTest(e, NOW, fake(204))).toBeNull(); // one shot
+    expect(calls).toHaveLength(1);
+  });
+  it('failure and missing token are recorded', async () => {
+    await request();
+    expect(await dispatchTest(e, NOW, fake(403))).toBe('dispatch failed 403');
+    await request();
+    expect(await dispatchTest({ ...e, GH_DISPATCH_TOKEN: undefined }, NOW, fake(204))).toBe('no token');
+    expect(JSON.parse((await read('score_dispatch_test'))!)).toMatchObject({ status: 'no token', token: false });
+  });
+  it('guardScoring leaves an hourly summary with token presence only', async () => {
+    await guardScoring(e, NOW, fake(204));
+    const g = (await read('score_guard_last'))!;
+    expect(JSON.parse(g)).toMatchObject({ at: NOW.toISOString(), token: true });
+    expect(g).not.toContain('secret-value');
   });
 });
