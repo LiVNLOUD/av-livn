@@ -280,3 +280,25 @@ Model ve veri hattına dokunulmadı.
   - Uzak zoom'da yalnız yerleşim rozetleri; mera adları zoom ≥ 12'de.
   - Önerilen mera turuncu halka ve adıyla gösterilir; harita ona ortalanır.
 - [x] M4 Doğrulama (canlı, `scripts/e2e.mjs`): 5 saniye testi 3440/1920/1440/768/390 px'te geçti; 280 px kuralı ana ekran ve kartta; konsol hatası 0; `/api/tackle` markasız; smoke 5/5. Ekran görüntüleri `docs/screenshots/m/`.
+
+## Faz N — küçük düzeltmeler (2026-11-07) ✅ DUR
+- [x] N1 İki seçenekli takım satırı koşulu yazar: "ışık suya düşüyorsa: şeffaf-simli · karanlıksa: koyu siluet".
+  - Plan satırı da öyle: "5 cm silikon (ışık suya düşüyorsa …, karanlıksa …)".
+  - Levrek rengi "chartreuse ya da beyaz".
+  - Test: tüm senaryolarda ve iki türde açıklamasız " / " yok (scoring); e2e plan ve kartı denetler.
+- [x] N2 "Neden?" maddeleri kanıt türünü günlük dille taşır.
+  - Lamba önseli: "iskelede ışık olması muhtemel (doğrulanmadı)".
+  - Masa başı: "(harita/fotoğraf verisi, sahada doğrulanmadı)".
+  - Diğerleri: uzaktan gözlem, saha, deniz haritası ölçümü, harita tahmini, yapı boyundan tahmin, bölgesel harita, kıyı şekli hesabı, "(hava tahmini)".
+  - Testler gerçek gerekçe metinleriyle.
+- [x] N3 Güven tavanı: ileriye dönük kalibrasyon ilk doğrulamayı geçene kadar (≥ 30 seans + zaman bölmeli testte üç basit tabanı geçme) en fazla "Orta".
+  - `GET /api/trust-gate` (yalnız karar ve seans sayısı); canlıda `passed: false, n: 0`.
+  - MODEL.md §17 ve /model/ "Ne kadar güvenilir?".
+- [x] N4 Uzak zoom'da ekranda çakışan yerleşim rozetleri "… çevresi · N mera" olarak birleşir (`mergeBadges`, test).
+  - Rozetler tek satır.
+  - Önerinin rozeti turuncu kenarlı; ayrı ad etiketi yalnız rozet dışındayken.
+- [x] N5 Plan kartında "Hava verisi: X dk önce".
+  - Puanlama ya da hava 2 saati aşınca kartın üstünde uyarı (mobilde kısa metin).
+  - Site bandıyla aynı kaynak: `freshness()`; ana sayfada bant kart uyarısıyla tekrarlanmaz.
+- Canlı: e2e tamamı geçti (5 sn testi 5 genişlikte), smoke 5/5. Ekran görüntüleri `docs/screenshots/n/`.
+- Not: doğrulama sırasında puanlar 2 saati aşmıştı. GitHub zamanlayıcısı yine tetikleri atladı; GH_DISPATCH_TOKEN hâlâ yok, Worker yedek tetiği devrede değil. Puanlama elle tetiklendi.
