@@ -30,7 +30,7 @@ import Base from '../layouts/Base.astro';
         <p class="stale-card" id="stale-card" role="alert" hidden></p>
         <article class="card main-pick" id="pick">
           <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub"><span id="verdict-sub"></span> <span class="fresh" id="fresh"></span></p></div>
-          <div class="qa q2" hidden><h2 class="q">Nereye, ne zaman?</h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="a-sub now-line" id="a-now" hidden></p></div>
+          <div class="qa q2" hidden><h2 class="q q-row">Nereye, ne zaman? <a id="a-maplink" class="q-link" href="/harita/" title="Bu saatte rüzgar, dalga, akıntı ve yağış haritası">haritada aç</a></h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="a-sub now-line" id="a-now" hidden></p></div>
           <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
           <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p><p class="a-sub models-line" id="a-models" hidden></p></div>
@@ -831,6 +831,8 @@ import Base from '../layouts/Base.astro';
     const prov = s?.province && s.province !== 'bursa' ? PROV_TR[s.province] ?? s.province : null;
     // 2) where, when
     $('a-where').textContent = w.name;
+    // P3: the map page opens its 72 h slider at the plan's suggested hour, centred on the spot
+    $<HTMLAnchorElement>('a-maplink').href = `/harita/?id=${encodeURIComponent(w.spot_id)}&t=${encodeURIComponent(new Date(w.peak).toISOString())}`;
     $('a-when').textContent = [span(w), `en iyi saat ${fmtTime(w.peak)}`, prov, w.access && w.access !== 'acik' ? ACCESS_TR[w.access] ?? 'erişim belirsiz' : null].filter(Boolean).join(' · ');
     // 4) why (plain); 5) trust (L1 rule)
     const why = $('a-why');

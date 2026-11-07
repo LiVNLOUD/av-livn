@@ -62,10 +62,19 @@ Teknik ayrıntılar yalnız "Neden? Ayrıntılar" çekmecesindedir: puan, bant, 
 - **"Şimdi" satırı:** önerilen saat şimdi değilse kart şimdinin neden farklı olduğunu tek satırda söyler, örneğin güvenlik tavanı ve ne zaman yatışacağı.
 - **Güvenlik rozeti:** tavan yüzünden düşük kalan puan her yerde "güvenlik" rozeti ya da koyu kırmızı işaretle gösterilir.
 - **Meraya git (tek yol):** plan seçeneği, harita, liste ve ısı haritası hep aynı davranır: harita zoom 15,5'e yumuşak geçer ve merayı halkayla gösterir. Her mera tek etiket alır; seçili olanın etiketi turuncudur.
-- **Tüm meralar:** ≥ 1200 px'te tablo (Mera, Tip, Puan, En iyi saat, Erişim, Güven).
+- **Tüm meralar:** ≥ 1200 px'te tablo, liste bölgesinin tamamını kullanır. Sütunlar: Mera (en geniş, tek satır, taşarsa … ve ipucu), Tip, "Puan (bugün 18:00)", En iyi saat, Erişim (kısa rozet: Marina/Feribot/Belirsiz/Açık, ipucunda açıklama), Güven. Güven sütunu yalnız satırlar arasında fark varsa görünür, yoksa tablonun üstünde tek not satırı. Puan, en iyi saat ve ad başlıkları sıralar. Hiçbir hücre 2 satırı geçmez (e2e).
 - **Isı haritası:** "şimdi" etiketi saat satırındadır; çakışan saat etiketi gösterilmez.
 
 **Harita (M3):** liman, sanayi ve askeri alanlar kırmızı taralı alan ve lejantla gösterilir, metin etiketi yoktur. Uzak zoom'da (< 12) yalnız yerleşim rozetleri görünür. Önerilen mera her zoomda turuncu halka ve adıyla işaretlidir; harita ona ortalanır.
+
+**Harita sekmesi (Faz P, Windy.com'dan esinlenen kalıplar, kendi açık verimizle; Windy embed/API kullanılmaz):**
+- **Saat kaydırıcısı:** haritanın altında 72 saat. Gün ayraçları ve adları, koyu gece bandı (güneş −6°'nin altında), turuncu "şimdi" çizgisi. Kaydırınca mera işaretleri, hava katmanları ve mera glifleri o saate geçer; adres çubuğundaki `?t=` güncellenir. Plan kartındaki "haritada aç" bağlantısı kaydırıcıyı önerilen saatte ve merada açar.
+- **Katman seçici:** Puan (varsayılan), Rüzgar, Dalga, Akıntı, Su sıcaklığı, Yağış, Bulut; haritanın üstünde tek satır hap düğmeler (telefonda yana kayar). Seçili katmanın lejantı sağ altta: renk çubuğu, uç değerler, ne olduğu, kaynak.
+- **Renk alanları:** kaba model ızgarası (0,1°; akıntı 500 m) tek piksel = tek nokta, doğrusal yeniden örneklemeyle yumuşak; uydurma ayrıntı yok. Deniz alanları kara maskesinin altında. Yağış ve bulut sıfırda saydam; yağış lejantı "tahmin, radar değil", bulut lejantı gece ay ışığı ve ortam karanlığı notunu taşır.
+- **Parçacıklar:** rüzgar ve akıntıda 2D canvas üzerinde akış çizgileri (kütüphanesiz). Telefonda ~300, geniş ekranda en çok 1400. WebGL yoksa harita zaten kapalı, katmanlar sessizce kapanır. `prefers-reduced-motion` açıkken yalnız renk alanı.
+- **Mera glifleri (zoom ≥ 14):** diskin altında tek küçük etiket. İçinde (gerekirse) güvenlik üçgeni, yağış damlası (≥ 0,1 mm/sa), rüzgarın gittiği yöne ok ve hız. Etiketler glifin yolundan çekilir; glifler üst üste binmez.
+
+**Mera kartı — saatlik tahmin tablosu (P4):** 3 saatte bir sütun, gün başlıkları. Satırlar: Puan, Güvenlik, Rüzgar (hücre altında modellerin aralık çubuğu), Hamle, Yön, Dalga, Yağış, Bulut, Su, Akıntı, Ay. Rüzgar/hamle hücreleri 5 basamaklı renkte (<12, <20, <30, <40, ≥40 km/sa). Gece sütunları koyu. İlk sütun sabit, tablo yana kayar.
 
 ## Bileşenler (her biri tek tanım, `global.css`)
 - `.btn` birincil (sodyum dolgu, koyu metin), `.btn.secondary` (şeffaf, `--swell` kenar, `--foam` metin), `.btn.small` (32 px). Yükseklik 40 px (dokunmatik 44 px'e `.btn.touch`). Hepsi `inline-flex; align-items: center`.
@@ -77,4 +86,4 @@ Teknik ayrıntılar yalnız "Neden? Ayrıntılar" çekmecesindedir: puan, bant, 
 ## İlkeler
 1. Ana görsel av planıdır (M1); ısı haritası ikincil sekmededir. Renk yalnız puan anlamına gelir, süs yok.
 2. Belirsizlik görünür: bant genişse hücre taralı/soluk; "varsayıma dayanıyor" rozeti.
-3. Karanlıkta okunur: ≥ 4.5:1 kontrast, 44 px dokunma hedefi, hareket yalnız kullanıcı eylemine yanıt.
+3. Karanlıkta okunur: ≥ 4.5:1 kontrast, 44 px dokunma hedefi, hareket yalnız kullanıcı eylemine yanıt (parçacıklar yalnız Rüzgar/Akıntı katmanı seçilince; azaltılmış hareket tercihinde kapalı).

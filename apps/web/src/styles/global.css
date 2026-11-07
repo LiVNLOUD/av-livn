@@ -230,6 +230,9 @@ html.embed body { padding-bottom: 0; }
 .qa { min-width: 0; display: grid; gap: 2px; align-content: start; }
 .qa[hidden] { display: none; }
 .qa .q { margin: 0; font-size: var(--fs-2); line-height: var(--lh-2, 1.45); font-weight: 600; color: var(--mist); }
+/* P3: small map link on the question line (no extra line on the plan's first screen) */
+.qa .q-row { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: var(--s3); }
+.qa .q-link { font-weight: 450; font-size: var(--fs-1); color: var(--foam); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .qa .a { margin: 0; font-size: var(--fs-3); line-height: 1.4; font-weight: 650; color: var(--foam); overflow-wrap: anywhere; }
 .qa .a.big { font-size: var(--fs-5); line-height: 1.15; font-weight: 760; font-stretch: 85%; }
 .qa .a.nm { font-size: var(--fs-4); line-height: 1.25; }

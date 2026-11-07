@@ -9,6 +9,8 @@
 //   5. M4 "5 saniye testi": at 3440/1920/1440/768/390 px the five answers of the plan card are on the first screen
 //      without scrolling; no label/value column under 280 px; no jargon on the first screen; visitor menu; the
 //      public tackle endpoint carries no brand (M2)
+//   6. Faz O/P0: go-to-spot, labels, time bar, spots table (≤ 2 lines per cell), "now" label
+//   7. Faz P: plan model line, 72 h map slider at the plan's hour, weather layers + glyphs, spot forecast table, timings
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 
@@ -257,7 +259,19 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1920, 1080], [1440, 900], [39
     // P0: no cell wraps to more than 2 lines; the table uses the list region (≥ 1100 px from 1920 px)
     const t = await p.evaluate(() => {
       const cells = [...document.querySelectorAll('.spot-table td, .spot-table th')];
-      const tall = cells.filter((c) => { const cs = getComputedStyle(c); const lh = parseFloat(cs.lineHeight) || 20; return c.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) > 2 * lh + 2; }).map((c) => c.textContent.trim().slice(0, 30));
+      // text lines = distinct line boxes of the cell's text (a 44 px tap target is one line, not two)
+      const lines = (c) => {
+        const mids = [];
+        const tw = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
+        for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+          if (!n.textContent.trim()) continue;
+          const r = document.createRange(); r.selectNodeContents(n);
+          for (const x of r.getClientRects()) if (x.width > 0) mids.push(x.top + x.height / 2);
+        }
+        mids.sort((a, b) => a - b);
+        return mids.reduce((k, m, i) => (i === 0 || m - mids[i - 1] > 8 ? k + 1 : k), 0);
+      };
+      const tall = cells.filter((c) => lines(c) > 2).map((c) => c.textContent.trim().slice(0, 30));
       return { tall, width: Math.round(document.querySelector('.spot-table').getBoundingClientRect().width), head: [...document.querySelectorAll('.spot-table thead th')].map((h) => h.textContent.trim()) };
     });
     t.tall.length ? fail(`${w}: table cells over 2 lines: ${t.tall.slice(0, 4).join(' | ')}`) : ok(`${w}: no table cell over 2 lines`);
@@ -278,6 +292,76 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1920, 1080], [1440, 900], [39
   clash === 0 ? ok(`${w}: "şimdi" clear of the hour labels`) : fail(`${w}: "şimdi" label clash (${clash})`);
   if (shots) await p.screenshot({ path: `${shots}/heat-${w}.png` });
   errors.length ? fail(`${w} (O): console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w} (O): no console errors`);
+}
+
+// 7. Faz P: plan-card model line (P2), map slider opened at the plan's hour (P3), weather layers + spot glyphs (P5),
+//    point forecast table on the spot card (P4); page-load times
+const LAYERS = ['puan', 'ruzgar', 'dalga', 'akinti', 'sst', 'yagis', 'bulut'];
+const timing = (p) => p.evaluate(() => { const n = performance.getEntriesByType('navigation')[0]; return n ? Math.round(n.loadEventEnd) : null; });
+for (const [w, h] of [[3440, 1440], [2576, 1440], [1440, 900], [390, 844]]) {
+  const { p, errors } = await page(w, h);
+  const t0 = Date.now();
+  await p.goto(base + '/', { waitUntil: 'networkidle' });
+  await waitPlan(p);
+  const homeMs = Date.now() - t0;
+  const models = await p.evaluate(() => { const e = document.getElementById('a-models'); return e && !e.hidden ? e.textContent : null; });
+  models && /^Hava modelleri (uyuşuyor|farklı şeyler söylüyor|güvenlik konusunda ayrışıyor) \(/.test(models) ? ok(`${w}: plan model line "${models}"`) : fail(`${w}: plan model line missing (${models})`);
+  if (shots) await p.screenshot({ path: `${shots}/plan-${w}.png` });
+  // P3: "Haritada aç" carries the spot and the plan's hour; the slider opens there
+  const href = await p.getAttribute('#a-maplink', 'href');
+  const t = new URL(href, base).searchParams.get('t');
+  const t1 = Date.now();
+  await p.goto(new URL(href, base).href);
+  await p.waitForFunction(() => document.documentElement.dataset.layersReady === '1', null, { timeout: 30000 }).catch(() => {});
+  const mapMs = Date.now() - t1;
+  const sl = await p.evaluate(() => ({ max: document.querySelector('.ts-range')?.max, v: Number(document.querySelector('.ts-range')?.value), out: document.querySelector('.ts-out')?.textContent, nights: document.querySelectorAll('.ts-night').length, days: document.querySelectorAll('.ts-day').length, now: !!document.querySelector('.ts-now') }));
+  const want = Math.floor(Date.parse(t) / 3_600_000) - Math.floor(Date.now() / 3_600_000);
+  sl.max === '71' && sl.nights >= 2 && sl.days >= 3 && sl.now ? ok(`${w}: 72 h slider (days ${sl.days}, nights ${sl.nights}, now mark)`) : fail(`${w}: slider ${JSON.stringify(sl)}`);
+  want < 0 || want > 71 || sl.v === want ? ok(`${w}: slider opened at the plan's hour (${sl.out})`) : fail(`${w}: slider at ${sl.v}, plan hour ${want}`);
+  await p.waitForTimeout(1200);
+  for (const l of LAYERS) {
+    await p.locator(`.layers input[value=${l}] + span`).click();
+    await p.waitForTimeout(l === 'ruzgar' || l === 'akinti' ? 1600 : 800);
+    const info = await p.evaluate(() => { const e = document.getElementById('layer-info'); return e.hidden ? '' : e.textContent; });
+    if (l === 'puan') info === '' ? ok(`${w}: Puan layer has no weather legend`) : fail(`${w}: Puan shows a legend`);
+    else /veri yok/.test(info) || !/Kaynak:/.test(info) ? fail(`${w}: layer ${l}: ${info.slice(0, 80)}`) : ok(`${w}: layer ${l} drawn with legend and source`);
+    if (l === 'yagis' && !/tahmin, radar değil/.test(info)) fail(`${w}: rain legend must say "tahmin, radar değil"`);
+    if (l === 'bulut' && !/ay ışığını/.test(info)) fail(`${w}: cloud legend must mention moonlight`);
+    if (shots) await p.screenshot({ path: `${shots}/harita-${l}-${w}.png` });
+  }
+  // slider drives the map: six hours on, the URL and the markers follow
+  await p.locator(`.layers input[value=ruzgar] + span`).click();
+  await p.locator('.ts-range').focus();
+  for (let i = 0; i < 6; i++) await p.keyboard.press('ArrowRight');
+  await p.waitForTimeout(1500);
+  const moved = await p.evaluate(() => [Number(document.querySelector('.ts-range').value), new URL(location.href).searchParams.get('t')]);
+  moved[1] ? ok(`${w}: slider moved the map hour (${moved[1]})`) : fail(`${w}: slider did not set the hour`);
+  if (shots) await p.screenshot({ path: `${shots}/harita-slider-${w}.png` });
+  // zoom ≥ 14: per-spot glyphs (wind arrow + speed, rain, safety)
+  await p.locator(`.layers input[value=puan] + span`).click();
+  const id = new URL(href, base).searchParams.get('id');
+  await p.evaluate(async (sid) => { const s = (await (await fetch('/api/spots')).json()).spots.find((x) => x.id === sid); document.getElementById('map').__avMap.jumpTo({ center: [s.lon, s.lat], zoom: 14.6 }); }, id);
+  await p.waitForTimeout(2000);
+  const gl = await p.evaluate(() => document.getElementById('map').__avMap.queryRenderedFeatures({ layers: ['glyphs'] }).map((f) => f.properties.img));
+  gl.length && gl.every((x) => /^gl:/.test(x)) ? ok(`${w}: ${gl.length} spot glyph(s) at zoom 14.6 (${gl[0]})`) : fail(`${w}: no spot glyphs at close zoom`);
+  if (shots) await p.screenshot({ path: `${shots}/harita-glyph-${w}.png` });
+  const far = await p.evaluate(() => { const m = document.getElementById('map').__avMap; m.jumpTo({ zoom: 11 }); return new Promise((r) => m.once('idle', () => r(m.queryRenderedFeatures({ layers: ['glyphs'] }).length))); });
+  far === 0 ? ok(`${w}: glyphs hidden at far zoom`) : fail(`${w}: ${far} glyphs at zoom 11`);
+  // P4: forecast table on the spot card
+  const t2 = Date.now();
+  await p.goto(`${base}/mera/?id=${encodeURIComponent(id)}`);
+  await p.waitForSelector('#fc-block:not([hidden])', { timeout: 20000 }).catch(() => {});
+  const meraMs = Date.now() - t2;
+  const fc = await p.evaluate(() => {
+    const sc = document.getElementById('fc'), th = document.querySelector('.fc tbody th');
+    return { cols: document.querySelectorAll('.fc thead tr:nth-child(2) th').length, rows: [...document.querySelectorAll('.fc tbody th')].map((e) => e.textContent.split(' ')[0]), sticky: th ? getComputedStyle(th).position : null, scrolls: sc.scrollWidth > sc.clientWidth, ranges: document.querySelectorAll('.fc-rng').length };
+  });
+  fc.cols >= 20 && ['Puan', 'Güvenlik', 'Rüzgar', 'Hamle', 'Yön', 'Dalga', 'Yağış', 'Bulut', 'Su', 'Akıntı', 'Ay'].every((r) => fc.rows.includes(r)) && fc.sticky === 'sticky' ? ok(`${w}: forecast table ${fc.cols} columns, ${fc.rows.length} rows, first column fixed, model ranges ${fc.ranges}`) : fail(`${w}: forecast table ${JSON.stringify(fc)}`);
+  if (w < 500) fc.scrolls ? ok(`${w}: forecast table scrolls sideways`) : fail(`${w}: forecast table does not scroll`);
+  (await overflow(p)) <= 0 ? ok(`${w}: spot card without page overflow`) : fail(`${w}: spot card page overflow`);
+  if (shots) { await p.locator('#fc-block').scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await p.screenshot({ path: `${shots}/mera-fc-${w}.png` }); }
+  console.log(`time ${w}: plan ${homeMs} ms, map+layers ready ${mapMs} ms, spot card+table ${meraMs} ms; load event ${await timing(p)} ms (spot card)`);
+  errors.length ? fail(`${w} (P): console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w} (P): no console errors`);
 }
 
 await browser.close();

@@ -76,6 +76,10 @@ export interface MapApi {
   highlight(id: string | null): void;
   /** O1: fly to a spot (zoom ~15.5) and ring it. */
   focus(id: string): void;
+  /** P5: the MapLibre map once its layers are in place (null when the map could not start). */
+  ready: Promise<maplibregl.Map | null>;
+  /** P5: spots as currently shown (position, safety cap at the selected hour). */
+  spotsNow(): { id: string; lat: number; lon: number; gated: boolean }[];
 }
 
 /** I2: MapLibre 6 needs WebGL2. Without it the map is replaced by a note; list, plan and heat map keep working. */
@@ -86,7 +90,7 @@ export function webgl2Ok(): boolean {
     return false;
   }
 }
-const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {}, focus: () => {} };
+const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {}, focus: () => {}, ready: Promise.resolve(null), spotsNow: () => [] };
 function noMap(container: HTMLElement, why: string): MapApi {
   const note = document.createElement('div');
   note.className = 'map-loading map-off-note';
@@ -304,6 +308,8 @@ const fetchSpots = async () => {
 };
 const spotsReady = fetchSpots();
 let layout: () => void = () => {};
+let markReady: (m: maplibregl.Map) => void = () => {};
+const ready = new Promise<maplibregl.Map | null>((r) => (markReady = r));
 
 map.on('load', async () => {
   addHatch();
@@ -632,6 +638,7 @@ map.on('load', async () => {
   }
   o.container.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
   o.container.dataset.ready = String(spots.length);
+  markReady(map);
 });
 
 return {
@@ -650,6 +657,8 @@ return {
     loading.hidden = true;
   },
   resize: () => map.resize(),
+  ready,
+  spotsNow: () => spots.map((s) => ({ id: s.id, lat: s.lat, lon: s.lon, gated: !!s.score.gated })),
   highlight(id) {
     const changed = id !== pickId;
     setPick(id);

@@ -36,6 +36,12 @@ import Base from '../../layouts/Base.astro';
       <p class="hint muted">Bir saate dokunun ya da sürükleyin. Gölge: %10–90 belirsizlik bandı. Koyu bantlar gece, açık bantlar alacakaranlık, kırmızı çizgiler güvenlik uyarısı.</p>
     </section>
 
+    <section class="fc-block" id="fc-block" hidden>
+      <h2>Saatlik tahmin</h2>
+      <p class="hint muted">3 saatte bir, seçili meranın en yakın model noktasından. Rüzgar hücresindeki ince çubuk: hava modellerinin (ICON, ECMWF, GFS, Météo-France) verdiği aralık; genişse modeller ayrışıyor. Koyu sütunlar gece. Tahmin, ölçüm değil.</p>
+      <div class="fc-scroll" id="fc" tabindex="0" role="region" aria-label="Saatlik tahmin tablosu, yatay kaydırılır"></div>
+    </section>
+
     <section>
       <h2>Koşullar</h2>
       <dl class="cond" id="cond"></dl>
@@ -96,6 +102,28 @@ import Base from '../../layouts/Base.astro';
   .tk-notes { margin: var(--s3) 0 0; }
   .flag { margin: 12px 0 0; font-size: var(--fs-2); padding: 8px 10px; border-left: 3px solid var(--warn); background: color-mix(in oklab, var(--warn) 8%, transparent); }
   .chart-block { margin-top: 18px; }
+  /* P4: point forecast table — first column fixed, horizontal scroll */
+  .fc-block { margin-top: 18px; }
+  .fc-scroll { overflow-x: auto; border: 1px solid var(--swell); border-radius: 10px; background: var(--sea); }
+  .fc-scroll:focus-visible { outline: 2px solid var(--foam); }
+  :global(table.fc) { border-collapse: separate; border-spacing: 0; font-size: var(--fs-1); font-variant-numeric: tabular-nums; }
+  :global(.fc th), :global(.fc td) { padding: 4px 6px; text-align: center; white-space: nowrap; min-width: 34px; border-bottom: 1px solid rgb(219 230 234 / .07); }
+  :global(.fc th[scope=row]), :global(.fc .fc-corner) { position: sticky; left: 0; z-index: 1; background: var(--deep); text-align: left; color: var(--foam); font-weight: 600; min-width: 76px; box-shadow: 1px 0 0 var(--swell); }
+  :global(.fc th[scope=row] small) { color: var(--mist); font-weight: 400; }
+  :global(.fc thead th) { color: var(--mist); font-weight: 560; }
+  :global(.fc .fc-day) { text-align: left; color: var(--foam); border-left: 1px solid var(--swell); }
+  :global(.fc .nt) { background: #050b11; }
+  :global(.fc thead .nt) { color: #6f8793; }
+  :global(.fc .w0) { color: #cfe3ea; } :global(.fc .w1) { background: rgb(90 190 140 / .22); }
+  :global(.fc .w2) { background: rgb(235 200 60 / .28); } :global(.fc .w3) { background: rgb(235 120 60 / .38); } :global(.fc .w4) { background: rgb(210 50 80 / .5); color: #fff; }
+  :global(.fc .s2) { color: var(--good); font-weight: 700; } :global(.fc .s1) { color: var(--warn); font-weight: 650; } :global(.fc .s0) { color: var(--bad); }
+  :global(.fc .sg) { background: #5a2a2c; color: #ffb4ab; font-weight: 700; }
+  :global(.fc .rn) { color: #9cc8f5; font-weight: 600; }
+  :global(.fc-warn) { color: #ff7a6b; } :global(.fc-ok) { color: var(--mist); opacity: .5; }
+  :global(.fc-arr) { display: inline-block; font-weight: 700; margin-right: 2px; }
+  :global(.fc td small) { display: block; color: var(--mist); font-size: 0.85em; }
+  :global(.fc-rng) { display: block; position: relative; height: 3px; margin-top: 2px; background: rgb(219 230 234 / .12); border-radius: 2px; }
+  :global(.fc-rng i) { position: absolute; top: 0; bottom: 0; background: var(--foam); border-radius: 2px; opacity: .85; }
   .chart, .profile { margin: 0 calc(var(--gutter) * -1); background: var(--deep); border-block: 1px solid var(--swell); }
   .chart { touch-action: pan-y; }
   .chart :global(svg), .profile :global(svg) { display: block; width: 100%; height: auto; }
@@ -131,6 +159,8 @@ import Base from '../../layouts/Base.astro';
   import { loadMy, toProfiles } from '../../scripts/mytackle';
   import { bandOf, bandV2, fieldBand, tackleClass, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
   import { api, currentSpecies, SPECIES_TR } from '../../scripts/species';
+  import { forecastColumns, renderForecast, type PackedHour } from '../../scripts/forecast';
+  import { loadGrid } from '../../scripts/layers';
   const species = currentSpecies();
 
   type Hour = [string, number | null, number | null, number | null, number | null, 0 | 1, string[], number, number | null, (number | null)[], string[]];
@@ -145,7 +175,7 @@ import Base from '../../layouts/Base.astro';
     spot: {
       id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null;
       shore_normal_deg: number | null; length_m: number | null; profile: (number | null)[] | null; alt: { lat: number; lon: number } | null;
-      auto_added?: boolean; near?: string[];
+      auto_added?: boolean; near?: string[]; lat: number; lon: number;
     };
     /** Public: which kinds of field knowledge exist (badges), never values. */
     field: { observations: number; desk_pending: number; kinds: Record<'lamba' | 'derinlik' | 'taban' | 'yapi', string | null> } | null;
@@ -466,7 +496,20 @@ import Base from '../../layouts/Base.astro';
     const ti = Number.isNaN(t) ? -1 : H.findIndex((h) => Math.floor(Date.parse(h[0]) / 3_600_000) === Math.floor(t / 3_600_000));
     select(ti >= 0 ? ti : 0);
     profileChart();
+    void forecastTable();
     $('spot').setAttribute('aria-busy', 'false');
+  }
+
+  /** P4: point forecast table from the packed hours plus the hourly grids (direction, rain, cloud, SST, current, model spread). */
+  async function forecastTable() {
+    try {
+      const [wx, sea, cur, spread] = await Promise.all([loadGrid('wx'), loadGrid('sea'), loadGrid('cur'), fetch('/api/grid/spread').then((r) => (r.ok ? r.json() : null)).catch(() => null)]);
+      const cols = forecastColumns({ lat: d.spot.lat, lon: d.spot.lon, hours: H as unknown as PackedHour[], tk: TK, wx, sea, cur, spread: spread?.cells ? spread : null });
+      $('fc').innerHTML = renderForecast(cols);
+      $('fc-block').hidden = false;
+    } catch (e) {
+      console.error('forecast table', e);
+    }
   }
 
   if (!id) {
