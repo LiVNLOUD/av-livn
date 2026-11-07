@@ -84,6 +84,7 @@ Teknik ayrıntılar yalnız "Neden? Ayrıntılar" çekmecesindedir: puan, bant, 
 - Başlık menüsü: Plan, Harita, Model; yönetici anahtarı cihazdaysa Sahadayım, Günlük, Ayarlar, Adaylar, Panel.
 
 ## İlkeler
+0. Yatay kaydırma yok (Q4): hiçbir sayfa ya da panel yana kaymaz. İstisna ısı haritası ve tahmin tablosu; ikisinde de ilk sütun sabit. `body` tek sütun `minmax(0, 1fr)`; mera kartı çekmecesi 420–480 px, içerik kapsayıcısına göre (başlık `clamp()`, takım kutusu 480 px altında tek sütun, grafikler `viewBox` ile %100). e2e akış 8 bunu 7 genişlikte denetler.
 1. Ana görsel av planıdır (M1); ısı haritası ikincil sekmededir. Renk yalnız puan anlamına gelir, süs yok.
 2. Belirsizlik görünür: bant genişse hücre taralı/soluk; "varsayıma dayanıyor" rozeti.
 3. Karanlıkta okunur: ≥ 4.5:1 kontrast, 44 px dokunma hedefi, hareket yalnız kullanıcı eylemine yanıt (parçacıklar yalnız Rüzgar/Akıntı katmanı seçilince; azaltılmış hareket tercihinde kapalı).

@@ -375,3 +375,45 @@ Windy embed/API kullanılmadı. Ana ekrana yalnız "haritada aç" bağlantısı 
 
 - Parçacık başarımı (390 px): 60 fps, 4× CPU yavaşlatmada da 60 fps (en kötü kare 24 ms). Parçacık sayısı (~300) azaltılmadı.
 - Not: akıntı ızgarası JSON'u ~420 KB (sıkıştırılmadan); yalnız Akıntı katmanı ya da mera tablosu açılınca indirilir.
+
+## Faz Q — doğrulama ve performans (2026-11-07) ✅ DUR
+Yeni özellik yok.
+
+- [x] **Q1 Bayatlık**
+  - Kök neden O sonrası fazda bulunmuş ve düzeltilmişti: hava Cloudflare'da saatlik çekiliyor, puanlama GitHub zamanlayıcısına bağlıydı.
+  - 48 saat denetimi: `docs/audit/staleness-48h.md` (betik ve çalışma listesi yanında).
+    - Hava çekimi 50 saatin 50'sinde yapıldı, aralık 60 dk.
+    - GitHub zamanlanmış puanlama 192 beklenenin yalnız 16'sında başladı. Puan yazımları arası medyan 8 dk, en çok 510 dk.
+    - Uyarı: 48 saatte 11 bölüm, ~27 sa; hepsi düzeltmeden önce. Düzeltmeden sonra (~3 sa'lik kısa örnek) 0; puanlar her saatin :09'unda yazılıyor.
+    - Yedek tetik 3 kez devreye girdi (16:07, 17:07, 18:07, "new weather"); ayrıca 1 kuru test.
+  - Tamamlama:
+    - puanlama işi hava 60 dk'dan eskiyse önce taze çeker (`POST /api/admin/weather/refresh`, cron'la aynı kod, 15 dk kısıtı);
+    - yedek tetik Worker çekimi başarısız ve veri > 60 dk ise "stale weather" ile tetikler;
+    - her dispatch `meta.score_dispatch_log`'a yazılır;
+    - testli (`workers/api/test/q1.test.ts`); MODEL.md §18 eki.
+- [x] **Q2 Plan kartı açılışı** (canlı, gezinme başı → `plan-ready` işareti, 3 koşu medyanı, ms):
+
+  | Genişlik | Önce | Harita ertelendi | Son (erken istek + doğru ön-istek) |
+  |---|---|---|---|
+  | 3440 | 2020 | 1458 | 1009 |
+  | 2576 | 1615 | 1254 | 1008 |
+  | 1920 | 1304 | 1207 | 769 |
+  | 1440 | 1306 | 1313 | 770 |
+  | 390 | 989 | 1263 | 833 |
+
+  e2e'de en kötü değer 870 ms; hedef ≤ 1500 ms artık e2e eşiği. Yapılanlar:
+  - harita (MapLibre, WebGL, karolar) kart çizildikten sonra yükleniyor;
+  - plan verisi istekleri sayfa modüllerinden önce satır içi betikle başlıyor;
+  - seçilen meranın ayrıntısı pencereler gelir gelmez isteniyor (kart ve ön-istek aynı `planPick` kuralını kullanıyor, testli).
+  - Not: P raporundaki 3,4–4,3 sn "networkidle" beklediği için harita karolarını da sayıyordu.
+- [x] **Q3** 390 px kaydırıcı canlı görüntüyle doğrulandı (`docs/screenshots/p/harita-slider-390.png`); e2e etiket çakışma kontrolü geçiyor.
+- [x] **Ek düzeltme: mera glifleri.** MapLibre 6'da `styleimagemissing` olayı resmi geç ekliyordu; glif yalnız bir sonraki yerleşimde görünüyordu. Eksik resim çözücüsüne geçildi.
+- [x] **Q4 Yatay taşma**
+  - Kök neden: `body` grid'inin örtük `auto` sütunu. Mera kartındaki tahmin tablosu sayfanın en küçük genişliğini 704 px'e itiyordu; 420 px çekmecede içerik sağa taşıyordu.
+  - Düzeltme `grid-template-columns: minmax(0, 1fr)`; tüm sayfalar için geçerli.
+  - Çekmece 420–480 px (`clamp(420px, 28vw, 480px)`), harita daralıyor; 768–1199 px'te tam genişlik alt panel.
+  - Mera başlığı `clamp()` ile küçülüp sarıyor; takım kutusu 480 px altında tek sütun.
+  - Harita katman seçici ve eşdeğer seçenek hapları sarıyor, kaydırmıyor; Tüm meralar tablosu sabit düzen ve "…"; Model tabloları sarıyor.
+  - e2e akış 8: Plan, Saat çizelgesi, Tüm meralar, çekmece, Harita, mera kartı, Model, Ayarlar, Sahadayım; 3440/2576/1920/1440/1024/768/390 px. Belge ya da izinsiz bir kaydırma kabı yana taşarsa test kırılır; izinli kaplar ısı haritası ve tahmin tablosu.
+  - Önce/sonra görüntüsü: `docs/screenshots/q/drawer-2576-once.png`, `drawer-2576-sonra.png`.
+- Canlı: e2e tüm akışlar yeşil, smoke yeşil, konsol hatası 0.
