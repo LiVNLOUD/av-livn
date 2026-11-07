@@ -112,3 +112,28 @@ export function equalText(n: number): string {
   const w = n === 2 ? 'İki' : n === 3 ? 'Üç' : String(n);
   return `${w} yer de aynı derecede iyi görünüyor; model birini öne çıkaramıyor.`;
 }
+
+/**
+ * O3: one line on the card when the plan's hour differs from now: why "now" scores low (safety cap: gusts or
+ * waves) and from when it calms down. `calmFrom` = first hour after now without the cap (local "HH:MM").
+ */
+export function nowVsPlan(o: { nowGated: boolean; gustKmh: number | null; waveM: number | null; calmFrom: string | null; planIsNow: boolean; nowTotal: number | null; planTime: string }): string | null {
+  if (o.planIsNow) return null;
+  if (o.nowGated) {
+    const why = o.gustKmh !== null && o.gustKmh >= 40 ? `rüzgar sert (hamle ${Math.round(o.gustKmh)} km/sa, güvenli değil)`
+      : o.waveM !== null && o.waveM >= 1.2 ? `dalga yüksek (${o.waveM.toFixed(1).replace('.', ',')} m, güvenli değil)`
+      : 'güvenlik sınırı aşılıyor (rüzgar ya da dalga)';
+    return `Şu an ${why}; ${o.calmFrom ? `${o.calmFrom}'${ablative(o.calmFrom)} sonra yatışıyor` : 'önümüzdeki saatlerde de sürüyor'}.`;
+  }
+  return o.nowTotal !== null ? `Şu an puan ${Math.round(o.nowTotal)}; en iyi saat ${o.planTime}.` : null;
+}
+
+/** Turkish ablative suffix for a clock time read by its hour ("20:00'den", "19:00'dan", "03:00'ten"). */
+export function ablative(hhmm: string): string {
+  const h = Number(hhmm.slice(0, 2));
+  const last = h === 0 ? 'sıfır' : h % 10 === 0 ? (h === 10 ? 'on' : 'yirmi') : ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz'][h % 10]!;
+  const vowel = [...last].reverse().find((c) => 'aıoueiöü'.includes(c))!;
+  const back = 'aıou'.includes(vowel);
+  const hard = /[çfhkpsşt]$/.test(last);
+  return `${hard ? 't' : 'd'}${back ? 'a' : 'e'}n`;
+}

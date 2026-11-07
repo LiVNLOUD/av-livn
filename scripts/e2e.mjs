@@ -212,6 +212,65 @@ for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [768, 1024], [390
   }
 }
 
+// 6. Faz O: go-to-spot zoom + ring (O1), one label per spot (O2), the time bar (O3), the table (O5), "now" label (O6)
+for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [390, 844]]) {
+  const { p, errors } = await page(w, h);
+  await p.goto(base + '/', { waitUntil: 'networkidle' });
+  await waitPlan(p);
+  await p.waitForTimeout(1500);
+  if (w >= 768) {
+    // O3: the map and the list follow the plan's hour
+    const tbShown = await p.locator('#timebar').isVisible();
+    ok(tbShown ? `${w}: time bar "${(await p.locator('#timebar').innerText()).replace(/\s+/g, ' ').trim()}"` : `${w}: plan hour is now (no time bar)`);
+    // O1: choosing an option (chip, else the main pick) zooms the map onto it with a ring
+    const chip = p.locator('#eq-pick button').nth(1);
+    const target = (await chip.count()) ? (await chip.innerText()).trim() : (await p.locator('#a-where').innerText()).trim();
+    if (await chip.count()) await chip.click(); else await p.locator('#pick-open').click();
+    await p.waitForTimeout(2200);
+    const m = await p.evaluate((name) => {
+      const map = document.getElementById('map').__avMap;
+      if (!map) return null;
+      const feats = map.queryRenderedFeatures().filter((f) => ['spot-labels', 'cand-labels'].includes(f.layer.id) && String(f.properties.label ?? f.properties.name ?? '').startsWith(name));
+      const ring = map.queryRenderedFeatures({ layers: ['pick-ring'] }).length;
+      return { zoom: map.getZoom(), labels: feats.length, ring };
+    }, target);
+    if (!m) fail(`${w}: no map`);
+    else {
+      m.zoom >= 14.5 ? ok(`${w}: map zoomed to ${target} (z ${m.zoom.toFixed(1)})`) : fail(`${w}: map zoom ${m.zoom.toFixed(1)} after choosing ${target}`);
+      m.ring >= 1 ? ok(`${w}: ring around the chosen spot`) : fail(`${w}: no ring`);
+      m.labels === 1 ? ok(`${w}: "${target}" labelled once`) : fail(`${w}: "${target}" labelled ${m.labels} times`);
+    }
+    if (shots) await p.screenshot({ path: `${shots}/map-${w}.png` });
+    if (await p.locator('#timebar').isVisible()) {
+      await p.locator('#tb-now').click();
+      await p.waitForTimeout(600);
+      (await p.locator('#timebar').isVisible()) ? fail(`${w}: "şimdiye dön" did not reset the hour`) : ok(`${w}: "şimdiye dön" resets to now`);
+    }
+  }
+  // O5: all spots — a table on wide screens, no overflow
+  await p.locator('.views [data-v="spots"]').click();
+  await p.waitForTimeout(900);
+  if (w >= 1200) {
+    const cols = await p.locator('.spot-table thead th').count();
+    const rows = await p.locator('.spot-table tbody tr[data-id]').count();
+    cols === 6 && rows > 10 ? ok(`${w}: spot table ${cols} columns, ${rows} rows`) : fail(`${w}: spot table ${cols} columns, ${rows} rows`);
+  }
+  (await overflow(p)) <= 0 ? ok(`${w}: all spots without horizontal overflow`) : fail(`${w}: all spots overflow`);
+  if (shots) await p.screenshot({ path: `${shots}/spots-${w}.png` });
+  // O6: the "now" label never touches an hour label
+  await p.locator('.views [data-v="heat"]').click();
+  await p.waitForTimeout(1200);
+  const clash = await p.evaluate(() => {
+    const now = document.querySelector('.heatmap .hm-nowl');
+    if (!now) return 'no now label';
+    const a = now.getBBox();
+    return [...document.querySelectorAll('.heatmap .hm-tick')].map((t) => t.getBBox()).filter((b) => b.x < a.x + a.width && a.x < b.x + b.width && b.y < a.y + a.height && a.y < b.y + b.height).length;
+  });
+  clash === 0 ? ok(`${w}: "şimdi" clear of the hour labels`) : fail(`${w}: "şimdi" label clash (${clash})`);
+  if (shots) await p.screenshot({ path: `${shots}/heat-${w}.png` });
+  errors.length ? fail(`${w} (O): console errors ${errors.slice(0, 3).join(' | ')}`) : ok(`${w} (O): no console errors`);
+}
+
 await browser.close();
 console.log(failed ? `${failed} check(s) failed` : 'all checks passed');
 process.exit(failed ? 1 : 0);

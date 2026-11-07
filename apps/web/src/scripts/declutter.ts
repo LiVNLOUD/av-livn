@@ -116,3 +116,18 @@ export function placeBadges(spots: PlaceSpot[], min = 2): { badges: PlaceBadge[]
   badges.sort((a, b) => b.count - a.count || a.place.localeCompare(b.place, 'tr'));
   return { badges, single };
 }
+
+/** One map feature per shown spot (O2): the spot sits at its shown (maybe spread) position, carries its own
+ *  label, and at most one is flagged as the plan's pick; true-position dots never get a label. */
+export interface SpotFeatureIn { id: string; name: string; lon: number; lat: number; total: number | null; gated: boolean; rank: number | null }
+export function spotFeatures(shown: { s: SpotFeatureIn; lon: number; lat: number }[], pickId: string | null) {
+  return shown.map(({ s, lon, lat }) => ({
+    type: 'Feature' as const,
+    geometry: { type: 'Point' as const, coordinates: [lon, lat] as [number, number] },
+    properties: {
+      id: s.id, name: s.name, total: s.total ?? -1, gated: s.gated, pick: s.id === pickId,
+      score: s.gated ? '!' : s.total === null ? '–' : String(Math.round(s.total)),
+      label: s.gated ? `${s.name} · güvenlik` : s.name, rank: s.rank ?? 99,
+    },
+  }));
+}

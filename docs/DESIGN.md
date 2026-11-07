@@ -55,6 +55,16 @@ Teknik ayrıntılar yalnız "Neden? Ayrıntılar" çekmecesindedir: puan, bant, 
 
 **Menü:** ziyaretçi için Plan, Harita, Model. Sahadayım, Günlük, Ayarlar, Adaylar ve Panel yalnız yönetici anahtarı cihazdayken görünür. Ayarlar → Takımım ziyaretçiye açıktır: plan kartındaki "Kendi takımını gir" bağlantısı ve sayfa altındaki bağlantı oraya gider.
 
+**Faz O:**
+- **Plan bölgesi:** ana kart en çok 720 px. Plan bölgesi 1100 px'i geçince yanına bir sütun açılır: seçili meranın 24 saatlik şeridi, takım görseli ve en çok 2 alternatif kart. Dar ekranda bunlar kartın altına iner.
+- **Saat çizelgesi şeridi:** saate dokununca kart o saate geçer.
+- **Gösterilen saat:** harita işaretleri, liste ve ısı haritası planın saatini gösterir. Üstteki çubukta "Gösterilen saat: … · şimdiye dön" yazar; 768–1199 px'te çubuk haritanın üstündedir, telefonda plan sekmesinde gizlidir.
+- **"Şimdi" satırı:** önerilen saat şimdi değilse kart şimdinin neden farklı olduğunu tek satırda söyler, örneğin güvenlik tavanı ve ne zaman yatışacağı.
+- **Güvenlik rozeti:** tavan yüzünden düşük kalan puan her yerde "güvenlik" rozeti ya da koyu kırmızı işaretle gösterilir.
+- **Meraya git (tek yol):** plan seçeneği, harita, liste ve ısı haritası hep aynı davranır: harita zoom 15,5'e yumuşak geçer ve merayı halkayla gösterir. Her mera tek etiket alır; seçili olanın etiketi turuncudur.
+- **Tüm meralar:** ≥ 1200 px'te tablo (Mera, Tip, Puan, En iyi saat, Erişim, Güven).
+- **Isı haritası:** "şimdi" etiketi saat satırındadır; çakışan saat etiketi gösterilmez.
+
 **Harita (M3):** liman, sanayi ve askeri alanlar kırmızı taralı alan ve lejantla gösterilir, metin etiketi yoktur. Uzak zoom'da (< 12) yalnız yerleşim rozetleri görünür. Önerilen mera her zoomda turuncu halka ve adıyla işaretlidir; harita ona ortalanır.
 
 ## Bileşenler (her biri tek tanım, `global.css`)

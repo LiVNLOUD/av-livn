@@ -89,6 +89,13 @@ const textW = (t: string) => t.length * 6.6 + 8;
  * weekday first ("Pazar 1 Kasım" → "Pazar 1 Kas" → "Pazar 1"); when even that does not fit, the date
  * ("1 Kas"), never a cryptic two-letter day; nothing when not even the date fits.
  */
+export type Box = [number, number];
+export interface Tick { x: number; text: string }
+/** O6: hour labels whose box [x, x + width] overlaps the "now" label box are dropped. */
+export function visibleTicks(ticks: Tick[], now: Box, gap = 2): Tick[] {
+  return ticks.filter((t) => t.x + textW(t.text) + gap <= now[0] || t.x >= now[1] + gap);
+}
+
 export function dayLabel(local: Date, px: number): string {
   const d = local.getUTCDate();
   const cands = [`${DAYS_LONG[local.getUTCDay()]} ${d} ${MONTHS[local.getUTCMonth()]}`, `${DAYS_LONG[local.getUTCDay()]} ${d} ${MON_SHORT[local.getUTCMonth()]}`, `${DAYS_LONG[local.getUTCDay()]} ${d}`, `${d} ${MON_SHORT[local.getUTCMonth()]}`];
@@ -140,10 +147,15 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatS
     if (label) parts.push(`<text class="hm-day" x="${x(c0) + 4}" y="13">${label}</text>`);
     if (c0 > 0) parts.push(`<line class="hm-sep" x1="${x(c0)}" x2="${x(c0)}" y1="2" y2="${H}"/>`);
   });
+  // O6: the "now" label sits in the hour row; hour labels that would touch it are left out (same rule as the ticks)
+  const nowX = x(0) + cw * ((Date.now() / 3_600_000) % 1);
+  const nowBox: Box = [nowX + 2, nowX + 2 + textW('şimdi')];
+  const ticks: Tick[] = [];
   for (let c = 0; c < d.hours; c++) {
     const lh = (from + c + TZ) % 24;
-    if (lh % step === 0 && (c + 1) * cw - 2 <= W - L) parts.push(`<text class="hm-tick" x="${x(c) + 2}" y="31">${String(lh).padStart(2, '0')}</text>`);
+    if (lh % step === 0 && (c + 1) * cw - 2 <= W - L) ticks.push({ x: x(c) + 2, text: String(lh).padStart(2, '0') });
   }
+  for (const t of visibleTicks(ticks, nowBox)) parts.push(`<text class="hm-tick" x="${t.x}" y="31">${t.text}</text>`);
   view.forEach((s, r) => {
     const y = top + r * rh;
     if (s.id === o.focus) parts.push(`<rect class="hm-focus" x="0.5" y="${y + 0.5}" width="${W - 1}" height="${rh - 1}" pointer-events="none"/>`);
@@ -165,9 +177,8 @@ export function renderHeatmap(el: HTMLElement, d: HoursData, o: HeatOpts): HeatS
       if (wide && v !== null && !gated) parts.push(`<rect x="${x(c) + 0.5}" y="${y + 1}" width="${cw - 1}" height="${rh - 2}" fill="url(#hm-wide)" pointer-events="none"/>`);
     }
   });
-  // H5: "now" as a thin line with a small label above the grid
-  const nowX = x(0) + cw * ((Date.now() / 3_600_000) % 1);
-  parts.push(`<line class="hm-now" x1="${nowX}" x2="${nowX}" y1="34" y2="${H}"/><text class="hm-nowl" x="${nowX + 3}" y="${top - 1}">şimdi</text>`);
+  // H5/O6: "now" as a thin line; its label in the hour row, clear of the hour labels
+  parts.push(`<line class="hm-now" x1="${nowX}" x2="${nowX}" y1="34" y2="${H}"/><text class="hm-nowl" x="${nowBox[0]}" y="31">şimdi</text>`);
   el.innerHTML = `<svg class="heatmap" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Mera ve saat ısı haritası: ${rows.length} mera, ${view.length} satır, ${d.hours} saat">${parts.join('')}</svg>`;
   el.querySelectorAll<SVGRectElement>('.hm-cell').forEach((r) =>
     r.addEventListener('click', () => o.onCell(r.dataset.id!, Number(r.dataset.c))),

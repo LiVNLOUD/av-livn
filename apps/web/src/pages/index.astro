@@ -18,16 +18,19 @@ import Base from '../layouts/Base.astro';
         </select>
       </label>
     </div>
+    <!-- O3: the hour the map and the list show; follows the plan's hour -->
+    <p class="timebar" id="timebar" hidden><span>Gösterilen saat: <b id="tb-time"></b></span><button type="button" class="tb-now" id="tb-now">şimdiye dön</button></p>
 
     <section class="r-win" aria-labelledby="t-main">
       <h1 id="t-main" class="vh">Av planı</h1>
       <div class="plan" id="plan" aria-live="polite">
+       <div class="plan-main">
         <p class="eq-note" id="eq-note" hidden></p>
         <div class="eq-pick" id="eq-pick" role="radiogroup" aria-label="Eşdeğer seçenekler" hidden></div>
         <p class="stale-card" id="stale-card" role="alert" hidden></p>
         <article class="card main-pick" id="pick">
           <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub"><span id="verdict-sub"></span> <span class="fresh" id="fresh"></span></p></div>
-          <div class="qa q2" hidden><h2 class="q">Nereye, ne zaman?</h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p></div>
+          <div class="qa q2" hidden><h2 class="q">Nereye, ne zaman?</h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="a-sub now-line" id="a-now" hidden></p></div>
           <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
           <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p></div>
@@ -39,8 +42,23 @@ import Base from '../layouts/Base.astro';
           </details>
           <div class="go" id="pick-go" hidden><button type="button" class="btn" id="pick-open">Merayı ve saatleri aç</button><a class="btn secondary admin-only" id="pick-field" href="/sahadayim/" hidden>Sahadayım'da başlat</a></div>
         </article>
-        <h2 class="alts-h" id="alts-h" hidden>Diğer seçenekler</h2>
-        <ol class="alts" id="alts" hidden></ol>
+       </div>
+       <!-- O4: the plan region is filled with the pick's 24 h strip, the tackle picture and the alternatives -->
+       <div class="plan-side">
+        <section class="card side-card" id="strip-card" hidden aria-labelledby="t-strip">
+          <h2 class="side-h" id="t-strip">Önümüzdeki 24 saat <span class="muted fs-1" id="strip-name"></span></h2>
+          <div class="strip-box" id="strip"></div>
+          <p class="fs-1 muted strip-legend"><span class="lg-win" aria-hidden="true"></span> önerilen pencere · <span class="lg-gate" aria-hidden="true"></span> güvenlik saati · üst şerit gece/gündüz · bir saate dokununca kart o saate geçer</p>
+        </section>
+        <section class="card side-card" id="rig-card" hidden aria-labelledby="t-rig">
+          <h2 class="side-h" id="t-rig">Takım görseli <span class="muted fs-1" id="rig-hour"></span></h2>
+          <div class="rig-box" id="rig"></div>
+        </section>
+        <section class="side-alts" id="alts-box" hidden aria-labelledby="alts-h">
+          <h2 class="side-h" id="alts-h">Diğer seçenekler</h2>
+          <ol class="alts" id="alts"></ol>
+        </section>
+       </div>
       </div>
     </section>
 
@@ -75,6 +93,7 @@ import Base from '../layouts/Base.astro';
       <p class="muted fs-2" id="meta">Meralar yükleniyor…</p>
       <label class="toggle"><input type="checkbox" id="hide-access" /> Erişimi belirsiz/kısıtlı olanları gizle</label>
       <ol class="spots" id="spots" aria-live="polite"></ol>
+      <div class="spot-table-box" id="spot-table" hidden></div>
       <p class="empty muted" id="empty" hidden></p>
     </section>
 
@@ -98,7 +117,8 @@ import Base from '../layouts/Base.astro';
 
 <style>
   /* M1: one grid; the plan is the first view. ≥768 px: plan ~60 % | compact map ~40 %; hour chart full width. */
-  .app { display: grid; gap: var(--s4); padding: var(--s4); grid-template-columns: minmax(0, 1fr); grid-template-areas: 'views' 'main'; }
+  .app { display: grid; gap: var(--s4); padding: var(--s4); grid-template-columns: minmax(0, 1fr); grid-template-areas: 'views' 'tb' 'main'; }
+  .timebar { grid-area: tb; }
   .views { grid-area: views; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
   .views button { min-height: 44px; padding: 0 var(--s4); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--mist); font: inherit; font-size: var(--fs-2); font-weight: 650; cursor: pointer; }
   .views button[aria-selected='true'] { background: var(--swell); color: var(--foam); border-color: var(--mist); }
@@ -118,8 +138,8 @@ import Base from '../layouts/Base.astro';
     .app { gap: var(--s3); padding-top: var(--s3); }
   }
   @media (min-width: 768px) {
-    .app { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); grid-template-areas: 'views views' 'main map'; }
-    .app[data-view='heat'] { grid-template-areas: 'views views' 'main main'; }
+    .app { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); grid-template-areas: 'views views' 'tb tb' 'main map'; }
+    .app[data-view='heat'] { grid-template-areas: 'views views' 'tb tb' 'main main'; }
     .app[data-view='heat'] .r-map { display: none !important; }
     .r-map { display: block; position: sticky; top: var(--s4); height: calc(100dvh - var(--header-h) - var(--s6)); }
     .r-card:not([hidden]) { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; height: 62dvh; }
@@ -128,8 +148,8 @@ import Base from '../layouts/Base.astro';
     :global(body.app) { height: 100dvh; overflow: hidden; }
     :global(body.app main) { min-height: 0; }
     :global(body.app footer.site) { display: none; }
-    .app { height: 100%; padding: 0; gap: 0; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) auto; grid-template-areas: 'views views views' 'main map card'; }
-    .app[data-view='heat'] { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'views views' 'main card'; }
+    .app { height: 100%; padding: 0; gap: 0; grid-template-rows: auto auto minmax(0, 1fr); grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) auto; grid-template-areas: 'views views views' 'tb tb tb' 'main map card'; }
+    .app[data-view='heat'] { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'views views' 'tb tb' 'main card'; }
     .views { padding: var(--s3) var(--s5); border-bottom: 1px solid var(--swell); }
     .r-win, .r-spots, .r-heat { padding: var(--s5); overflow: auto; }
     .r-spots > * { max-width: 900px; }
@@ -163,6 +183,7 @@ import Base from '../layouts/Base.astro';
   :global(.heat-sum .tk b) { color: var(--sodium); font-weight: 650; }
   :global(.heatmap .hm-focus) { fill: none; stroke: var(--foam); stroke-width: 1; opacity: 0.45; }
   :global(.ramp) { display: inline-block; width: 56px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(57 50 52), rgb(185 126 80), rgb(71 157 109)); }
+  :global(.gatesw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: #3a1c1f; border: 1px solid var(--storm); }
   :global(.hatchsw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #0e1c27 0 1.5px, #5d9a76 1.5px 4px); }
   .heat { overflow-x: auto; }
   :global(.heatmap) { display: block; font-family: inherit; }
@@ -173,7 +194,6 @@ import Base from '../layouts/Base.astro';
   :global(.heatmap .hm-now) { stroke: var(--sodium); stroke-width: 1; }
   :global(.heatmap .hm-nowl) { fill: var(--sodium); }
   :global(.heatmap .hm-selcol) { fill: var(--foam); opacity: 0.12; }
-  :global(.heatmap .hm-nowl) { font-size: 10px; }
   :global(.heatmap .hm-cell) { cursor: pointer; }
   :global(.heatmap .hm-cell:hover) { stroke: var(--foam); stroke-width: 1; }
   :global(.heatmap .hm-name text) { cursor: pointer; }
@@ -198,9 +218,34 @@ import Base from '../layouts/Base.astro';
   :global(.spot .rk) { color: var(--foam); font-weight: 700; }
   :global(.spot .badge) { margin-left: var(--s1); }
   .empty { padding: var(--s5) 0; }
+  /* O5: table of all spots on wide screens */
+  .spot-table-box { overflow-x: auto; }
+  .spot-table-box[hidden] { display: none; }
+  :global(.spot-table) { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
+  :global(.spot-table th), :global(.spot-table td) { text-align: left; padding: var(--s2) var(--s2); border-top: 1px solid var(--swell); vertical-align: middle; }
+  :global(.spot-table thead th) { color: var(--mist); font-weight: 600; border-top: 0; white-space: nowrap; }
+  :global(.spot-table tbody th) { font-weight: 620; display: flex; align-items: center; gap: var(--s2); min-width: 260px; }
+  :global(.spot-table tbody th .lamp) { --size: 30px; flex: none; }
+  :global(.spot-table tbody th a) { color: var(--foam); text-decoration: none; }
+  :global(.spot-table tr[data-id]) { cursor: pointer; }
+  :global(.spot-table tr[data-id]:hover) { background: color-mix(in oklab, var(--swell) 45%, transparent); }
+  :global(.spot-table .num) { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  :global(.spot-table .grp-btn) { border-top: 0; }
   .mapbox { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
   @media (min-width: 1200px) { .mapbox { border-radius: 0; } }
 
+  /* O3: hour shown by the map and the list */
+  .timebar { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); font-size: var(--fs-2); color: var(--foam); padding: var(--s2) var(--s3); border: 1px solid var(--sodium); border-radius: 10px; background: color-mix(in oklab, var(--sodium) 10%, transparent); }
+  .timebar[hidden] { display: none; }
+  .timebar b { color: var(--sodium); }
+  .tb-now { min-height: 40px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--swell); background: var(--deep); color: var(--foam); font: inherit; font-weight: 650; cursor: pointer; }
+  @media (min-width: 1200px) { .timebar { margin: var(--s2) var(--s5) 0; } }
+  @media (max-width: 767px) { .app[data-view='plan'] .timebar { display: none; } }
+  /* 768–1199: the time bar sits on the map (it describes the map and the list), not above the plan card */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .app[data-view='plan'] .timebar, .app[data-view='spots'] .timebar { grid-area: map; align-self: start; justify-self: start; position: sticky; top: var(--s4); z-index: 6; margin: var(--s2); background: var(--deep); }
+    .app:not([data-view='heat']) { grid-template-areas: 'views views' 'main map'; }
+  }
   .mini-legend { position: absolute; z-index: 2; left: var(--s3); bottom: var(--s5); margin: 0; padding: var(--s1) var(--s3); border-radius: 8px; background: color-mix(in oklab, var(--deep) 88%, transparent); border: 1px solid var(--swell); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); max-width: calc(100% - 24px); }
   .mini-legend a { color: var(--foam); }
   .sw-pick { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--sodium); display: inline-block; }
@@ -212,9 +257,11 @@ import Base from '../layouts/Base.astro';
 
 <script>
   import { esc, fmtAgo, fmtDay, fmtTime, freshness, KIND_TR, lampV2, swimRule } from '../scripts/format';
-  import { kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
+  import { IF_DARK, IF_LIT, kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
-  import { driverSentence, equalText, lightSentence, trust, weatherSentence } from '../scripts/plan';
+  import { driverSentence, equalText, lightSentence, nowVsPlan, trust, weatherSentence } from '../scripts/plan';
+  import { stripSvg } from '../scripts/strip';
+  import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
   import { columnMax, groupSame, isGroup, rankLabel, splitBeaches, tieCounts } from '../scripts/grouping';
@@ -222,7 +269,7 @@ import Base from '../layouts/Base.astro';
 
   type Spot = {
     id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null; private_marina?: boolean;
-    score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null };
+    score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null; top3?: number | null; missing?: string[] | string | null };
   };
   type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; reason?: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
 
@@ -264,7 +311,7 @@ import Base from '../layouts/Base.astro';
     $<HTMLAnchorElement>('drawer-open').href = url;
     $('drawer-title').textContent = all.find((s) => s.id === id)?.name ?? hours?.spots.find((s) => s.id === id)?.name ?? 'Mera kartı';
     $('drawer').hidden = false;
-    mapApi?.flyTo(id);
+    mapApi?.focus(id); // O1: one path for plan, map, list and heat map — zoom in and ring the spot
     requestAnimationFrame(() => mapApi?.resize());
   }
   $('drawer-close').addEventListener('click', () => { $('drawer').hidden = true; requestAnimationFrame(() => mapApi?.resize()); });
@@ -316,10 +363,19 @@ import Base from '../layouts/Base.astro';
     fillHours();
     hourSel.value = String(h);
     $('now').classList.toggle('on', sel === 0);
+    // O3: the hour the map and the list show, with a way back to now
+    const tb = $('timebar');
+    tb.hidden = sel === 0;
+    if (sel) {
+      const iso = new Date(h * HOUR).toISOString();
+      const d = fmtDay(iso);
+      $('tb-time').textContent = `${d === fmtDay(new Date().toISOString()) ? 'bugün' : d} ${fmtTime(iso)}`;
+    }
     load();
     heat();
     mapApi?.setHour(atIso());
   }
+  $('tb-now').addEventListener('click', () => { cardCol = null; setCol(0); renderPlan(); });
   $('now').addEventListener('click', () => setCol(0));
   day.addEventListener('change', () => { fillHours(); setCol(Number(hourSel.value) - nowHour); });
   hourSel.addEventListener('change', () => setCol(Number(hourSel.value) - nowHour));
@@ -340,6 +396,29 @@ import Base from '../layouts/Base.astro';
   };
   const sameLabel = (kinds: string[], n: number) => `${n} ${new Set(kinds).size === 1 ? kindLabel(kinds[0]!) : 'mera'} aynı puan`;
 
+  const tableMq = matchMedia('(min-width: 1200px)');
+  tableMq.addEventListener('change', () => render());
+  /** O5: best non-capped hour of a spot in the next 72 h (from /api/hours). */
+  function bestHour(id: string): string {
+    const hs = hours?.spots.find((x) => x.id === id);
+    if (!hs) return '–';
+    const off = hours ? nowHour - Math.floor(Date.parse(hours.from) / HOUR) : 0;
+    let bc = -1, bv = -1;
+    for (let c = 0; c < 72; c++) { const v = hs.t[off + c]; if (v != null && !hs.g.includes(off + c) && v > bv) { bv = v; bc = c; } }
+    if (bc < 0) return '–';
+    const iso = new Date((nowHour + bc) * HOUR).toISOString();
+    const d = fmtDay(iso);
+    return `${d === fmtDay(new Date().toISOString()) ? 'Bugün' : d} ${fmtTime(iso)} · ${Math.round(bv)}`;
+  }
+  function tableRow(s: Spot): string {
+    const sc = s.score;
+    const reason = sc.reason ?? null;
+    const why = reason ? reason.replace(/^(Öne çıkaran|Geri bırakan) \([^)]*\): /, '') : null;
+    const tr = sc.total === null ? null : trust({ why, reason, assumed: /varsayım|kanıt C|\(C\)|ölçüm değil/.test(reason ?? ''), tier: sc.total >= 65 ? 'guclu' : 'goreli', missing: (Array.isArray(sc.missing) ? sc.missing.length : sc.missing) ? 'eksik' : null, top3: sc.top3 ?? null, p10: sc.p10, p90: sc.p90 }, { calibrated: calibrated[species] === true });
+    const acc = s.private_marina ? MARINA_BADGE : s.access && ACCESS_BADGE[s.access] ? ACCESS_BADGE[s.access] : s.access === 'acik' ? 'açık' : 'bilinmiyor';
+    const score = sc.total === null ? '–' : sc.gated ? `${Math.round(sc.total)} <span class="badge storm">güvenlik</span>` : String(Math.round(sc.total));
+    return `<tr data-id="${esc(s.id)}" tabindex="0"><th scope="row"><span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span><a href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}">${esc(s.name)}</a>${outside(s) ? ' <span class="badge">Bursa dışı</span>' : ''}</th><td>${esc(KIND_TR[s.kind] ?? s.kind)}</td><td class="num">${score}</td><td>${bestHour(s.id)}</td><td>${esc(acc)}</td><td>${tr ? `<b class="trust" data-l="${tr.level}">${tr.level}</b>` : '–'}</td></tr>`;
+  }
   function render() {
     const spots = all.filter((s) => !hidden(s));
     const at = atIso();
@@ -357,7 +436,7 @@ import Base from '../layouts/Base.astro';
           ? '<p class="why">Puan henüz hesaplanmadı</p>'
           : `<p class="why"><b class="rk">${rankLabel(sc.rank, ties.get(sc.rank) ?? 1)}</b> / ${all.length}${band}${leadWithRank(sc.p10, sc.p90) ? ' · belirsizlik geniş' : ''}${s.lamp_known ? '' : ' · iskele aydınlatması bilinmiyor'}</p>`;
       const legal = swimRule(s.kind, at ?? new Date().toISOString());
-      const badges = (s.private_marina ? `<span class="badge warn">${MARINA_BADGE}</span>` : s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '') + (outside(s) ? '<span class="badge" title="Bursa ili dışında, yakın çevre">Bursa dışı</span>' : '');
+      const badges = (sc.gated ? '<span class="badge storm" title="Puan güvenlik tavanında (rüzgar ya da dalga eşiği aşıldı)">güvenlik</span>' : '') + (s.private_marina ? `<span class="badge warn">${MARINA_BADGE}</span>` : s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '') + (legal ? `<span class="badge legal">${legal}</span>` : '') + (s.auto_added ? '<span class="badge assume" title="otomatik eklendi — sahada doğrulanmadı">otomatik</span>' : '') + (outside(s) ? '<span class="badge" title="Bursa ili dışında, yakın çevre">Bursa dışı</span>' : '');
       return `<li><a class="spot" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}" data-id="${esc(s.id)}">
           <span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span>
           <span><h3>${esc(s.name)}${badges}</h3><p class="sub">${esc(sub)}</p>${why}${sc.reason ? `<p class="reason">${esc(sc.reason)}</p>` : ''}</span></a></li>`;
@@ -376,6 +455,20 @@ import Base from '../layouts/Base.astro';
         .join('');
     const { main, beaches } = splitBeaches(spots);
     const best = beaches.reduce<number | null>((m, s) => (s.score.total !== null && (m === null || s.score.total > m) ? s.score.total : m), null);
+    // O5: wide screens get a table (name, kind, score, best hour, access, trust) instead of one narrow column
+    const tbl = $('spot-table');
+    tbl.hidden = !tableMq.matches;
+    $('spots').hidden = tableMq.matches;
+    if (tableMq.matches) {
+      const byRank = (a: Spot, b: Spot) => (a.score.rank ?? 1e9) - (b.score.rank ?? 1e9);
+      const rows = [...main].sort(byRank).map(tableRow).join('') +
+        (beaches.length ? `<tr class="grp"><td colspan="6"><button type="button" class="grp-btn" data-grp="beaches" aria-expanded="${beachesOpen}"><span class="lamp" data-total="${best ?? ''}" data-gated="false"></span><span>Kumsallar (${beaches.length})${best !== null ? ` — en iyi ${Math.round(best)}` : ''} · ${beachesOpen ? 'daralt' : 'genişlet'}</span></button></td></tr>` + (beachesOpen ? [...beaches].sort(byRank).map(tableRow).join('') : '') : '');
+      tbl.innerHTML = `<table class="spot-table"><thead><tr><th scope="col">Mera</th><th scope="col">Tip</th><th scope="col">Puan${at ? ` (${fmtTime(at)})` : ' (şimdi)'}</th><th scope="col">En iyi saat (72 sa)</th><th scope="col">Erişim</th><th scope="col">Güven</th></tr></thead><tbody>${rows}</tbody></table>`;
+      tbl.querySelectorAll<HTMLElement>('.lamp').forEach((el) => lampV2(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'));
+      tbl.querySelectorAll<HTMLButtonElement>('[data-grp]').forEach((b) => b.addEventListener('click', () => toggleGroup(b.dataset.grp!)));
+      tbl.querySelectorAll<HTMLTableRowElement>('tr[data-id]').forEach((tr) => tr.addEventListener('click', (e) => { e.preventDefault(); openSpot(tr.dataset.id!); }));
+      return;
+    }
     $('spots').innerHTML =
       section(main, 'm') +
       (beaches.length
@@ -394,6 +487,7 @@ import Base from '../layouts/Base.astro';
   function showFresh(scoredAt: string | null, fetchedAt: string | null) {
     const f = freshness(scoredAt, fetchedAt);
     $('fresh').textContent = f.line;
+    $('fresh').dataset.stale = f.stale ? f.short! : '';
     const warn = $('stale-card');
     warn.hidden = !f.stale;
     warn.innerHTML = f.stale ? `<span class="long">${esc(f.banner!)}</span><span class="short">${esc(f.short!)}</span>` : '';
@@ -496,7 +590,7 @@ import Base from '../layouts/Base.astro';
     const band = st.meanBand === null ? '' : ` · ortalama bant genişliği ${Math.round(st.meanBand)} puan`;
     const scale = hmMode === 'diff'
       ? `<span class="divramp" aria-hidden="true"></span> saat ortalamasının altında ← → üstünde (±${st.diffMax} puanda doyar)`
-      : '<span class="ramp" aria-hidden="true"></span> düşük → yüksek puan';
+      : '<span class="ramp" aria-hidden="true"></span> düşük → yüksek puan · <span class="gatesw" aria-hidden="true"></span> güvenlik saati (rüzgar ya da dalga eşiği; puan tavanda)';
     const hatch = unc.checked && st.wideFrom !== null ? ` · <span class="hatchsw" aria-hidden="true"></span> bandı en geniş üçte bir (> ${Math.round(st.wideFrom)} puan)` : '';
     $('hm-legend').innerHTML = `${scale}${hatch}${band} · ${sky}`;
   }
@@ -531,6 +625,7 @@ import Base from '../layouts/Base.astro';
       s.private_marina ? `<span class="badge warn">${MARINA_BADGE}</span>` : s.access && ACCESS_BADGE[s.access] ? `<span class="badge warn">${ACCESS_BADGE[s.access]}</span>` : '',
       legal ? `<span class="badge legal">${legal}</span>` : '',
       s.auto_added ? '<span class="badge assume">otomatik eklendi — sahada doğrulanmadı</span>' : '',
+      sc.gated ? '<span class="badge storm">güvenlik</span>' : '',
     ].join('');
     const band = sc.p10 !== null && sc.p90 !== null ? `bant ${Math.round(sc.p10)}–${Math.round(sc.p90)}` : 'bant yok';
     const head = `<h3><span class="big">${sc.total === null ? '–' : Math.round(sc.total)}</span> ${esc(s.name)}</h3>
@@ -551,7 +646,7 @@ import Base from '../layouts/Base.astro';
   const loadHours = () =>
     fetch(api('/api/hours', species), { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((b: HoursData) => { hours = b; heat(); })
+      .then((b: HoursData) => { hours = b; heat(); if (cardWin) renderPlan(); render(); })
       .catch(() => { $('heat').innerHTML = '<p class="muted fs-2">Isı haritası alınamadı.</p>'; });
   loadHours();
   let rz = 0;
@@ -623,7 +718,7 @@ import Base from '../layouts/Base.astro';
       $('verdict').textContent = 'Hayır';
       $('verdict-sub').textContent = '72 saatte öneri yok: koşullar uygun değil ya da rüzgar/dalga verisi eksik (güvenlik denetlenemiyor). Güvenlik uyarıları "Tüm meralar" sekmesinde.';
       for (const c of ['.q2', '.q3', '.q4', '.q5', '.why-more', '.go']) qa(c, false);
-      alts.hidden = true; $('alts-h').hidden = true; eqNote.hidden = true; eqPick.hidden = true;
+      $('alts-box').hidden = true; $('strip-card').hidden = true; $('rig-card').hidden = true; eqNote.hidden = true; eqPick.hidden = true;
       return;
     }
     // I9: answer "today?" first (until 06:00 tomorrow), then the nearest strong option in 72 h, else the relative best
@@ -656,10 +751,19 @@ import Base from '../layouts/Base.astro';
     if (eqList.length >= 2) {
       eqNote.textContent = equalText(eqList.length);
       eqPick.innerHTML = eqList.map((w, i) => `<button type="button" role="radio" aria-checked="${i === eqSel}" data-i="${i}">${esc(w.name)}</button>`).join('');
-      eqPick.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => { eqSel = Number(x.dataset.i); renderPlan(); }));
+      eqPick.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => {
+        eqSel = Number(x.dataset.i);
+        cardCol = null;
+        renderPlan();
+        mapApi?.focus(eqList[eqSel]!.spot_id); // O1: choosing an option goes to it on the map
+      }));
     }
-    alts.innerHTML = rest.map((w) => `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)}</span><span class="a-r">${span(w)} · puan ${Math.round(w.total)}${w.tier === 'guclu' ? '' : ' · görece'}</span></button></li>`).join('');
-    alts.hidden = $('alts-h').hidden = !rest.length;
+    // O4: alternatives as small cards beside the main card (name, time, score, trust in plain words)
+    alts.innerHTML = rest.map((w) => {
+      const tr = trust(w, { calibrated: calibrated[species] === true });
+      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)}</span><span class="a-r">${span(w)} · puan ${Math.round(w.total)}${w.tier === 'guclu' ? '' : ' · görece'}</span><span class="a-r">Güven: <b class="trust" data-l="${tr.level}">${tr.level}</b></span></button></li>`;
+    }).join('');
+    $('alts-box').hidden = !rest.length;
     alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
     await fillCard(cur, myN, eqList.length, withOutside);
   }
@@ -671,8 +775,17 @@ import Base from '../layouts/Base.astro';
   const PROV_TR: Record<string, string> = { yalova: 'Yalova', balikesir: 'Balıkesir' };
 
   /** Questions 2–5 for one window; the tackle line and the weather sentence need the spot's hourly inputs. */
+  /** O4: hour of the card (null = the window's best hour); set by the 24 h strip. */
+  let cardCol: number | null = null;
+  let cardWin: Win | null = null;
   async function fillCard(w: Win, myN: number, nEq: number, withOutside: boolean) {
     const s = all.find((x) => x.id === w.spot_id);
+    if (cardWin?.spot_id !== w.spot_id || cardWin?.start !== w.start) cardCol = null;
+    const first = cardWin === null;
+    cardWin = w;
+    const col = cardCol ?? colOf(w);
+    // O3: the map and the list follow the plan's hour (the time bar says so and offers "şimdiye dön")
+    if (first && sel !== col) setCol(col);
     const prov = s?.province && s.province !== 'bursa' ? PROV_TR[s.province] ?? s.province : null;
     // 2) where, when
     $('a-where').textContent = w.name;
@@ -690,6 +803,7 @@ import Base from '../layouts/Base.astro';
     $<HTMLAnchorElement>('pick-field').href = link(`/sahadayim/?id=${encodeURIComponent(w.spot_id)}`, species);
     pickId = w.spot_id;
     mapApi?.highlight(w.spot_id);
+    drawStrip(w, col);
     // technical detail under "Neden?"
     const band = w.p10 !== null && w.p90 !== null ? `${Math.round(w.p10)}–${Math.round(w.p90)}` : 'yok';
     const tech = [
@@ -702,10 +816,12 @@ import Base from '../layouts/Base.astro';
     // 3) tackle, weather and light at the best hour
     const d = await detail(w.spot_id);
     if (myN !== planSeq) return;
-    const v = d?.packed?.tk?.[d.from + colOf(w)];
+    const v = d?.packed?.tk?.[d.from + col];
+    nowLine(w, d);
     if (!v) {
       $('a-tackle').textContent = 'Bu saatin girdileri yok; takım için mera kartına bakın.';
       $('a-tackle-sub').textContent = '';
+      $('rig-card').hidden = true;
       return;
     }
     const input = { depthM: v[0] ?? 3, currentMs: v[1] ?? null, windKmh: v[2] ?? null, gustKmh: v[3] ?? null, crossKmh: v[4] ?? null, sunAlt: v[5] ?? 0, lampP: v[6] ?? null, turbidity: v[7] ?? null, sstDev: v[8] ?? null, waveM: v[9] ?? null, kind: s?.kind };
@@ -715,12 +831,75 @@ import Base from '../layouts/Base.astro';
     $('a-tackle').textContent = personalLine(line, t.profile, myTk.personal);
     const own = myTk.personal[t.profile];
     // short under the line; the class's line sizes and the legal size are under "Neden?"
-    $('a-tackle-sub').innerHTML = `${own ? 'Senin takımına göre' : 'Genel takım sınıfı'}${t.light === 'bilinmeyen gece' ? ' · iskele ışığı bilinmiyor' : ''} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
+    $('a-tackle-sub').innerHTML = `${own ? 'Senin takımına göre' : 'Genel takım sınıfı'} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
     const cls = t.profile === 'lrf' ? TACKLE_CLASSES.lrf : tackleClass('spin', g);
     const tkHead = `<li><b>Takım sınıfı:</b> ${own ? `senin takımın (${esc(myTk.profiles.find((p) => p.id === t.profile)!.name)})` : `${esc(tackleClass(t.profile, g).label)}; ip ${esc(cls.line)}`}. Yasal asgari boy ${LEGAL_MIN[species]} cm (6/2 Tebliğ).</li>`;
-    why.innerHTML = [lead, weatherSentence(v[2] ?? null, v[3] ?? null, v[9] ?? null), lightSentence(v[5] ?? null, fmtTime(w.peak))].filter(Boolean).slice(0, 3).map((x) => `<li>${esc(x!)}</li>`).join('');
+    const colIso = new Date((nowHour + col) * HOUR).toISOString();
+    why.innerHTML = [lead, weatherSentence(v[2] ?? null, v[3] ?? null, v[9] ?? null), lightSentence(v[5] ?? null, fmtTime(colIso))].filter(Boolean).slice(0, 3).map((x) => `<li>${esc(x!)}</li>`).join('');
+    // the chosen hour differs from the window's best hour: say which hour the card describes
+    if (col !== colOf(w)) {
+      const hs = hourSpot(w.spot_id);
+      const sc = hs ? hs.t[col + hoursOffset()] : null;
+      $('a-when').textContent += ` · kart şu saate göre: ${fmtTime(colIso)}${sc != null ? ` (puan ${Math.round(sc)})` : ''}`;
+    }
+    drawRig(t, colIso);
     const tkWhy = document.getElementById('tk-why');
     if (tkWhy) tkWhy.innerHTML = tkHead + t.rows.map((r) => `<li><b>${esc(r.label)}: ${esc(r.value)}</b> — ${esc(r.why)} <span class="tag ev-${r.evidence}" title="Kanıt düzeyi">kanıt ${r.evidence}</span>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`).join('') + t.notes.map((n) => `<li class="muted">${esc(n)}</li>`).join('');
+  }
+  // ---------------------------------------------------------------- O3/O4: strip, rig, now line
+  const hoursOffset = () => (hours ? nowHour - Math.floor(Date.parse(hours.from) / HOUR) : 0);
+  const hourSpot = (id: string) => hours?.spots.find((x) => x.id === id) ?? null;
+  function drawStrip(w: Win, col: number) {
+    const hs = hourSpot(w.spot_id);
+    const card = $('strip-card');
+    if (!hs) { card.hidden = true; return; }
+    const off = hoursOffset();
+    const a = Math.floor(Date.parse(w.start) / HOUR) - nowHour;
+    const b = Math.floor(Date.parse(w.end) / HOUR) - nowHour + 1;
+    const el = $('strip');
+    el.innerHTML = stripSvg({ fromHour: nowHour, t: hs.t.slice(off, off + 24), gated: hs.g.map((g) => g - off).filter((g) => g >= 0 && g < 24), window: [a, b], selected: col }, Math.max(320, el.clientWidth || 640));
+    $('strip-name').textContent = w.name;
+    card.hidden = false;
+    el.querySelectorAll<SVGRectElement>('.st-cell').forEach((r) => r.addEventListener('click', () => {
+      cardCol = Number(r.dataset.c);
+      setCol(cardCol);
+      fillCard(w, ++planSeq, eqKey.split('|').length, (() => { try { return localStorage.getItem('av-livn-outside-bursa') === '1'; } catch { return false; } })());
+    }));
+  }
+  function drawRig(t: ReturnType<typeof tackle> | ReturnType<typeof tackleLevrek>, colIso: string) {
+    const row = (k: string) => t.rows.find((r) => r.key === k);
+    let vs: RigVariant[];
+    if ('jigG' in t) {
+      const color = row('renk')!, sink = row('saydirma')!;
+      const base = { weightG: t.jigG, lureCm: t.lureCm, zone: t.zone as Zone };
+      vs = color.lit !== undefined || sink.lit !== undefined
+        ? [{ ...base, label: IF_LIT, color: color.lit ?? color.value, sink: (sink.lit ?? sink.value).replace(/ s$/, ' sn') },
+           { ...base, label: IF_DARK, color: color.dark ?? color.value, sink: (sink.dark ?? sink.value).replace(/ s$/, ' sn') }]
+        : [{ ...base, color: color.value, sink: sink.value.replace(/ s$/, ' sn') }];
+    } else {
+      const color = row('renk')!;
+      const cm = Number(/\d+/.exec(t.lureCm)?.[0] ?? 8);
+      const base = { weightG: t.weightG, lureCm: cm, zone: (t.lure === 'metal jig' ? 'dibe yakın' : 'orta su') as Zone, sink: null };
+      vs = color.lit !== undefined ? [{ ...base, label: IF_LIT, color: color.lit }, { ...base, label: IF_DARK, color: color.dark! }] : [{ ...base, color: color.value }];
+    }
+    const el = $('rig');
+    el.innerHTML = rigSvg(vs, Math.max(300, Math.min(640, el.clientWidth || 420)));
+    $('rig-hour').textContent = `${fmtTime(colIso)} için`;
+    $('rig-card').hidden = false;
+  }
+  /** O3: when the plan's hour is not now, one line on why "now" differs (safety cap) and when it calms. */
+  function nowLine(w: Win, d: Detail | null) {
+    const el = $('a-now');
+    const hs = hourSpot(w.spot_id);
+    const off = hoursOffset();
+    const planIsNow = Math.floor(Date.parse(w.start) / HOUR) <= nowHour && Math.floor(Date.parse(w.end) / HOUR) >= nowHour;
+    const v0 = d?.packed?.tk?.[d.from];
+    const nowGated = !!hs && hs.g.includes(off);
+    let calm: string | null = null;
+    if (hs && nowGated) for (let c = 1; c < 72; c++) if (!hs.g.includes(off + c) && hs.t[off + c] != null) { calm = fmtTime(new Date((nowHour + c) * HOUR).toISOString()); break; }
+    const txt = nowVsPlan({ nowGated, gustKmh: v0?.[3] ?? null, waveM: v0?.[9] ?? null, calmFrom: calm, planIsNow, nowTotal: hs ? hs.t[off] ?? null : null, planTime: fmtTime(w.peak) });
+    el.hidden = !txt;
+    el.textContent = txt ?? '';
   }
   const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))

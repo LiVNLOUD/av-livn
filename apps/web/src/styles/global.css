@@ -195,7 +195,32 @@ html.embed body { padding-bottom: 0; }
 .draw-panel p { margin: 0; }
 
 /* M1: home plan card — five questions, label above answer (never a narrow value column) */
-.plan { display: grid; gap: var(--s3); container: plan / inline-size; max-width: 1180px; }
+.r-win { container: planwrap / inline-size; }
+/* O4: main card (≤ 720 px text column) + side column (24 h strip, tackle picture, alternatives) */
+.plan { display: grid; gap: var(--s4); grid-template-columns: minmax(0, 1fr); align-items: start; }
+.plan-main { display: grid; gap: var(--s3); container: plan / inline-size; max-width: 720px; min-width: 0; }
+.plan-side { display: grid; gap: var(--s4); min-width: 0; align-content: start; }
+@container planwrap (min-width: 1100px) {
+  .plan { grid-template-columns: minmax(0, 720px) minmax(0, 1fr); }
+}
+
+.side-card { display: grid; gap: var(--s2); padding: var(--s4); min-width: 0; }
+.side-card[hidden], .side-alts[hidden] { display: none; }
+.side-h { margin: 0; font-size: var(--fs-3); display: flex; gap: var(--s2); align-items: baseline; flex-wrap: wrap; }
+.strip-box svg, .rig-box svg { display: block; width: 100%; height: auto; }
+.rig-box svg { max-width: 900px; }
+.strip .st-cell { cursor: pointer; }
+.strip .st-cell:hover { stroke: var(--foam); stroke-width: 1; }
+.strip text, .rig-svg text { fill: var(--mist); font-size: 11px; font-family: inherit; }
+.rig-svg .rg-zone.on { fill: var(--sodium); font-weight: 650; }
+.rig-svg .rg-var { fill: var(--foam); font-weight: 650; font-size: 12px; }
+.rig-svg .rg-cap { fill: var(--foam); }
+.strip-legend { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
+.lg-win { display: inline-block; width: 14px; height: 10px; border: 2px solid var(--sodium); border-radius: 2px; }
+.lg-gate { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #3a1c1f 0 2px, #ff7a6b 2px 3.5px); }
+.now-line { color: var(--warn) !important; font-weight: 600; }
+.now-line[hidden] { display: none; }
+.badge.storm { border-color: var(--storm); color: var(--storm); }
 .main-pick { display: grid; gap: var(--s4) var(--s5); padding: var(--s4) var(--s5); grid-template-columns: minmax(0, 1fr); grid-template-areas: 'q1' 'q2' 'q3' 'q4' 'q5' 'more' 'go'; }
 @container plan (min-width: 720px) {
   .main-pick { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'q1 q2' 'q3 q3' 'q4 q5' 'more more' 'go go'; }
@@ -217,7 +242,21 @@ body.app .stale.on { display: none; }
 .stale-card .short { display: none; }
 .qa .fresh::before { content: '· '; }
 .qa .fresh:empty { display: none; }
-@media (max-width: 767px) { .stale-card { font-size: var(--fs-1); padding: var(--s1) var(--s3); } .stale-card .long { display: none; } .stale-card .short { display: inline; } }
+/* M4/O: phones keep the five answers on the first screen — the stale warning moves into the freshness line
+   (same text, warning colour), "Neden?" shows two points, the now line is small */
+@media (max-width: 767px) {
+  .stale-card { display: none !important; }
+  .qa .fresh[data-stale]:not([data-stale='']) { font-size: 0; }
+  .qa .fresh[data-stale]:not([data-stale=''])::after { content: attr(data-stale); font-size: var(--fs-2); color: var(--warn); font-weight: 650; }
+  #a-why li:nth-child(n + 3) { display: none; }
+  .now-line { font-size: var(--fs-1) !important; }
+  .main-pick { gap: 8px !important; }
+  .qa .q { font-size: var(--fs-1); }
+  .qa .a.big { font-size: 1.5rem; }
+  .qa .tk-line { line-height: 1.3; }
+  .qa .a-sub { line-height: 1.35; }
+  .eq-note { font-size: var(--fs-1) !important; }
+}
 .qa .tk-line { font-size: var(--fs-4); line-height: 1.35; font-weight: 650; }
 .qa ul.a { padding-left: 1.1em; display: grid; gap: 2px; font-weight: 500; }
 .trust[data-l='Düşük'] { color: var(--warn); } .trust[data-l='Orta'] { color: var(--foam); } .trust[data-l='Yüksek'] { color: var(--good); }
@@ -240,6 +279,7 @@ body.app .stale.on { display: none; }
 .eq-pick button { min-height: 44px; padding: 0 var(--s4); border-radius: 999px; border: 1px solid var(--swell); background: transparent; color: var(--foam); font: inherit; font-size: var(--fs-2); font-weight: 600; cursor: pointer; }
 .eq-pick button[aria-checked='true'] { background: var(--sodium); border-color: var(--sodium); color: #1a1205; }
 .alts-h { margin: var(--s2) 0 0; font-size: var(--fs-3); }
+.side-alts { display: grid; gap: var(--s2); }
 .alts { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .alts button { width: 100%; display: grid; gap: 2px; text-align: left; padding: var(--s3); border: 1px solid var(--swell); border-radius: 10px; background: transparent; color: var(--foam); font: inherit; cursor: pointer; min-height: 44px; }
 .alts button:hover { border-color: var(--mist); }

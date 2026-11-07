@@ -5,7 +5,9 @@ import { PMTiles, Protocol, type RangeResponse, type Source } from 'pmtiles';
 import { esc, KIND_TR, lampV2 } from './format';
 import { getToken } from './admin';
 import { PALETTE } from './palette';
-import { badgeLabel, declutter, mergeBadges, placeBadges } from './declutter';
+import { badgeLabel, declutter, mergeBadges, placeBadges, spotFeatures } from './declutter';
+/** O1: zoom when going to a spot. */
+export const FOCUS_ZOOM = 15.5;
 import { api, link, type Species } from './species';
 import { BANDS_V2 } from '@av-livn/scoring';
 
@@ -72,6 +74,8 @@ export interface MapApi {
   flyTo(id: string): void;
   /** M3: highlight the plan's pick (null clears). */
   highlight(id: string | null): void;
+  /** O1: fly to a spot (zoom ~15.5) and ring it. */
+  focus(id: string): void;
 }
 
 /** I2: MapLibre 6 needs WebGL2. Without it the map is replaced by a note; list, plan and heat map keep working. */
@@ -82,7 +86,7 @@ export function webgl2Ok(): boolean {
     return false;
   }
 }
-const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {} };
+const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {}, focus: () => {} };
 function noMap(container: HTMLElement, why: string): MapApi {
   const note = document.createElement('div');
   note.className = 'map-loading map-off-note';
@@ -227,6 +231,9 @@ const map = new maplibregl.Map({
     ],
   },
 });
+// e2e hook (O1/O2 checks read zoom and rendered labels); no data beyond what the page shows
+(o.container as HTMLElement & { __avMap?: unknown }).__avMap = map;
+
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 map.addControl(new maplibregl.ScaleControl({ unit: 'metric', maxWidth: 110 }), 'bottom-right');
 map.addControl(
@@ -473,23 +480,27 @@ map.on('load', async () => {
   map.addLayer({
     id: 'spot-labels', type: 'symbol', source: 'spots', minzoom: 12, // M3: far zoom shows settlement badges only
     layout: {
-      'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 10.5, 14, 13],
+      // O2: one label per spot, from the spot's own feature (the selected one in sodium, always placed)
+      'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 10.5, 14, 13],
       'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'bottom-right', 'bottom-left', 'top-right'],
       'text-radial-offset': ['interpolate', ['linear'], ['zoom'], 9, 1.35, 14, 1.7], 'text-max-width': 9,
-      'symbol-sort-key': ['get', 'rank'],
+      'symbol-sort-key': ['case', ['get', 'pick'], -1, ['get', 'rank']] as never,
     },
-    paint: { 'text-color': '#f3f6f7', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.6 },
+    paint: { 'text-color': ['case', ['get', 'pick'], '#f5a83c', ['get', 'gated'], '#ffb4ab', '#f3f6f7'] as never, 'text-halo-color': '#0e1c27', 'text-halo-width': 1.6 },
   });
   map.addLayer({
     id: 'spots', type: 'symbol', source: 'spots',
     layout: { 'icon-image': 'disc', 'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.55, 14, 0.85], 'icon-allow-overlap': true },
-    paint: { 'icon-color': color as never, 'icon-halo-color': '#0e1c27', 'icon-halo-width': 2 },
+    // O3: a safety-capped score is not a plain low score: dark red disc, red halo, "!" instead of the number
+    paint: { 'icon-color': ['case', ['get', 'gated'], '#5a2a2c', color] as never, 'icon-halo-color': ['case', ['get', 'gated'], '#ff7a6b', '#0e1c27'] as never, 'icon-halo-width': 2 },
   });
   map.addLayer({
     id: 'spot-score', type: 'symbol', source: 'spots', minzoom: 11,
     layout: { 'text-field': ['to-string', ['get', 'score']], 'text-font': ['Noto Sans Bold'], 'text-size': 10, 'text-allow-overlap': true, 'text-ignore-placement': true },
-    paint: { 'text-color': '#0e1c27' },
+    paint: { 'text-color': ['case', ['get', 'gated'], '#ffb4ab', '#0e1c27'] as never },
   });
+  // O1/O2: ring around the selected spot, drawn from the same feature as its marker and label
+  map.addLayer({ id: 'pick-ring', type: 'circle', source: 'spots', filter: ['==', ['get', 'pick'], true], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 10, 16, 18], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#f5a83c', 'circle-stroke-width': 3 } });
 
   // G5: settlement badges at far zoom (visual grouping only; every spot keeps its own data and card).
   const P = 24;
@@ -513,26 +524,10 @@ map.on('load', async () => {
     paint: { 'icon-color': color as never, 'icon-halo-color': ['case', ['get', 'pick'], '#f5a83c', '#0e1c27'] as never, 'icon-halo-width': ['case', ['get', 'pick'], 3, 1.5] as never, 'text-color': '#0e1c27' },
   });
 
-  // M3: the plan's pick, highlighted at every zoom (ring + name), above badges and markers
-  map.addSource('pick', { type: 'geojson', data: empty });
-  map.addLayer({ id: 'pick-ring', type: 'circle', source: 'pick', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 9, 14, 15], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#f5a83c', 'circle-stroke-width': 3 } });
-  map.addLayer({
-    id: 'pick-label', type: 'symbol', source: 'pick',
-    // N4: no separate name while the pick sits inside a far-zoom badge (the badge is outlined instead)
-    filter: ['!', ['get', 'inBadge']],
-    layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-size': 13, 'text-anchor': 'top', 'text-offset': [0, 1.3], 'text-max-width': 12, 'text-allow-overlap': true },
-    paint: { 'text-color': '#f5a83c', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.8 },
-  });
-  let pickInBadge = false;
   setPick = (id) => {
     pickId = id;
-    const s = id ? byId.get(id) : undefined;
-    (map.getSource('pick') as maplibregl.GeoJSONSource | undefined)?.setData({
-      type: 'FeatureCollection',
-      features: s ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: [s.lon, s.lat] }, properties: { name: s.name, inBadge: pickInBadge } }] : [],
-    });
+    layout();
   };
-  setPick(pickId);
   const p0 = pickId ? byId.get(pickId) : undefined;
   if (p0 && !o.focusId) map.jumpTo({ center: [p0.lon, p0.lat] });
 
@@ -551,8 +546,6 @@ map.on('load', async () => {
       : { badges: [], single: spots.map((s) => s.id) };
     // N4: neighbouring settlements whose badges would overlap on screen become one "… çevresi" badge
     const badges = mergeBadges(raw, (lon, lat) => map.project([lon, lat]));
-    const inBadge = !!pickId && badges.some((b) => b.ids.includes(pickId!));
-    if (inBadge !== pickInBadge) { pickInBadge = inBadge; setPick(pickId); }
     const keep = new Set(single);
     const shownSpots = spots.filter((s) => keep.has(s.id));
     (map.getSource('badges') as maplibregl.GeoJSONSource).setData({
@@ -570,10 +563,7 @@ map.on('load', async () => {
     });
     (map.getSource('spots') as maplibregl.GeoJSONSource).setData({
       type: 'FeatureCollection',
-      features: feats.map(({ s, ll }) => ({
-        type: 'Feature', geometry: { type: 'Point', coordinates: [ll.lng, ll.lat] },
-        properties: { id: s.id, name: s.name, total: s.score.total ?? -1, score: s.score.total === null ? '–' : Math.round(s.score.total), rank: s.score.rank ?? 99 },
-      })),
+      features: spotFeatures(feats.map(({ s, ll }) => ({ s: { id: s.id, name: s.name, lon: s.lon, lat: s.lat, total: s.score.total, gated: !!s.score.gated, rank: s.score.rank }, lon: ll.lng, lat: ll.lat })), pickId),
     });
     (map.getSource('leaders') as maplibregl.GeoJSONSource).setData({
       type: 'FeatureCollection',
@@ -601,9 +591,8 @@ map.on('load', async () => {
         const s = byId.get(btn.dataset.id!);
         if (!s) return;
         listPop.remove();
-        map.easeTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 14.5) });
-        if (o.onSpot) o.onSpot(s.id);
-        else showCard(s);
+        if (o.onSpot) o.onSpot(s.id); // O1: the page's single "go to spot" path zooms and rings it
+        else { map.easeTo({ center: [s.lon, s.lat], zoom: Math.max(map.getZoom(), 14.5) }); showCard(s); }
       }),
     );
   });
@@ -649,11 +638,15 @@ return {
   resize: () => map.resize(),
   highlight(id) {
     const changed = id !== pickId;
-    pickId = id;
     setPick(id);
-    layout();
     const s = id ? byId.get(id) : undefined;
     if (changed && s) map.easeTo({ center: [s.lon, s.lat] });
+  },
+  // O1: every "go to this spot" (plan chip, map, list, heat map) — smooth zoom to ~15.5 with the ring on it
+  focus(id) {
+    const s = byId.get(id);
+    setPick(id);
+    if (s) map.flyTo({ center: [s.lon, s.lat], zoom: FOCUS_ZOOM, duration: 1200, essential: true });
   },
   flyTo(id) {
     const s = byId.get(id);

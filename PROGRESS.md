@@ -311,3 +311,19 @@ Model ve veri hattına dokunulmadı.
   - Kuru iş D1'e yazmaz ("dry run: nothing written").
   - `score_dispatch_at`'a dokunulmaz; test tek seferliktir.
 - Her saat `meta.score_guard_last`: `{at, scoredAt, dispatched, alert, token}`. Token için yalnız varlığı yazılır, değeri asla.
+
+## Faz O — plan ekranı tutarlılığı ve boş alan (2026-11-07) ✅ DUR
+Model ve veri hattına dokunulmadı.
+- [x] O1 Meraya git, tek yol (`MapApi.focus`): harita zoom 15,5'e 1,2 sn'de yumuşak geçer ve merayı halkayla gösterir. Plan seçeneği, kart, harita, liste/tablo ve ısı haritası aynı yolu kullanır. e2e: zoom ≥ 14,5 ve halka.
+- [x] O2 Tek mera, tek etiket: ayrı pick-label katmanı kaldırıldı. Halka ve turuncu ad, meranın kendi (gerekirse kaydırılmış) konumundan çizilir (`spotFeatures`, test). e2e'de İDO Güzelyalı Feribot İskelesi 1 kez yazıyor.
+- [x] O3 Saat tutarlılığı:
+  - harita, liste ve ısı haritası planın saatini gösterir; üstte "Gösterilen saat: … · şimdiye dön" çubuğu;
+  - kartta "Şu an rüzgar sert (hamle 42 km/sa, güvenli değil); 20:00'den sonra yatışıyor." (`nowVsPlan`, Türkçe ek testli);
+  - güvenlik tavanındaki puanlar her yerde rozetli: liste, tablo, harita (koyu kırmızı "!"), ısı haritası lejantı ve özeti.
+- [x] O4 Plan bölgesi:
+  - ana kart ≤ 720 px; yanında 24 saat şeridi (puan rengi, gece/gündüz, güvenlik saatleri taralı, önerilen pencere çerçeveli; dokununca kart o saate geçer);
+  - takım görseli: katman, saydırma; ışık bilinmiyorsa iki varyant; markasız;
+  - en çok 2 alternatif küçük kart.
+- [x] O5 Tüm meralar ≥ 1200 px'te tablo (Mera, Tip, Puan, En iyi saat, Erişim, Güven).
+- [x] O6 Isı haritasında "şimdi" etiketi saat satırında; çakışan saat etiketi gösterilmez (`visibleTicks`, test + e2e getBBox).
+- Telefonda 5 saniye testi için: bayatlık uyarısı tazelik satırına alındı, "Neden?" 2 madde, yazı boyutları biraz küçüldü.
