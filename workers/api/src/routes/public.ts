@@ -37,6 +37,15 @@ publicRoutes.get('/forbidden', async (c) => {
 });
 // M2: the public endpoint returns the generic, brand-free classes only; the owner's personal set is admin-only
 // (GET /api/admin/tackle) and a visitor's own set lives on their device.
+// P2/P5: weather grids and model spread, built hourly in Actions and stored in D1 meta; served as stored (no CPU)
+const GRIDS: Record<string, string> = { wx: 'grid_wx', sea: 'grid_sea', cur: 'grid_cur', spread: 'model_spread' };
+publicRoutes.get('/grid/:name', async (c) => {
+  const key = GRIDS[c.req.param('name')];
+  if (!key) return c.json({ ok: false, error: 'unknown_grid', grids: Object.keys(GRIDS) }, 404);
+  const r = await c.env.DB.prepare('SELECT value FROM meta WHERE key = ?1').bind(key).first<{ value: string }>();
+  if (!r) return c.json({ ok: false, error: 'not_ready' }, 404);
+  return c.body(r.value, 200, { 'content-type': 'application/json; charset=UTF-8', 'cache-control': 'public, max-age=600' });
+});
 publicRoutes.get('/tackle', (c) => c.json({ ok: true, profiles: DEFAULT_PROFILES }, 200, NO_CACHE));
 // N3: whether the forward calibration has passed its first check (caps the plan's trust at "Orta" until then).
 // Only the verdict and the session count of the report; coefficients and sessions stay admin-only.

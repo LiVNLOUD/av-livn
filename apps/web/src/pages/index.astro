@@ -33,7 +33,7 @@ import Base from '../layouts/Base.astro';
           <div class="qa q2" hidden><h2 class="q">Nereye, ne zaman?</h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="a-sub now-line" id="a-now" hidden></p></div>
           <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
-          <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p></div>
+          <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p><p class="a-sub models-line" id="a-models" hidden></p></div>
           <details class="why-more" id="why-more" hidden>
             <summary>Neden? Ayrıntılar (puan, belirsizlik, kanıt, kaynaklar)</summary>
             <div id="why-detail"></div>
@@ -152,7 +152,7 @@ import Base from '../layouts/Base.astro';
     .app[data-view='heat'] { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'views views' 'tb tb' 'main card'; }
     .views { padding: var(--s3) var(--s5); border-bottom: 1px solid var(--swell); }
     .r-win, .r-spots, .r-heat { padding: var(--s5); overflow: auto; }
-    .r-spots > * { max-width: 900px; }
+    .r-spots > *:not(.spot-table-box) { max-width: 900px; }
     .r-map { position: relative; top: 0; height: auto; min-height: 0; border-left: 1px solid var(--swell); }
     .r-card:not([hidden]) { position: static; height: auto; width: 420px; border-left: 1px solid var(--swell); }
   }
@@ -222,9 +222,18 @@ import Base from '../layouts/Base.astro';
   .spot-table-box { overflow-x: auto; }
   .spot-table-box[hidden] { display: none; }
   :global(.spot-table) { width: 100%; border-collapse: collapse; font-size: var(--fs-2); }
+  :global(.spot-table td), :global(.spot-table th) { white-space: nowrap; }
+  :global(.spot-table .c-name) { width: 46%; }
+  :global(.spot-table tbody th .nm) { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  :global(.th-sort) { all: unset; cursor: pointer; color: var(--mist); font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
+  :global(.th-sort:hover), :global([aria-sort='ascending'] .th-sort), :global([aria-sort='descending'] .th-sort) { color: var(--foam); }
+  :global(.badge.acc) { cursor: help; }
+  :global(.badge.acc-ok) { border-color: var(--good); color: var(--good); }
+  :global(.badge.acc-warn) { border-color: var(--warn); color: var(--warn); }
+  :global(.tbl-note) { margin: 0 0 var(--s2); font-size: var(--fs-2); color: var(--mist); }
   :global(.spot-table th), :global(.spot-table td) { text-align: left; padding: var(--s2) var(--s2); border-top: 1px solid var(--swell); vertical-align: middle; }
   :global(.spot-table thead th) { color: var(--mist); font-weight: 600; border-top: 0; white-space: nowrap; }
-  :global(.spot-table tbody th) { font-weight: 620; display: flex; align-items: center; gap: var(--s2); min-width: 260px; }
+  :global(.spot-table tbody th) { font-weight: 620; display: flex; align-items: center; gap: var(--s2); min-width: 260px; max-width: 46vw; }
   :global(.spot-table tbody th .lamp) { --size: 30px; flex: none; }
   :global(.spot-table tbody th a) { color: var(--foam); text-decoration: none; }
   :global(.spot-table tr[data-id]) { cursor: pointer; }
@@ -259,7 +268,7 @@ import Base from '../layouts/Base.astro';
   import { esc, fmtAgo, fmtDay, fmtTime, freshness, type WeatherRunInfo, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { IF_DARK, IF_LIT, kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
-  import { driverSentence, equalText, lightSentence, nowVsPlan, trust, weatherSentence } from '../scripts/plan';
+  import { driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, trust, weatherSentence } from '../scripts/plan';
   import { stripSvg } from '../scripts/strip';
   import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
@@ -268,7 +277,7 @@ import Base from '../layouts/Base.astro';
   import type { MapApi } from '../scripts/map';
 
   type Spot = {
-    id: string; name: string; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null; private_marina?: boolean;
+    id: string; name: string; lat: number; lon: number; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null; private_marina?: boolean;
     score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean; warnings: string[]; partial: boolean; reason: string | null; top3?: number | null; missing?: string[] | string | null };
   };
   type Win = { spot_id: string; name: string; start: string; end: string; peak: string; total: number; p10: number | null; p90: number | null; rank: number; why: string | null; reason?: string | null; assumed: boolean; tier?: 'guclu' | 'goreli'; missing?: string | null; top3?: number | null; access?: string | null };
@@ -399,25 +408,44 @@ import Base from '../layouts/Base.astro';
   const tableMq = matchMedia('(min-width: 1200px)');
   tableMq.addEventListener('change', () => render());
   /** O5: best non-capped hour of a spot in the next 72 h (from /api/hours). */
-  function bestHour(id: string): string {
+  function bestHour(id: string): { col: number; v: number } | null {
     const hs = hours?.spots.find((x) => x.id === id);
-    if (!hs) return '–';
+    if (!hs) return null;
     const off = hours ? nowHour - Math.floor(Date.parse(hours.from) / HOUR) : 0;
     let bc = -1, bv = -1;
     for (let c = 0; c < 72; c++) { const v = hs.t[off + c]; if (v != null && !hs.g.includes(off + c) && v > bv) { bv = v; bc = c; } }
-    if (bc < 0) return '–';
-    const iso = new Date((nowHour + bc) * HOUR).toISOString();
-    const d = fmtDay(iso);
-    return `${d === fmtDay(new Date().toISOString()) ? 'Bugün' : d} ${fmtTime(iso)} · ${Math.round(bv)}`;
+    return bc < 0 ? null : { col: bc, v: bv };
   }
-  function tableRow(s: Spot): string {
+  /** P0: access as a short badge in the table; the long text is the tooltip. */
+  const ACCESS_SHORT = (s: Spot): [string, string] =>
+    s.private_marina ? ['Marina', MARINA_BADGE] : s.access === 'kisitli_feribot' ? ['Feribot', ACCESS_BADGE.kisitli_feribot!] : s.access === 'belirsiz' ? ['Belirsiz', ACCESS_BADGE.belirsiz!] : s.access === 'acik' ? ['Açık', 'erişim açık (tahmin; sahada doğrulanmadı)'] : ['Bilinmiyor', 'erişim bilgisi yok'];
+  const dayWordShort = (iso: string) => {
+    const d = fmtDay(iso);
+    return d === fmtDay(new Date().toISOString()) ? 'bugün' : d.split(' ')[0]!; // full weekday, no date
+  };
+  type SortKey = 'score' | 'best' | 'name';
+  let tblSort: { key: SortKey; dir: 1 | -1 } = { key: 'score', dir: -1 };
+  function tableTrust(s: Spot) {
     const sc = s.score;
+    if (sc.total === null) return null;
     const reason = sc.reason ?? null;
     const why = reason ? reason.replace(/^(Öne çıkaran|Geri bırakan) \([^)]*\): /, '') : null;
-    const tr = sc.total === null ? null : trust({ why, reason, assumed: /varsayım|kanıt C|\(C\)|ölçüm değil/.test(reason ?? ''), tier: sc.total >= 65 ? 'guclu' : 'goreli', missing: (Array.isArray(sc.missing) ? sc.missing.length : sc.missing) ? 'eksik' : null, top3: sc.top3 ?? null, p10: sc.p10, p90: sc.p90 }, { calibrated: calibrated[species] === true });
-    const acc = s.private_marina ? MARINA_BADGE : s.access && ACCESS_BADGE[s.access] ? ACCESS_BADGE[s.access] : s.access === 'acik' ? 'açık' : 'bilinmiyor';
-    const score = sc.total === null ? '–' : sc.gated ? `${Math.round(sc.total)} <span class="badge storm">güvenlik</span>` : String(Math.round(sc.total));
-    return `<tr data-id="${esc(s.id)}" tabindex="0"><th scope="row"><span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span><a href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}">${esc(s.name)}</a>${outside(s) ? ' <span class="badge">Bursa dışı</span>' : ''}</th><td>${esc(KIND_TR[s.kind] ?? s.kind)}</td><td class="num">${score}</td><td>${bestHour(s.id)}</td><td>${esc(acc)}</td><td>${tr ? `<b class="trust" data-l="${tr.level}">${tr.level}</b>` : '–'}</td></tr>`;
+    return trust({ why, reason, assumed: /varsayım|kanıt C|\(C\)|ölçüm değil/.test(reason ?? ''), tier: sc.total >= 65 ? 'guclu' : 'goreli', missing: (Array.isArray(sc.missing) ? sc.missing.length : sc.missing) ? 'eksik' : null, top3: sc.top3 ?? null, p10: sc.p10, p90: sc.p90 }, { calibrated: calibrated[species] === true }).level;
+  }
+  function tableRow(s: Spot, showTrust: boolean): string {
+    const sc = s.score;
+    const [acc, accLong] = ACCESS_SHORT(s);
+    const score = sc.total === null ? '–' : sc.gated ? `${Math.round(sc.total)} <span class="badge storm" title="Puan güvenlik tavanında (rüzgar ya da dalga eşiği aşıldı)">güvenlik</span>` : String(Math.round(sc.total));
+    const bh = bestHour(s.id);
+    const bIso = bh ? new Date((nowHour + bh.col) * HOUR).toISOString() : null;
+    const best = bh && bIso ? `${dayWordShort(bIso)} ${fmtTime(bIso)} · ${Math.round(bh.v)}` : '–';
+    const tl = showTrust ? tableTrust(s) : null;
+    return `<tr data-id="${esc(s.id)}" tabindex="0"><th scope="row"><span class="lamp" data-total="${sc.total ?? ''}" data-gated="${sc.gated}"></span><a class="nm" href="${link(`/mera/?id=${encodeURIComponent(s.id)}`, species)}" title="${esc(s.name)}">${esc(s.name)}</a>${outside(s) ? ' <span class="badge" title="Bursa ili dışında, yakın çevre">Bursa dışı</span>' : ''}</th><td>${esc(KIND_TR[s.kind] ?? s.kind)}</td><td class="num">${score}</td><td class="num">${best}</td><td><span class="badge acc acc-${acc === 'Açık' ? 'ok' : 'warn'}" title="${esc(accLong)}" tabindex="0">${acc}</span></td>${showTrust ? `<td>${tl ? `<b class="trust" data-l="${tl}">${tl}</b>` : '–'}</td>` : ''}</tr>`;
+  }
+  function sortSpots(list: Spot[]): Spot[] {
+    const k = tblSort.key, d = tblSort.dir;
+    const val = (s: Spot) => (k === 'score' ? (s.score.total ?? -1) : k === 'best' ? (bestHour(s.id)?.v ?? -1) : 0);
+    return [...list].sort((a, b) => (k === 'name' ? d * a.name.localeCompare(b.name, 'tr') : d * (val(a) - val(b))) || (a.score.rank ?? 1e9) - (b.score.rank ?? 1e9));
   }
   function render() {
     const spots = all.filter((s) => !hidden(s));
@@ -460,13 +488,27 @@ import Base from '../layouts/Base.astro';
     tbl.hidden = !tableMq.matches;
     $('spots').hidden = tableMq.matches;
     if (tableMq.matches) {
-      const byRank = (a: Spot, b: Spot) => (a.score.rank ?? 1e9) - (b.score.rank ?? 1e9);
-      const rows = [...main].sort(byRank).map(tableRow).join('') +
-        (beaches.length ? `<tr class="grp"><td colspan="6"><button type="button" class="grp-btn" data-grp="beaches" aria-expanded="${beachesOpen}"><span class="lamp" data-total="${best ?? ''}" data-gated="false"></span><span>Kumsallar (${beaches.length})${best !== null ? ` — en iyi ${Math.round(best)}` : ''} · ${beachesOpen ? 'daralt' : 'genişlet'}</span></button></td></tr>` + (beachesOpen ? [...beaches].sort(byRank).map(tableRow).join('') : '') : '');
-      tbl.innerHTML = `<table class="spot-table"><thead><tr><th scope="col">Mera</th><th scope="col">Tip</th><th scope="col">Puan${at ? ` (${fmtTime(at)})` : ' (şimdi)'}</th><th scope="col">En iyi saat (72 sa)</th><th scope="col">Erişim</th><th scope="col">Güven</th></tr></thead><tbody>${rows}</tbody></table>`;
+      // P0: trust column only when it carries information (more than one level among the rows)
+      const levels = new Set(spots.map(tableTrust).filter(Boolean));
+      const showTrust = levels.size > 1;
+      const one = levels.size === 1 ? [...levels][0] : null;
+      const cols = showTrust ? 6 : 5;
+      const rows = sortSpots(main).map((x) => tableRow(x, showTrust)).join('') +
+        (beaches.length ? `<tr class="grp"><td colspan="${cols}"><button type="button" class="grp-btn" data-grp="beaches" aria-expanded="${beachesOpen}"><span class="lamp" data-total="${best ?? ''}" data-gated="false"></span><span>Kumsallar (${beaches.length})${best !== null ? ` — en iyi ${Math.round(best)}` : ''} · ${beachesOpen ? 'daralt' : 'genişlet'}</span></button></td></tr>` + (beachesOpen ? sortSpots(beaches).map((x) => tableRow(x, showTrust)).join('') : '') : '');
+      const hIso = new Date((nowHour + sel) * HOUR).toISOString();
+      const sortTh = (key: SortKey, label: string, cls = '') => {
+        const on = tblSort.key === key;
+        return `<th scope="col" class="${cls}" aria-sort="${on ? (tblSort.dir === 1 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="th-sort" data-sort="${key}">${label}${on ? (tblSort.dir === 1 ? ' ▲' : ' ▼') : ''}</button></th>`;
+      };
+      tbl.innerHTML = `${one ? `<p class="tbl-note">Tüm meralarda güven ${one.toLocaleLowerCase('tr')}: ${one === 'Düşük' ? 'öne çıkaranlar çoğunlukla varsayım ve model sahada henüz doğrulanmadı.' : 'model sahada henüz doğrulanmadı.'}</p>` : ''}<table class="spot-table"><thead><tr>${sortTh('name', 'Mera', 'c-name')}<th scope="col">Tip</th>${sortTh('score', `Puan (${dayWordShort(hIso)} ${fmtTime(hIso)})`)}${sortTh('best', 'En iyi saat (72 sa)')}<th scope="col">Erişim</th>${showTrust ? '<th scope="col">Güven</th>' : ''}</tr></thead><tbody>${rows}</tbody></table>`;
       tbl.querySelectorAll<HTMLElement>('.lamp').forEach((el) => lampV2(el, el.dataset.total === '' ? null : Number(el.dataset.total), el.dataset.gated === 'true'));
       tbl.querySelectorAll<HTMLButtonElement>('[data-grp]').forEach((b) => b.addEventListener('click', () => toggleGroup(b.dataset.grp!)));
-      tbl.querySelectorAll<HTMLTableRowElement>('tr[data-id]').forEach((tr) => tr.addEventListener('click', (e) => { e.preventDefault(); openSpot(tr.dataset.id!); }));
+      tbl.querySelectorAll<HTMLButtonElement>('.th-sort').forEach((b) => b.addEventListener('click', () => {
+        const k = b.dataset.sort as SortKey;
+        tblSort = tblSort.key === k ? { key: k, dir: tblSort.dir === 1 ? -1 : 1 } : { key: k, dir: k === 'name' ? 1 : -1 };
+        render();
+      }));
+      tbl.querySelectorAll<HTMLTableRowElement>('tr[data-id]').forEach((tr) => tr.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('.acc')) return; e.preventDefault(); openSpot(tr.dataset.id!); }));
       return;
     }
     $('spots').innerHTML =
@@ -794,7 +836,11 @@ import Base from '../layouts/Base.astro';
     const why = $('a-why');
     const lead = driverSentence(w.why);
     why.innerHTML = lead ? `<li>${esc(lead)}</li>` : '';
-    const tr = trust(w, { calibrated: calibrated[species] === true });
+    // P2: weather-model agreement at the card's hour (Actions builds the spread hourly; nearest spot cell)
+    const ag = agreementAt(s, col);
+    const tr = trust(w, { calibrated: calibrated[species] === true, weather: ag?.split ?? null });
+    $('a-models').hidden = !ag;
+    $('a-models').textContent = ag ? `${ag.text}.` : '';
     $('a-trust').textContent = tr.level;
     $('a-trust').dataset.l = tr.level;
     $('a-trust-sub').textContent = tr.text;
@@ -809,6 +855,7 @@ import Base from '../layouts/Base.astro';
     const tech = [
       w.reason ? `Modelin gerekçesi: ${esc(w.reason)}` : null,
       `Puan ${Math.round(w.total)} (bant ${band}) · ${w.tier === 'guclu' ? 'güçlü' : 'görece'} pencere${w.top3 != null ? ` · ilk 3'te kalma payı %${Math.round(w.top3 * 100)}` : ''}${w.missing ? ` · ${esc(w.missing)}` : ''}`,
+      modelsDetail(s, col),
       nEq > 1 ? `Eşdeğer gösterim: ilk 3'te kalma payı %60'ın altında ve bantlar örtüşüyor; seçenekler ada göre sıralı, en iyi ilan edilmez (MODEL.md §16).` : null,
       `Kapsam: ${SPECIES_TR[species]}, ${withOutside ? 'Bursa ve yakın çevre' : 'Bursa kıyısı'}, ${box.checked ? 'erişimi açık meralar' : 'tüm meralar'}.`,
     ].filter(Boolean).map((x) => `<li>${x}</li>`).join('');
@@ -846,6 +893,26 @@ import Base from '../layouts/Base.astro';
     const tkWhy = document.getElementById('tk-why');
     if (tkWhy) tkWhy.innerHTML = tkHead + t.rows.map((r) => `<li><b>${esc(r.label)}: ${esc(r.value)}</b> — ${esc(r.why)} <span class="tag ev-${r.evidence}" title="Kanıt düzeyi">kanıt ${r.evidence}</span>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`).join('') + t.notes.map((n) => `<li class="muted">${esc(n)}</li>`).join('');
   }
+  // ---------------------------------------------------------------- P2: weather-model spread (MODEL.md §19)
+  type SpreadCell = { id: string; lat: number; lon: number; w: ([number, number, number] | null)[]; g: ([number, number, number] | null)[]; d: (number | null)[]; m: Record<string, (number | null)[]> };
+  let spreadDoc: { from_hour: number; models: string[]; cells: SpreadCell[] } | null = null;
+  fetch('/api/grid/spread').then((r) => (r.ok ? r.json() : null)).then((b) => { if (b?.cells) { spreadDoc = b; if (cardWin) renderPlan(); } }).catch(() => {});
+  const MODEL_TR: Record<string, string> = { icon_seamless: 'ICON (DWD)', ecmwf_ifs025: 'ECMWF IFS', gfs_seamless: 'GFS (NOAA)', meteofrance_seamless: 'ARPEGE (Météo-France)' };
+  function spreadAt(s: Spot | undefined, col: number): { cell: SpreadCell; k: number } | null {
+    if (!s || !spreadDoc) return null;
+    const cell = spreadDoc.cells.reduce((b, c) => ((c.lat - s.lat) ** 2 + (c.lon - s.lon) ** 2 < (b.lat - s.lat) ** 2 + (b.lon - s.lon) ** 2 ? c : b));
+    const k = nowHour + col - spreadDoc.from_hour;
+    return k >= 0 && k < cell.w.length ? { cell, k } : null;
+  }
+  const agreementAt = (s: Spot | undefined, col: number) => { const a = spreadAt(s, col); return a ? modelAgreement(a.cell.w[a.k] ?? null, a.cell.g[a.k] ?? null) : null; };
+  function modelsDetail(s: Spot | undefined, col: number): string | null {
+    const a = spreadAt(s, col);
+    if (!a) return 'Hava modelleri karşılaştırması: henüz yok.';
+    const per = Object.entries(a.cell.m).map(([m, v]) => `${MODEL_TR[m] ?? m} ${v[a.k] == null ? '–' : Math.round(v[a.k]!)}`).join(', ');
+    const g = a.cell.g[a.k], d = a.cell.d[a.k];
+    return `Hava modelleri (rüzgar km/sa): ${per}${g ? `; hamle ${Math.round(g[0])}–${Math.round(g[1])}` : ''}${d != null ? `; yön farkı en çok ${d}°` : ''}. Bu yayılım puan bandına katılmaz (bant yalnız model parametrelerinin belirsizliği); güven düzeyini etkiler (MODEL.md §19).`;
+  }
+
   // ---------------------------------------------------------------- O3/O4: strip, rig, now line
   const hoursOffset = () => (hours ? nowHour - Math.floor(Date.parse(hours.from) / HOUR) : 0);
   const hourSpot = (id: string) => hours?.spots.find((x) => x.id === id) ?? null;

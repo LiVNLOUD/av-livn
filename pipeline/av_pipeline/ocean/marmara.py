@@ -97,6 +97,28 @@ def series_for(spots: list[dict], times: list[dt.datetime], lats: np.ndarray, lo
     return out
 
 
+def current_grid(times: list[dt.datetime], lats: np.ndarray, lons: np.ndarray, u: np.ndarray, v: np.ndarray, from_hour: int,
+                 hours: int = 72, stride: int = 3) -> dict:
+    """P5: surface current (depth-mean 1-5 m, already averaged) on a decimated regular grid for the map layer.
+
+    u, v: [time, lat, lon] in m/s; output u/v in cm/s (int, None on land) for `hours` hours from `from_hour`
+    (epoch hours, UTC). Every `stride`-th cell (500 m * 3 = ~1.5 km) keeps the file small; no smoothing."""
+    idx = {int(t.timestamp() // 3600): k for k, t in enumerate(times)}
+    la, lo = lats[::stride], lons[::stride]
+
+    def frame(arr: np.ndarray, h: int) -> list:
+        k = idx.get(h)
+        if k is None:
+            return [None] * (len(la) * len(lo))
+        f = arr[k, ::stride, ::stride]
+        return [None if not np.isfinite(x) else int(round(x * 100)) for x in f.ravel()]
+
+    return {"from_hour": from_hour, "hours": hours, "lat0": round(float(la[0]), 4), "lon0": round(float(lo[0]), 4),
+            "dlat": round(float(la[1] - la[0]), 5) if len(la) > 1 else 0.0, "dlon": round(float(lo[1] - lo[0]), 5) if len(lo) > 1 else 0.0,
+            "nlat": len(la), "nlon": len(lo), "source": "Copernicus Marine, Karadeniz/Marmara 500 m (1-5 m ortalaması), tahmin",
+            "vars": {"u": [frame(u, from_hour + k) for k in range(hours)], "v": [frame(v, from_hour + k) for k in range(hours)]}}
+
+
 # ---------------------------------------------------------------- I/O (Actions only)
 
 def cm_subset(dataset: str, variables: list[str], box: tuple[float, float, float, float], start: str, end: str, depth: tuple[float, float], out: Path) -> Path:
@@ -166,6 +188,15 @@ def forecast(d1: D1, now: dt.datetime) -> int:
         vo = read(cp, "vo")[4]
     sst = depth_mean(thetao, depths, 0.5, 20.5)
     speed = depth_mean(np.sqrt(uo ** 2 + vo ** 2), cdepths, 0.5, 5.5)
+    # P5: current field for the map layer (u, v separately; stored as meta.grid_cur, served by the Worker as is)
+    try:
+        from_hour = int(now.timestamp() // 3600)
+        grid = current_grid(ctimes, clats, clons, depth_mean(uo, cdepths, 0.5, 5.5), depth_mean(vo, cdepths, 0.5, 5.5), from_hour)
+        grid["built_at"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        d1.query("INSERT INTO meta (key, value) VALUES ('grid_cur', ?1) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [json.dumps(grid, separators=(",", ":"))])
+        print(f"grid_cur: {grid['nlat']}x{grid['nlon']} points, {grid['hours']} hours")
+    except Exception as e:  # noqa: BLE001 — the layer is optional; the per-spot series below must still be written
+        print(f"grid_cur skipped: {type(e).__name__}")
     if ctimes != times or not (np.allclose(clats, lats) and np.allclose(clons, lons)):
         speed = None  # grids differ: keep temperature only
     series = series_for(spots, times, lats, lons, sst, speed)

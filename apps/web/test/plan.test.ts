@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { driverOf, driverSentence, equalText, evidenceOf, lightSentence, trust, weatherSentence, type PlanWin } from '../src/scripts/plan';
+import { modelAgreement, driverOf, driverSentence, equalText, evidenceOf, lightSentence, trust, weatherSentence, type PlanWin } from '../src/scripts/plan';
 import { fromServer, parseMy, personalLine, toProfiles } from '../src/scripts/mytackle';
 import { DEFAULT_PROFILES } from '@av-livn/scoring';
 
@@ -92,5 +92,21 @@ describe('M2 device tackle profile', () => {
     const m = fromServer([{ id: 'lrf', name: 'x', jigMin: 0.6, jigMax: 5, maxGustKmh: 25, line: 'PE 0.2 + FC 0.8–1.2 numara (≈3–5 lb)' }, { id: 'spin', name: 'y', jigMin: 6, jigMax: 32, maxGustKmh: 50, line: 'PE 0.8' }]);
     expect(m).toEqual({ light: { min: 0.6, max: 5, line: 'PE 0.2', leader: 'FC 0.8–1.2 numara (≈3–5 lb)' }, heavy: { min: 6, max: 32, line: 'PE 0.8', leader: '' } });
     expect(fromServer([])).toEqual({ light: null, heavy: null });
+  });
+});
+
+describe('P2: weather-model agreement', () => {
+  it('agree / wide / gate split, in plain words', () => {
+    expect(modelAgreement([12, 15, 1.2], [20, 25, 2])).toEqual({ split: null, text: 'Hava modelleri uyuşuyor (rüzgar 12–15 km/sa)' });
+    expect(modelAgreement([12, 28, 6], [20, 35, 6])).toEqual({ split: 'wide', text: 'Hava modelleri farklı şeyler söylüyor (rüzgar 12–28 km/sa)' });
+    expect(modelAgreement([10, 14, 6], null)!.split).toBe('wide'); // sd alone
+    expect(modelAgreement([20, 30, 4], [32, 48, 6])).toEqual({ split: 'gate', text: 'Hava modelleri güvenlik konusunda ayrışıyor (hamle 32–48 km/sa)' });
+    expect(modelAgreement(null, [30, 50, 8])).toBeNull();
+  });
+  it('trust: a gate split is low, a wide spread caps at medium, agreement changes nothing', () => {
+    const base = { why: 'Kuzey rüzgarına daha az açık (x)', assumed: false, tier: 'guclu' as const, missing: null, top3: 0.9, p10: 60, p90: 75 };
+    expect(trust(base, { calibrated: true, weather: 'gate' }).level).toBe('Düşük');
+    expect(trust(base, { calibrated: true, weather: 'wide' })).toMatchObject({ level: 'Orta', text: expect.stringMatching(/hava modelleri rüzgarda ayrışıyor/) });
+    expect(trust(base, { calibrated: true, weather: null }).level).toBe('Yüksek');
   });
 });

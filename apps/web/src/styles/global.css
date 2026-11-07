@@ -285,3 +285,10 @@ body.app .stale.on { display: none; }
 .alts button:hover { border-color: var(--mist); }
 .alts .a-n { font-weight: 650; } .alts .a-r { font-size: var(--fs-2); color: var(--mist); }
 .badge.good { border-color: #5fbf7f; color: #5fbf7f; }
+
+/* P0: close-zoom depth note */
+.map-coarse { position: absolute; z-index: 3; left: 50%; top: var(--s3); transform: translateX(-50%); max-width: min(420px, calc(100% - 24px)); padding: var(--s1) var(--s3); border-radius: 8px; background: color-mix(in oklab, var(--deep) 90%, transparent); border: 1px solid var(--swell); color: var(--mist); font-size: var(--fs-1); text-align: center; }
+.map-coarse[hidden] { display: none; }
+
+.qa .models-line { color: var(--foam); }
+.qa .models-line[hidden] { display: none; }

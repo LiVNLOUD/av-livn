@@ -564,3 +564,32 @@ Eski hava verisiyle hesaplanan taze puan da eskidir; uyarı yalnız puan yaşın
 **Sıra.** Cloudflare cron her saat önce havayı çeker, sonra puanlar bu çekimden eskiyse puanlamayı tetikler (`shouldRescoreAfterFetch`). GitHub zamanlaması yedektir; puanlar zaten en yeni havayla hesaplanmışsa hemen çıkar (`nothingNew`). Deploy ve veri yenilemesi `force` ile her zaman yeniden puanlar.
 
 Ölçülen durum ve beklenen sıklık: `docs/audit/staleness-24h.md`.
+
+## 19. Hava tahmini belirsizliği: model karşılaştırması (P2)
+
+**Ne ölçülür.** Saatlik olarak Actions'ta (`scripts/weather-grids.ts`), Open-Meteo'dan dört model çekilir:
+- ICON (DWD; Avrupa iç ağı Marmara'yı kapsar);
+- ECMWF IFS 0,25°;
+- GFS (NOAA);
+- ARPEGE (Météo-France; Avrupa alanı Türkiye'yi kapsar).
+
+Open-Meteo'da Türkiye'ye özel bir model yoktur. Çekim, meraların bütün hava hücreleri için tek istektir (çoklu koordinat). Değişkenler rüzgar, hamle, yön, yağış ve buluttur. Her saat için hesaplananlar:
+- rüzgar ve hamle: en az, en çok, standart sapma;
+- yön: dairesel ortalamadan en büyük sapma;
+- yağış ve bulut: aralık.
+
+Sonuç D1 `meta.model_spread`'e yazılır ve `/api/grid/spread` ile olduğu gibi servis edilir.
+
+**Puan bandına girmez.** Mera kartındaki %10–90 bandı yalnız **model parametrelerinin** belirsizliğidir (Monte Carlo, §16). Hava tahmininin belirsizliği ondan ayrı tutulur ve ayrı gösterilir. İkisini tek banda karıştırmak hangi belirsizliğin nereden geldiğini gizlerdi. Puan, Open-Meteo'nun `best_match` tahmini üzerinden hesaplanmaya devam eder.
+
+**Güven kuralına etkisi** (`plan.ts` `modelAgreement`, `trust`):
+- **Güvenlik ayrışması.** Bazı modeller hamleyi 40 km/sa güvenlik eşiğinin üstünde, bazıları altında veriyorsa güven **Düşük** olur ("bu saatin güvenli olup olmadığında ayrışıyor").
+- **Geniş yayılım.** Rüzgar aralığı 12 km/sa'ten geniş ya da standart sapma 5 km/sa'ten büyükse güven en çok **Orta** olur.
+- **Uyum.** Modeller uyuşuyorsa güven değişmez; bu, güveni yükseltmez.
+
+Bu eşikler varsayımdır (kanıt C). Av kaydıyla değerlendirilecek.
+
+**Gösterim.**
+- Plan kartında güven cevabının altında tek satır: "Hava modelleri uyuşuyor (rüzgar 12–15 km/sa)" ya da "… farklı şeyler söylüyor (rüzgar 12–28 km/sa)".
+- Model model değerler "Neden? Ayrıntılar" altında.
+- Mera kartındaki saatlik tahmin tablosunda rüzgar satırı modellerin aralığını küçük bir çubukla gösterir.

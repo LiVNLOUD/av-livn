@@ -34,6 +34,14 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: node_modules/.bin/esbuild scripts/score-job.ts --bundle --platform=node --format=esm --external:web-push --outfile=.score/job.mjs --log-level=warning
+      - name: Weather grids and model spread → D1 (P2/P5; hourly, skipped when fresh)
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          node_modules/.bin/esbuild scripts/weather-grids.ts --bundle --platform=node --format=esm --outfile=.score/grids.mjs --log-level=warning
+          node .score/grids.mjs ${{ inputs.force && '--force' || '' }}
       - name: Score spots → D1
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

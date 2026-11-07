@@ -31,7 +31,21 @@ export function driverOf(text: string | null | undefined): Driver {
  * estimate that is not a measurement), trust is low and the sentence says so in plain words. Missing weather data
  * is also low. A relative-best window, a wide band or a pick the model cannot separate from others is medium.
  */
-export function trust(w: PlanWin, opts: { calibrated?: boolean } = {}): { level: TrustLevel; text: string } {
+/**
+ * P2 (MODEL.md §19): agreement of the weather models at one hour. Wind [min, max, sd] km/h and gust [min, max, sd]
+ * across ICON, ECMWF IFS, GFS and ARPEGE. "gate": some models put the gust over the 40 km/h safety gate and
+ * others under it; "wide": wind range over 12 km/h or sd over 5 km/h; null = models agree.
+ */
+export const GATE_GUST = 40;
+export function modelAgreement(w: [number, number, number] | null, g: [number, number, number] | null): { split: 'gate' | 'wide' | null; text: string } | null {
+  if (!w) return null;
+  const rng = `${Math.round(w[0])}–${Math.round(w[1])} km/sa`;
+  if (g && g[0] < GATE_GUST && g[1] >= GATE_GUST) return { split: 'gate', text: `Hava modelleri güvenlik konusunda ayrışıyor (hamle ${Math.round(g[0])}–${Math.round(g[1])} km/sa)` };
+  if (w[1] - w[0] > 12 || w[2] > 5) return { split: 'wide', text: `Hava modelleri farklı şeyler söylüyor (rüzgar ${rng})` };
+  return { split: null, text: `Hava modelleri uyuşuyor (rüzgar ${rng})` };
+}
+
+export function trust(w: PlanWin, opts: { calibrated?: boolean; weather?: 'gate' | 'wide' | null } = {}): { level: TrustLevel; text: string } {
   if (w.assumed) {
     const d = driverOf(w.why ?? w.reason);
     const what =
@@ -42,9 +56,12 @@ export function trust(w: PlanWin, opts: { calibrated?: boolean } = {}): { level:
     return { level: 'Düşük', text: `Bu öneri çoğunlukla ${what}` };
   }
   if (w.missing) return { level: 'Düşük', text: 'Bazı hava ya da deniz verileri eksik; öneri eksik veriyle hesaplandı.' };
+  // P2: when the weather models disagree about the safety gate, the hour may not be safe at all
+  if (opts.weather === 'gate') return { level: 'Düşük', text: 'Hava modelleri bu saatin güvenli olup olmadığında ayrışıyor (hamle eşiği); öneri belirsiz.' };
   if (w.tier === 'goreli') return { level: 'Orta', text: 'Bugünün en iyisi, ama koşullar genel olarak zayıf.' };
   const wide = w.p10 !== null && w.p90 !== null && w.p90 - w.p10 > 30;
   if ((w.top3 != null && w.top3 < 0.6) || wide) return { level: 'Orta', text: 'Yer ve saat iyi görünüyor, ama yakın seçeneklerden net ayrılmıyor.' };
+  if (opts.weather === 'wide') return { level: 'Orta', text: 'Yer iyi görünüyor, ama hava modelleri rüzgarda ayrışıyor; tahmin belirsiz.' };
   // N3 (MODEL.md §17): "Yüksek" only after the forward calibration has passed its first check
   if (!opts.calibrated) return { level: 'Orta', text: 'Koşullar güçlü ve öne çıkaran etken ölçülmüş veriye dayanıyor; ama model ileriye dönük av kaydıyla henüz doğrulanmadı (en fazla Orta).' };
   return { level: 'Yüksek', text: 'Koşullar güçlü, öne çıkaran etken ölçülmüş veriye dayanıyor ve model ileriye dönük av kaydında basit tahminleri geçti.' };

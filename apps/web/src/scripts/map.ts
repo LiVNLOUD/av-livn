@@ -115,6 +115,12 @@ loading.className = 'map-loading';
 loading.setAttribute('role', 'status');
 loading.textContent = 'Meralar yükleniyor…';
 o.container.append(loading);
+// P0: at close zoom the depth data is too coarse — say so where the fill fades out
+const coarse = document.createElement('div');
+coarse.className = 'map-coarse';
+coarse.hidden = true;
+coarse.textContent = 'Bu ölçekte derinlik verisi yetersiz (EMODnet DTM ~115 m); yalnız sığ konturlar kesikli gösteriliyor.';
+o.container.append(coarse);
 let at: string | null = o.at ?? null;
 let species: Species = o.species ?? 'istavrit';
 let pickId: string | null = o.highlight ?? null;
@@ -165,13 +171,14 @@ const map = new maplibregl.Map({
       { id: 'bg', type: 'background', paint: { 'background-color': OPEN_WATER } },
       {
         id: 'bands', type: 'fill', source: 'bathy', 'source-layer': 'bands',
-        paint: { 'fill-color': ['step', ['get', 'dmin'], DEPTH_STOPS[0]![1], ...DEPTH_STOPS.slice(1).flatMap(([d, c]) => [d, c])] as never, 'fill-antialias': false },
+        // P0: the ~115 m DTM must not look like close-range detail — the fill fades out from zoom 15 to 16
+        paint: { 'fill-color': ['step', ['get', 'dmin'], DEPTH_STOPS[0]![1], ...DEPTH_STOPS.slice(1).flatMap(([d, c]) => [d, c])] as never, 'fill-antialias': false, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 15, 1, 16, 0] as never },
       },
       // G5: "belirsiz derinlik" (interpolated DTM) is optional, off by default; the hatch image is registered on
       // load before the layer can be shown (tiles laid out before the image existed drew no hatch).
       { id: 'interp', type: 'fill', source: 'bathy', 'source-layer': 'interp', layout: { visibility: 'none' }, paint: { 'fill-pattern': 'hatch', 'fill-opacity': 0.55 } },
       {
-        id: 'contours', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['!=', ['get', 'q'], 0],
+        id: 'contours', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['!=', ['get', 'q'], 0], maxzoom: 15,
         paint: {
           'line-color': '#dbe6ea',
           'line-opacity': ['match', ['get', 'depth'], [10, 20, 50, 100], 0.55, 0.28],
@@ -180,13 +187,18 @@ const map = new maplibregl.Map({
       },
       {
         // contours over interpolated (GEBCO-filled) cells: dashed and faint
-        id: 'contours-i', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['==', ['get', 'q'], 0],
+        id: 'contours-i', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['==', ['get', 'q'], 0], maxzoom: 15,
         paint: {
           'line-color': '#dbe6ea',
           'line-opacity': ['match', ['get', 'depth'], [10, 20, 50, 100], 0.3, 0.16],
           'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1],
           'line-dasharray': [3, 3],
         },
+      },
+      {
+        // P0: close in, only the shallowest contours stay — dashed and faint (the DTM cannot resolve this scale)
+        id: 'contours-near', type: 'line', source: 'bathy', 'source-layer': 'contours', minzoom: 15, filter: ['<=', ['get', 'depth'], 10],
+        paint: { 'line-color': '#dbe6ea', 'line-opacity': 0.22, 'line-width': 1, 'line-dasharray': [3, 3] },
       },
       {
         id: 'survey-line', type: 'line', source: 'bathy', 'source-layer': 'survey',
@@ -235,6 +247,8 @@ const map = new maplibregl.Map({
 (o.container as HTMLElement & { __avMap?: unknown }).__avMap = map;
 
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+const showCoarse = () => { coarse.hidden = map.getZoom() < 15; };
+map.on('zoom', showCoarse);
 map.addControl(new maplibregl.ScaleControl({ unit: 'metric', maxWidth: 110 }), 'bottom-right');
 map.addControl(
   new maplibregl.AttributionControl({ compact: true, customAttribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> katkıcıları · Copernicus Marine · Open-Meteo' }),

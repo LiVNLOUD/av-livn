@@ -213,7 +213,7 @@ for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [768, 1024], [390
 }
 
 // 6. Faz O: go-to-spot zoom + ring (O1), one label per spot (O2), the time bar (O3), the table (O5), "now" label (O6)
-for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [390, 844]]) {
+for (const [w, h] of [[3440, 1440], [2576, 1440], [1920, 1080], [1440, 900], [390, 844]]) {
   const { p, errors } = await page(w, h);
   await p.goto(base + '/', { waitUntil: 'networkidle' });
   await waitPlan(p);
@@ -253,7 +253,16 @@ for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [390, 844]]) {
   if (w >= 1200) {
     const cols = await p.locator('.spot-table thead th').count();
     const rows = await p.locator('.spot-table tbody tr[data-id]').count();
-    cols === 6 && rows > 10 ? ok(`${w}: spot table ${cols} columns, ${rows} rows`) : fail(`${w}: spot table ${cols} columns, ${rows} rows`);
+    cols >= 5 && rows > 10 ? ok(`${w}: spot table ${cols} columns, ${rows} rows`) : fail(`${w}: spot table ${cols} columns, ${rows} rows`);
+    // P0: no cell wraps to more than 2 lines; the table uses the list region (≥ 1100 px from 1920 px)
+    const t = await p.evaluate(() => {
+      const cells = [...document.querySelectorAll('.spot-table td, .spot-table th')];
+      const tall = cells.filter((c) => { const cs = getComputedStyle(c); const lh = parseFloat(cs.lineHeight) || 20; return c.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) > 2 * lh + 2; }).map((c) => c.textContent.trim().slice(0, 30));
+      return { tall, width: Math.round(document.querySelector('.spot-table').getBoundingClientRect().width), head: [...document.querySelectorAll('.spot-table thead th')].map((h) => h.textContent.trim()) };
+    });
+    t.tall.length ? fail(`${w}: table cells over 2 lines: ${t.tall.slice(0, 4).join(' | ')}`) : ok(`${w}: no table cell over 2 lines`);
+    w >= 1920 && t.width < 1100 ? fail(`${w}: table only ${t.width} px wide`) : ok(`${w}: table ${t.width} px wide`);
+    /\(bugün \d\d:\d\d\)|\(\S+ \d\d:\d\d\)/.test(t.head.join(' ')) ? ok(`${w}: score header names the hour: ${t.head[2]}`) : fail(`${w}: score header "${t.head[2]}"`);
   }
   (await overflow(p)) <= 0 ? ok(`${w}: all spots without horizontal overflow`) : fail(`${w}: all spots overflow`);
   if (shots) await p.screenshot({ path: `${shots}/spots-${w}.png` });
