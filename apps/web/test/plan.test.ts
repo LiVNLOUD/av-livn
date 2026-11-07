@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { modelAgreement, driverOf, driverSentence, equalText, evidenceOf, lightSentence, trust, weatherSentence, type PlanWin } from '../src/scripts/plan';
+import { modelAgreement, planPick, driverOf, driverSentence, equalText, evidenceOf, lightSentence, trust, weatherSentence, type PlanWin } from '../src/scripts/plan';
 import { fromServer, parseMy, personalLine, toProfiles } from '../src/scripts/mytackle';
 import { DEFAULT_PROFILES } from '@av-livn/scoring';
 
@@ -108,5 +108,24 @@ describe('P2: weather-model agreement', () => {
     expect(trust(base, { calibrated: true, weather: 'gate' }).level).toBe('Düşük');
     expect(trust(base, { calibrated: true, weather: 'wide' })).toMatchObject({ level: 'Orta', text: expect.stringMatching(/hava modelleri rüzgarda ayrışıyor/) });
     expect(trust(base, { calibrated: true, weather: null }).level).toBe('Yüksek');
+  });
+});
+
+describe('Q2: the plan pick (shared by the card and the early detail request)', () => {
+  const W = (id: string, name: string, total: number, o: object = {}) => ({ spot_id: id, name, total, top3: 0.9, p10: total - 10, p90: total + 10, ...o });
+  it("today's strong window first; equal options listed by name and the first is shown", () => {
+    const a = W('a', 'Zeytinbağı', 80, { tier: 'guclu', top3: 0.4 }), b = W('b', 'Armutlu', 76, { tier: 'guclu' }), c = W('c', 'Mudanya', 40, { tier: 'goreli', p90: 50 });
+    const r = planPick([a, b, c], [a, b, c])!;
+    expect(r.m.spot_id).toBe('a');
+    expect(r.eqList.map((w) => w.spot_id)).toEqual(['b', 'a']); // Armutlu before Zeytinbağı: the card opens on b
+    expect(r.rest.map((w) => w.spot_id)).toEqual(['c']);
+  });
+  it('no strong window today: nearest strong in 72 h, else the relative best; tier filled from the score', () => {
+    const t = [W('t', 'T', 50)];
+    expect(planPick(t, [W('x', 'X', 55, { tier: 'goreli' }), W('y', 'Y', 70, { tier: 'guclu' })])!.m.spot_id).toBe('y');
+    expect(t[0]).toMatchObject({ tier: 'goreli' });
+    const r = planPick([], [W('x', 'X', 55, { tier: 'goreli' })])!;
+    expect([r.m.spot_id, r.todayStrong, r.nextStrong, r.eqList.length]).toEqual(['x', undefined, undefined, 1]);
+    expect(planPick([], [])).toBeNull();
   });
 });

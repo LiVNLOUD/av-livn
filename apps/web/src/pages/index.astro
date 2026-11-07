@@ -2,6 +2,22 @@
 import Base from '../layouts/Base.astro';
 ---
 <Base title="av.livn — Av planı" app>
+  <!-- Q2: start the plan's data requests at once, before the page modules load (~0.6 s earlier on the critical path).
+       Same URLs as scripts/species.ts api(); the page takes each response once (preFetch) or fetches itself. -->
+  <script is:inline>
+    (function () {
+      var sp = 'istavrit';
+      try {
+        var q = new URLSearchParams(location.search).get('tur');
+        var v = localStorage.getItem('av-livn-species');
+        sp = q === 'levrek' || q === 'istavrit' ? q : v === 'levrek' || v === 'istavrit' ? v : 'istavrit';
+      } catch (e) {}
+      var api = function (p) { return sp === 'istavrit' ? p : p + (p.indexOf('?') >= 0 ? '&' : '?') + 'species=' + sp; };
+      var pre = {};
+      ['/api/windows', '/api/spots', '/api/trust-gate'].forEach(function (p) { var u = api(p); pre[u] = fetch(u, { cache: 'no-cache' }); pre[u].catch(function () {}); });
+      window.__avPre = pre;
+    })();
+  </script>
   <div class="app" id="app" data-view="plan">
     <!-- M1: the plan is the first view at every width; the hour chart and the full list are one tap away -->
     <div class="views" role="tablist" aria-label="Görünüm">
@@ -268,7 +284,7 @@ import Base from '../layouts/Base.astro';
   import { esc, fmtAgo, fmtDay, fmtTime, freshness, type WeatherRunInfo, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { IF_DARK, IF_LIT, kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
-  import { driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, trust, weatherSentence } from '../scripts/plan';
+  import { driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, planPick, trust, weatherSentence } from '../scripts/plan';
   import { stripSvg } from '../scripts/strip';
   import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
@@ -285,6 +301,14 @@ import Base from '../layouts/Base.astro';
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const app = $('app');
   let species: Species = currentSpecies();
+  /** Q2: the response started by the inline script for this exact URL (once), else a fresh request. */
+  const preFetch = (url: string, init?: RequestInit): Promise<Response> => {
+    const pre = (window as { __avPre?: Record<string, Promise<Response>> }).__avPre;
+    const p = pre?.[url];
+    if (!p) return fetch(url, init);
+    delete pre![url];
+    return p.catch(() => fetch(url, init));
+  };
   const HOUR = 3_600_000;
   const TZ_OFF = 3;
   const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
@@ -553,7 +577,7 @@ import Base from '../layouts/Base.astro';
   const loadGate = (sp: Species) => {
     if (sp in calibrated) return Promise.resolve();
     calibrated[sp] = false;
-    return fetch(api('/api/trust-gate', sp)).then((r) => (r.ok ? r.json() : null)).then((b: { passed?: boolean } | null) => {
+    return preFetch(api('/api/trust-gate', sp)).then((r) => (r.ok ? r.json() : null)).then((b: { passed?: boolean } | null) => {
       calibrated[sp] = b?.passed === true;
       if (calibrated[sp]) renderPlan();
     }).catch(() => {});
@@ -563,7 +587,7 @@ import Base from '../layouts/Base.astro';
   function load() {
     const my = ++seq;
     const at = atIso();
-    fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' })
+    preFetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((b: { spots: Spot[]; data_fetched_at: string | null; scored_at?: string | null; weather_run?: WeatherRunInfo | null }) => {
         if (my !== seq) return;
@@ -778,20 +802,9 @@ import Base from '../layouts/Base.astro';
       $('alts-box').hidden = true; $('strip-card').hidden = true; $('rig-card').hidden = true; eqNote.hidden = true; eqPick.hidden = true;
       return;
     }
-    // I9: answer "today?" first (until 06:00 tomorrow), then the nearest strong option in 72 h, else the relative best
+    // I9 + K3: one shared rule (planPick) for the card and the early detail request
     const td = (P ? (box.checked ? P.today.open : P.today.all).windows : winBody.today ? (box.checked ? winBody.today.open : winBody.today.all).windows : []).filter(inBursa);
-    for (const w of td) w.tier ??= w.total >= 65 ? 'guclu' : 'goreli';
-    const todayStrong = td.find((w) => w.tier === 'guclu');
-    const nextStrong = ws.find((w) => w.tier === 'guclu');
-    const m = todayStrong ?? nextStrong ?? ws[0]!;
-    const pool = todayStrong ? [...td, ...ws] : ws;
-    const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
-    // K3 (MODEL.md §16): when the model cannot separate the pick from its alternatives, they are shown as equals
-    const EQ_TOP3 = 0.6;
-    const overlaps = (w: Win) => w.p90 !== null && m.p10 !== null && w.p90 >= m.p10;
-    const eq = m.top3 != null && m.top3 < EQ_TOP3 ? [m, ...others.filter(overlaps)] : [m];
-    const rest = others.filter((w) => !eq.includes(w));
-    const eqList = eq.length >= 2 ? [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr')) : [m];
+    const { m, todayStrong, nextStrong, eqList, rest } = planPick(td, ws)!;
     const key = eqList.map((w) => w.spot_id).join('|');
     if (key !== eqKey) { eqKey = key; eqSel = 0; }
     const cur = eqList[Math.min(eqSel, eqList.length - 1)]!;
@@ -995,12 +1008,10 @@ import Base from '../layouts/Base.astro';
     try { outsideOk = localStorage.getItem('av-livn-outside-bursa') === '1'; } catch {}
     const P = b.plan?.[outsideOk ? 'wide' : 'bursa'];
     if (!P) return;
-    const today = (box.checked ? P.today.open : P.today.all).windows;
-    const all72 = (box.checked ? P.open : P.all).windows;
-    const w = today.find((x) => (x.tier ?? (x.total >= 65 ? 'guclu' : 'goreli')) === 'guclu') ?? all72.find((x) => x.tier === 'guclu') ?? all72[0];
-    if (w) void detail(w.spot_id);
+    const pick = planPick([...(box.checked ? P.today.open : P.today.all).windows], (box.checked ? P.open : P.all).windows);
+    if (pick) void detail(pick.eqList[0]!.spot_id); // the card shows the first equal option until another is chosen
   }
-  const loadWindows = () => fetch(api('/api/windows', species), { cache: 'no-cache' })
+  const loadWindows = () => preFetch(api('/api/windows', species), { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
     .then((b: NonNullable<typeof winBody>) => { winBody = b; prefetchPick(b); renderWindows(); renderPlan(); })
     .catch(() => { $('windows').innerHTML = '<li class="muted">Pencereler alınamadı.</li>'; $('verdict').textContent = 'Bilinmiyor'; $('verdict-sub').textContent = 'Öneriler alınamadı (bağlantı ya da sunucu). "Tüm meralar" sekmesine bakın.'; planReady(); });

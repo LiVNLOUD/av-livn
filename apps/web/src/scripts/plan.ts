@@ -154,3 +154,27 @@ export function ablative(hhmm: string): string {
   const hard = /[çfhkpsşt]$/.test(last);
   return `${hard ? 't' : 'd'}${back ? 'a' : 'e'}n`;
 }
+
+/** Window fields the plan's choice needs (server plan candidates: marinas and outside spots already removed). */
+export interface PickWin { spot_id: string; name: string; total: number; tier?: 'guclu' | 'goreli'; top3?: number | null; p10: number | null; p90: number | null }
+/** K3 (MODEL.md §16): below this chance of staying in the top 3, the pick and overlapping alternatives are equals. */
+export const EQ_TOP3 = 0.6;
+/**
+ * The plan card's choice (I9 + K3), shared by the card and by the early detail request (Q2): today's strong window,
+ * else the nearest strong one in 72 h, else the relative best; up to two other spots; equal options (pick not
+ * separable) listed by name, the first of which the card shows until the visitor picks another.
+ */
+export function planPick<W extends PickWin>(today: W[], all: W[]): { m: W; todayStrong: W | undefined; nextStrong: W | undefined; eqList: W[]; rest: W[] } | null {
+  if (!all.length) return null;
+  for (const w of today) w.tier ??= w.total >= 65 ? 'guclu' : 'goreli';
+  const todayStrong = today.find((w) => w.tier === 'guclu');
+  const nextStrong = all.find((w) => w.tier === 'guclu');
+  const m = todayStrong ?? nextStrong ?? all[0]!;
+  const pool = todayStrong ? [...today, ...all] : all;
+  const others = pool.filter((w, i, arr) => w.spot_id !== m.spot_id && arr.findIndex((x) => x.spot_id === w.spot_id) === i).slice(0, 2);
+  const overlaps = (w: W) => w.p90 !== null && m.p10 !== null && w.p90 >= m.p10;
+  const eq = m.top3 != null && m.top3 < EQ_TOP3 ? [m, ...others.filter(overlaps)] : [m];
+  const rest = others.filter((w) => !eq.includes(w));
+  const eqList = eq.length >= 2 ? [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr')) : [m];
+  return { m, todayStrong, nextStrong, eqList, rest };
+}
