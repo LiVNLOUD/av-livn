@@ -1,0 +1,88 @@
+{
+ "now": "2026-11-07T23:00:00.000Z",
+ "night": "2026-11-08T18:00:00.000Z",
+ "top_now": [
+  [
+   "Armutlu Devlet Limanı – kısa batı mendireği",
+   76.6
+  ],
+  [
+   "Armutlu Devlet Limanı – orta batı mendireği",
+   76.5
+  ],
+  [
+   "Armutlu Devlet Limanı – uzun batı mendireği",
+   76.5
+  ],
+  [
+   "Armutlu Devlet Limanı – doğu mendireği",
+   76.4
+  ],
+  [
+   "Güzelyalı Yat Limanı – batı mendireği",
+   76
+  ],
+  [
+   "Güzelyalı Yat Limanı – doğu mendireği",
+   75.6
+  ],
+  [
+   "Demirsubaşı İskelesi",
+   75
+  ],
+  [
+   "Karacaali İskelesi",
+   74.8
+  ],
+  [
+   "Armutlu İskelesi",
+   74.8
+  ],
+  [
+   "Güzelyalı Yat Limanı – liman içi",
+   74.6
+  ]
+ ],
+ "top_night": [
+  [
+   "Armutlu Devlet Limanı – doğu mendireği",
+   76
+  ],
+  [
+   "Armutlu Devlet Limanı – orta batı mendireği",
+   76
+  ],
+  [
+   "Armutlu Devlet Limanı – uzun batı mendireği",
+   76
+  ],
+  [
+   "Güzelyalı Yat Limanı – batı mendireği",
+   76
+  ],
+  [
+   "Güzelyalı Yat Limanı – doğu mendireği",
+   75.8
+  ],
+  [
+   "Armutlu Devlet Limanı – kısa batı mendireği",
+   75.5
+  ],
+  [
+   "Karacaali İskelesi",
+   74.8
+  ],
+  [
+   "Kurşunlu (Karacabey) – uzun batı mendireği",
+   74.8
+  ],
+  [
+   "Güzelyalı Yat Limanı – liman içi",
+   74.4
+  ],
+  [
+   "Armutlu İskelesi",
+   74.3
+  ]
+ ]
+}
