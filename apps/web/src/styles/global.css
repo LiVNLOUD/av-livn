@@ -210,6 +210,14 @@ html.embed body { padding-bottom: 0; }
 .qa .a.nm { font-size: var(--fs-4); line-height: 1.25; }
 .qa .a-sub { margin: 0; font-size: var(--fs-2); line-height: 1.45; color: var(--mist); }
 .qa .a-sub a { color: var(--foam); }
+.stale-card { margin: 0; border-radius: 8px; padding: var(--s2) var(--s3); border-left: 3px solid var(--warn); background: color-mix(in oklab, var(--warn) 14%, transparent); color: var(--foam); font-size: var(--fs-2); font-weight: 600; }
+.stale-card[hidden] { display: none; }
+/* N5: on the plan page the card carries the same warning; the site-wide band is not repeated above it */
+body.app .stale.on { display: none; }
+.stale-card .short { display: none; }
+.qa .fresh::before { content: '· '; }
+.qa .fresh:empty { display: none; }
+@media (max-width: 767px) { .stale-card { font-size: var(--fs-1); padding: var(--s1) var(--s3); } .stale-card .long { display: none; } .stale-card .short { display: inline; } }
 .qa .tk-line { font-size: var(--fs-4); line-height: 1.35; font-weight: 650; }
 .qa ul.a { padding-left: 1.1em; display: grid; gap: 2px; font-weight: 500; }
 .trust[data-l='Düşük'] { color: var(--warn); } .trust[data-l='Orta'] { color: var(--foam); } .trust[data-l='Yüksek'] { color: var(--good); }
@@ -225,7 +233,7 @@ html.embed body { padding-bottom: 0; }
   .eq-note { font-size: var(--fs-2); }
   .eq-pick { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: calc(-1 * var(--s4)); padding-right: var(--s4); }
   .eq-pick button { flex: none; }
-  .main-pick { gap: var(--s3); padding: var(--s3) var(--s4); }
+  .main-pick { gap: 10px; padding: var(--s3) var(--s4); }
   .qa .tk-line { font-size: var(--fs-3); }
   .plan { gap: var(--s2); }
 }

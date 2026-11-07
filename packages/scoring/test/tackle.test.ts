@@ -179,9 +179,9 @@ describe('tackle (F0/G2)', () => {
 // H3: levrek tackle scenario table (docs/species/levrek/TACKLE.md "Örnek senaryolar")
 const lb: TackleInput = { depthM: 4, currentMs: 0.05, windKmh: 8, gustKmh: 12, crossKmh: 4, sunAlt: -20, lampP: 0.2, turbidity: 1, sstDev: 0, waveM: 0.3, kind: 'rocky' };
 export const LEVREK_SCENARIOS: { name: string; input: TackleInput; expect: [string, number, string, string] }[] = [
-  { name: 'Fırtına ertesi bulanık gece, kayalık', input: { ...lb, waveM: 0.8, turbidity: 0.6, windKmh: 20, gustKmh: 30 }, expect: ['spin', 14, 'silikon shad 10–12 cm', 'chartreuse / beyaz'] },
+  { name: 'Fırtına ertesi bulanık gece, kayalık', input: { ...lb, waveM: 0.8, turbidity: 0.6, windKmh: 20, gustKmh: 30 }, expect: ['spin', 14, 'silikon shad 10–12 cm', 'chartreuse ya da beyaz'] },
   { name: 'Sakin berrak gece, lambalı iskele (3 m)', input: { ...lb, kind: 'pier', waveM: 0.15, lampP: 0.9, depthM: 3 }, expect: ['lrf', 3, 'LRF shad 5–7 cm', 'beyaz-gümüş (ışık–gölge sınırı)'] },
-  { name: 'Yağış sonrası alacakaranlık, dere ağzı', input: { ...lb, kind: 'river_mouth', sunAlt: -3, depthM: 1.5, turbidity: 0.7, waveM: 0.4 }, expect: ['spin', 10, 'silikon shad 10–12 cm', 'chartreuse / beyaz'] },
+  { name: 'Yağış sonrası alacakaranlık, dere ağzı', input: { ...lb, kind: 'river_mouth', sunAlt: -3, depthM: 1.5, turbidity: 0.7, waveM: 0.4 }, expect: ['spin', 10, 'silikon shad 10–12 cm', 'chartreuse ya da beyaz'] },
   { name: 'Gündüz, derin mendirek (9 m), akıntı 0,3', input: { ...lb, kind: 'breakwater', sunAlt: 30, lampP: null, depthM: 9, currentMs: 0.3, waveM: 0.6 }, expect: ['spin', 28, 'metal jig 28 g', 'doğal, ince profil'] },
   { name: 'Kış ani soğuma gecesi, kumsal', input: { ...lb, kind: 'beach', sstDev: -2.5, depthM: 1.5, waveM: 0.5 }, expect: ['spin', 14, 'minnow 7–9 cm', 'koyu siluet (siyah, mor)'] },
   { name: 'Alacakaranlık, sığ berrak kayalık', input: { ...lb, sunAlt: -3, depthM: 2, waveM: 0.6 }, expect: ['spin', 14, 'minnow 9–12 cm', 'doğal gümüş (sardalya)'] },
@@ -225,16 +225,33 @@ describe('I3: unknown lamp → conditional advice; missing data is not calm', ()
       const t = tackle({ ...base, lampP });
       expect(t.light).toBe('bilinmeyen gece');
       const color = t.rows.find((r) => r.key === 'renk')!;
-      expect(color.value).toBe('şeffaf-simli / koyu siluet');
-      expect(color.why).toMatch(/^lamba suya düşüyorsa şeffaf-simli .*; karanlıksa koyu siluet/);
+      // N1: the condition of each option is written out, never a bare "A / B"
+      expect(color.value).toBe('ışık suya düşüyorsa: şeffaf-simli · karanlıksa: koyu siluet');
+      expect([color.lit, color.dark]).toEqual(['şeffaf-simli', 'koyu siluet']);
+      expect(color.why).toMatch(/^ışık suya düşüyorsa şeffaf-simli .*; karanlıksa koyu siluet/);
       expect(t.notes[0]).toMatch(/Lamba durumu bilinmiyor/);
+      expect(tackleLine(t)).toMatch(/silikon \(ışık suya düşüyorsa şeffaf-simli, karanlıksa koyu siluet\)/);
     }
     expect(tackle({ ...base, lampP: 0.85 }).light).toBe('aydınlık gece');
     expect(tackle({ ...base, lampP: 0.85 }).rows.find((r) => r.key === 'renk')!.value).toBe('şeffaf-simli');
     expect(tackle({ ...base, sunAlt: 20, lampP: null }).light).toBe('gündüz');
     const lv = tackleLevrek({ ...lb, lampP: null });
     expect(lv.light).toBe('bilinmeyen gece');
-    expect(lv.rows.find((r) => r.key === 'renk')!.value).toContain(' / ');
+    expect(lv.rows.find((r) => r.key === 'renk')!.value).toMatch(/^ışık suya düşüyorsa: .* · karanlıksa: /);
+    expect(tackleLevrekLine(lv)).toMatch(/ · ışık suya düşüyorsa .*, karanlıksa /);
+  });
+  it('N1: no row and no one-line text offers two options with a bare slash (all scenarios, both species)', () => {
+    const slash = / \/ /;
+    const inputs = [...SCENARIOS.map((s) => s.input), ...LEVREK_SCENARIOS.map((s) => s.input)];
+    for (const input of inputs) for (const lampP of [null, 0, 0.5, 1]) {
+      const t = tackle({ ...input, lampP });
+      const l = tackleLevrek({ ...input, lampP });
+      for (const r of [...t.rows, ...l.rows]) expect(r.value, `${r.key}: ${r.value}`).not.toMatch(slash);
+      expect(tackleLine(t)).not.toMatch(slash);
+      expect(tackleLevrekLine(l)).not.toMatch(slash);
+      expect([...t.notes, ...l.notes].join(' ')).not.toMatch(/"\/"/);
+      if (t.rows.some((r) => (r.key === 'renk' || r.key === 'saydirma') && r.lit !== undefined)) expect(tackleLine(t)).toMatch(/ışık suya düşüyorsa .*, karanlıksa /);
+    }
   });
   it('missing current/wind/wave is named, and never unlocks the light levrek LRF set', () => {
     const t = tackle({ ...base, currentMs: null, windKmh: null, gustKmh: null });

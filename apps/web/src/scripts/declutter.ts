@@ -51,6 +51,42 @@ export interface PlaceBadge {
   best: number | null;
   lon: number;
   lat: number;
+  /** N4: settlements merged into this badge (the first one names it); one entry when not merged. */
+  places?: string[];
+}
+
+/** Text shown on a badge: "Armutlu · 26 mera", or for merged neighbours "Mudanya çevresi · 14 mera". */
+export const badgeLabel = (b: PlaceBadge) => `${b.place}${(b.places?.length ?? 1) > 1 ? ' çevresi' : ''} · ${b.count} mera`;
+/** Approximate on-screen size of a badge label (12 px bold text + pill padding). */
+export const badgeSize = (b: PlaceBadge): [number, number] => [7 * badgeLabel(b).length + 14, 22];
+
+/**
+ * N4: neighbouring settlements whose badges overlap on screen are merged into one ("… çevresi"), repeatedly until
+ * no two overlap; counts add up, ids join, best score kept, position = count-weighted mean. Named after the
+ * settlement with the most spots. The click list still shows every spot.
+ */
+export function mergeBadges(badges: PlaceBadge[], toPx: (lon: number, lat: number) => { x: number; y: number }, size = badgeSize, pad = 4): PlaceBadge[] {
+  let out = badges.map((b) => ({ ...b, places: b.places ?? [b.place] }));
+  for (;;) {
+    let hit: [number, number] | null = null;
+    for (let i = 0; i < out.length && !hit; i++)
+      for (let j = i + 1; j < out.length && !hit; j++) {
+        const a = out[i]!, b = out[j]!;
+        const pa = toPx(a.lon, a.lat), pb = toPx(b.lon, b.lat);
+        const [wa, ha] = size(a), [wb, hb] = size(b);
+        if (Math.abs(pa.x - pb.x) < (wa + wb) / 2 + pad && Math.abs(pa.y - pb.y) < (ha + hb) / 2 + pad) hit = [i, j];
+      }
+    if (!hit) return out;
+    const [a, b] = [out[hit[0]]!, out[hit[1]]!];
+    const [big, small] = a.count >= b.count ? [a, b] : [b, a];
+    const n = a.count + b.count;
+    const best = a.best === null ? b.best : b.best === null ? a.best : Math.max(a.best, b.best);
+    const merged: PlaceBadge & { places: string[] } = {
+      place: big.place, places: [...big.places, ...small.places], ids: [...big.ids, ...small.ids], count: n, best,
+      lon: (a.lon * a.count + b.lon * b.count) / n, lat: (a.lat * a.count + b.lat * b.count) / n,
+    };
+    out = [...out.filter((_, k) => k !== hit![0] && k !== hit![1]), merged];
+  }
 }
 
 /** Badge key: the main settlement ("Güzelyalı Siteler", "Güzelyalı Burgaz" → "Güzelyalı"), so neighbouring

@@ -111,6 +111,7 @@ const anchor = (ref: string) => {
       <p>Son adımda ham sonuç 0–100'e çevrilir. "En iyi" ve "en kötü" iki örnek senaryo 92 ve 8'e sabitlenir. Bu ölçek sıralamayı değiştirmez.</p>
       <p>Lamba bilinmiyorsa iki olasılık (var / yok) hesaplanır ve tipine göre bir olasılıkla karıştırılır. Kanıtı olmayan her yapıda (iskele, feribot iskelesi, liman, mendirek, kordon) %50: tip farkı ölçülmedi (J1/K2). Doğal kıyılarda düşük: kayalık %10, kumsal ve dere ağzı %15 (aydınlatma altyapısı genelde yok; ön bilgi, kanıt C). Saha ya da uzaktan gözlemle “var/yok” girilince o meranın değeri buna göre değişir.</p>
       <p><b>Güvenlik kapısı:</b> rüzgar veya dalga eşiği aşılırsa puan en fazla 30 gösterilir. Bu bir uyarıdır, balığın orada olmadığı anlamına gelmez.</p>
+      <p id="guven"><b>Ne kadar güvenilir?</b> Ana ekrandaki öneri, en büyük katkısı varsayıma dayanıyorsa (ör. yer tipi tercihi ya da doğrulanmamış iskele ışığı) <b>Düşük</b> güvenle gösterilir. Seçenekler birbirinden ayrılmıyorsa ya da belirsizlik genişse güven <b>Orta</b> olur. <b>Tavan:</b> ileriye dönük av kaydıyla yapılan kalibrasyon ilk doğrulamayı geçene kadar (en az 30 seans ve modelin tek oran, saat bandı ve mera tabanlarının her birini zaman bölmeli testte geçmesi) hiçbir öneri <b>Yüksek</b> gösterilmez; en fazla Orta. Ayrıntı: MODEL.md §17.</p>
       <p><b>Bant:</b> puanın yanındaki aralık (%10–90) Monte Carlo ile hesaplanır. Her parametre kanıt düzeyine göre oynatılır: A az, C çok. Bant genişse tahmin belirsizdir.</p>
 
       <h3>Dinamik bileşenler ve ağırlıkları</h3>

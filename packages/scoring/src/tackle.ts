@@ -73,6 +73,9 @@ export interface TackleRow {
   evidence: Evidence;
   /** M2: literature behind the row, shown under "Neden?" (not in the row text). */
   source?: string;
+  /** N1: lamp unknown and the two variants differ — the value for a lit pier and for a dark one. */
+  lit?: string;
+  dark?: string;
 }
 
 export interface Tackle {
@@ -112,15 +115,20 @@ export function lightCase(sunAlt: number, lampP: number | null): LightCase {
   return lampP >= LIT_P ? 'aydınlık gece' : 'karanlık gece';
 }
 
-/** I3: rows of the lit and the dark variant merged; rows that differ say both, the lit one first. */
+/** I3/N1: rows of the lit and the dark variant merged; rows that differ name the condition of each option
+ *  ("ışık suya düşüyorsa: … · karanlıksa: …"), never two options separated by a bare slash. */
+export const IF_LIT = 'ışık suya düşüyorsa';
+export const IF_DARK = 'karanlıksa';
 function mergeRows(lit: TackleRow[], dark: TackleRow[]): TackleRow[] {
   return lit.map((r, k) => {
     const d = dark[k]!;
     if (r.value === d.value) return r;
-    return { ...r, value: `${r.value} / ${d.value}`, why: `lamba suya düşüyorsa ${r.value} (${r.why}); karanlıksa ${d.value} (${d.why})` };
+    return { ...r, value: `${IF_LIT}: ${r.value} · ${IF_DARK}: ${d.value}`, lit: r.value, dark: d.value, why: `${IF_LIT} ${r.value} (${r.why}); ${IF_DARK} ${d.value} (${d.why})` };
   });
 }
-const UNKNOWN_LAMP_NOTE = 'Lamba durumu bilinmiyor: yerinde iskele ışığı suya düşüyorsa "/" işaretinden önceki seçeneği, karanlıksa sonrakini kullan.';
+const UNKNOWN_LAMP_NOTE = 'Lamba durumu bilinmiyor: iki seçenekli satırlarda yerinde iskele ışığı suya düşüyorsa ilk seçeneği, karanlıksa ikincisini kullan.';
+/** N1: a row's value for a one-line text; a conditional row says its condition in words. */
+const condText = (r: TackleRow, fmt: (v: string) => string = (v) => v) => (r.lit !== undefined ? `${IF_LIT} ${fmt(r.lit)}, ${IF_DARK} ${fmt(r.dark!)}` : fmt(r.value));
 /** I3: a missing input is not calm water (docs/MODEL.md §15): say what was assumed. */
 /** I4: fishability, not fish availability — the model's current term (availability) never penalises strong
  *  current; whether the angler can still work the lure is said here. */
@@ -249,8 +257,11 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
 
 /** M1: one plain line for the home plan: class · jighead · hook · lure · layer and count (no brand). */
 export function tackleLine(t: Tackle): string {
-  const v = (k: TackleRow['key']) => t.rows.find((r) => r.key === k)!.value; // istavrit rows always carry renk and saydirma
-  return `${tackleClass(t.profile, t.jigG).short} · ${n1(t.jigG)} g ${t.jigType} jighead · #${t.hook} iğne · ${t.lureCm} cm ${v('renk')} silikon · ${t.zone}, ${v('saydirma').replace(/ s$/, ' sn')} say`;
+  const row = (k: TackleRow['key']) => t.rows.find((r) => r.key === k)!; // istavrit rows always carry renk and saydirma
+  const color = row('renk');
+  const lure = color.lit !== undefined ? `${t.lureCm} cm silikon (${condText(color)})` : `${t.lureCm} cm ${color.value} silikon`;
+  const sec = (v: string) => v.replace(/ s$/, ' sn');
+  return `${tackleClass(t.profile, t.jigG).short} · ${n1(t.jigG)} g ${t.jigType} jighead · #${t.hook} iğne · ${lure} · ${t.zone}, ${condText(row('saydirma'), sec)} say`;
 }
 
 /** One-line version (Sahadayım, home page). */
@@ -320,7 +331,7 @@ function levrekOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
     lure = turbid ? 'silikon shad' : (night || light === 'alacakaranlık') && depth <= 3 ? 'minnow' : light === 'gündüz' && (depth >= 6 || cur >= 0.25) ? 'metal jig' : 'silikon kum balığı';
   }
   const lureCm = useLrf ? '5–7 cm' : cold ? '7–9 cm' : turbid ? '10–12 cm' : lure === 'metal jig' ? `${weightG} g` : '9–12 cm';
-  const color = turbid ? 'chartreuse / beyaz' : light === 'karanlık gece' ? 'koyu siluet (siyah, mor)' : light === 'aydınlık gece' ? 'beyaz-gümüş (ışık–gölge sınırı)' : light === 'alacakaranlık' ? 'doğal gümüş (sardalya)' : 'doğal, ince profil';
+  const color = turbid ? 'chartreuse ya da beyaz' : light === 'karanlık gece' ? 'koyu siluet (siyah, mor)' : light === 'aydınlık gece' ? 'beyaz-gümüş (ışık–gölge sınırı)' : light === 'alacakaranlık' ? 'doğal gümüş (sardalya)' : 'doğal, ince profil';
   const technique = i.kind === 'river_mouth'
     ? 'akıntıyla sürükle; tatlı–tuzlu su sınırında yavaşla'
     : turbid
@@ -348,7 +359,8 @@ function levrekOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
 
 /** M1: plain one-line levrek version for the home plan. */
 export function tackleLevrekLine(t: LevrekTackle): string {
-  return `${t.profile === 'lrf' ? 'Hafif LRF' : tackleClass('spin', t.weightG).short} · ${n1(t.weightG)} g · ${t.lure} ${t.lureCm} · ${t.color}`;
+  const color = t.rows.find((r) => r.key === 'renk')!;
+  return `${t.profile === 'lrf' ? 'Hafif LRF' : tackleClass('spin', t.weightG).short} · ${n1(t.weightG)} g · ${t.lure} ${t.lureCm} · ${condText(color)}`;
 }
 
 /** One-line levrek version. */

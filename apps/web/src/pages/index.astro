@@ -24,8 +24,9 @@ import Base from '../layouts/Base.astro';
       <div class="plan" id="plan" aria-live="polite">
         <p class="eq-note" id="eq-note" hidden></p>
         <div class="eq-pick" id="eq-pick" role="radiogroup" aria-label="Eşdeğer seçenekler" hidden></div>
+        <p class="stale-card" id="stale-card" role="alert" hidden></p>
         <article class="card main-pick" id="pick">
-          <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub" id="verdict-sub"></p></div>
+          <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub"><span id="verdict-sub"></span> <span class="fresh" id="fresh"></span></p></div>
           <div class="qa q2" hidden><h2 class="q">Nereye, ne zaman?</h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p></div>
           <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
@@ -210,7 +211,7 @@ import Base from '../layouts/Base.astro';
 </style>
 
 <script>
-  import { esc, fmtAgo, fmtDay, fmtTime, KIND_TR, lampV2, swimRule } from '../scripts/format';
+  import { esc, fmtAgo, fmtDay, fmtTime, freshness, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
   import { driverSentence, equalText, lightSentence, trust, weatherSentence } from '../scripts/plan';
@@ -389,17 +390,37 @@ import Base from '../layouts/Base.astro';
       openSpot(a.dataset.id!);
     }));
   }
+  /** N5: freshness line on the plan card; past 2 h a prominent warning on top of the card (same rule as the banner). */
+  function showFresh(scoredAt: string | null, fetchedAt: string | null) {
+    const f = freshness(scoredAt, fetchedAt);
+    $('fresh').textContent = f.line;
+    const warn = $('stale-card');
+    warn.hidden = !f.stale;
+    warn.innerHTML = f.stale ? `<span class="long">${esc(f.banner!)}</span><span class="short">${esc(f.short!)}</span>` : '';
+  }
+  // N3: trust stays at most "Orta" until the forward calibration has passed (GET /api/trust-gate)
+  const calibrated: Partial<Record<Species, boolean>> = {};
+  const loadGate = (sp: Species) => {
+    if (sp in calibrated) return Promise.resolve();
+    calibrated[sp] = false;
+    return fetch(api('/api/trust-gate', sp)).then((r) => (r.ok ? r.json() : null)).then((b: { passed?: boolean } | null) => {
+      calibrated[sp] = b?.passed === true;
+      if (calibrated[sp]) renderPlan();
+    }).catch(() => {});
+  };
+  loadGate(species);
   let seq = 0;
   function load() {
     const my = ++seq;
     const at = atIso();
     fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((b: { spots: Spot[]; data_fetched_at: string | null }) => {
+      .then((b: { spots: Spot[]; data_fetched_at: string | null; scored_at?: string | null }) => {
         if (my !== seq) return;
         const first = all.length === 0;
         all = b.spots;
         fetched = b.data_fetched_at;
+        if (!at) showFresh(b.scored_at ?? null, b.data_fetched_at);
         render();
         heat();
         summary();
@@ -660,7 +681,7 @@ import Base from '../layouts/Base.astro';
     const why = $('a-why');
     const lead = driverSentence(w.why);
     why.innerHTML = lead ? `<li>${esc(lead)}</li>` : '';
-    const tr = trust(w);
+    const tr = trust(w, { calibrated: calibrated[species] === true });
     $('a-trust').textContent = tr.level;
     $('a-trust').dataset.l = tr.level;
     $('a-trust-sub').textContent = tr.text;
@@ -694,7 +715,7 @@ import Base from '../layouts/Base.astro';
     $('a-tackle').textContent = personalLine(line, t.profile, myTk.personal);
     const own = myTk.personal[t.profile];
     // short under the line; the class's line sizes and the legal size are under "Neden?"
-    $('a-tackle-sub').innerHTML = `${own ? 'Senin takımına göre' : 'Genel takım sınıfı'}${t.light === 'bilinmeyen gece' ? ' · "/": iskele ışığı varsa / karanlıksa' : ''} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
+    $('a-tackle-sub').innerHTML = `${own ? 'Senin takımına göre' : 'Genel takım sınıfı'}${t.light === 'bilinmeyen gece' ? ' · iskele ışığı bilinmiyor' : ''} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
     const cls = t.profile === 'lrf' ? TACKLE_CLASSES.lrf : tackleClass('spin', g);
     const tkHead = `<li><b>Takım sınıfı:</b> ${own ? `senin takımın (${esc(myTk.profiles.find((p) => p.id === t.profile)!.name)})` : `${esc(tackleClass(t.profile, g).label)}; ip ${esc(cls.line)}`}. Yasal asgari boy ${LEGAL_MIN[species]} cm (6/2 Tebliğ).</li>`;
     why.innerHTML = [lead, weatherSentence(v[2] ?? null, v[3] ?? null, v[9] ?? null), lightSentence(v[5] ?? null, fmtTime(w.peak))].filter(Boolean).slice(0, 3).map((x) => `<li>${esc(x!)}</li>`).join('');
@@ -726,6 +747,7 @@ import Base from '../layouts/Base.astro';
     focus = null;
     load();
     loadHours();
+    loadGate(species);
     loadWindows();
     mapApi?.setSpecies(species);
   });

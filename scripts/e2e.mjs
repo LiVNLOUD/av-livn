@@ -88,7 +88,16 @@ const waitPlan = (p) => p.waitForFunction(() => {
     / · .* g .*iğne|· \d+(,\d+)? g · /.test(tk) ? ok(`home: 3) ${tk}`) : fail(`home: tackle line "${tk}"`);
     const why = await p.locator('#a-why li').allInnerTexts();
     why.length >= 1 && why.length <= 3 ? ok(`home: 4) ${why.join(' | ')}`) : fail(`home: ${why.length} reasons`);
+    // N1: a two-option tackle line names its condition, never "A / B"
+    / \/ /.test(tk) ? fail(`home: tackle line with a bare slash "${tk}"`) : ok('home: tackle line without a bare slash');
     const tr = (await p.locator('#a-trust').innerText()).trim();
+    // N3: no "Yüksek" while the forward calibration has not passed
+    const gate = await (await fetch((apiOrigin ?? base) + '/api/trust-gate')).json().catch(() => null);
+    gate && !gate.passed && tr === 'Yüksek' ? fail('home: trust "Yüksek" before the calibration passed') : ok(`home: trust cap (calibration ${gate?.passed ? 'passed' : `not passed, n=${gate?.n ?? '?'}`})`);
+    // N5: freshness line on the card
+    const fresh = (await p.locator('#fresh').innerText()).trim();
+    /^Hava verisi: /.test(fresh) ? ok(`home: ${fresh}`) : fail(`home: freshness line "${fresh}"`);
+    if (await p.locator('#stale-card').isVisible()) ok(`home: stale warning "${(await p.locator('#stale-card').innerText()).trim()}"`);
     /^(Düşük|Orta|Yüksek)$/.test(tr) ? ok(`home: 5) ${tr} — ${(await p.locator('#a-trust-sub').innerText()).trim()}`) : fail(`home: trust "${tr}"`);
     // I5: the plan only picks Bursa spots
     const listed = (await (await fetch((apiOrigin ?? base) + '/api/spots')).json()).spots.find((x) => x.name === where);
@@ -130,6 +139,7 @@ const waitPlan = (p) => p.waitForFunction(() => {
   (await tk.isVisible()) && tkRows >= 4 ? ok(`card: tackle box with ${tkRows} rows`) : fail(`card: tackle box missing (visible ${await tk.isVisible()}, rows ${tkRows})`);
   (await p.locator('#render-err').isVisible()) ? fail('card: render error banner shown') : ok('card: no render error');
   const tkText = await p.locator('.tackle').innerText();
+  / \/ /.test((await p.locator('#tk').innerText()).replace(/Ultra hafif \/ LRF/g, '')) ? fail('card: tackle value with a bare slash') : ok('card: tackle values without a bare slash');
   /Peksu|J\. Appl\./.test(tkText) ? fail('card: article citation visible in the tackle box') : ok('card: citation only under "Neden?"');
   const narrowCard = await narrowColumns(p);
   narrowCard.length ? fail(`card: value columns under 280 px: ${narrowCard.slice(0, 4).join(', ')}`) : ok('card: no value column under 280 px');

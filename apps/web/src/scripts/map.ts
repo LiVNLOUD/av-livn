@@ -5,7 +5,7 @@ import { PMTiles, Protocol, type RangeResponse, type Source } from 'pmtiles';
 import { esc, KIND_TR, lampV2 } from './format';
 import { getToken } from './admin';
 import { PALETTE } from './palette';
-import { declutter, placeBadges } from './declutter';
+import { badgeLabel, declutter, mergeBadges, placeBadges } from './declutter';
 import { api, link, type Species } from './species';
 import { BANDS_V2 } from '@av-livn/scoring';
 
@@ -507,9 +507,10 @@ map.on('load', async () => {
     id: 'badges', type: 'symbol', source: 'badges',
     layout: {
       'icon-image': 'pill', 'icon-text-fit': 'both', 'icon-text-fit-padding': [3, 7, 3, 7], 'icon-allow-overlap': true, 'text-allow-overlap': true,
-      'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': 12,
+      'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': 12, 'text-max-width': 40, // N4: one line (merge uses the one-line size)
     },
-    paint: { 'icon-color': color as never, 'icon-halo-color': '#0e1c27', 'icon-halo-width': 1.5, 'text-color': '#0e1c27' },
+    // N4/M3: the badge that holds the plan's pick gets an orange outline at far zoom
+    paint: { 'icon-color': color as never, 'icon-halo-color': ['case', ['get', 'pick'], '#f5a83c', '#0e1c27'] as never, 'icon-halo-width': ['case', ['get', 'pick'], 3, 1.5] as never, 'text-color': '#0e1c27' },
   });
 
   // M3: the plan's pick, highlighted at every zoom (ring + name), above badges and markers
@@ -517,15 +518,18 @@ map.on('load', async () => {
   map.addLayer({ id: 'pick-ring', type: 'circle', source: 'pick', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 9, 14, 15], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#f5a83c', 'circle-stroke-width': 3 } });
   map.addLayer({
     id: 'pick-label', type: 'symbol', source: 'pick',
+    // N4: no separate name while the pick sits inside a far-zoom badge (the badge is outlined instead)
+    filter: ['!', ['get', 'inBadge']],
     layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Bold'], 'text-size': 13, 'text-anchor': 'top', 'text-offset': [0, 1.3], 'text-max-width': 12, 'text-allow-overlap': true },
     paint: { 'text-color': '#f5a83c', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.8 },
   });
+  let pickInBadge = false;
   setPick = (id) => {
     pickId = id;
     const s = id ? byId.get(id) : undefined;
     (map.getSource('pick') as maplibregl.GeoJSONSource | undefined)?.setData({
       type: 'FeatureCollection',
-      features: s ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: [s.lon, s.lat] }, properties: { name: s.name } }] : [],
+      features: s ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: [s.lon, s.lat] }, properties: { name: s.name, inBadge: pickInBadge } }] : [],
     });
   };
   setPick(pickId);
@@ -542,16 +546,20 @@ map.on('load', async () => {
   const SPIDER_MAX = 8;
   layout = () => {
     const far = map.getZoom() < BADGE_ZOOM;
-    const { badges, single } = far
+    const { badges: raw, single } = far
       ? placeBadges(spots.map((s) => ({ id: s.id, place: s.place, lon: s.lon, lat: s.lat, total: s.score.total })))
       : { badges: [], single: spots.map((s) => s.id) };
+    // N4: neighbouring settlements whose badges would overlap on screen become one "… çevresi" badge
+    const badges = mergeBadges(raw, (lon, lat) => map.project([lon, lat]));
+    const inBadge = !!pickId && badges.some((b) => b.ids.includes(pickId!));
+    if (inBadge !== pickInBadge) { pickInBadge = inBadge; setPick(pickId); }
     const keep = new Set(single);
     const shownSpots = spots.filter((s) => keep.has(s.id));
     (map.getSource('badges') as maplibregl.GeoJSONSource).setData({
       type: 'FeatureCollection',
       features: badges.map((b) => ({
         type: 'Feature', geometry: { type: 'Point', coordinates: [b.lon, b.lat] },
-        properties: { place: b.place, ids: b.ids.join(','), total: b.best ?? -1, label: `${b.place} · ${b.count} mera` },
+        properties: { place: badgeLabel(b).replace(/ · \d+ mera$/, ''), ids: b.ids.join(','), total: b.best ?? -1, label: badgeLabel(b), pick: !!pickId && b.ids.includes(pickId) },
       })),
     });
     const px = shownSpots.map((s) => map.project([s.lon, s.lat]));
@@ -643,6 +651,7 @@ return {
     const changed = id !== pickId;
     pickId = id;
     setPick(id);
+    layout();
     const s = id ? byId.get(id) : undefined;
     if (changed && s) map.easeTo({ center: [s.lon, s.lat] });
   },

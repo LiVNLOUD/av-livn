@@ -33,6 +33,26 @@ export function fmtAgo(iso: string | null): string {
   return `Veriler ${Math.round(min / 60)} sa önce güncellendi`;
 }
 
+/**
+ * N5: data freshness, one source for the site-wide banner (Base.astro) and the plan card. Weather is fetched hourly
+ * by the Worker, scores hourly by Actions; past STALE_H hours either one makes the data stale.
+ */
+export const STALE_H = 2;
+const hmTr = new Intl.DateTimeFormat('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' });
+export function freshness(scoredAt: string | null | undefined, fetchedAt: string | null | undefined, now = Date.now()) {
+  const age = (iso: string | null | undefined) => (iso && !Number.isNaN(Date.parse(iso)) ? Math.max(0, Math.round((now - Date.parse(iso)) / 60000)) : null);
+  const weatherMin = age(fetchedAt);
+  const scoredMin = age(scoredAt);
+  const ago = (m: number | null) => (m === null ? 'henüz alınmadı' : m < 2 ? 'az önce' : m < 60 ? `${m} dk önce` : `${Math.floor(m / 60)} sa ${m % 60} dk önce`);
+  const limit = STALE_H * 60;
+  // one age for the whole warning: the older of the scoring and the weather it used (no "2 saat" next to "3 sa")
+  const worst = Math.max(scoredMin ?? 0, weatherMin ?? 0);
+  const stamps = [scoredAt && scoredMin !== null ? `son puanlama: ${hmTr.format(new Date(scoredAt))}` : null, fetchedAt && weatherMin !== null ? `hava verisi: ${hmTr.format(new Date(fetchedAt))}` : null].filter(Boolean).join(', ');
+  const banner = worst > limit ? `Veriler ${Math.floor(worst / 60)} saat eski (${stamps}). Puanlar eski olabilir; hava ve güvenliği ayrıca kontrol edin.` : null;
+  const short = banner ? `Veriler ${Math.floor(worst / 60)} saat eski; hava ve güvenliği ayrıca kontrol edin.` : null;
+  return { weatherMin, scoredMin, stale: banner !== null, banner, short, line: `Hava verisi: ${ago(weatherMin)}` };
+}
+
 /** Fill a .lamp element for a score; colour band comes from the scoring engine's thresholds. */
 export function lamp(el: HTMLElement, total: number | null, gated: boolean): void {
   const band = total === null ? 'none' : bandOf(total / 100);

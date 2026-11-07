@@ -5,6 +5,7 @@ import { ACTIVE_COUNT_SQL, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, isSpecies, SPECIES, type FieldDepthRow, type FieldObsRow, type ListEntryV2, type Species } from '../precompute_v2';
 import { FETCHED_SQL, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
 import { DEFAULT_PROFILES } from '@av-livn/scoring';
+import { calibrationPassed, MIN_SESSIONS, parseReport, reportKey } from '../lib/calibration';
 
 export const publicRoutes = new Hono<{ Bindings: Env }>();
 
@@ -37,6 +38,14 @@ publicRoutes.get('/forbidden', async (c) => {
 // M2: the public endpoint returns the generic, brand-free classes only; the owner's personal set is admin-only
 // (GET /api/admin/tackle) and a visitor's own set lives on their device.
 publicRoutes.get('/tackle', (c) => c.json({ ok: true, profiles: DEFAULT_PROFILES }, 200, NO_CACHE));
+// N3: whether the forward calibration has passed its first check (caps the plan's trust at "Orta" until then).
+// Only the verdict and the session count of the report; coefficients and sessions stay admin-only.
+publicRoutes.get('/trust-gate', async (c) => {
+  const species = sp(c);
+  if (!species) return notReady(c);
+  const r = parseReport((await c.env.DB.prepare('SELECT value FROM meta WHERE key = ?1').bind(reportKey(species)).first<{ value: string }>())?.value);
+  return c.json({ ok: true, species, passed: calibrationPassed(r), n: r?.n ?? 0, min: MIN_SESSIONS }, 200, { 'cache-control': 'public, max-age=600' });
+});
 
 type Ctx = Context<{ Bindings: Env }>;
 

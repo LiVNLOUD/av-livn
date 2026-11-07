@@ -64,20 +64,18 @@ const TABS: [string, string, string, boolean][] = [
       ))}
     </nav>
     <script>
+      import { freshness } from '../scripts/format';
       // Admin links only when the owner key is on this device (the pages themselves still ask for it).
       try { if (localStorage.getItem('av-livn-admin')) document.querySelectorAll<HTMLElement>('.admin-only').forEach((e) => (e.hidden = false)); } catch {}
-      // E8: data freshness. Scores are recomputed hourly; after 2 h the banner is shown on every page.
+      // E8/N5: data freshness, one rule for every page and the plan card (scripts/format.ts freshness)
       fetch('/api/spots', { cache: 'no-cache' })
         .then((r) => (r.ok ? r.json() : null))
-        .then((b: { scored_at?: string | null } | null) => {
-          const t = b?.scored_at ? Date.parse(b.scored_at) : NaN;
-          if (Number.isNaN(t)) return;
-          const h = (Date.now() - t) / 3_600_000;
-          (document.documentElement as HTMLElement).dataset.scoredAt = String(t);
-          if (h > 2) {
+        .then((b: { scored_at?: string | null; data_fetched_at?: string | null } | null) => {
+          if (!b) return;
+          const f = freshness(b.scored_at, b.data_fetched_at);
+          if (f.banner) {
             const el = document.getElementById('stale')!;
-            const hm = new Date(t).toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' });
-            el.textContent = `Veriler ${Math.floor(h)} saat önce güncellendi (son puanlama: ${hm}). Puanlar eski olabilir; hava ve güvenliği ayrıca kontrol edin.`;
+            el.textContent = f.banner;
             el.classList.add('on');
           }
         })

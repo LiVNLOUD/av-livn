@@ -517,3 +517,26 @@ Ana ekran tek bir "en iyi" ilan etmez. Şu koşulda ana öneri ve alternatifler 
 - ve alternatifin %10–90 bandı ana pencerenin bandıyla örtüşüyor (alternatif p90 ≥ ana p10).
 
 Bu pay yalnız parametre belirsizliğini kapsar; tahmin hatası dahil değildir. Eşdeğerlik bu yüzden "model bunları ayıramıyor" demektir, "eşit derecede iyi" demek değildir.
+
+## 17. Güven düzeyi ve tavanı (L1, N3)
+
+Ana ekrandaki "Ne kadar güvenilir?" cevabı `apps/web/src/scripts/plan.ts` `trust()` ile verilir.
+
+**Düşük:**
+- önerinin en büyük katkısı varsayıma dayanıyor (kanıt C, önsel ya da ölçüm olmayan tahmin; L1 ablasyonu), ya da
+- hava veya deniz verisi eksik.
+
+Gerekçe günlük dille yazılır. Örnek: "Bu öneri çoğunlukla yer tipine dair varsayıma dayanıyor; sahada doğrulanmadı."
+
+**Orta:**
+- görece en iyi pencere, ya da
+- ilk 3'te kalma payı %60'ın altında, ya da
+- bant 30 puandan geniş.
+
+**Yüksek:** yukarıdakilerin hiçbiri yok ve ileriye dönük kalibrasyon ilk doğrulamayı geçmiş.
+
+**Tavan (N3):** ileriye dönük kalibrasyon ilk doğrulamayı geçene kadar hiçbir öneri "Yüksek" gösterilmez; en fazla "Orta" olur. Cümle bunu söyler: "model ileriye dönük av kaydıyla henüz doğrulanmadı". İlk doğrulama `analysis/calibrate.py` raporunda (D1 `meta.calibration_report[:tür]`) şunların hepsinin sağlanmasıdır:
+- `status = tamam` ve en az **30 ileriye dönük seans**;
+- zaman bölmeli testte (`temporal`) modelin log-olabilirliği üç basit tabanın her birinden yüksek (`model_beats_baselines = true`). Tabanlar: tek oran, saat bandı, mera.
+
+Kapının sonucu `GET /api/trust-gate?species=` ile herkese açıktır. Yalnız karar ve seans sayısı döner; katsayılar ve seanslar yönetici ucundadır. Karar `workers/api/src/lib/calibration.ts` `calibrationPassed` ile verilir.

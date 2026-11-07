@@ -35,9 +35,9 @@ Ortak: derinlik 4 m, akıntı 0,05 m/s, rüzgar 8 km/sa, hamle 12, berrak su, da
 
 | Senaryo | Takım | Ağırlık | Yem | Renk |
 |---|---|---|---|---|
-| Fırtına ertesi bulanık gece, kayalık (dalga 0,8) | Spin | 14 g | silikon shad 10–12 cm | chartreuse / beyaz |
+| Fırtına ertesi bulanık gece, kayalık (dalga 0,8) | Spin | 14 g | silikon shad 10–12 cm | chartreuse ya da beyaz |
 | Sakin berrak gece, lambalı iskele (3 m, dalga 0,15) | LRF (hafif levrek) | 3 g | LRF shad 5–7 cm | beyaz-gümüş (ışık–gölge sınırı) |
-| Yağış sonrası alacakaranlık, dere ağzı | Spin | 10 g | silikon shad 10–12 cm (akıntıyla sürükle) | chartreuse / beyaz |
+| Yağış sonrası alacakaranlık, dere ağzı | Spin | 10 g | silikon shad 10–12 cm (akıntıyla sürükle) | chartreuse ya da beyaz |
 | Gündüz, derin mendirek (9 m), akıntı 0,3 | Spin | 28 g | metal jig 28 g | doğal, ince profil |
 | Kış ani soğuma gecesi, kumsal | Spin | 14 g | minnow 7–9 cm | koyu siluet |
 | Alacakaranlık, sığ berrak kayalık | Spin | 14 g | minnow 9–12 cm | doğal gümüş |
