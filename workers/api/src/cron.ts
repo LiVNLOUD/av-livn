@@ -2,6 +2,7 @@ import { fetchSnapshots, type CellCoord, type FetchStats } from './lib/openmeteo
 import { valuesAt } from './lib/series';
 import type { Env } from './env';
 import { dispatchTest, guardScoring } from './lib/staleness';
+import { recordWeatherRuns } from './lib/modelrun';
 
 const OBS_COLS: Record<string, string> = {
   pressure_msl: 'pressure', wind_speed_10m: 'wind_speed', wind_direction_10m: 'wind_dir', wind_gusts_10m: 'wind_gust',
@@ -78,10 +79,13 @@ export async function runCron(cron: string, env: Env, now = new Date()): Promise
   if (cron === CRON_FETCH) {
     const weather = await refreshWeather(env, now);
     // K0: the same (only) cron guards scoring freshness — GitHub's scheduler alone is not reliable
-    const scoring = await guardScoring(env, now).catch((e) => ({ error: String(e) }));
+    // MODEL.md §18: run time of the model behind this weather, for the staleness threshold
+    const runs = await recordWeatherRuns(env, now, weather.wx + weather.sea > 0, weather.errors.length).catch((e) => ({ error: String(e) }));
+    // weather first, then scoring with it (Cloudflare is the reliable clock; GitHub's schedule is the backup)
+    const scoring = await guardScoring(env, now, fetch, weather.wx + weather.sea > 0).catch((e) => ({ error: String(e) }));
     // dry end-to-end test of the backup trigger, only when requested in meta (never ages scores)
     const dispatchTestResult = await dispatchTest(env, now).catch((e) => `error ${String(e)}`);
-    return { ...weather, scoring, dispatchTest: dispatchTestResult };
+    return { ...weather, runs, scoring, dispatchTest: dispatchTestResult };
   }
   throw new Error(`unknown cron ${cron}`);
 }

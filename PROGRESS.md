@@ -327,3 +327,9 @@ Model ve veri hattına dokunulmadı.
 - [x] O5 Tüm meralar ≥ 1200 px'te tablo (Mera, Tip, Puan, En iyi saat, Erişim, Güven).
 - [x] O6 Isı haritasında "şimdi" etiketi saat satırında; çakışan saat etiketi gösterilmez (`visibleTicks`, test + e2e getBBox).
 - Telefonda 5 saniye testi için: bayatlık uyarısı tazelik satırına alındı, "Neden?" 2 madde, yazı boyutları biraz küçüldü.
+
+## Bayatlık kök nedeni ve eşik (2026-11-07) ✅ DUR
+- Kök neden: hava çekimi (Cloudflare :07) her saat yapılıyor. Puanlama GitHub zamanlayıcısında atlanıyor; yedek tetik ancak 75 dk sonra devreye giriyor. Puan ve kullandığı hava birlikte 2 saati aşıyor.
+- Düzeltme: Worker cron her çekimden sonra, puanlar çekimden eskiyse puanlamayı hemen tetikliyor ("new weather"). GitHub zamanlaması yedek; `nothingNew` ile erken çıkıyor. Deploy ve veri yenileme `force`. Testli.
+- Eşik (MODEL.md §18): kullanılan çekim > 2 sa, ya da model çalıştırması > 2 × olağan aralık (Open-Meteo meta.json; `best_match` modeli Worker'da değer karşılaştırmasıyla tanınır), ya da son çekim başarısız ve veri > 1 sa.
+- Son 24 sa: 7 uyarı bölümü, toplam ~12 sa. Düzeltme sonrası beklenen günde 0 (`docs/audit/staleness-24h.md`).

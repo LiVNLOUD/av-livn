@@ -256,7 +256,7 @@ import Base from '../layouts/Base.astro';
 </style>
 
 <script>
-  import { esc, fmtAgo, fmtDay, fmtTime, freshness, KIND_TR, lampV2, swimRule } from '../scripts/format';
+  import { esc, fmtAgo, fmtDay, fmtTime, freshness, type WeatherRunInfo, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { IF_DARK, IF_LIT, kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
   import { driverSentence, equalText, lightSentence, nowVsPlan, trust, weatherSentence } from '../scripts/plan';
@@ -484,8 +484,8 @@ import Base from '../layouts/Base.astro';
     }));
   }
   /** N5: freshness line on the plan card; past 2 h a prominent warning on top of the card (same rule as the banner). */
-  function showFresh(scoredAt: string | null, fetchedAt: string | null) {
-    const f = freshness(scoredAt, fetchedAt);
+  function showFresh(scoredAt: string | null, fetchedAt: string | null, run: WeatherRunInfo | null) {
+    const f = freshness(scoredAt, fetchedAt, Date.now(), run);
     $('fresh').textContent = f.line;
     $('fresh').dataset.stale = f.stale ? f.short! : '';
     const warn = $('stale-card');
@@ -509,12 +509,12 @@ import Base from '../layouts/Base.astro';
     const at = atIso();
     fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((b: { spots: Spot[]; data_fetched_at: string | null; scored_at?: string | null }) => {
+      .then((b: { spots: Spot[]; data_fetched_at: string | null; scored_at?: string | null; weather_run?: WeatherRunInfo | null }) => {
         if (my !== seq) return;
         const first = all.length === 0;
         all = b.spots;
         fetched = b.data_fetched_at;
-        if (!at) showFresh(b.scored_at ?? null, b.data_fetched_at);
+        if (!at) showFresh(b.scored_at ?? null, b.data_fetched_at, b.weather_run ?? null);
         render();
         heat();
         summary();

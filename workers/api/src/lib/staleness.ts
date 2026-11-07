@@ -24,6 +24,23 @@ export function shouldDispatch(scoredAt: string | null, lastDispatch: string | n
   return minutesSince(scoredAt, now) > DISPATCH_MIN && minutesSince(lastDispatch, now) > DISPATCH_GAP_MIN;
 }
 
+/**
+ * Weather is fetched by the Worker's Cloudflare cron at :07, scoring runs in GitHub Actions. Scores only use the
+ * weather of their own run, so when GitHub skips runs the shown scores rest on weather up to ~2 h old although
+ * fresh weather sits in D1. After a successful fetch the cron therefore starts scoring at once whenever the
+ * newest scores were computed before that fetch (one dispatch per 30 min at most).
+ */
+export function shouldRescoreAfterFetch(o: { scoredAt: string | null; newestFetch: string | null; fetchOk: boolean; lastDispatch: string | null; now: Date }): boolean {
+  if (!o.fetchOk || !o.newestFetch) return false;
+  const behind = o.scoredAt === null || Date.parse(o.scoredAt) < Date.parse(o.newestFetch);
+  return behind && minutesSince(o.lastDispatch, o.now) > DISPATCH_GAP_MIN;
+}
+
+/** Score job: nothing to do when the newest scores already use the newest weather and no field edit waits. */
+export function nothingNew(scoredAt: string | null, newestFetch: string | null, pending: number): boolean {
+  return pending === 0 && scoredAt !== null && newestFetch !== null && Date.parse(scoredAt) >= Date.parse(newestFetch);
+}
+
 export function shouldAlert(scoredAt: string | null, lastAlert: string | null, now: Date): boolean {
   return minutesSince(scoredAt, now) > STALE_ALERT_H * 60 && minutesSince(lastAlert, now) > ALERT_GAP_H * 60;
 }
@@ -59,10 +76,15 @@ export async function dispatchTest(env: Env, now: Date, fetcher: typeof fetch = 
 }
 
 /** Hourly from the Worker cron: re-start a skipped score run and alert the owner on stale scores. */
-export async function guardScoring(env: Env, now: Date, fetcher: typeof fetch = fetch): Promise<{ scoredAt: string | null; dispatched: string; alert: string }> {
+export async function guardScoring(env: Env, now: Date, fetcher: typeof fetch = fetch, fetchOk = false): Promise<{ scoredAt: string | null; dispatched: string; alert: string; reason: string | null }> {
   const scoredAt = (await env.DB.prepare('SELECT max(computed_at) AS at FROM spot_scores_v2').first<{ at: string | null }>())?.at ?? null;
+  const newestFetch = (await env.DB.prepare('SELECT max(fetched_at) AS at FROM forecast_snapshots').first<{ at: string | null }>())?.at ?? null;
   let dispatched = 'fresh';
-  if (shouldDispatch(scoredAt, await meta(env, 'score_dispatch_at'), now)) {
+  let reason: string | null = null;
+  const lastDispatch = await meta(env, 'score_dispatch_at');
+  if (shouldRescoreAfterFetch({ scoredAt, newestFetch, fetchOk, lastDispatch, now })) reason = 'new weather';
+  else if (shouldDispatch(scoredAt, lastDispatch, now)) reason = 'stale scores';
+  if (reason) {
     dispatched = await dispatchScore(env, fetcher);
     if (dispatched === 'dispatched') await setMeta(env, 'score_dispatch_at', now.toISOString());
   }
@@ -81,6 +103,6 @@ export async function guardScoring(env: Env, now: Date, fetcher: typeof fetch = 
     }
   }
   // hourly summary for checking the guard live (token presence only, never its value)
-  await setMeta(env, 'score_guard_last', JSON.stringify({ at: now.toISOString(), scoredAt, dispatched, alert, token: !!env.GH_DISPATCH_TOKEN }));
-  return { scoredAt, dispatched, alert };
+  await setMeta(env, 'score_guard_last', JSON.stringify({ at: now.toISOString(), scoredAt, newestFetch, reason, dispatched, alert, token: !!env.GH_DISPATCH_TOKEN }));
+  return { scoredAt, dispatched, alert, reason };
 }

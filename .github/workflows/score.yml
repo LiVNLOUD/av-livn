@@ -1,7 +1,8 @@
 name: score
 # Hourly precomputation of spot scores into D1 (spot_scores). Runs here instead of a Worker cron because
 # scoring all spots needs ~100 ms CPU, far above the Workers free plan's ~10 ms per invocation.
-# The Worker's :07 cron fetches weather; this runs after it.
+# The Worker's :07 cron fetches weather and then dispatches this workflow (Cloudflare is the reliable clock);
+# the schedules below are the backup and exit at once when the scores already use the newest weather.
 on:
   schedule:
     - cron: '23 * * * *'          # full hourly run (v1 + v2)
@@ -10,6 +11,10 @@ on:
     inputs:
       dry_run:
         description: 'Kuru çalıştırma: puan hesaplanır, D1''e yazılmaz (yedek tetik testi)'
+        type: boolean
+        default: false
+      force:
+        description: 'Puanlar en yeni havayla hesaplanmış olsa da yeniden puanla (deploy, veri yenileme)'
         type: boolean
         default: false
 concurrency:
@@ -35,7 +40,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || (github.event.schedule == '8,38,53 * * * *' && '--pending' || '') }}
+        run: node .score/job.mjs ${{ inputs.dry_run && '--dry-run' || (github.event.schedule == '8,38,53 * * * *' && '--pending' || '') }} ${{ inputs.force && '--force' || '' }}
       - name: Alert the owner on failure (E8)
         if: failure()
         env:

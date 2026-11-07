@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { dispatchTest, guardScoring, needsFullRun, shouldAlert, shouldDispatch } from '../src/lib/staleness';
+import { dispatchTest, guardScoring, nothingNew, shouldRescoreAfterFetch, needsFullRun, shouldAlert, shouldDispatch } from '../src/lib/staleness';
 import { resetAndSeed } from './helpers';
 
 const NOW = new Date('2026-11-06T22:07:00Z');
@@ -82,5 +82,41 @@ describe('backup trigger: dry end-to-end test on request', () => {
     const g = (await read('score_guard_last'))!;
     expect(JSON.parse(g)).toMatchObject({ at: NOW.toISOString(), token: true });
     expect(g).not.toContain('secret-value');
+  });
+});
+
+describe('staleness fix: score right after fresh weather', () => {
+  it('decision: fetched ok and scores older than the fetch → rescore; at most once per 30 min', () => {
+    const base = { scoredAt: ago(58), newestFetch: ago(0), fetchOk: true, lastDispatch: null, now: NOW };
+    expect(shouldRescoreAfterFetch(base)).toBe(true);
+    expect(shouldRescoreAfterFetch({ ...base, scoredAt: null })).toBe(true);
+    expect(shouldRescoreAfterFetch({ ...base, scoredAt: new Date(NOW.getTime() + 60_000).toISOString() })).toBe(false); // scores already use it
+    expect(shouldRescoreAfterFetch({ ...base, fetchOk: false })).toBe(false);
+    expect(shouldRescoreAfterFetch({ ...base, newestFetch: null })).toBe(false);
+    expect(shouldRescoreAfterFetch({ ...base, lastDispatch: ago(10) })).toBe(false);
+    expect(shouldRescoreAfterFetch({ ...base, lastDispatch: ago(45) })).toBe(true);
+  });
+  it('score job: nothing new only when scores use the newest weather and no field edit waits', () => {
+    expect(nothingNew(ago(5), ago(10), 0)).toBe(true);
+    expect(nothingNew(ago(10), ago(10), 0)).toBe(true);
+    expect(nothingNew(ago(70), ago(10), 0)).toBe(false);
+    expect(nothingNew(ago(5), ago(10), 2)).toBe(false);
+    expect(nothingNew(null, ago(10), 0)).toBe(false);
+    expect(nothingNew(ago(5), null, 0)).toBe(false);
+  });
+  it('cron: a successful fetch with older scores dispatches score.yml ("new weather"), even when scores are under 75 min', async () => {
+    await resetAndSeed();
+    const calls: string[] = [];
+    const fake = (async (url: string) => { calls.push(url); return new Response(null, { status: 204 }); }) as unknown as typeof fetch;
+    await env.DB.prepare("DELETE FROM meta WHERE key IN ('score_dispatch_at', 'alert_stale_at')").run();
+    await env.DB.prepare('DELETE FROM spot_scores_v2').run();
+    await env.DB.prepare("INSERT INTO forecast_snapshots (cell_id, fetched_at, json) SELECT id, ?1, '{}' FROM cells LIMIT 1 ON CONFLICT(cell_id) DO UPDATE SET fetched_at = excluded.fetched_at").bind(NOW.toISOString()).run();
+    const e = { ...env, GH_DISPATCH_TOKEN: 'x', NTFY_TOPIC: undefined };
+    const r = await guardScoring(e, NOW, fake, true);
+    expect(r).toMatchObject({ reason: 'new weather', dispatched: 'dispatched' });
+    expect(calls).toHaveLength(1);
+    // a second fetch within 30 min of the last dispatch does not dispatch again
+    const r2 = await guardScoring(e, new Date(NOW.getTime() + 10 * 60_000), fake, true); // within 30 min of the last dispatch
+    expect(r2.reason).toBe(null);
   });
 });

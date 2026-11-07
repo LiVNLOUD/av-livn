@@ -3,7 +3,7 @@ import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
 import { ACTIVE_COUNT_SQL, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, isSpecies, SPECIES, type FieldDepthRow, type FieldObsRow, type ListEntryV2, type Species } from '../precompute_v2';
-import { FETCHED_SQL, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
+import { FETCHED_SQL, WEATHER_RUNS_SQL, parseWeatherRun, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
 import { DEFAULT_PROFILES } from '@av-livn/scoring';
 import { calibrationPassed, MIN_SESSIONS, parseReport, reportKey } from '../lib/calibration';
 
@@ -69,8 +69,8 @@ async function listV2(c: Ctx, species: Species) {
     const p = await pre(c, 'list', nowHour, species);
     if (p) return p;
   }
-  const [rows, fetched] = await c.env.DB.batch([c.env.DB.prepare(LIST_SQL).bind(species), c.env.DB.prepare(FETCHED_SQL)]);
-  return c.json(listBody(rows!.results as ListRow[], fetchedAt(fetched!.results), nowHour, species), 200, NO_CACHE);
+  const [rows, fetched, runs] = await c.env.DB.batch([c.env.DB.prepare(LIST_SQL).bind(species), c.env.DB.prepare(FETCHED_SQL), c.env.DB.prepare(WEATHER_RUNS_SQL)]);
+  return c.json(listBody(rows!.results as ListRow[], fetchedAt(fetched!.results), nowHour, species, parseWeatherRun((runs!.results[0] as { value?: string } | undefined)?.value)), 200, NO_CACHE);
 }
 
 /** Spot × hour grid for the heat map (E2). */

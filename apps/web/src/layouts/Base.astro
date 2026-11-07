@@ -64,15 +64,15 @@ const TABS: [string, string, string, boolean][] = [
       ))}
     </nav>
     <script>
-      import { freshness } from '../scripts/format';
+      import { freshness, type WeatherRunInfo } from '../scripts/format';
       // Admin links only when the owner key is on this device (the pages themselves still ask for it).
       try { if (localStorage.getItem('av-livn-admin')) document.querySelectorAll<HTMLElement>('.admin-only').forEach((e) => (e.hidden = false)); } catch {}
       // E8/N5: data freshness, one rule for every page and the plan card (scripts/format.ts freshness)
       fetch('/api/spots', { cache: 'no-cache' })
         .then((r) => (r.ok ? r.json() : null))
-        .then((b: { scored_at?: string | null; data_fetched_at?: string | null } | null) => {
+        .then((b: { scored_at?: string | null; data_fetched_at?: string | null; weather_run?: WeatherRunInfo | null } | null) => {
           if (!b) return;
-          const f = freshness(b.scored_at, b.data_fetched_at);
+          const f = freshness(b.scored_at, b.data_fetched_at, Date.now(), b.weather_run ?? null);
           if (f.banner) {
             const el = document.getElementById('stale')!;
             el.textContent = f.banner;

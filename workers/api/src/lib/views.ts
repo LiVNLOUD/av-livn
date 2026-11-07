@@ -15,6 +15,7 @@ export const LIST_SQL = `SELECT s.*, v.start_hour, v.list_json, v.model_version,
 export const HOURS_SQL = `SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const WINDOWS_SQL = `SELECT s.id, s.name, s.access, s.province, s.private_marina, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const FETCHED_SQL = 'SELECT max(fetched_at) AS at FROM forecast_snapshots';
+export const WEATHER_RUNS_SQL = "SELECT value FROM meta WHERE key = 'weather_runs'";
 export const PRE_KINDS = ['list', 'hours', 'windows'] as const;
 export const preKey = (kind: (typeof PRE_KINDS)[number], hour: number, species = 'istavrit') => `pub:${kind}:${species}:${hour}`;
 /** Any change to which spots are public (hide, forbidden area, edit, rescore) drops the stored bodies. */
@@ -26,7 +27,11 @@ export type WindowsRow = { id: string; name: string; access?: string | null; pro
 
 export const fetchedAt = (r: unknown[]) => (r[0] as { at: string | null } | undefined)?.at ?? null;
 
-export function listBody(all: ListRow[], dataFetchedAt: string | null, nowHour: number, species = 'istavrit') {
+/** Staleness (MODEL.md §18): the weather fetch and the model run behind the scores' data (meta.weather_runs). */
+export type WeatherRun = { wx: unknown; sea: unknown; fetch: unknown } | null;
+export const parseWeatherRun = (json: string | null | undefined): WeatherRun => { try { return json ? JSON.parse(json) : null; } catch { return null; } };
+
+export function listBody(all: ListRow[], dataFetchedAt: string | null, nowHour: number, species = 'istavrit', weatherRun: WeatherRun = null) {
   const spots = all.map((r) => {
     const e = r.list_json && r.start_hour !== null ? (JSON.parse(r.list_json) as ListEntryV2[])[nowHour - r.start_hour] : undefined;
     return {
@@ -40,7 +45,7 @@ export function listBody(all: ListRow[], dataFetchedAt: string | null, nowHour: 
   spots.sort((a, b) => (b.score.total ?? -1) - (a.score.total ?? -1) || a.name.localeCompare(b.name, 'tr'));
   const version = all.find((r) => r.model_version)?.model_version ?? null;
   const scored = all.reduce<string | null>((m, r) => (r.scored_at && (m === null || r.scored_at > m) ? r.scored_at : m), null);
-  return { ok: true, species, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: dataFetchedAt, scored_at: scored, count: spots.length, spots };
+  return { ok: true, species, model: version, at: new Date(nowHour * HOUR).toISOString(), data_fetched_at: dataFetchedAt, weather_run: weatherRun, scored_at: scored, count: spots.length, spots };
 }
 
 /** Per active spot the next 72 h: score (rounded), band width (p90 − p10) and gated hours. */
@@ -89,9 +94,9 @@ export function windowsBody(rows: WindowsRow[], from: number, hours: number, spe
 }
 
 /** Bodies for the given hours, as [meta key, JSON text] rows (score job). */
-export function preBodies(list: ListRow[], hoursRows: HoursRow[], win: WindowsRow[], dataFetchedAt: string | null, hours: number[], species = 'istavrit'): [string, string][] {
+export function preBodies(list: ListRow[], hoursRows: HoursRow[], win: WindowsRow[], dataFetchedAt: string | null, hours: number[], species = 'istavrit', weatherRun: WeatherRun = null): [string, string][] {
   return hours.flatMap((h) => [
-    [preKey('list', h, species), JSON.stringify(listBody(list, dataFetchedAt, h, species))],
+    [preKey('list', h, species), JSON.stringify(listBody(list, dataFetchedAt, h, species, weatherRun))],
     [preKey('hours', h, species), JSON.stringify(hoursBody(hoursRows, dataFetchedAt, h, species))],
     [preKey('windows', h, species), JSON.stringify(windowsBody(win, h, 72, species))],
   ] as [string, string][]);

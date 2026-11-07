@@ -10,8 +10,8 @@
 import { readFileSync } from 'node:fs';
 import { DELETE_STALE_SCORES_SQL, scoreRecords, UPSERT_SCORE_SQL } from '../workers/api/src/precompute';
 import type { Snapshot } from '../workers/api/src/lib/openmeteo';
-import { CLEAR_PRE_SQL, FETCHED_SQL, fetchedAt, HOURS_SQL, LIST_SQL, preBodies, WINDOWS_SQL, type HoursRow, type ListRow, type WindowsRow } from '../workers/api/src/lib/views';
-import { FULL_RUN_MIN, needsFullRun } from '../workers/api/src/lib/staleness';
+import { CLEAR_PRE_SQL, FETCHED_SQL, WEATHER_RUNS_SQL, parseWeatherRun, fetchedAt, HOURS_SQL, LIST_SQL, preBodies, WINDOWS_SQL, type HoursRow, type ListRow, type WindowsRow } from '../workers/api/src/lib/views';
+import { FULL_RUN_MIN, needsFullRun, nothingNew } from '../workers/api/src/lib/staleness';
 import { computeSpotV2, SPECIES, DELETE_STALE_V2_SQL, fieldRecords, oceanMap, pointsFromObservations, recomputeHours, scoreRecordsV2, UPSERT_HISTORY_SQL, UPSERT_V2_SQL, type ObservationRow, type FieldDepthRow, type FieldObsRow } from '../workers/api/src/precompute_v2';
 import { ACTIVE, type SpotRow } from '../workers/api/src/lib/spots';
 import type { ListEntryV2 } from '../workers/api/src/precompute_v2';
@@ -20,6 +20,8 @@ import { forbiddenUpdates, parseArea, type SpotPos } from '../workers/api/src/li
 
 const dryRun = process.argv.includes('--dry-run');
 let pendingOnly = process.argv.includes('--pending');
+// staleness fix: deploys and data refreshes force a run even when the scores already use the newest weather
+const force = process.argv.includes('--force');
 const compareOut = process.argv.includes('--compare-desk') ? process.argv[process.argv.indexOf('--compare-desk') + 1] : null;
 // I3: ferry lamp prior sensitivity (dry run): same weather, LAMP_PRIOR.ferry 0.85 vs 0.5 at every night hour
 // L1: per-driver ablation for spots whose name matches a pattern, next 21:00 local (dry run)
@@ -68,6 +70,22 @@ if (pendingOnly) {
   }
   console.log(`pending: ${pending.map((p) => p.spot_id).join(', ')}`);
 }
+// The Worker cron (:07) fetches weather and then starts this job; a GitHub-scheduled run that finds the scores
+// already computed from the newest weather (and no field edit waiting) has nothing to do.
+if (!pendingOnly && !force && !dryRun) {
+  const [sc, fe, pe] = await Promise.all([
+    query<{ at: string | null }>('SELECT max(computed_at) AS at FROM spot_scores_v2'),
+    query<{ at: string | null }>('SELECT max(fetched_at) AS at FROM forecast_snapshots'),
+    query<{ n: number }>('SELECT COUNT(*) AS n FROM pending_rescore'),
+  ]);
+  const scoredAt = sc[0]?.at ?? null, newestFetch = fe[0]?.at ?? null;
+  if (newestFetch && (Date.now() - Date.parse(newestFetch)) / 60_000 > 60) console.log(`weather: newest fetch ${newestFetch} is older than 60 min (Worker cron); scoring with it`);
+  if (nothingNew(scoredAt, newestFetch, pe[0]?.n ?? 0)) {
+    console.log(`nothing new: scores ${scoredAt} already use the newest weather ${newestFetch}`);
+    await runNotify(query, { spots: [], nowHour: Math.floor(Date.now() / 3_600_000), testOnly: true });
+    process.exit(0);
+  }
+}
 // F1: owner-drawn forbidden areas hide the spots inside them (and release those no longer covered).
 if (!dryRun) {
   const areas = (await query<{ id: string; name: string; geojson: string }>('SELECT id, name, geojson FROM forbidden_area')).map(parseArea);
@@ -78,6 +96,8 @@ if (!dryRun) {
 }
 const rows = await query<SpotRow>(`SELECT * FROM spots WHERE ${ACTIVE} ORDER BY id`);
 const snapRows = await query<{ cell_id: string; fetched_at: string; json: string }>('SELECT cell_id, fetched_at, json FROM forecast_snapshots');
+// MODEL.md §18: model run behind this weather (Worker cron, meta.weather_runs), stored with the public bodies
+const weatherRun = parseWeatherRun((await query<{ value: string }>(WEATHER_RUNS_SQL))[0]?.value);
 const snaps = new Map(snapRows.map((r) => [r.cell_id, { snap: JSON.parse(r.json) as Snapshot, fetched_at: r.fetched_at }]));
 const now = new Date();
 const t1 = performance.now();
@@ -197,11 +217,13 @@ if (dryRun) {
   // schedules can be late or skipped; past the last stored hour the Worker builds the bodies live, which costs CPU).
   {
     const h0 = Math.floor(Date.now() / 3_600_000);
-    const fet = await query(FETCHED_SQL);
+    // the weather these scores were computed with (snapshots read at the start), not a fetch that landed meanwhile
+    const usedFetch = snapRows.reduce<string | null>((m, r) => (m === null || r.fetched_at > m ? r.fetched_at : m), null);
+    const fet = usedFetch ? [{ at: usedFetch }] : await query(FETCHED_SQL);
     const bodies: [string, string][] = [];
     for (const species of SPECIES) {
       const [list, hrs, win] = await Promise.all([query<ListRow>(LIST_SQL, [species]), query<HoursRow>(HOURS_SQL, [species]), query<WindowsRow>(WINDOWS_SQL, [species])]);
-      bodies.push(...preBodies(list, hrs, win, fetchedAt(fet), Array.from({ length: 6 }, (_, k) => h0 + k), species));
+      bodies.push(...preBodies(list, hrs, win, fetchedAt(fet), Array.from({ length: 6 }, (_, k) => h0 + k), species, weatherRun));
     }
     await query(CLEAR_PRE_SQL);
     for (const [k, v] of bodies) await query('INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value', [k, v]);

@@ -540,3 +540,26 @@ Gerekçe günlük dille yazılır. Örnek: "Bu öneri çoğunlukla yer tipine da
 - zaman bölmeli testte (`temporal`) modelin log-olabilirliği üç basit tabanın her birinden yüksek (`model_beats_baselines = true`). Tabanlar: tek oran, saat bandı, mera.
 
 Kapının sonucu `GET /api/trust-gate?species=` ile herkese açıktır. Yalnız karar ve seans sayısı döner; katsayılar ve seanslar yönetici ucundadır. Karar `workers/api/src/lib/calibration.ts` `calibrationPassed` ile verilir.
+
+## 18. Veri tazeliği ve uyarı eşiği
+
+**Ne gösterilir.** Puanlar Worker'ın son hava çekimiyle (Open-Meteo, Cloudflare cron :07) GitHub Actions'ta hesaplanır. Sayfa, puanın kullandığı çekimin zamanını (`data_fetched_at`) ve o çekimin arkasındaki model çalıştırmasını (`weather_run`) gösterir.
+
+**Uyarı** (`apps/web/src/scripts/format.ts` `freshness`) şu durumlardan biri varsa çıkar:
+- (a) puanın kullandığı hava çekimi ya da puanlamanın kendisi **2 saatten eski**;
+- (b) kullanılan tahminin model çalıştırma zamanı (`init`), o modelin **olağan güncelleme aralığının 2 katından eski**;
+- (c) son çekim denemesi **başarısız** ve kullanılan veri 1 saatten eski.
+
+Eski hava verisiyle hesaplanan taze puan da eskidir; uyarı yalnız puan yaşına indirilmez.
+
+**Model çalıştırma zamanı.** Open-Meteo'nun forecast ve marine yanıtında model çalıştırma zamanı yoktur. Modelin meta ucunda vardır: `/data/<model>/static/meta.json` → `last_run_initialisation_time`, `last_run_availability_time`, `update_interval_seconds`.
+- Biz `best_match` istiyoruz. Bursa'da bunun hangi model olduğu Worker'da (`lib/modelrun.ts`) değer değer karşılaştırmayla belirlenir: haftada bir ya da `meta.model_check = requested` ile.
+- Aday modeller:
+  - hava: ICON-EU, ICON global, ECMWF IFS, GFS;
+  - deniz: Météo-France dalga, DWD EWAM, ECMWF WAM, DWD GWAM.
+- Hiçbir aday tam eşleşmezse o tür için model yaşı **bilinmiyor** sayılır ve yalnız (a) ile (c) uygulanır. Uydurulmuş bir model zamanı kullanılmaz.
+- Deniz verisinde `best_match` değişkene göre farklı modellerden gelebilir. Tanıma dalga yüksekliğiyle yapılır, çünkü güvenlik kapısı dalgaya dayanır.
+
+**Sıra.** Cloudflare cron her saat önce havayı çeker, sonra puanlar bu çekimden eskiyse puanlamayı tetikler (`shouldRescoreAfterFetch`). GitHub zamanlaması yedektir; puanlar zaten en yeni havayla hesaplanmışsa hemen çıkar (`nothingNew`). Deploy ve veri yenilemesi `force` ile her zaman yeniden puanlar.
+
+Ölçülen durum ve beklenen sıklık: `docs/audit/staleness-24h.md`.
