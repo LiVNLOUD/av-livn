@@ -80,11 +80,35 @@ def test_atl24_features_filter_bbox_thin_and_date():
     assert thin(np.array([]), np.array([]), np.array([]), np.array([])) == []
 
 
+def test_stage_counts_show_where_photons_drop_out():
+    from av_pipeline.satbathy.atl24 import stage_counts
+
+    p = {
+        "class_ph": np.array([40, 40, 40, 41, 40, 40]),
+        "confidence": np.array([0.9, 0.9, 0.3, 0.9, 0.9, 0.9]),
+        "lat_ph": np.array([40.4, 40.4, 40.4, 40.4, 40.4, 50.0]),
+        "lon_ph": np.array([29.0, 29.0, 29.0, 29.0, 29.0, 29.0]),
+        "surface_h": np.full(6, 0.2),
+        "ortho_h": np.array([-3.0, 1.0, -3.0, -3.0, -3.0, -3.0]),
+        "invalid_kd": np.array([0, 0, 0, 0, 1, 0]),
+    }
+    assert stage_counts(p) == {"photons": 6, "in_bbox": 5, "class_40": 4, "conf_ge_0_6": 3, "flags_clean": 2, "depth_ok": 1}
+
+
 def test_reports_say_unknown_when_there_is_no_data_and_show_the_decision():
     from av_pipeline.satbathy.spots import coverage_md, sdb_md
 
     md = coverage_md({"source": "x", "fetched_via": "nsidc", "updated": "2026-11-07"}, np.array([]), np.array([]), np.array([]), [], [], [], [])
-    assert "kullanılabilir ATL24 batimetri ölçümü yok" in md
+    assert "kullanılabilir ATL24 batimetri ölçümü yok" in md and "doğrulanmadı" in md  # no stage counters → not proven
+    # with stage counters the reason is stated from the evidence
+    st = {"photons": 120000, "in_bbox": 3400, "class_40": 0, "conf_ge_0_6": 0, "flags_clean": 0, "depth_ok": 0}
+    md2 = coverage_md({"source": "x", "fetched_via": "nsidc", "updated": "d", "diagnostics": {"stages": st, "granules_read": 129, "first_beam_in_bbox": {"class_ph_values": {"0": 3000, "41": 400}, "confidence_range": [0.0, 0.2]}}},
+                      np.array([]), np.array([]), np.array([]), [], [], [], [])
+    assert "| Gemlik–Mudanya kutusu içinde | 3.400 |" in md2 and "batimetri sınıfı (40) foton yok" in md2 and "129 granül" in md2
+    st_none = {**st, "in_bbox": 0}
+    assert "hiç foton yok" in coverage_md({"diagnostics": {"stages": st_none}}, np.array([]), np.array([]), np.array([]), [], [], [], [])
+    st_thr = {**st, "class_40": 50}
+    assert "eşiğini geçen yok" in coverage_md({"diagnostics": {"stages": st_thr}}, np.array([]), np.array([]), np.array([]), [], [], [], [])
     rep = {"scenes_used": 12, "calibration_points": 10, "calibration_passes": 3, "decision": {"accepted": False, "why": ["bağımsız kalibrasyon noktası 10 < 30"]}}
     assert "RET — modele girmez" in sdb_md(rep) and "10 < 30" in sdb_md(rep)
     rep2 = {**rep, "validation": {"range_0_8": {"rmse": 1.1, "bias": 0.1, "r2": 0.7, "n": 40}, "all": {"rmse": 1.3, "r2": 0.65}, "by_band": {"0-2": {"n": 5, "rmse": 0.8, "bias": 0.2}}}, "decision": {"accepted": True, "why": []}}

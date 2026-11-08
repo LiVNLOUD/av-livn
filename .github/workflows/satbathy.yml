@@ -17,6 +17,10 @@ on:
         description: 'ATL24 kaynağı: auto (önce SlideRule), sliderule, nsidc'
         type: string
         default: auto
+      refresh:
+        description: 'Granül önbelleğini yok say, tüm arşivi yeniden oku (tanı)'
+        type: boolean
+        default: false
 permissions:
   contents: write
   actions: write
@@ -52,7 +56,7 @@ jobs:
       - name: ICESat-2 ATL24 (SlideRule, else NSIDC)
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
-        run: python -m av_pipeline.satbathy.atl24 data/satbathy --source ${{ inputs.source || 'auto' }}
+        run: python -m av_pipeline.satbathy.atl24 data/satbathy --source ${{ inputs.source || 'auto' }} ${{ inputs.refresh && '--refresh' || '' }}
       - name: Sentinel-2 SDB (calibration, grouped validation, acceptance)
         continue-on-error: true
         run: python -m av_pipeline.satbathy.sdb data/satbathy

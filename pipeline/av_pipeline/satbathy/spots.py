@@ -38,8 +38,26 @@ def coverage_md(gj, lon, lat, depth, passes, dates, spots, near) -> str:
     L = ["# ICESat-2 ATL24 kapsamı (Gemlik–Mudanya kıyısı)", ""]
     L.append(f"Kaynak: {gj.get('source')}; çekim yolu: {gj.get('fetched_via')}; güncelleme {gj.get('updated')}. Yalnız batimetri sınıfı (40), güven ≥ 0,6, kalite bayrağı yok; 10 m'de bir nokta.")
     L.append("")
+    diag = gj.get("diagnostics") or {}
+    st = diag.get("stages") or {}
+    if st:
+        tr = {"photons": "Granüllerdeki toplam foton", "in_bbox": "Gemlik–Mudanya kutusu içinde", "class_40": "Batimetri sınıfı (40)", "conf_ge_0_6": "Güven ≥ 0,6", "flags_clean": "Kalite bayrağı yok", "depth_ok": "Derinlik 0–40 m"}
+        L.append(f"Aşama sayaçları ({diag.get('granules_read', '?')} granül okundu; her satır bir öncekinden kalan foton):")
+        L.append("")
+        L.append("| Aşama | Foton |")
+        L.append("|---|---|")
+        L += [f"| {tr.get(k, k)} | {v:,} |".replace(",", ".") for k, v in st.items()]
+        if diag.get("first_beam_in_bbox"):
+            f = diag["first_beam_in_bbox"]
+            L.append("")
+            L.append(f"Kutudaki ilk ışında sınıf dağılımı: {f.get('class_ph_values')}; güven aralığı {f.get('confidence_range')}.")
+        L.append("")
     if len(depth) == 0:
-        L.append("**Bölgede kullanılabilir ATL24 batimetri ölçümü yok.** Marmara'nın bulanık suyunda lazer dibe ulaşamıyor ya da ürün bu kıyıda batimetri sınıfı üretmemiş. Uydu lidarından meralara derinlik gelmedi.")
+        why = ("Kutu içinde batimetri sınıfı (40) foton yok: ürün bu kıyıda dip algılamamış (bulanık suda lazer dibe ulaşamıyor)." if st and st.get("in_bbox") and not st.get("class_40")
+               else "Kutu içinde hiç foton yok: ICESat-2 geçişleri bu kıyıda ATL24 ürünü üretmemiş." if st and not st.get("in_bbox")
+               else "Batimetri fotonları var ama güven/kalite eşiğini geçen yok." if st and st.get("class_40")
+               else "Aşama sayaçları yok (eski çalışma); sonuç doğrulanmadı.")
+        L.append(f"**Bölgede kullanılabilir ATL24 batimetri ölçümü yok.** {why} Uydu lidarından meralara derinlik gelmedi.")
         return "\n".join(L) + "\n"
     yrs = sorted({d[:4] for d in dates})
     L.append(f"- Toplam {len(depth)} nokta, {len(set(passes))} geçiş (ışın), yıllar {yrs[0]}–{yrs[-1]}.")

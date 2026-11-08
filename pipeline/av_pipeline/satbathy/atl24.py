@@ -53,7 +53,55 @@ def thin(lat: np.ndarray, lon: np.ndarray, depth: np.ndarray, sigma: np.ndarray,
     return keep
 
 
+STAGES = ("photons", "in_bbox", "class_40", "conf_ge_0_6", "flags_clean", "depth_ok")
+
+
+def stage_counts(p: dict[str, np.ndarray]) -> dict[str, int]:
+    """How many photons survive each filter step, inside the bbox (diagnostics: where a zero comes from)."""
+    from av_pipeline.satbathy.core import BATHY_CLASS, MAX_DEPTH_M, MIN_CONFIDENCE  # noqa: PLC0415
+
+    n = len(p["class_ph"])
+    zero = np.zeros(n)
+    lat, lon = np.asarray(p["lat_ph"], float), np.asarray(p["lon_ph"], float)
+    m = (lon >= BBOX[0]) & (lon <= BBOX[2]) & (lat >= BBOX[1]) & (lat <= BBOX[3])
+    out = {"photons": n, "in_bbox": int(m.sum())}
+    m &= np.asarray(p["class_ph"]) == BATHY_CLASS
+    out["class_40"] = int(m.sum())
+    m &= np.nan_to_num(np.asarray(p.get("confidence", zero), float), nan=0.0) >= MIN_CONFIDENCE
+    out["conf_ge_0_6"] = int(m.sum())
+    for flag in ("low_confidence_flag", "invalid_kd", "invalid_wind_speed", "sensor_depth_exceeded"):
+        m &= np.nan_to_num(np.asarray(p.get(flag, zero), float), nan=1.0) == 0
+    out["flags_clean"] = int(m.sum())
+    d = depth_of(p)
+    m &= np.isfinite(d) & (d > 0) & (d <= MAX_DEPTH_M)
+    out["depth_ok"] = int(m.sum())
+    return out
+
+
+DIAG: dict[str, int] = {k: 0 for k in STAGES}
+DIAG_SEEN: dict[str, object] = {}
+
+
+def note_diagnostics(p: dict[str, np.ndarray]) -> None:
+    """Accumulate stage counts; on the first beam with photons in the bbox, record the value ranges once."""
+    c = stage_counts(p)
+    for k, v in c.items():
+        DIAG[k] += v
+    if c["in_bbox"] and "first" not in DIAG_SEEN:
+        lat, lon = np.asarray(p["lat_ph"], float), np.asarray(p["lon_ph"], float)
+        m = (lon >= BBOX[0]) & (lon <= BBOX[2]) & (lat >= BBOX[1]) & (lat <= BBOX[3])
+        cls = np.asarray(p["class_ph"])[m]
+        conf = np.asarray(p.get("confidence", np.full(len(m), np.nan)), float)[m]
+        DIAG_SEEN["first"] = {
+            "fields": sorted(p.keys()),
+            "class_ph_values": {str(int(k)): int(v) for k, v in zip(*np.unique(cls, return_counts=True))},
+            "confidence_range": [None if not np.isfinite(conf).any() else round(float(np.nanmin(conf)), 3), None if not np.isfinite(conf).any() else round(float(np.nanmax(conf)), 3)],
+        }
+        print(f"  first beam in bbox: {DIAG_SEEN['first']}")
+
+
 def features(name: str, beam: str, p: dict[str, np.ndarray]) -> list[dict]:
+    note_diagnostics(p)
     m = filter_photons(p)
     lat, lon = p["lat_ph"][m], p["lon_ph"][m]
     inb = (lon >= BBOX[0]) & (lon <= BBOX[2]) & (lat >= BBOX[1]) & (lat <= BBOX[3])
@@ -163,6 +211,7 @@ def via_nsidc(done: set[str]) -> tuple[list[dict], list[str]]:
 def main(argv: list[str]) -> None:
     out_dir = Path(argv[0])
     source = argv[argv.index("--source") + 1] if "--source" in argv else "auto"
+    refresh = "--refresh" in argv  # ignore the granule cache (diagnostic re-read of the whole archive)
     out_dir.mkdir(parents=True, exist_ok=True)
     cache = out_dir / "atl24_granules.json"
     gj = out_dir / "atl24.geojson"
@@ -186,11 +235,17 @@ def main(argv: list[str]) -> None:
                 raise
     names: list[str] = []
     if used is None:
-        feats, names = via_nsidc(done)
+        for k in DIAG:
+            DIAG[k] = 0  # count the granules themselves only
+        feats, names = via_nsidc(set() if refresh else done)
         used = "nsidc"
+        if refresh:
+            old = []  # the whole archive was read again
     allf = old + feats
-    gj.write_text(json.dumps({"type": "FeatureCollection", "source": "ICESat-2 ATL24 v002 (NASA NSIDC, doi:10.5067/ATLAS/ATL24.002)", "fetched_via": used, "updated": dt.date.today().isoformat(), "features": allf}, separators=(",", ":")) + "\n")
+    diagnostics = {"stages": dict(DIAG), "first_beam_in_bbox": DIAG_SEEN.get("first"), "granules_read": len(names), "refresh": refresh}
+    gj.write_text(json.dumps({"type": "FeatureCollection", "source": "ICESat-2 ATL24 v002 (NASA NSIDC, doi:10.5067/ATLAS/ATL24.002)", "fetched_via": used, "updated": dt.date.today().isoformat(), "diagnostics": diagnostics, "features": allf}, separators=(",", ":")) + "\n")
     cache.write_text(json.dumps({"granules": sorted(done | set(names)), "updated": dt.date.today().isoformat()}, indent=1) + "\n")
+    print(f"atl24 stages (photons → kept): {json.dumps(DIAG)}")
     print(f"atl24: {len(feats)} new, {len(allf)} total points via {used}")
 
 

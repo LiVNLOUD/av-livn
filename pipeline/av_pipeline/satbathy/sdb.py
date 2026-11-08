@@ -26,7 +26,7 @@ from pathlib import Path
 
 import numpy as np
 
-from av_pipeline.satbathy.core import SDB_RANGE, accept, fit_linear, grouped_cv, stumpf_ratio
+from av_pipeline.satbathy.core import ACCEPT_N, SDB_RANGE, accept, fit_linear, grouped_cv, stumpf_ratio
 
 STAC = "https://earth-search.aws.element84.com/v1"
 AOI = (28.74, 40.30, 29.22, 40.58)  # W, S, E, N (lon/lat): spots ± margin
@@ -136,6 +136,13 @@ def main(argv: list[str]) -> None:
     pidx[inside] = strip_idx[row[inside], col[inside]]
     usable = (pidx >= 0) & (z <= SDB_RANGE[1])
     report["atl24_in_strip_0_10m"] = int(usable.sum())
+    if int(usable.sum()) < ACCEPT_N:
+        # nothing to calibrate against: no point reading 40 scenes — the decision is already "rejected"
+        report["decision"] = {"accepted": False, "why": [f"kalibrasyon için yetersiz ATL24 noktası (kıyı şeridinde 0–10 m'de {int(usable.sum())} nokta, en az {ACCEPT_N} gerekir)"]}
+        report["scenes_used"] = 0
+        (out / "sdb_report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False) + "\n")
+        print(f"sdb: rejected before reading scenes — {report['decision']['why'][0]}")
+        return
 
     items = search_scenes()
     stack, sdates, fracs = [], [], []
