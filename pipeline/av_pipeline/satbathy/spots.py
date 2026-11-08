@@ -46,12 +46,13 @@ def coverage_md(gj, lon, lat, depth, passes, dates, spots, near) -> str:
         L.append("")
         L.append("| Aşama | Foton |")
         L.append("|---|---|")
-        L += [f"| {tr.get(k, k)} | {v:,} |".replace(",", ".") for k, v in st.items()]
+        L += [f"| {tr.get(k, k)} | {f'{v:,}'.replace(',', '.')} |" for k, v in st.items()]
         if diag.get("nearest_photon"):
             n0, ext = diag["nearest_photon"], diag.get("photon_extent_lat_lat_lon_lon")
+            tr_n = lambda x, k=2: f"{x:.{k}f}".replace(".", ",")  # noqa: E731
             L.append("")
-            L.append(f"Kutu merkezine en yakın foton {n0['km']} km uzakta ({n0['lat']}, {n0['lon']}; sınıf {n0['class_ph']}). 50 km içinde {diag.get('within_50km', 0)} foton, bunların {diag.get('within_50km_class_40', 0)} tanesi batimetri sınıfında."
-                     + (f" Tüm fotonlar enlem {ext[0]:.2f}–{ext[1]:.2f}, boylam {ext[2]:.2f}–{ext[3]:.2f} aralığında." if ext else ""))
+            L.append(f"Kutu merkezine en yakın foton {tr_n(n0['km'], 1)} km uzakta ({tr_n(n0['lat'], 4)} K, {tr_n(n0['lon'], 4)} D; sınıf {n0['class_ph']}). 50 km içinde {diag.get('within_50km', 0)} foton, bunların {diag.get('within_50km_class_40', 0)} tanesi batimetri sınıfında."
+                     + (f" Tüm fotonlar enlem {tr_n(ext[0])}–{tr_n(ext[1])}, boylam {tr_n(ext[2])}–{tr_n(ext[3])} aralığında." if ext else ""))
         if diag.get("first_beam_in_bbox"):
             f = diag["first_beam_in_bbox"]
             L.append("")
@@ -88,7 +89,7 @@ def coverage_md(gj, lon, lat, depth, passes, dates, spots, near) -> str:
 def sdb_md(rep: dict) -> str:
     L = ["# Sentinel-2 uydu türevli batimetri (SDB) doğrulaması", ""]
     L.append("Yöntem: Stumpf vd. (2003) log-oran (mavi/yeşil), ICESat-2 ATL24 ile kalibrasyon; doğrulama ATL24 geçişlerine göre gruplu 5 kat (aynı geçişin noktaları aynı katta). Copernicus Sentinel-2 L2A (Earth Search STAC).")
-    L.append(f"Kabul eşiği: 0–8 m'de RMSE ≤ {ACCEPT_RMSE} m, R² ≥ {ACCEPT_R2}, en az {ACCEPT_N} bağımsız nokta (piksel × geçiş).")
+    L.append(f"Kabul eşiği: 0–8 m'de RMSE ≤ {str(ACCEPT_RMSE).replace('.', ',')} m, R² ≥ {str(ACCEPT_R2).replace('.', ',')}, en az {ACCEPT_N} bağımsız nokta (piksel × geçiş).")
     L.append("")
     L.append(f"- Kullanılan berrak sahne: {rep.get('scenes_used', 0)}; kıyı şeridi pikseli {rep.get('strip_pixels')}; şeritte 0–10 m ATL24 noktası {rep.get('atl24_in_strip_0_10m', 0)}.")
     L.append(f"- Kalibrasyon: {rep.get('calibration_points', 0)} bağımsız nokta, {rep.get('calibration_passes', 0)} geçiş.")

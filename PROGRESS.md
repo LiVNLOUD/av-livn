@@ -434,3 +434,48 @@ Yeni özellik yok. Rapor: `docs/audit/monitor-72h.md`.
 - watchdog saatlikten 6 saatlik bağımsız kontrole indi.
 
 **Temizlik:** kuru tetik testi (`dispatchTest`) ve testleri kaldırıldı. `dry_run` girdisi elle kuru çalıştırma için kalıyor. Denetim betiği `docs/audit/staleness-audit.py` artık pencere parametreli.
+
+## Saha düzeltmesi tetiği + Faz R — uydu verisiyle kıyı derinliği (2026-11-07/08) ✅ DUR
+**Saha düzeltmesi tetiği:**
+- Puanı etkileyen saha kaydı (lamba, derinlik, erişim, dip; yöneticinin lamba durumu) kaydedilince Worker puanlamayı hemen başlatır; sebep "saha düzeltmesi".
+- En fazla 10 dk'da bir; arada gelenler aynı çalışmanın ikinci geçişinde birlikte puanlanır. Form "Puan birkaç dakika içinde güncellenecek." der.
+- Av günlüğü kaydı puan girdisi değil, tetiklemez.
+- Canlı test:
+  - 1. kayıt puanlamayı 22 sn'de başlattı, puan 1 dk 40 sn'de yazıldı;
+  - 20 sn sonraki 2. kayıt kuyruğa alındı ve aynı çalışmada işlendi;
+  - kayıtta sebep "saha düzeltmesi";
+  - test kayıtları silindi.
+
+**R1 — derinlik bilgisinin değeri** (`docs/audit/depth-voi.md`):
+- Bu gecenin planı derinlikten etkilenmiyor: modelde derinlik yalnız gündüz koluna girer.
+- 72 saatlik sıralamada derinlik 1–10 m değişince 61 mera ilk 3'e girip çıkıyor; sıra aralığı medyanı 33 basamak.
+- 119 meranın 119'unda kullanılan derinlik yapı boyundan tahmin.
+- Öncelikli ilk 5: Kordon (Eşkel kuzeybatısı), Kordon (Hasanbey kuzeyi), Kordon (Hasanbey kuzeydoğusu), Kordon (Kumyaka doğusu), Kordon (Ömerbey Mah. doğusu).
+
+**R2 — ICESat-2 ATL24 v002** (`satbathy.yml`, aylık; `docs/audit/atl24-coverage.md`):
+- SlideRule 0 foton döndü. Boş yanıt kanıt sayılmadı; NSIDC'den 129 granül (2018–2024, ~5 GB) token'la okundu.
+- Toplam 192.332.558 foton, ama Gemlik–Mudanya kutusunda **0**.
+- En yakın foton 375 km uzakta (Gökova); 50 km içinde hiç foton yok; fotonlar enlem 30,75–59,51 aralığında, yani koordinatlar doğru.
+- Sonuç: ATL24 ürünü Marmara Denizi kıyısı için foton üretmemiş. Uydu lidarından meralara derinlik **gelmedi**.
+
+**R3 — Sentinel-2 SDB** (`docs/audit/sdb-validation.md`):
+- Earth Search'te 1075 sahne (bulut < %10); ilk çalışmada 40 berrak sahne okundu.
+- Kalibrasyon için 0 ATL24 noktası var. **Ret:** model kurulamadı, modele girmez, haritada gösterilmez.
+
+**R4 — entegrasyon (kod hazır, veri yok):**
+- Motor kaynakları `uydu-lidar` / `uydu-tahmini`. Ağırlık belirsizlikle düşer: tavan 0,9 / 0,7, taban 0,3. Puanlama %100 kapsam.
+- D1 `sat_depth_band` / `sat_depth_points`; mera kartı profilinde uydu noktaları ve bandı; "Uydu derinliği" harita katmanı.
+- Atıflar footer ve /model/'de: NASA NSIDC ATL24 v002, doi:10.5067/ATLAS/ATL24.002; Copernicus Sentinel-2.
+- Bugün veri olmadığı için puanlar değişmedi. Kart "Uydu derinliği: bilinmiyor", katman "uydu lazer ölçümü yok" diyor. Önce/sonra farkı yok (`docs/audit/r-top10-before.json`).
+
+**Earthdata token:**
+- Bitiş 7 Ocak 2027 00:41 (İstanbul); her çalışmada okunuyor.
+- ≤ 10 gün kala ve bitince ntfy + push uyarısı (günde bir). Test uyarısı ntfy ile iletildi; push aboneliği yok.
+- Token yoksa ya da geçersizse yalnız satbathy işi açık mesajla durur.
+
+**R5 — kalan en hızlı yol:**
+- R1 listesinin ilk 5 merasında sahada kurşunla derinlik ölçümü (saha formu; artık birkaç dakikada puanlanır).
+- ≥ 30 saha derinlik noktası birikirse Sentinel-2 modeli ATL24 yerine saha ölçümleriyle kalibre edilebilir (aynı kabul eşiği). Bu ayrı bir karar.
+- Aylık satbathy işi yeni ATL24 geçişlerini kontrol etmeye devam eder.
+
+**Doğrulama:** puanlama %100, worker 163 ve web 53 test, pipeline 99 test, typecheck; canlı e2e (taşma testi dahil) ve smoke yeşil.
