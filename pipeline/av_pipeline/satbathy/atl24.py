@@ -87,6 +87,22 @@ def note_diagnostics(p: dict[str, np.ndarray]) -> None:
     c = stage_counts(p)
     for k, v in c.items():
         DIAG[k] += v
+    # where the photons actually are: overall extent and the closest one to the box centre (rules out swapped or
+    # mis-scaled coordinates before a "no data" conclusion)
+    lat_a, lon_a = np.asarray(p["lat_ph"], float), np.asarray(p["lon_ph"], float)
+    if len(lat_a):
+        ext = DIAG_SEEN.setdefault("extent", [90.0, -90.0, 180.0, -180.0])
+        ext[0], ext[1] = min(ext[0], float(np.nanmin(lat_a))), max(ext[1], float(np.nanmax(lat_a)))
+        ext[2], ext[3] = min(ext[2], float(np.nanmin(lon_a))), max(ext[3], float(np.nanmax(lon_a)))
+        cy, cx = (BBOX[1] + BBOX[3]) / 2, (BBOX[0] + BBOX[2]) / 2
+        dkm = np.hypot((lat_a - cy) * 111.3, (lon_a - cx) * 111.3 * np.cos(np.radians(cy)))
+        i = int(np.nanargmin(dkm))
+        best = DIAG_SEEN.get("nearest")
+        if best is None or dkm[i] < best["km"]:
+            DIAG_SEEN["nearest"] = {"km": round(float(dkm[i]), 1), "lat": round(float(lat_a[i]), 4), "lon": round(float(lon_a[i]), 4), "class_ph": int(np.asarray(p["class_ph"])[i])}
+        near = dkm <= 50
+        DIAG["within_50km"] = DIAG.get("within_50km", 0) + int(near.sum())
+        DIAG["within_50km_class_40"] = DIAG.get("within_50km_class_40", 0) + int((near & (np.asarray(p["class_ph"]) == 40)).sum())
     if c["in_bbox"] and "first" not in DIAG_SEEN:
         lat, lon = np.asarray(p["lat_ph"], float), np.asarray(p["lon_ph"], float)
         m = (lon >= BBOX[0]) & (lon <= BBOX[2]) & (lat >= BBOX[1]) & (lat <= BBOX[3])
@@ -242,7 +258,10 @@ def main(argv: list[str]) -> None:
         if refresh:
             old = []  # the whole archive was read again
     allf = old + feats
-    diagnostics = {"stages": dict(DIAG), "first_beam_in_bbox": DIAG_SEEN.get("first"), "granules_read": len(names), "refresh": refresh}
+    diagnostics = {"stages": {k: DIAG[k] for k in STAGES}, "within_50km": DIAG.get("within_50km", 0), "within_50km_class_40": DIAG.get("within_50km_class_40", 0),
+                   "photon_extent_lat_lat_lon_lon": DIAG_SEEN.get("extent"), "nearest_photon": DIAG_SEEN.get("nearest"), "first_beam_in_bbox": DIAG_SEEN.get("first"),
+                   "granules_read": len(names), "refresh": refresh}
+    print(f"atl24 extent/nearest: {json.dumps({k: diagnostics[k] for k in ('within_50km', 'within_50km_class_40', 'photon_extent_lat_lat_lon_lon', 'nearest_photon')})}")
     gj.write_text(json.dumps({"type": "FeatureCollection", "source": "ICESat-2 ATL24 v002 (NASA NSIDC, doi:10.5067/ATLAS/ATL24.002)", "fetched_via": used, "updated": dt.date.today().isoformat(), "diagnostics": diagnostics, "features": allf}, separators=(",", ":")) + "\n")
     cache.write_text(json.dumps({"granules": sorted(done | set(names)), "updated": dt.date.today().isoformat()}, indent=1) + "\n")
     print(f"atl24 stages (photons → kept): {json.dumps(DIAG)}")

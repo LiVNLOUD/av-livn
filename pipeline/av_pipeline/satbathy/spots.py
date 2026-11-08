@@ -47,6 +47,11 @@ def coverage_md(gj, lon, lat, depth, passes, dates, spots, near) -> str:
         L.append("| Aşama | Foton |")
         L.append("|---|---|")
         L += [f"| {tr.get(k, k)} | {v:,} |".replace(",", ".") for k, v in st.items()]
+        if diag.get("nearest_photon"):
+            n0, ext = diag["nearest_photon"], diag.get("photon_extent_lat_lat_lon_lon")
+            L.append("")
+            L.append(f"Kutu merkezine en yakın foton {n0['km']} km uzakta ({n0['lat']}, {n0['lon']}; sınıf {n0['class_ph']}). 50 km içinde {diag.get('within_50km', 0)} foton, bunların {diag.get('within_50km_class_40', 0)} tanesi batimetri sınıfında."
+                     + (f" Tüm fotonlar enlem {ext[0]:.2f}–{ext[1]:.2f}, boylam {ext[2]:.2f}–{ext[3]:.2f} aralığında." if ext else ""))
         if diag.get("first_beam_in_bbox"):
             f = diag["first_beam_in_bbox"]
             L.append("")
