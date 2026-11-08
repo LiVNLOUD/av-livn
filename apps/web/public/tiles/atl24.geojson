@@ -1,1 +1,1 @@
-{"type":"FeatureCollection","source":"ICESat-2 ATL24 v002 (NASA NSIDC, doi:10.5067/ATLAS/ATL24.002)","fetched_via":"nsidc","updated":"2026-11-07","features":[]}
+{"type":"FeatureCollection","source":"ICESat-2 ATL24 v002 (NASA NSIDC, doi:10.5067/ATLAS/ATL24.002)","fetched_via":"nsidc","updated":"2026-11-08","diagnostics":{"stages":{"photons":192332558,"in_bbox":0,"class_40":0,"conf_ge_0_6":0,"flags_clean":0,"depth_ok":0},"first_beam_in_bbox":null,"granules_read":129,"refresh":true},"features":[]}
