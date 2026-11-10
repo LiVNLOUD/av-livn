@@ -13,8 +13,10 @@ retry() { # retry <description> <command...>
   echo "FAIL $desc"; fail=1
 }
 
-health() { curl -fsS -m 15 https://av.livn.tr/api/health | grep -q '"ok":true'; }
-home() { curl -fsS -m 15 https://av.livn.tr/ | grep -q 'data-app="av-livn"'; }
+# Read the whole body first: piping curl into `grep -q` lets grep exit on the first match while curl is still writing,
+# curl then fails with (23) and pipefail turns a good page into a FAIL (seen once the home page grew past one pipe write).
+health() { local b; b=$(curl -fsS -m 15 https://av.livn.tr/api/health) && grep -q '"ok":true' <<<"$b"; }
+home() { local b; b=$(curl -fsS -m 15 https://av.livn.tr/) && grep -q 'data-app="av-livn"' <<<"$b"; }
 status200() { [ "$(curl -s -o /dev/null -m 15 -w '%{http_code}' "$1")" = 200 ]; }
 win() {
   local out; out=$(curl -s -o /dev/null -m 15 -w '%{http_code} %{redirect_url}' https://livn.tr/win)
