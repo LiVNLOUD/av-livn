@@ -19,7 +19,7 @@ type Driver = 'yapi' | 'lamba' | 'derinlik' | 'maruziyet' | 'taban' | null;
 export function driverOf(text: string | null | undefined): Driver {
   const t = (text ?? '').toLocaleLowerCase('tr');
   if (/ tipi\b|^yapı \(/.test(t) || /^[^(]*tipi/.test(t)) return 'yapi';
-  if (/aydınlatma/.test(t)) return 'lamba';
+  if (/aydınlatma|ışığı görüldü/.test(t)) return 'lamba';
   if (/m su \(|derinlik/.test(t)) return 'derinlik';
   if (/rüzgar(ın)?a daha|rüzgara daha/.test(t)) return 'maruziyet';
   if (/^dip|dip:/.test(t)) return 'taban';
@@ -50,7 +50,7 @@ export function trust(w: PlanWin, opts: { calibrated?: boolean; weather?: 'gate'
     const d = driverOf(w.why ?? w.reason);
     const what =
       d === 'yapi' ? 'yer tipine dair varsayıma dayanıyor; sahada doğrulanmadı.'
-      : d === 'lamba' ? 'iskelede ışık olması muhtemel varsayımına dayanıyor; ışık sahada doğrulanmadı.'
+      : d === 'lamba' ? 'iskele aydınlatmasına dair bir varsayıma dayanıyor; ışık sahada doğrulanmadı.'
       : d === 'derinlik' ? 'tahmini su derinliğine dayanıyor; derinlik ölçülmedi.'
       : 'doğrulanmamış bir varsayıma dayanıyor.';
     return { level: 'Düşük', text: `Bu öneri çoğunlukla ${what}` };
@@ -93,6 +93,8 @@ export function driverSentence(why: string | null | undefined): string | null {
   const Kind = kind ? kind.charAt(0).toLocaleUpperCase('tr') + kind.slice(1) : 'Yapı';
   switch (d) {
     case 'lamba':
+      if (/aydınlatması bilinmiyor/i.test(why ?? '')) return 'İskele aydınlatması bilinmiyor; puan bu konuda bir varsayıma dayanıyor (sahada doğrulanmadı).';
+      if (/ışığı görüldü/i.test(why ?? '')) return `Fotoğrafta/uzaktan iskele ışığı görüldü; gece çalıştığı doğrulanmadı (${ev === 'masabasi' ? 'harita/fotoğraf verisi' : 'uzaktan gözlem'}).`;
       if (/aydınlatması yok/i.test(why ?? '')) return `İskelede ışık yok (${ev === 'saha' ? 'sahada görüldü' : ev === 'uzaktan' ? 'uzaktan gözlem, sahada doğrulanmadı' : 'harita/fotoğraf verisi, sahada doğrulanmadı'}).`;
       return ev === 'saha' ? 'İskele ışığı sahada doğrulandı; model ışığı bu tür için olumlu sayıyor.'
         : ev === 'uzaktan' ? 'İskelede ışık var görünüyor (uzaktan gözlem, sahada doğrulanmadı).'
@@ -179,4 +181,47 @@ export function planPick<W extends PickWin>(today: W[], all: W[]): { m: W; today
   const rest = others.filter((w) => !eq.includes(w));
   const eqList = eq.length >= 2 ? [...eq].sort((x, y) => x.name.localeCompare(y.name, 'tr')) : [m];
   return { m, todayStrong, nextStrong, eqList, rest };
+}
+
+// ---------------------------------------------------------------- V1.2: decision language and three trusts
+/**
+ * The headline answer. Never an unconditional "Evet": the wording follows the overall trust, so low trust can
+ * only ever say "worth a try" (REVISION-V V1.2).
+ */
+export function verdictText(o: { todayStrong: boolean; nextStrong: boolean; trust: TrustLevel }): string {
+  if (!o.todayStrong) return o.nextStrong ? 'Bugün zayıf görünüyor' : 'Zayıf görünüyor';
+  return o.trust === 'Yüksek' ? 'İyi görünüyor' : o.trust === 'Orta' ? 'Uygun görünüyor' : 'Denemeye değer görünüyor';
+}
+export const trustTail = (l: TrustLevel): string =>
+  l === 'Düşük' ? 'güven düşük (çoğunlukla varsayıma dayalı)' : l === 'Orta' ? 'güven orta' : 'güven yüksek';
+
+export type FieldKinds = { lamba: string | null; derinlik: string | null; yapi: string | null; taban?: string | null } | null | undefined;
+export interface TrustRow { key: 'hava' | 'mera' | 'av'; label: string; level: TrustLevel | null; value: string; text: string }
+
+/** Spot knowledge from the kinds of evidence on record (field, remote/desk, none) for lamp, depth and structure. */
+export function spotKnowledge(kinds: FieldKinds, lampState?: string | null): TrustRow {
+  const k = kinds ?? { lamba: null, derinlik: null, yapi: null };
+  const lamp = lampState === 'dogrulandi' || lampState === 'yok' ? 'saha' : lampState === 'goruldu' ? 'uzaktan' : k.lamba;
+  const items: [string, string | null][] = [['lamba', lamp], ['derinlik', k.derinlik], ['yapı', k.yapi]];
+  const field = items.filter(([, v]) => v === 'saha').map(([n]) => n);
+  const seen = items.filter(([, v]) => v === 'uzaktan' || v === 'masabasi').map(([n]) => n);
+  const none = items.filter(([, v]) => !v).map(([n]) => n);
+  const level: TrustLevel = field.length >= 2 && field.includes('derinlik') ? 'Yüksek' : field.length >= 1 || seen.length >= 2 ? 'Orta' : 'Düşük';
+  const join = (a: string[]) => a.join(' ve ');
+  const parts = [field.length ? `${join(field)} sahada` : '', seen.length ? `${join(seen)} uzaktan/fotoğraftan` : '', none.length ? `${join(none)} tahmin ya da bilinmiyor` : ''].filter(Boolean);
+  return { key: 'mera', label: 'Mera bilgisi', level, value: level, text: parts.join('; ') };
+}
+
+/** Weather trust from the model agreement (modelAgreement); null when the comparison is not available yet. */
+export function weatherTrust(ag: ReturnType<typeof modelAgreement>): TrustRow {
+  if (!ag) return { key: 'hava', label: 'Hava tahmini', level: null, value: 'Karşılaştırma yok', text: 'model karşılaştırması henüz yok' };
+  const level: TrustLevel = ag.split === 'gate' ? 'Düşük' : ag.split === 'wide' ? 'Orta' : 'Yüksek';
+  return { key: 'hava', label: 'Hava tahmini', level, value: ag.split === null ? 'Uyumlu' : ag.split === 'wide' ? 'Ayrışıyor' : 'Güvenlikte ayrışıyor', text: ag.text.replace(/^Hava modelleri /, 'modeller ') };
+}
+
+/** Catch verification: forward check of the model against logged sessions (/api/trust-gate). */
+export function catchTrust(gate: { passed: boolean; n: number; min: number } | null): TrustRow {
+  if (!gate) return { key: 'av', label: 'Av verimi doğrulaması', level: null, value: 'Bilinmiyor', text: 'doğrulama durumu alınamadı' };
+  if (gate.passed) return { key: 'av', label: 'Av verimi doğrulaması', level: 'Yüksek', value: 'Doğrulandı', text: `${gate.n} kayıtlı seansta model basit tahminleri geçti` };
+  return { key: 'av', label: 'Av verimi doğrulaması', level: 'Düşük', value: gate.n ? 'Yetersiz' : 'Yok', text: `kayıtlı av n = ${gate.n} (en az ${gate.min} gerekli); uygunluk puanı yerel avla doğrulanmadı` };
 }

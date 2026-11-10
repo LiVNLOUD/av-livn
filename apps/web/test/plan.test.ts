@@ -6,7 +6,8 @@ import { DEFAULT_PROFILES } from '@av-livn/scoring';
 const w = (o: Partial<PlanWin>): PlanWin => ({ why: null, assumed: false, tier: 'guclu', missing: null, top3: 0.8, p10: 60, p90: 80, ...o });
 // real reason texts (workers/api precompute_v2 reasonText, after plainReason)
 const YAPI = 'Mendirek tipi (tip tercihi varsayım, kanıt C; OSM)';
-const LAMBA = 'İskele aydınlatması olasılığı 0,50 (varsayım, kanıt yok)';
+const LAMBA = 'İskele aydınlatması bilinmiyor (varsayım, kanıt yok)';
+const LAMBA_OLD = 'İskele aydınlatması olasılığı 0,50 (varsayım, kanıt yok)'; // stored rows from before V1
 const DEPTH = 'Atış mesafesinde ~1.8 m su (EMODnet enterpolasyonu, ölçüm değil)';
 const EXPO = 'Kuzey rüzgarına daha az açık (20 km/sa) (kıyı geometrisinden hesap, OSM; rüzgar Open-Meteo modeli)';
 
@@ -16,7 +17,7 @@ describe('M1 plan sentences', () => {
   });
   it('L1 rule: largest contribution on an assumption → low trust, said in plain words', () => {
     expect(trust(w({ why: YAPI, assumed: true }))).toEqual({ level: 'Düşük', text: 'Bu öneri çoğunlukla yer tipine dair varsayıma dayanıyor; sahada doğrulanmadı.' });
-    expect(trust(w({ why: LAMBA, assumed: true })).text).toMatch(/ışık olması muhtemel varsayımına/);
+    expect(trust(w({ why: LAMBA, assumed: true })).text).toMatch(/iskele aydınlatmasına dair bir varsayıma/);
     expect(trust(w({ why: DEPTH, assumed: true })).text).toMatch(/derinlik ölçülmedi/);
     expect(trust(w({ why: 'x', assumed: true })).text).toMatch(/doğrulanmamış bir varsayıma/);
     expect(trust(w({ missing: 'eksik veri: akıntı' })).level).toBe('Düşük');
@@ -34,7 +35,12 @@ describe('M1 plan sentences', () => {
   });
   it('N2: every reason sentence carries its evidence type in plain words', () => {
     // lamp: prior, desk data, remote observation, field
-    expect(driverSentence(LAMBA)).toBe('İskelede ışık olması muhtemel (doğrulanmadı).');
+    // V1 lamp language: three states, never a probability
+    expect(driverSentence(LAMBA)).toBe('İskele aydınlatması bilinmiyor; puan bu konuda bir varsayıma dayanıyor (sahada doğrulanmadı).');
+    expect(driverSentence('İskele ışığı görüldü, gece çalıştığı doğrulanmadı (uzaktan gözlem)')).toBe('Fotoğrafta/uzaktan iskele ışığı görüldü; gece çalıştığı doğrulanmadı (uzaktan gözlem).');
+    expect(driverSentence('İskele ışığı görüldü, gece çalıştığı doğrulanmadı (masa başı veri, onay bekliyor)')).toMatch(/harita\/fotoğraf verisi/);
+    for (const t of [LAMBA, 'İskele ışığı görüldü, gece çalıştığı doğrulanmadı (uzaktan gözlem)']) expect(driverSentence(t)).not.toMatch(/\d,\d|olasılı/);
+    expect(driverSentence(LAMBA_OLD)).toBe('İskelede ışık olması muhtemel (doğrulanmadı).');
     expect(driverSentence('İskele aydınlatması olasılığı 0,60 (masa başı veri, onay bekliyor)')).toBe('İskelede ışık var gibi görünüyor (harita/fotoğraf verisi, sahada doğrulanmadı).');
     expect(driverSentence('İskele aydınlatması olasılığı 0,60 (uzaktan gözlem)')).toMatch(/\(uzaktan gözlem, sahada doğrulanmadı\)/);
     expect(driverSentence('İskele aydınlatması (saha bilgisi, değer gizli)')).toMatch(/^İskele ışığı sahada doğrulandı/);
@@ -42,7 +48,7 @@ describe('M1 plan sentences', () => {
     expect(driverSentence('İskele aydınlatması yok (saha ölçümü)')).toMatch(/sahada görüldü/);
     expect(driverSentence('İskele aydınlatması yok (uzaktan gözlem)')).toMatch(/uzaktan gözlem, sahada doğrulanmadı/);
     // an unobserved lamp is never stated as a fact
-    for (const t of [LAMBA, 'İskele aydınlatması olasılığı 0,60 (masa başı veri, onay bekliyor)']) expect(driverSentence(t)).not.toMatch(/^(Gece )?iskele ışığı/i);
+    for (const t of [LAMBA_OLD, 'İskele aydınlatması olasılığı 0,60 (masa başı veri, onay bekliyor)']) expect(driverSentence(t)).not.toMatch(/^(Gece )?iskele ışığı/i);
     // structure, depth, bottom, exposure
     expect(driverSentence(YAPI)).toBe('Mendirek: model bu yer tipini avantajlı sayıyor (tip tercihi varsayım, av kaydıyla doğrulanmadı).');
     expect(driverSentence('yapı (saha bilgisi, değer gizli)')).toMatch(/^Yapı sahada doğrulandı/);
@@ -127,5 +133,39 @@ describe('Q2: the plan pick (shared by the card and the early detail request)', 
     const r = planPick([], [W('x', 'X', 55, { tier: 'goreli' })])!;
     expect([r.m.spot_id, r.todayStrong, r.nextStrong, r.eqList.length]).toEqual(['x', undefined, undefined, 1]);
     expect(planPick([], [])).toBeNull();
+  });
+});
+
+import { catchTrust, spotKnowledge, trustTail, verdictText, weatherTrust } from '../src/scripts/plan';
+describe('V1.2 decision language and three trusts', () => {
+  it('never an unconditional yes: wording follows trust', () => {
+    expect(verdictText({ todayStrong: true, nextStrong: false, trust: 'Düşük' })).toBe('Denemeye değer görünüyor');
+    expect(verdictText({ todayStrong: true, nextStrong: false, trust: 'Orta' })).toBe('Uygun görünüyor');
+    expect(verdictText({ todayStrong: true, nextStrong: false, trust: 'Yüksek' })).toBe('İyi görünüyor');
+    expect(verdictText({ todayStrong: false, nextStrong: true, trust: 'Orta' })).toBe('Bugün zayıf görünüyor');
+    expect(verdictText({ todayStrong: false, nextStrong: false, trust: 'Yüksek' })).toBe('Zayıf görünüyor');
+    for (const t of ['Düşük', 'Orta', 'Yüksek'] as const) for (const a of [true, false]) expect(verdictText({ todayStrong: a, nextStrong: !a, trust: t })).not.toMatch(/^(Evet|Hayır)$/);
+    expect(trustTail('Düşük')).toBe('güven düşük (çoğunlukla varsayıma dayalı)');
+    expect(trustTail('Orta')).toBe('güven orta');
+    expect(trustTail('Yüksek')).toBe('güven yüksek');
+  });
+  it('spot knowledge from evidence kinds', () => {
+    expect(spotKnowledge({ lamba: 'saha', derinlik: null, yapi: 'saha' })).toMatchObject({ level: 'Orta', text: 'lamba ve yapı sahada; derinlik tahmin ya da bilinmiyor' });
+    expect(spotKnowledge({ lamba: 'saha', derinlik: 'saha', yapi: null }).level).toBe('Yüksek');
+    expect(spotKnowledge({ lamba: 'uzaktan', derinlik: 'masabasi', yapi: null })).toMatchObject({ level: 'Orta', text: 'lamba ve derinlik uzaktan/fotoğraftan; yapı tahmin ya da bilinmiyor' });
+    expect(spotKnowledge(null)).toMatchObject({ level: 'Düşük', text: 'lamba ve derinlik ve yapı tahmin ya da bilinmiyor' });
+    // the public lamp state counts as evidence even without the detail's field record
+    expect(spotKnowledge(null, 'dogrulandi').text).toMatch(/^lamba sahada/);
+    expect(spotKnowledge(null, 'goruldu').text).toMatch(/^lamba uzaktan/);
+  });
+  it('weather trust from model agreement; catch verification n = 0 says so', () => {
+    expect(weatherTrust(null)).toMatchObject({ level: null, value: 'Karşılaştırma yok' });
+    expect(weatherTrust({ split: null, text: 'Hava modelleri uyuşuyor (rüzgar 2–8 km/sa)' })).toMatchObject({ level: 'Yüksek', value: 'Uyumlu', text: 'modeller uyuşuyor (rüzgar 2–8 km/sa)' });
+    expect(weatherTrust({ split: 'wide', text: 'x' }).level).toBe('Orta');
+    expect(weatherTrust({ split: 'gate', text: 'x' })).toMatchObject({ level: 'Düşük', value: 'Güvenlikte ayrışıyor' });
+    expect(catchTrust({ passed: false, n: 0, min: 20 })).toMatchObject({ level: 'Düşük', value: 'Yok', text: expect.stringMatching(/n = 0 .*doğrulanmadı/) });
+    expect(catchTrust({ passed: false, n: 3, min: 20 }).value).toBe('Yetersiz');
+    expect(catchTrust({ passed: true, n: 25, min: 20 }).level).toBe('Yüksek');
+    expect(catchTrust(null).level).toBeNull();
   });
 });

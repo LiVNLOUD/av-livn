@@ -74,6 +74,12 @@ describe('privacy: public endpoints never return field values (docs/PRIVACY.md)'
     }
     const d = JSON.parse(det) as { field: Record<string, any>; spot: { lamp_known: boolean }; packed: { meta: { comps: unknown[][] }; h: unknown[][] } };
     expect(d.spot.lamp_known).toBe(true);
+    // V1: the three-state lamp language is public (state only: no notes, person or date)
+    expect((d.spot as { lamp_state?: string }).lamp_state).toBe('dogrulandi');
+    const ls = JSON.parse(list) as { spots: { id: string; lamp_state: string; fetch_km: unknown }[] };
+    expect(ls.spots.find((x) => x.id === 'osm-way-1')!.lamp_state).toBe('dogrulandi');
+    expect(ls.spots.filter((x) => x.id !== 'osm-way-1').every((x) => x.lamp_state === 'bilinmiyor')).toBe(true);
+    expect(ls.spots.every((x) => 'fetch_km' in x)).toBe(true);
     expect(d.field).toEqual({ observations: 1, desk_pending: 0, kinds: { lamba: 'saha', derinlik: 'saha', taban: 'saha', yapi: 'saha' } });
     const i = d.packed.meta.comps.findIndex((c) => c[0] === 'derinlik');
     expect((d.packed.h[0]![9] as unknown[])[i]).toBeNull();

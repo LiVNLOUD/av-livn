@@ -103,7 +103,7 @@ function components(s: SpotV2, r: ReturnType<typeof rawScore>, w: Weather, sstSo
   const { st, dyn, lampP } = r;
   const d0 = dyn[0]!;
   const lampTxt =
-    s.lamp === true ? 'iskele aydınlatması var' : s.lamp === false ? 'iskele aydınlatması yok' : s.lampSource ? `iskele aydınlatması olasılığı ${f2(lampP!)}` : `iskele aydınlatması bilinmiyor (olasılık ${f2(lampP!)})`;
+    s.lamp === true ? 'iskele aydınlatması var' : s.lamp === false ? 'iskele aydınlatması yok' : s.lampSource ? `iskele ışığı görüldü, gece çalıştığı doğrulanmadı (varsayım önseli ${f2(lampP!)})` : `iskele aydınlatması bilinmiyor (varsayım önseli ${f2(lampP!)})`;
   const lampSrc: Source = s.lampSource ? KIND_SOURCE[s.lampSource] : s.lamp === null ? 'önsel' : 'saha';
   const lightTxt = w.sunAlt > 0 ? 'gündüz' : w.sunAlt >= -12 ? 'alacakaranlık' : 'gece';
   const fieldDepth = st.sources.depth === 'saha';

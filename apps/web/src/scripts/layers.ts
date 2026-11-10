@@ -2,6 +2,7 @@
 // Actions (Open-Meteo forecast and marine on a 0.1° lattice; Copernicus Marmara 500 m currents) and served as
 // stored JSON (/api/grid/:name). Colour fields are drawn from the coarse grid with linear resampling (smooth, no
 // invented detail); wind and current also get a light particle animation on a 2D canvas (no extra library).
+import { latest } from './hour';
 import type maplibregl from 'maplibre-gl';
 
 export type LayerName = 'puan' | 'ruzgar' | 'dalga' | 'akinti' | 'sst' | 'yagis' | 'bulut' | 'uydu';
@@ -208,12 +209,15 @@ export function weatherLayers(map: maplibregl.Map, container: HTMLElement, onInf
         + `<span class="muted">Kaynak: NASA NSIDC ICESat-2 ATL24 v002 (doi:10.5067/ATLAS/ATL24.002)${sdb ? '; Copernicus Sentinel-2' : ''}</span>`
       : '<b>Uydu derinliği:</b> veri henüz yok.');
   }
+  const drawReq = latest(); // V1.1: a slow grid for an older hour/layer never paints over the current choice
   async function draw() {
+    const current = drawReq.token();
     if (name !== 'uydu') clearSat();
     if (name === 'uydu') { clear(); particles.set(null, null, 1); await drawSat(); return; }
     if (name === 'puan') { clear(); particles.set(null, null, 1); onInfo(''); return; }
     const spec = SPEC[name];
     const g = await loadGrid(spec.grid);
+    if (!current()) return;
     const k = g ? frameIndex(g, hour) : null;
     if (!g || k === null) { clear(); particles.set(null, null, 1); onInfo(`<b>${RAMPS[name].label}:</b> bu saat için veri yok.`); return; }
     const url = fieldImage(g, k, name);

@@ -288,3 +288,10 @@ body.app .stale.on { display: none; }
 
 .qa .models-line { color: var(--foam); }
 .qa .models-line[hidden] { display: none; }
+
+/* V1.2: three separate trusts under the overall level */
+.trust3 { list-style: none; margin: var(--s2) 0 0; padding: 0; display: grid; gap: 6px; }
+.trust3 li { display: grid; grid-template-columns: minmax(0, 11rem) auto; column-gap: var(--s2); align-items: baseline; font-size: var(--fs-2); }
+.trust3 .t3-k { color: var(--fg-2); }
+.trust3 .t3-d { grid-column: 1 / -1; color: var(--fg-2); font-size: var(--fs-1); line-height: var(--lh-1); }
+.trust3 b[data-l=''] { color: var(--fg-2); font-weight: 600; }

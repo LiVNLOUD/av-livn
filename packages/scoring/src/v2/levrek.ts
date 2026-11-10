@@ -224,7 +224,7 @@ const ev = (k: LevrekKey) => LEVREK_PARAMS[k].evidence as Evidence;
 function components(s: SpotV2, r: LevrekRaw, w: Weather): V2Component[] {
   const t = r.terms[0]!;
   const lampSrc: Source = s.lampSource ? KIND_SOURCE[s.lampSource] : s.lamp === null ? 'önsel' : 'saha';
-  const lampTxt = s.lamp === true ? 'iskele aydınlatması var' : s.lamp === false ? 'iskele aydınlatması yok' : `iskele aydınlatması olasılığı ${f2(r.lampP!)}`;
+  const lampTxt = s.lamp === true ? 'iskele aydınlatması var' : s.lamp === false ? 'iskele aydınlatması yok' : s.lampSource ? `iskele ışığı görüldü, gece çalıştığı doğrulanmadı (varsayım önseli ${f2(r.lampP!)})` : `iskele aydınlatması bilinmiyor (varsayım önseli ${f2(r.lampP!)})`;
   const light = w.sunAlt > 0 ? 'gündüz' : w.sunAlt >= -12 ? 'alacakaranlık' : 'gece';
   const st = staticTerms(s, DEFAULTS);
   return [

@@ -10,7 +10,12 @@ import type { ListEntryV2 } from '../precompute_v2';
 const HOUR = 3_600_000;
 
 // ?1 = species (H3)
-export const LIST_SQL = `SELECT s.*, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
+/** Best lamp observation per spot as "<source_kind>:<0|1>" (saha first, then remote, then desk; newest first) — only the
+ *  kind and presence leave the table (lib/spots lampState). */
+export const LAMP_OBS_SQL = `(SELECT o.source_kind || ':' || COALESCE(o.has_light, CASE WHEN o.light_prob >= 0.5 THEN 1 WHEN o.light_prob IS NOT NULL THEN 0 END)
+       FROM field_obs o WHERE o.spot_id = s.id AND o.status != 'reddedildi' AND (o.has_light IS NOT NULL OR o.light_prob IS NOT NULL)
+       ORDER BY CASE o.source_kind WHEN 'saha' THEN 0 WHEN 'uzaktan' THEN 1 ELSE 2 END, o.observed_at DESC LIMIT 1) AS lamp_obs`;
+export const LIST_SQL = `SELECT s.*, ${LAMP_OBS_SQL}, v.start_hour, v.list_json, v.model_version, v.computed_at AS scored_at, v.partial FROM spots s
        LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const HOURS_SQL = `SELECT s.*, v.start_hour, v.list_json, v.computed_at AS scored_at FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
 export const WINDOWS_SQL = `SELECT s.id, s.name, s.access, s.province, s.private_marina, v.start_hour, v.list_json FROM spots s JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?1 WHERE s.${ACTIVE}`;
@@ -21,7 +26,7 @@ export const preKey = (kind: (typeof PRE_KINDS)[number], hour: number, species =
 /** Any change to which spots are public (hide, forbidden area, edit, rescore) drops the stored bodies. */
 export const CLEAR_PRE_SQL = "DELETE FROM meta WHERE key LIKE 'pub:%'";
 
-export type ListRow = SpotRow & { start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
+export type ListRow = SpotRow & { lamp_obs?: string | null; start_hour: number | null; list_json: string | null; model_version: string | null; partial: number | null; scored_at: string | null };
 export type HoursRow = SpotRow & { start_hour: number; list_json: string; scored_at: string };
 export type WindowsRow = { id: string; name: string; access?: string | null; province?: string | null; private_marina?: number | null; start_hour: number; list_json: string };
 

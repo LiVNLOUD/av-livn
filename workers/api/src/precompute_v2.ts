@@ -1,7 +1,7 @@
 // v2 precomputation (docs/MODEL.md): hourly in GitHub Actions for all spots (Monte Carlo band, ranks), and
 // for one spot right after a field entry (no band draws: the previous band offsets are reused, see rescoreSpot).
 import {
-  crossWind, DEFAULTS, explain, topShare, explainLevrek, scoreSeriesLevrek, LEVREK_VERSION, fieldDepths, staticTerms, indexSeries, lampPrior, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
+  crossWind, DEFAULTS, explain, topShare, explainLevrek, scoreSeriesLevrek, LEVREK_VERSION, fieldDepths, staticTerms, indexSeries, MODEL_VERSION, PROFILES, ranks, scoreSeriesV2, SHORE_KINDS, weatherAt, kindLabel,
   type ConvertedDepth, type DriverKey, type FieldKind, type Weather, type FieldStructure, type FieldSubstrate, type SinkCalibration, type SpotV2, type StructureKind, type V2Hour, type ShoreKind,
 } from '@av-livn/scoring';
 import type { HourlyPoint } from '@av-livn/scoring';
@@ -353,7 +353,10 @@ export function reasonText(key: DriverKey, delta: number, spot: SpotV2, h: V2Hou
           ? `iskele aydınlatması (${spot.lampSource === 'saha' ? 'saha' : 'uzaktan gözlem'} bilgisi, değer gizli)`
           : spot.lamp !== null
           ? `iskele aydınlatması ${spot.lamp ? 'var' : 'yok'} (${ev(c('lamba').source)})`
-          : `iskele aydınlatması olasılığı ${lampPrior(spot).toFixed(2).replace(".", ",")} (${spot.lampSource === 'masabasi' ? 'masa başı veri, onay bekliyor' : spot.lampSource === 'uzaktan' ? 'uzaktan gözlem' : 'varsayım, kanıt yok'})`;
+          // V1 lamp language: three states in words, never a probability on the page (the prior is an assumption)
+          : spot.lampSource === 'uzaktan' || spot.lampSource === 'masabasi'
+          ? `iskele ışığı görüldü, gece çalıştığı doğrulanmadı (${spot.lampSource === 'masabasi' ? 'masa başı veri, onay bekliyor' : 'uzaktan gözlem'})`
+          : 'iskele aydınlatması bilinmiyor (varsayım, kanıt yok)';
       break;
     case 'yapi':
       body = PRIVATE_SOURCES.has(c('yapi').source)

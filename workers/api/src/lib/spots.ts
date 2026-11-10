@@ -73,7 +73,23 @@ export function toSpotInput(r: SpotRow): SpotInput {
   return { lat: r.lat, lon: r.lon, shoreNormalDeg: r.shore_normal_deg, hasLight: r.has_light === null ? null : r.has_light === 1 };
 }
 
-export function publicSpot(r: SpotRow) {
+/** V1 lamp language (REVISION-V V1.9): the public state of a spot's lighting, never the notes, source person or date.
+ *  - dogrulandi: lamp present, field-verified (owner's field record or admin entry)
+ *  - yok: field-verified that there is no lamp
+ *  - goruldu: a pole/light seen in a photo or remote observation; working at night not verified
+ *  - bilinmiyor: no record (the model's prior stays an assumption, shown only under "Neden?")
+ *  lampObs = "<source_kind>:<0|1>" of the best lamp observation (views LIST_SQL), or null. */
+export type LampState = 'dogrulandi' | 'yok' | 'goruldu' | 'bilinmiyor';
+export function lampState(hasLight: number | null | undefined, lampObs: string | null | undefined): LampState {
+  if (hasLight === 1) return 'dogrulandi';
+  if (hasLight === 0) return 'yok';
+  const [kind, v] = (lampObs ?? '').split(':');
+  if (kind === 'saha') return v === '1' ? 'dogrulandi' : v === '0' ? 'yok' : 'bilinmiyor';
+  if ((kind === 'uzaktan' || kind === 'masabasi') && v === '1') return 'goruldu';
+  return 'bilinmiyor';
+}
+
+export function publicSpot(r: SpotRow & { lamp_obs?: string | null; fetch_json?: string | null }) {
   return {
     id: r.id,
     name: r.name,
@@ -96,6 +112,9 @@ export function publicSpot(r: SpotRow) {
     normal_source: r.normal_source ?? null,
     // Field knowledge is private: only whether the lamp state is known, never its value or the notes.
     lamp_known: r.has_light !== null,
+    lamp_state: lampState(r.has_light, r.lamp_obs ?? null),
+    /** 16-direction fetch (km of open water, from N clockwise; OSM land polygon) — exposure rose and wind vs shore */
+    fetch_km: r.fetch_json ? (JSON.parse(r.fetch_json) as number[]) : null,
     access: r.access ?? null,
     source: r.source,
     /** F1: added from the OSM inventory without field verification. */
@@ -131,7 +150,7 @@ export function adminSpot(r: SpotRow) {
 }
 
 /** Spot with its 0–500 m depth profile (detail endpoint only; the list stays small). */
-export function publicSpotDetail(r: SpotRow) {
+export function publicSpotDetail(r: SpotRow & { lamp_obs?: string | null }) {
   return {
     ...publicSpot(r),
     profile: r.profile_json ? (JSON.parse(r.profile_json) as (number | null)[]) : null,

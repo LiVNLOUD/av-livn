@@ -9,6 +9,7 @@ import { badgeLabel, declutter, mergeBadges, placeBadges, spotFeatures } from '.
 /** O1: zoom when going to a spot. */
 export const FOCUS_ZOOM = 15.5;
 import { api, link, type Species } from './species';
+import { latest, STALE } from './hour';
 import { BANDS_V2 } from '@av-livn/scoring';
 
 // Sequential depth scale: shallow = light, deep = dark (blue). Edges match bathy/contours.py BAND_EDGES_M.
@@ -300,11 +301,15 @@ let spotCount = 0;
 let spots: Spot[] = [];
 let byId = new Map<string, Spot>();
 const empty = { type: 'FeatureCollection' as const, features: [] };
-const fetchSpots = async () => {
-  const res = await fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] }));
+const spotsReq = latest(); // V1.1: an older hour's answer never replaces the newer one
+/** Loads the spots for the current hour and species; false if a newer request superseded this one. */
+const fetchSpots = async (): Promise<boolean> => {
+  const res = await spotsReq.run(() => fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] })));
+  if (res === STALE) return false;
   spots = res.spots ?? [];
   spotCount = spots.length;
   byId = new Map(spots.map((s) => [s.id, s]));
+  return true;
 };
 const spotsReady = fetchSpots();
 let layout: () => void = () => {};
@@ -645,14 +650,14 @@ return {
   async setSpecies(next) {
     species = next;
     loading.hidden = false;
-    await fetchSpots();
+    if (!(await fetchSpots())) return;
     layout();
     loading.hidden = true;
   },
   async setHour(next) {
     at = next;
     loading.hidden = false;
-    await fetchSpots();
+    if (!(await fetchSpots())) return; // superseded: the newer call lays out and hides the spinner
     layout();
     loading.hidden = true;
   },

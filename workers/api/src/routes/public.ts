@@ -3,7 +3,7 @@ import { Hono, type Context } from 'hono';
 import type { Env } from '../env';
 import { ACTIVE_COUNT_SQL, publicSpotDetail, type SpotRow } from '../lib/spots';
 import { fieldRecords, isSpecies, SPECIES, type FieldDepthRow, type FieldObsRow, type ListEntryV2, type Species } from '../precompute_v2';
-import { FETCHED_SQL, WEATHER_RUNS_SQL, parseWeatherRun, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
+import { FETCHED_SQL, LAMP_OBS_SQL, WEATHER_RUNS_SQL, parseWeatherRun, fetchedAt, HOURS_SQL, hoursBody, LIST_SQL, listBody, preKey, WINDOWS_SQL, windowsBody, type HoursRow, type ListRow, type WindowsRow } from '../lib/views';
 import { DEFAULT_PROFILES } from '@av-livn/scoring';
 import { calibrationPassed, MIN_SESSIONS, parseReport, reportKey } from '../lib/calibration';
 
@@ -108,7 +108,7 @@ async function detailV2(c: Ctx, species: Species) {
   const id = c.req.param('id')!;
   const hours = Math.min(Math.max(Number(c.req.query('hours') ?? 72) || 72, 1), 72);
   const [spotRes, obsRes, depthRes, countRes, satPts, satBand] = await c.env.DB.batch([
-    c.env.DB.prepare("SELECT s.*, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?2 WHERE s.id = ?1 AND s.status != 'proposed'").bind(id, species),
+    c.env.DB.prepare(`SELECT s.*, ${LAMP_OBS_SQL}, v.start_hour, v.detail_json, v.list_json, v.partial FROM spots s LEFT JOIN spot_scores_v2 v ON v.spot_id = s.id AND v.species = ?2 WHERE s.id = ?1 AND s.status != 'proposed'`).bind(id, species),
     c.env.DB.prepare('SELECT * FROM field_obs WHERE spot_id = ?1 ORDER BY observed_at').bind(id),
     c.env.DB.prepare('SELECT d.* FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1').bind(id),
     c.env.DB.prepare(ACTIVE_COUNT_SQL),

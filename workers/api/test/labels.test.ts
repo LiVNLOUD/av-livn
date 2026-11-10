@@ -31,7 +31,7 @@ describe('L1: reason lines carry the real contribution and its evidence type, no
     expect(t).not.toMatch(/derin\b|korunaklı/);
   });
   it('lamp prior, substrate and exposure name their evidence; exposure says "daha az açık", not "korunaklı"', () => {
-    expect(reasonText('lamba', 1.1, pier, h, {} as Weather)).toBe('Öne çıkaran (+1,1 puan): iskele aydınlatması olasılığı 0,50 (varsayım, kanıt yok)');
+    expect(reasonText('lamba', 1.1, pier, h, {} as Weather)).toBe('Öne çıkaran (+1,1 puan): iskele aydınlatması bilinmiyor (varsayım, kanıt yok)');
     expect(reasonText('taban', -0.5, pier, h, {} as Weather)).toBe('Geri bırakan (−0,5 puan): dip: Sandy mud (EUSeaMap bölgesel sınıflandırma)');
     const ex = reasonText('maruziyet', 3, pier, h, { windDir: 0, windKmh: 20 } as Weather);
     expect(ex).toBe('Öne çıkaran (+3,0 puan): kuzey rüzgarına daha az açık (20 km/sa) (kıyı geometrisinden hesap, OSM; rüzgar Open-Meteo modeli)');

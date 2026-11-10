@@ -104,31 +104,27 @@ import Base from '../../layouts/Base.astro';
   import { mountMap } from '../../scripts/map';
   import { mountSlider } from '../../scripts/timeslider';
   import { spotGlyphs, weatherLayers, type LayerName } from '../../scripts/layers';
+  import { browserUrl, createHourStore } from '../../scripts/hour';
   const q = new URLSearchParams(location.search);
   const HOURS = 72;
-  const from = Math.floor(Date.now() / 3_600_000);
-  // P3: coming from the plan (?t=…) the slider opens at the suggested hour
-  const t = q.get('t') ? Math.floor(Date.parse(q.get('t')!) / 3_600_000) : NaN;
-  let hour = Number.isFinite(t) && t >= from && t < from + HOURS ? t : from;
-  const api = mountMap({ container: document.getElementById('map')!, focusId: q.get('id'), at: hour === from ? null : new Date(hour * 3_600_000).toISOString() });
+  // V1.1: the same hour store as the home page; ?t= from the plan opens the map at that hour
+  const hourStore = createHourStore({ url: browserUrl(), max: HOURS - 1 });
+  const from = hourStore.nowHour;
+  const api = mountMap({ container: document.getElementById('map')!, focusId: q.get('id'), at: hourStore.get().iso });
   const info = document.getElementById('layer-info')!;
   const picker = document.getElementById('layers')!;
   api.ready.then((map) => {
     if (!map) { picker.hidden = true; return; } // no WebGL: the map note stands alone, layers switch off silently
     const wx = weatherLayers(map, document.getElementById('map')!, (html) => { info.innerHTML = html; info.hidden = !html; });
     const glyphs = spotGlyphs(map);
-    const refresh = () => glyphs(hour, api.spotsNow());
-    void wx.setHour(hour);
+    const refresh = () => glyphs(hourStore.get().hour, api.spotsNow());
+    void wx.setHour(hourStore.get().hour);
     void refresh();
-    mountSlider(document.getElementById('slider')!, from, HOURS, hour, async (h) => {
-      hour = h;
-      const iso = h === from ? null : new Date(h * 3_600_000).toISOString();
-      const u = new URL(location.href);
-      if (iso) u.searchParams.set('t', iso); else u.searchParams.delete('t');
-      history.replaceState(null, '', u);
-      await Promise.all([api.setHour(iso), wx.setHour(h)]);
-      await refresh();
+    hourStore.subscribe(async (st) => {
+      await Promise.all([api.setHour(st.iso), wx.setHour(st.hour)]);
+      if (hourStore.get().hour === st.hour) await refresh(); // a newer hour was picked meanwhile: its own refresh follows
     });
+    mountSlider(document.getElementById('slider')!, from, HOURS, hourStore.get().hour, (h) => void hourStore.set(h - from, 'slider'));
     picker.addEventListener('change', (e) => void wx.set((e.target as HTMLInputElement).value as LayerName));
     document.documentElement.dataset.layersReady = '1';
   });

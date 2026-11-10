@@ -49,7 +49,7 @@ import Base from '../layouts/Base.astro';
           <div class="qa q2" hidden><h2 class="q q-row">Nereye, ne zaman? <a id="a-maplink" class="q-link" href="/harita/" title="Bu saatte rüzgar, dalga, akıntı ve yağış haritası">haritada aç</a></h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="a-sub now-line" id="a-now" hidden></p></div>
           <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
-          <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p><p class="a-sub models-line" id="a-models" hidden></p></div>
+          <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p><ul class="trust3" id="a-trust3" aria-label="Üç ayrı güven"></ul><p class="a-sub models-line" id="a-models" hidden></p></div>
           <details class="why-more" id="why-more" hidden>
             <summary>Neden? Ayrıntılar (puan, belirsizlik, kanıt, kaynaklar)</summary>
             <div id="why-detail"></div>
@@ -286,13 +286,14 @@ import Base from '../layouts/Base.astro';
   import { esc, fmtAgo, fmtDay, fmtTime, freshness, type WeatherRunInfo, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { IF_DARK, IF_LIT, kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
-  import { driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, planPick, trust, weatherSentence } from '../scripts/plan';
+  import { catchTrust, driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, planPick, spotKnowledge, trust, trustTail, verdictText, weatherSentence, weatherTrust, type TrustRow } from '../scripts/plan';
   import { stripSvg } from '../scripts/strip';
   import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
   import { columnMax, groupSame, isGroup, rankLabel, splitBeaches, tieCounts } from '../scripts/grouping';
   import type { MapApi } from '../scripts/map';
+  import { browserUrl, createHourStore, type HourSource } from '../scripts/hour';
 
   type Spot = {
     id: string; name: string; lat: number; lon: number; kind: string; status: string; place: string | null; lamp_known: boolean; access: string | null; auto_added?: boolean; province?: string | null; private_marina?: boolean;
@@ -316,8 +317,10 @@ import Base from '../layouts/Base.astro';
   const ACCESS_BADGE: Record<string, string> = { kisitli_feribot: 'kısıtlı olabilir (feribot)', belirsiz: 'erişim belirsiz' };
   const MARINA_BADGE = 'kısıtlı olabilir (marina — özel işletme)';
   const HIDE = 'av-livn-hide-access';
-  const nowHour = Math.floor(Date.now() / HOUR);
-  let sel = 0; // column index from nowHour
+  // V1.1: one selected hour for the page (map, card, tackle, list, heat map), mirrored in ?t= (same as /harita/)
+  const hourStore = createHourStore({ url: browserUrl() });
+  const nowHour = hourStore.nowHour;
+  let sel = 0; // column index from nowHour; follows hourStore (applyHour)
   let all: Spot[] = [];
   let hours: HoursData | null = null;
   let fetched: string | null = null;
@@ -405,8 +408,15 @@ import Base from '../layouts/Base.astro';
     for (let h = 0; h < 24; h++) if (m + h >= nowHour && m + h <= nowHour + 71) o.push(`<option value="${m + h}">${String(h).padStart(2, '0')}:00</option>`);
     hourSel.innerHTML = o.join('');
   }
-  function setCol(col: number) {
-    sel = Math.max(0, Math.min(71, col));
+  /** Change the selected hour; every view follows through applyHour. Re-applies even when the hour is unchanged. */
+  function setCol(col: number, source: HourSource = 'list') {
+    const before = hourStore.get().col;
+    hourStore.set(col, source);
+    if (hourStore.get().col === before) applyHour();
+  }
+  hourStore.subscribe(() => applyHour());
+  function applyHour() {
+    sel = hourStore.get().col;
     const h = nowHour + sel;
     day.value = String([...days].reverse().find((d) => d <= h) ?? days[0]);
     fillHours();
@@ -424,8 +434,8 @@ import Base from '../layouts/Base.astro';
     heat();
     mapApi?.setHour(atIso());
   }
-  $('tb-now').addEventListener('click', () => { cardCol = null; setCol(0); renderPlan(); });
-  $('now').addEventListener('click', () => setCol(0));
+  $('tb-now').addEventListener('click', () => { cardCol = null; setCol(0, 'now'); renderPlan(); });
+  $('now').addEventListener('click', () => setCol(0, 'now'));
   day.addEventListener('change', () => { fillHours(); setCol(Number(hourSel.value) - nowHour); });
   hourSel.addEventListener('change', () => setCol(Number(hourSel.value) - nowHour));
 
@@ -576,12 +586,14 @@ import Base from '../layouts/Base.astro';
   }
   // N3: trust stays at most "Orta" until the forward calibration has passed (GET /api/trust-gate)
   const calibrated: Partial<Record<Species, boolean>> = {};
+  const gates: Partial<Record<Species, { passed: boolean; n: number; min: number }>> = {}; // V1.2: catch verification row
   const loadGate = (sp: Species) => {
     if (sp in calibrated) return Promise.resolve();
     calibrated[sp] = false;
-    return preFetch(api('/api/trust-gate', sp)).then((r) => (r.ok ? r.json() : null)).then((b: { passed?: boolean } | null) => {
+    return preFetch(api('/api/trust-gate', sp)).then((r) => (r.ok ? r.json() : null)).then((b: { passed?: boolean; n?: number; min?: number } | null) => {
       calibrated[sp] = b?.passed === true;
-      if (calibrated[sp]) renderPlan();
+      if (b) gates[sp] = { passed: b.passed === true, n: b.n ?? 0, min: b.min ?? 0 };
+      if (cardWin) renderPlan();
     }).catch(() => {});
   };
   loadGate(species);
@@ -663,7 +675,7 @@ import Base from '../layouts/Base.astro';
       },
       onCell: (id, col) => {
         focus = id;
-        if (col !== sel) setCol(col);
+        if (col !== sel) setCol(col, 'heat');
         else { heat(); summary(); }
         openSpot(id, col);
       },
@@ -686,7 +698,7 @@ import Base from '../layouts/Base.astro';
 
   // M2: generic classes unless this device has its own set (Ayarlar → Takımım); nothing personal comes from the server
   const myTk = toProfiles(loadMy());
-  type Detail = { from: number; packed: { tk?: (number | null)[][] } | null };
+  type Detail = { from: number; packed: { tk?: (number | null)[][] } | null; field?: { kinds: { lamba: string | null; derinlik: string | null; yapi: string | null; taban: string | null } } | null };
   const details = new Map<string, Promise<Detail | null>>();
   const detail = (id: string) => {
     if (!details.has(id)) details.set(id, fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species)).then((r) => (r.ok ? r.json() : null)).catch(() => null));
@@ -797,7 +809,7 @@ import Base from '../layouts/Base.astro';
     const eqNote = $('eq-note');
     const eqPick = $('eq-pick');
     if (!ws.length) {
-      $('verdict').textContent = 'Hayır';
+      $('verdict').textContent = 'Öneri yok';
       $('verdict-sub').textContent = '72 saatte öneri yok: koşullar uygun değil ya da rüzgar/dalga verisi eksik (güvenlik denetlenemiyor). Güvenlik uyarıları "Tüm meralar" sekmesinde.';
       for (const c of ['.q2', '.q3', '.q4', '.q5', '.why-more', '.go']) qa(c, false);
       planReady();
@@ -811,10 +823,11 @@ import Base from '../layouts/Base.astro';
     if (key !== eqKey) { eqKey = key; eqSel = 0; }
     const cur = eqList[Math.min(eqSel, eqList.length - 1)]!;
 
-    // 1) worth going today?
-    $('verdict').textContent = todayStrong ? 'Evet' : 'Hayır';
+    // 1) worth going today? V1.2: the wording follows the trust of the shown option, never an unconditional "Evet"
+    const curTr = trust(cur, { calibrated: calibrated[species] === true, weather: agreementAt(all.find((x) => x.id === cur.spot_id), colOf(cur))?.split ?? null });
+    $('verdict').textContent = verdictText({ todayStrong: !!todayStrong, nextStrong: !!nextStrong, trust: curTr.level });
     $('verdict-sub').textContent = todayStrong
-      ? (eqList.length > 1 ? 'Bugün iyi pencereler var.' : `${span(m)} arası iyi bir pencere var.`)
+      ? `${eqList.length > 1 ? 'Bugün birkaç yer benzer görünüyor' : `${span(m)} arası`}; ${trustTail(curTr.level)}.`
       : nextStrong
       ? `Bugün güçlü bir zaman yok. En yakın iyi zaman: ${span(m)}.`
       : '72 saatte güçlü bir zaman yok. Aşağıdaki, mevcut seçeneklerin görece en iyisi; gitmek için güçlü bir gerekçe değil.';
@@ -833,7 +846,7 @@ import Base from '../layouts/Base.astro';
     // O4: alternatives as small cards beside the main card (name, time, score, trust in plain words)
     alts.innerHTML = rest.map((w) => {
       const tr = trust(w, { calibrated: calibrated[species] === true });
-      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)}</span><span class="a-r">${span(w)} · puan ${Math.round(w.total)}${w.tier === 'guclu' ? '' : ' · görece'}</span><span class="a-r">Güven: <b class="trust" data-l="${tr.level}">${tr.level}</b></span></button></li>`;
+      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)}</span><span class="a-r">${span(w)} · uygunluk ${Math.round(w.total)}${w.tier === 'guclu' ? '' : ' · görece'}</span><span class="a-r">Güven: <b class="trust" data-l="${tr.level}">${tr.level}</b></span></button></li>`;
     }).join('');
     $('alts-box').hidden = !rest.length;
     alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
@@ -857,7 +870,8 @@ import Base from '../layouts/Base.astro';
     cardWin = w;
     const col = cardCol ?? colOf(w);
     // O3: the map and the list follow the plan's hour (the time bar says so and offers "şimdiye dön")
-    if (first && sel !== col) setCol(col);
+    // the first card opens on the plan's best hour, unless the page was opened on a given hour (?t=)
+    if (first && hourStore.get().source !== 'url' && sel !== col) setCol(col, 'plan');
     const prov = s?.province && s.province !== 'bursa' ? PROV_TR[s.province] ?? s.province : null;
     // 2) where, when
     $('a-where').textContent = w.name;
@@ -876,6 +890,7 @@ import Base from '../layouts/Base.astro';
     $('a-trust').textContent = tr.level;
     $('a-trust').dataset.l = tr.level;
     $('a-trust-sub').textContent = tr.text;
+    renderTrust3(weatherTrust(ag), spotKnowledge(null, (s as { lamp_state?: string } | undefined)?.lamp_state), catchTrust(gates[species] ?? null));
     for (const c of ['.q2', '.q3', '.q4', '.q5', '.why-more', '.go']) qa(c, true);
     $('pick-open').onclick = () => openSpot(w.spot_id, colOf(w));
     $<HTMLAnchorElement>('pick-field').href = link(`/sahadayim/?id=${encodeURIComponent(w.spot_id)}`, species);
@@ -895,6 +910,8 @@ import Base from '../layouts/Base.astro';
     // 3) tackle, weather and light at the best hour
     const d = await detail(w.spot_id);
     if (myN !== planSeq) return;
+    // V1.2: spot knowledge from the detail's evidence kinds (field / remote / none)
+    renderTrust3(weatherTrust(ag), spotKnowledge(d?.field?.kinds, (s as { lamp_state?: string } | undefined)?.lamp_state), catchTrust(gates[species] ?? null));
     const v = d?.packed?.tk?.[d.from + col];
     nowLine(w, d);
     if (!v) {
@@ -911,7 +928,7 @@ import Base from '../layouts/Base.astro';
     $('a-tackle').textContent = personalLine(line, t.profile, myTk.personal);
     const own = myTk.personal[t.profile];
     // short under the line; the class's line sizes and the legal size are under "Neden?"
-    $('a-tackle-sub').innerHTML = `${own ? 'Senin takımına göre' : 'Genel takım sınıfı'} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
+    $('a-tackle-sub').innerHTML = `<span class="tag ev-assumed">başlangıç önerisi</span> ${own ? 'Senin takımına göre' : 'Genel takım sınıfı'} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
     const cls = t.profile === 'lrf' ? TACKLE_CLASSES.lrf : tackleClass('spin', g);
     const tkHead = `<li><b>Takım sınıfı:</b> ${own ? `senin takımın (${esc(myTk.profiles.find((p) => p.id === t.profile)!.name)})` : `${esc(tackleClass(t.profile, g).label)}; ip ${esc(cls.line)}`}. Yasal asgari boy ${LEGAL_MIN[species]} cm (6/2 Tebliğ).</li>`;
     const colIso = new Date((nowHour + col) * HOUR).toISOString();
@@ -926,6 +943,10 @@ import Base from '../layouts/Base.astro';
     planReady();
     const tkWhy = document.getElementById('tk-why');
     if (tkWhy) tkWhy.innerHTML = tkHead + t.rows.map((r) => `<li><b>${esc(r.label)}: ${esc(r.value)}</b> — ${esc(r.why)} <span class="tag ev-${r.evidence}" title="Kanıt düzeyi">kanıt ${r.evidence}</span>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`).join('') + t.notes.map((n) => `<li class="muted">${esc(n)}</li>`).join('');
+  }
+  /** V1.2: weather forecast, spot knowledge and catch verification as three separate trusts. */
+  function renderTrust3(...rows: TrustRow[]) {
+    $('a-trust3').innerHTML = rows.map((r) => `<li data-l="${r.level ?? ''}"><span class="t3-k">${esc(r.label)}</span> <b class="trust" data-l="${r.level ?? ''}">${esc(r.value)}</b><span class="t3-d">${esc(r.text)}</span></li>`).join('');
   }
   // ---------------------------------------------------------------- P2: weather-model spread (MODEL.md §19)
   type SpreadCell = { id: string; lat: number; lon: number; w: ([number, number, number] | null)[]; g: ([number, number, number] | null)[]; d: (number | null)[]; m: Record<string, (number | null)[]> };
@@ -963,7 +984,7 @@ import Base from '../layouts/Base.astro';
     card.hidden = false;
     el.querySelectorAll<SVGRectElement>('.st-cell').forEach((r) => r.addEventListener('click', () => {
       cardCol = Number(r.dataset.c);
-      setCol(cardCol);
+      setCol(cardCol, 'timeline');
       fillCard(w, ++planSeq, eqKey.split('|').length, (() => { try { return localStorage.getItem('av-livn-outside-bursa') === '1'; } catch { return false; } })());
     }));
   }
@@ -1043,7 +1064,7 @@ import Base from '../layouts/Base.astro';
     mapApi?.setSpecies(species);
   });
 
-  setCol(0);
+  applyHour(); // first draw at the store's hour (now, or ?t= from a link)
   // the map is needed at once only when the page opens on a view other than the plan
   if (app.dataset.view === 'plan') whenPlanReady(() => void ensureMap()); else void ensureMap();
 </script>
