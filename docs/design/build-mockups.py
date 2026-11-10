@@ -323,10 +323,13 @@ def layer_chips() -> str:
 FOOT = f'<div class="mock-foot">Örnek ekran (Faz V0). Veriler canlı av.livn.tr anlık görüntüsü, {TAKEN.astimezone(TZ):%d.%m.%Y %H:%M} (İstanbul); kıyı OSM, derinlik EMODnet DTM türevi (~115 m, sadeleştirildi). Eğitim çizimi yok. Notları göster/gizle sağ altta.</div>'
 
 
+REJECTED = '<div class="rejected-band">Reddedildi — 10 Kasım: yön A ("Atlas") seçildi. Bu B ("Kokpit") maketi yalnız karşılaştırma için duruyor.</div>'
+
+
 def page(name: str, body: str, theme: str, extra_css: str, w: int) -> None:
     html = f'''<!doctype html><html lang="tr" data-theme="{theme}"><head><meta charset="utf-8"><meta name="viewport" content="width={w}">
 <title>{name}</title><link rel="stylesheet" href="../../../apps/web/src/styles/tokens-v.css"><link rel="stylesheet" href="mockup.css"><link rel="stylesheet" href="home.css"><style>{extra_css}</style></head>
-<body>{SPRITE}{body}<button class="notes-toggle" onclick="document.body.classList.toggle('notes')">Sorular</button></body></html>'''
+<body>{REJECTED if name.startswith("home-b") else ""}{SPRITE}{body}<button class="notes-toggle" onclick="document.body.classList.toggle('notes')">Sorular</button></body></html>'''
     (M / f"{name}.html").write_text(html)
 
 
@@ -355,7 +358,7 @@ def b_desktop(theme: str):
     page(f"home-b-desktop{'-light' if theme == 'light' else ''}", body, theme, "", 1440)
 
 
-def mobile(kind: str, view: str):
+def mobile(kind: str, view: str, theme: str = "dark"):
     # D9: first screen = decision + small condition summary; map and the detailed timeline one tap away
     if view == "first":
         if kind == "a":
@@ -375,13 +378,16 @@ def mobile(kind: str, view: str):
             body = f'<div class="mob {kind}">{header(compact=True)}<div class="m-back"><button class="chip">‹ Karar</button><b>Harita ve çizelge</b></div>{inner}{FOOT}</div>'
         else:  # B: the same content under the bottom tabs (Harita + Çizelge)
             body = f'<div class="mob {kind}">{header(compact=True)}{inner}{FOOT}<nav class="m-seg"><button>Karar</button><button class="on">Harita</button><button class="on">Çizelge</button><button>Seçenekler</button></nav></div>'
-    page(f"home-{kind}-mobile{'' if view == 'first' else '-detail'}", body, "dark", "", 390)
+    page(f"home-{kind}-mobile{'' if view == 'first' else '-detail'}{'-light' if theme == 'light' else ''}", body, theme, "", 390)
 
 
-for th in ("dark", "light"):
-    a_desktop(th)
-    b_desktop(th)
-for k in ("a", "b"):
-    mobile(k, "first")
-    mobile(k, "detail")
-print("written", sorted(p.name for p in M.glob("home-*.html")))
+if __name__ == "__main__":
+    for th in ("dark", "light"):
+        a_desktop(th)
+        b_desktop(th)
+    for k in ("a", "b"):
+        mobile(k, "first")
+        mobile(k, "detail")
+    mobile("a", "first", "light")  # the chosen direction also gets its daylight phone screens
+    mobile("a", "detail", "light")
+    print("written", sorted(p.name for p in M.glob("home-*.html")))

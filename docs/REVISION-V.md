@@ -330,3 +330,9 @@ kullanılabilir, (3) harita etkileşimli. Her biri ayrı raporlanır.
 
 D9 (mobil yoğunluk): 390 px ilk ekranda yalnız ana karar ve küçük koşul
 özeti; harita ve ayrıntılı çizelgeye tek dokunuşla geçiş.
+
+---
+
+## V1 notu (10 Kasım, V0b'de eklendi)
+- Yön seçimi: **A (Atlas)**. B reddedildi; maketleri karşılaştırma için `docs/design/mockups/` altında "reddedildi" notuyla duruyor.
+- D8 "önce" ölçümü (`scripts/v-audit.mjs`): orta mobil (4× CPU, yavaş 4G) soğuk önbellekte karar kartı **1,77 sn** (hedef ≤ 1,5 sn); /harita/ sıcak önbellekte etkileşimli harita **7,8 sn**. V1'de ikisi de hedef altına inmeli ve aynı betikle yeniden ölçülmeli.

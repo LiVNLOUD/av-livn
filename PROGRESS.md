@@ -479,3 +479,15 @@ Yeni özellik yok. Rapor: `docs/audit/monitor-72h.md`.
 - Aylık satbathy işi yeni ATL24 geçişlerini kontrol etmeye devam eder.
 
 **Doğrulama:** puanlama %100, worker 163 ve web 53 test, pipeline 99 test, typecheck; canlı e2e (taşma testi dahil) ve smoke yeşil.
+
+## Faz V0b — yön A, kıyı dosyası, Sahadayım, simge seti (10 Kasım)
+- Yön A "Atlas" seçildi; B maketleri "reddedildi" bandıyla duruyor. V1 performans notu (karar kartı 1,77 sn → ≤ 1,5; /harita/ 7,8 sn) `docs/REVISION-V.md`'de.
+- **Simge seti** Tabler Icons 3.51.0 (MIT) temelinde yeniden kuruldu: 19 Tabler + 13 özel çizim.
+  - Etiketsiz alt ajan testi 4 tur sürdü. Eski set 20–21/32 doğru, yeni set 26–27/32 doğru.
+  - Mendirek, dere ağzı ve 4 bağlama simgesi yalnız etiketle kullanılacak (`docs/design/icon-test/results.md`).
+- **Kıyı dosyası maketleri:**
+  - fotoğraflı (Kordon Ömerbey; Mapillary görüntüsü merayı göstermiyor, açıkça yazıldı);
+  - fotoğrafsız (Tirilye; OSM şematik; DTM 0–2 m ile saha ~5 m çelişkisi gösterildi).
+- **Sahadayım** gündüz/gece maketleri; ≥ 4 kg uyarısı yalnız "mevzuat doğrulanacak (V2)" yer tutucusu.
+- **`docs/design/assets-needed.md`:** 21 bitmap görsel (6 tür, 9 takım/yem, 3 boş durum, 1 OG, 2 PWA simgesi); prompt'lar ve kabul listeleriyle.
+- Canlı arayüz değişmedi; testler yeşil.

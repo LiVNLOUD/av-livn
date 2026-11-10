@@ -104,7 +104,11 @@ Kaynak: `docs/REVISION-V.md` (D1–D9 düzeltmeleri geçerli). Belirteçler `app
 - **Grafik ve dokunma boyutları.** Zaman çizelgesi ana satır 30 px, ikincil 18 px. İşaret 22 px, seçili 30 px. Dokunma hedefi 44 px; Sahadayım'da 56 px.
 - **Hareket.** 150–220 ms ve yalnız seçime tepki olarak. `prefers-reduced-motion` açıkken 0.
 - **Kontrast.** `node docs/design/contrast.mjs` → `docs/design/contrast.md`: 66 çiftin hepsi AA.
-- **Simgeler.** `apps/web/src/icons/` (32 adet): 24 px, 1,5 px çizgi, `currentColor`. Türkçe etiketler `icons.json`'da. Örnek sayfa: `docs/design/mockups/icons.html`.
+- **Simgeler (V0b'de yeniden kuruldu).** `apps/web/src/icons/` (32 adet), SVG + `currentColor`, bitmap yok.
+  - Temel: **Tabler Icons 3.51.0 (MIT)**, 19 simge. Yalnız kullanılanlar kopyalandı; paket bağımlılık değil. Lisans: `apps/web/src/icons/LICENSE-tabler.txt`. Her simgenin kaynağı `icons.json`'da (`source`).
+  - Özel çizim (13): iskele, mendirek, kordon, kayalık, dere ağzı, lamba, derinlik ve 6 yöntem. Tabler kurallarıyla çizildi: 24 ızgara, 2 px çizgi, yuvarlak uç/köşe, ~2 px iç boşluk. Üretici: `docs/design/build-icons.py`.
+  - Etiketsiz tanıma testi (alt ajan, 16 ve 24 px): `docs/design/icon-test/results.md`. Tam tanınmayan yapı tipi ve bağlama simgeleri (mendirek, dere ağzı, LRF, dropshot, dip takımı, çapari) **yalnız metin etiketiyle** kullanılır.
+  - Eski set reddedildi; karşılaştırma için: `docs/design/mockups/icons-v0-rejected/`.
 - **Gerçek veri / eğitim çizimi ayrımı.**
   - Haritalar OSM kıyısı + sitenin EMODnet türevi `bathy.pmtiles`'ından çizilir. Rakamlar tarihli canlı API anlık görüntüsünden gelir (`docs/design/build-mockup-data.py`).
   - Bugünkü veride olmayan durumlar "örnek durum — bugünkü veride yok" şeridinde gösterilir.
@@ -124,6 +128,12 @@ Kaynak: `docs/REVISION-V.md` (D1–D9 düzeltmeleri geçerli). Belirteçler `app
   | Durum şeridi | Bir şey ters ya da eksikse hemen fark eder miyim? |
   | Lejant | Renkler ne demek, hangi saat? |
   | Katman çipleri | Haritada neyi görmek istiyorum? |
-- **Ana ekran kompozisyonları (V0a, seçim bekliyor).** A "Atlas": tam ekran harita, kayan karar paneli, altta çizelge ve seçenekler. B "Kokpit": solda karar, çizelge ve seçenekler; sağda harita.
+- **Ana ekran: yön A "Atlas" seçildi (10 Kasım).** B reddedildi; maketleri "reddedildi" bandıyla duruyor (`shots/rejected/`).
+- **Ana ekran kompozisyonları (V0a).** A "Atlas": tam ekran harita, kayan karar paneli, altta çizelge ve seçenekler. B "Kokpit": solda karar, çizelge ve seçenekler; sağda harita.
   - Dosyalar: `docs/design/mockups/home-{a,b}-*.html`; üretici `docs/design/build-mockups.py`; ekran görüntüleri `docs/design/mockups/shots/`.
   - 390 px ilk ekranda yalnız karar ve küçük koşul özeti var (D9). Harita ve çizelge tek dokunuşla açılır: A'da itilen ekran, B'de alt sekmeler.
+- **Kıyı dosyası ve Sahadayım (V0b, yön A).** `docs/design/mockups/dossier-*.html`, `sahadayim-*.html`; üretici `docs/design/build-v0b.py`, veri `build-mockup-data.py --dossier`.
+  - Kıyı dosyası, harita üstünde sağ çekmece olarak açılır. Fotoğraf yalnız gerçek ve tarihli Mapillary görüntüsüdür; kanıt zinciri ayrı alanlarda gösterilir. Fotoğraf yoksa OSM geometrisinden "şematik görünüm" çizilir.
+  - Lamba dili üç durumludur. Kesitte DTM tahmini kesikli bant olarak, saha kaydı ise ayrı nokta olarak çizilir; kaynaklar çelişirse ortalaması alınmaz, çelişki gösterilir.
+  - Sahadayım plan ekranından ayrıdır: büyük saat, 72 px düğmeler (≥ 56 px kuralı), eğitim çizimi bağlama düzeni. Gecede kısık renkler, hareket yok. Mevzuat rakamları doğrulanana kadar yalnız yer tutucu olarak gösterilir.
+- **Bitmap görseller:** yalnız `docs/design/assets-needed.md` listesindekiler (21 görsel: tür, takım/yem, boş durum, OG, PWA simgesi), altında "çizim" etiketiyle. Mera için yapay görsel üretilmez.

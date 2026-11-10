@@ -18,7 +18,7 @@ from pathlib import Path
 
 import mapbox_vector_tile
 from pmtiles.reader import MmapSource, Reader
-from shapely.geometry import box, mapping, shape
+from shapely.geometry import Point, box, mapping, shape
 from shapely.ops import transform, unary_union
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -146,5 +146,92 @@ def main() -> None:
     print(f"map {W}×{H}, tones {len(t_out)}, contours {len(c_out)}; snapshot {snap['taken_at']} spots {len(spots['spots'])} picks {ids}")
 
 
+DOSSIER_IDS = ["osm-way-1073087871-1", "osm-way-483965349"]  # Kordon (Ömerbey Mah. güneydoğusu) — has Mapillary; Tirilye İskelesi — no photo
+
+
+def dossier() -> None:
+    """Kıyı dosyası data for two spots: local land/structure geometry (metres around the spot), a DTM transect along the
+    shore normal (bands → depth range per sample), the Mapillary record, the fetch rose. Only stored data; nothing made up."""
+    snap = json.loads((OUT / "snapshot.json").read_text())
+    spots = {s["id"]: s for s in snap["spots"]["spots"]}
+    mapi = json.loads((ROOT / "apps/web/public/tiles/mapillary.json").read_text())
+    rose = {r["spot"]: r for r in json.loads((ROOT / "docs/audit/fetch_rose.json").read_text())["spots"]}
+    osm = {e["id"]: e for e in json.loads((ROOT / "docs/audit/osm_structures.json").read_text())["elements"]}
+    landgj = json.loads((ROOT / "data/osm/land_marmara.geojson").read_text())
+    land_all = unary_union([shape(f["geometry"]).buffer(0) for f in landgj["features"]])
+    z = 13
+    r = Reader(MmapSource(open(ROOT / "apps/web/public/tiles/bathy.pmtiles", "rb")))
+    n = 2 ** z
+    out = {}
+    for sid in DOSSIER_IDS:
+        sp = spots[sid]
+        lat0, lon0 = sp["lat"], sp["lon"]
+        mx = 111320 * math.cos(math.radians(lat0))
+        my = 110540
+        to_m = lambda lon, lat: ((lon - lon0) * mx, (lat0 - lat) * my)  # noqa: E731 — x east, y south (SVG)
+        R = 450
+        win = box(lon0 - R / mx, lat0 - R / my, lon0 + R / mx, lat0 + R / my)
+        land = land_all.intersection(win)
+        def dpath(g):
+            parts = []
+            for gg in getattr(g, "geoms", [g]):
+                if gg.geom_type == "Polygon":
+                    for ring in [gg.exterior, *gg.interiors]:
+                        parts.append("M" + "L".join(f"{a:.1f},{b:.1f}" for a, b in (to_m(x, y) for x, y in ring.coords)) + "Z")
+                elif gg.geom_type == "LineString":
+                    parts.append("M" + "L".join(f"{a:.1f},{b:.1f}" for a, b in (to_m(x, y) for x, y in gg.coords)))
+            return "".join(parts)
+        # bathy bands in the window (z13 tiles), kept with depth range
+        bands = []
+        tx0, tx1 = int((win.bounds[0] + 180) / 360 * n), int((win.bounds[2] + 180) / 360 * n)
+        ty = lambda la: int((1 - math.asinh(math.tan(math.radians(la))) / math.pi) / 2 * n)  # noqa: E731
+        for x in range(tx0, tx1 + 1):
+            for y in range(ty(win.bounds[3]), ty(win.bounds[1]) + 1):
+                t = r.get(z, x, y)
+                if not t:
+                    continue
+                d = mapbox_vector_tile.decode(gzip.decompress(t) if t[:2] == b"\x1f\x8b" else t, default_options={"y_coord_down": True})
+                if "bands" not in d:
+                    continue
+                ext = d["bands"]["extent"]
+                def ll(gx, gy, x=x, y=y, ext=ext):
+                    return (x + gx / ext) / n * 360 - 180, math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (y + gy / ext) / n))))
+                for ft in d["bands"]["features"]:
+                    g = transform(ll, shape(ft["geometry"])).buffer(0)
+                    bands.append((g, ft["properties"]["dmin"], ft["properties"]["dmax"]))
+        # transect along the seaward shore normal, 0–400 m every 20 m
+        nrm = math.radians(sp["shore_normal_deg"] or 0)
+        tr = []
+        for k in range(0, 21):
+            dist = k * 20
+            lon = lon0 + math.sin(nrm) * dist / mx
+            lat = lat0 + math.cos(nrm) * dist / my
+            pt = Point(lon, lat)
+            if land_all.contains(pt):
+                tr.append({"m": dist, "land": True})
+                continue
+            hit = next(((a, b) for g, a, b in bands if g.contains(pt)), None)
+            tr.append({"m": dist, "dmin": hit[0] if hit else None, "dmax": hit[1] if hit else None})
+        tone = []
+        for g, a, b in bands:
+            gi = g.intersection(win)
+            if not gi.is_empty:
+                tone.append({"dmin": a, "dmax": b, "d": dpath(gi.simplify(0.00002))})
+        struct = None
+        if sid.startswith("osm-way-") and int(sid.split("-")[2]) in osm:
+            e = osm[int(sid.split("-")[2])]
+            struct = {"tags": e["tags"], "d": "M" + "L".join(f"{a:.1f},{b:.1f}" for a, b in (to_m(lo, la) for la, lo in e["geometry"]))}
+        m = mapi["spots"].get(sid, {})
+        out[sid] = {"name": sp["name"], "kind": sp["kind"], "lat": lat0, "lon": lon0, "shore_normal_deg": sp["shore_normal_deg"],
+                    "length_m": sp.get("length_m"), "depth_200m": sp.get("depth_200m"), "access": sp.get("access"), "lamp_known": sp.get("lamp_known"),
+                    "land": dpath(land.simplify(0.00002)), "bands": tone, "transect": tr, "structure": struct,
+                    "mapillary": {"license": mapi["license"], "found": m.get("found", 0), "facing": m.get("facing", 0),
+                                  "images": [{k: v for k, v in im.items()} for im in m.get("selected", [])[:3]]},
+                    "rose": rose.get(sid, {}).get("rose")}
+    (OUT / "dossier.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
+    for sid, v in out.items():
+        print(sid, v["name"], "bands", len(v["bands"]), "transect", [(t["m"], t.get("land"), t.get("dmin"), t.get("dmax")) for t in v["transect"][:8]], "imgs", len(v["mapillary"]["images"]), "rose", bool(v["rose"]))
+
+
 if __name__ == "__main__":
-    main()
+    dossier() if "--dossier" in sys.argv else main()

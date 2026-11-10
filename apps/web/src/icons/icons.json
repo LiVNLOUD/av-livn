@@ -1,130 +1,162 @@
 {
  "ruzgar": {
   "label": "Rüzgar",
-  "group": "hava"
+  "group": "hava",
+  "source": "tabler:wind@3.51.0"
  },
  "hamle": {
-  "label": "Hamle",
-  "group": "hava"
+  "label": "Hamle (ani rüzgar)",
+  "group": "hava",
+  "source": "tabler:windsock@3.51.0"
  },
  "dalga": {
   "label": "Dalga",
-  "group": "hava"
+  "group": "hava",
+  "source": "tabler:ripple@3.51.0"
  },
  "akinti": {
   "label": "Akıntı",
-  "group": "hava"
+  "group": "hava",
+  "source": "tabler:arrow-wave-right-up@3.51.0"
  },
  "yagis": {
   "label": "Yağış",
-  "group": "hava"
+  "group": "hava",
+  "source": "tabler:cloud-rain@3.51.0"
  },
  "bulut": {
   "label": "Bulut",
-  "group": "hava"
+  "group": "hava",
+  "source": "tabler:cloud@3.51.0"
  },
  "sicaklik": {
   "label": "Su sıcaklığı",
-  "group": "hava"
+  "group": "hava",
+  "source": "tabler:temperature@3.51.0"
  },
  "ay": {
-  "label": "Ay",
-  "group": "hava"
+  "label": "Ay / gece",
+  "group": "hava",
+  "source": "tabler:moon@3.51.0"
  },
  "lamba": {
-  "label": "Aydınlatma",
-  "group": "yer"
+  "label": "Aydınlatma (sokak lambası)",
+  "group": "yer",
+  "source": "custom"
  },
  "derinlik": {
   "label": "Derinlik",
-  "group": "yer"
+  "group": "yer",
+  "source": "custom"
  },
  "guvenlik": {
-  "label": "Güvenlik",
-  "group": "yer"
+  "label": "Güvenlik uyarısı",
+  "group": "yer",
+  "source": "tabler:alert-triangle@3.51.0"
  },
  "erisim-acik": {
   "label": "Erişim açık",
-  "group": "yer"
+  "group": "yer",
+  "source": "tabler:lock-open@3.51.0"
  },
  "erisim-kisitli": {
   "label": "Erişim kısıtlı",
-  "group": "yer"
+  "group": "yer",
+  "source": "tabler:lock@3.51.0"
  },
  "erisim-bilinmiyor": {
   "label": "Erişim bilinmiyor",
-  "group": "yer"
+  "group": "yer",
+  "source": "tabler:help-circle@3.51.0"
  },
  "iskele": {
   "label": "İskele",
-  "group": "yapı"
+  "group": "yapı",
+  "source": "custom"
  },
  "mendirek": {
-  "label": "Mendirek",
-  "group": "yapı"
+  "label": "Mendirek (dalgakıran)",
+  "group": "yapı",
+  "source": "custom"
  },
  "kordon": {
   "label": "Kordon / taş tahkimat",
-  "group": "yapı"
+  "group": "yapı",
+  "source": "custom"
  },
  "kaya": {
-  "label": "Kayalık",
-  "group": "yapı"
+  "label": "Kayalık kıyı",
+  "group": "yapı",
+  "source": "custom"
  },
  "kumsal": {
   "label": "Kumsal",
-  "group": "yapı"
+  "group": "yapı",
+  "source": "tabler:beach@3.51.0"
  },
  "dere-agzi": {
   "label": "Dere ağzı",
-  "group": "yapı"
+  "group": "yapı",
+  "source": "custom"
  },
  "liman": {
   "label": "Liman",
-  "group": "yapı"
+  "group": "yapı",
+  "source": "tabler:anchor@3.51.0"
  },
  "marina": {
   "label": "Marina",
-  "group": "yapı"
+  "group": "yapı",
+  "source": "tabler:sailboat@3.51.0"
  },
  "lrf": {
   "label": "LRF: jighead + silikon",
-  "group": "yöntem"
+  "group": "yöntem",
+  "source": "custom"
  },
  "mikro-jig": {
   "label": "Mikro jig",
-  "group": "yöntem"
+  "group": "yöntem",
+  "source": "custom"
  },
  "dropshot": {
   "label": "Dropshot + yem",
-  "group": "yöntem"
+  "group": "yöntem",
+  "source": "custom"
  },
  "dip-takimi": {
   "label": "Dip takımı",
-  "group": "yöntem"
+  "group": "yöntem",
+  "source": "custom"
  },
  "samandira": {
   "label": "Şamandıralı takım",
-  "group": "yöntem"
+  "group": "yöntem",
+  "source": "custom"
  },
  "capari": {
   "label": "Çapari",
-  "group": "yöntem"
+  "group": "yöntem",
+  "source": "custom"
  },
  "kanit-olcum": {
-  "label": "Ölçüm",
-  "group": "kanıt"
+  "label": "Kanıt: ölçüm",
+  "group": "kanıt",
+  "source": "tabler:ruler-2@3.51.0"
  },
  "kanit-model": {
-  "label": "Model / tahmin",
-  "group": "kanıt"
+  "label": "Kanıt: model / tahmin",
+  "group": "kanıt",
+  "source": "tabler:chart-line@3.51.0"
  },
  "kanit-uzaktan": {
-  "label": "Uzaktan gözlem",
-  "group": "kanıt"
+  "label": "Kanıt: uzaktan gözlem (uydu)",
+  "group": "kanıt",
+  "source": "tabler:satellite@3.51.0"
  },
  "kanit-varsayim": {
-  "label": "Varsayım",
-  "group": "kanıt"
+  "label": "Kanıt: varsayım",
+  "group": "kanıt",
+  "source": "tabler:pencil-question@3.51.0"
  }
 }
