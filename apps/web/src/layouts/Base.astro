@@ -9,8 +9,10 @@ const tally = (defs: ParamDef[]) => {
 };
 const IST = tally(Object.values(PARAMS) as ParamDef[]);
 const LEV = tally(Object.values(LEVREK_PARAMS) as ParamDef[]);
-interface Props { title: string; description?: string; fullscreen?: boolean; app?: boolean }
-const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false, app = false } = Astro.props;
+// themeable: the page has been redone on the V tokens and may follow the light "atlas" theme; others stay dark until
+// their own V phase (a half-converted page in the light theme would mix the two palettes).
+interface Props { title: string; description?: string; fullscreen?: boolean; app?: boolean; themeable?: boolean }
+const { title, description = 'Gemlik ve Mudanya kıyısında meralar için saatlik LRF av puanı.', fullscreen = false, app = false, themeable = false } = Astro.props;
 const path = Astro.url.pathname;
 const cur = (p: string): 'page' | undefined => ((p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined);
 // M1: visitors see Plan, Harita, Model; the owner's tools appear only with the admin key on this device
@@ -25,17 +27,27 @@ const TABS: [string, string, string, boolean][] = [
 ];
 ---
 <!doctype html>
-<html lang="tr" data-app="av-livn">
+<html lang="tr" data-app="av-livn" data-theme="dark" data-themeable={themeable ? "" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0e1c27" />
+    <meta name="theme-color" content="#08111a" />
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <title>{title}</title>
-    <script is:inline>if (/[?&]embed=1/.test(location.search)) document.documentElement.classList.add('embed');</script>
+    <script is:inline>
+      if (/[?&]embed=1/.test(location.search)) document.documentElement.classList.add('embed');
+      // theme before first paint: only themeable pages follow the saved choice (av-livn-theme: dark | light)
+      (function () {
+        var h = document.documentElement;
+        if (!h.hasAttribute('data-themeable')) return;
+        var t = null;
+        try { t = localStorage.getItem('av-livn-theme'); } catch (e) {}
+        if (t === 'light') { h.dataset.theme = 'light'; document.querySelector('meta[name=theme-color]').setAttribute('content', '#f2eee3'); }
+      })();
+    </script>
   </head>
   <body class:list={{ fullscreen, app }}>
     <header class="site">
@@ -48,6 +60,7 @@ const TABS: [string, string, string, boolean][] = [
           <a class="admin-only" href="/admin/adaylar/" aria-current={cur('/admin/adaylar')} hidden>Adaylar</a>
           <a class="admin-only" href="/admin/" aria-current={path === '/admin/' ? 'page' : undefined} hidden>Panel</a>
         </nav>
+        {themeable && <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false" title="Gündüz (açık) / gece (koyu) görünüm">Gündüz</button>}
       </div>
     </header>
     <p class="stale" id="stale" role="status"></p>
@@ -67,6 +80,24 @@ const TABS: [string, string, string, boolean][] = [
       import { freshness, type WeatherRunInfo } from '../scripts/format';
       // Admin links only when the owner key is on this device (the pages themselves still ask for it).
       try { if (localStorage.getItem('av-livn-admin')) document.querySelectorAll<HTMLElement>('.admin-only').forEach((e) => (e.hidden = false)); } catch {}
+      // V1.0 theme switch (themeable pages only); the choice is a per-device convenience
+      const tb = document.getElementById('theme-btn');
+      if (tb) {
+        const html = document.documentElement;
+        const paint = () => {
+          const light = html.dataset.theme === 'light';
+          tb.textContent = light ? 'Gece' : 'Gündüz';
+          tb.setAttribute('aria-pressed', String(light));
+          document.querySelector('meta[name=theme-color]')?.setAttribute('content', light ? '#f2eee3' : '#08111a');
+        };
+        paint();
+        tb.addEventListener('click', () => {
+          html.dataset.theme = html.dataset.theme === 'light' ? 'dark' : 'light';
+          try { localStorage.setItem('av-livn-theme', html.dataset.theme); } catch {}
+          paint();
+          window.dispatchEvent(new CustomEvent('av-theme', { detail: html.dataset.theme }));
+        });
+      }
       // E8/N5: data freshness, one rule for every page and the plan card (scripts/format.ts freshness)
       fetch('/api/spots', { cache: 'no-cache' })
         .then((r) => (r.ok ? r.json() : null))

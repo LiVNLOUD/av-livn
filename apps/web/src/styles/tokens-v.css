@@ -1,5 +1,5 @@
 /* Faz V — "Bursa kıyıları için bir deniz atlası ve av kokpiti" (docs/DESIGN.md → Faz V görsel dil).
-   V0: defined here and used by docs/design/mockups; wired into the app pages in V1 (not imported yet).
+   V1.0: imported by styles/global.css for every page; the older names there are aliases of these tokens.
    Roles are separate on purpose: one action colour, one selection colour, amber only for warnings, a red only for
    safety, and a suitability scale that uses neither. Contrast of every text token on every surface: docs/design/contrast.mjs. */
 
@@ -37,6 +37,8 @@
   --warn-bg: #3a2c10;
   --danger: #ff7666;  /* safety only (gust/wave gate) */
   --danger-bg: #3d1a17;
+  --good: #5fd08a;    /* condition bands (palette.ts): good / bad; warn = --warn */
+  --bad: #ff7a6b;
   /* suitability ("uygunluk puanı"): sequential multi-hue scale (viridis-like, stopping before yellow so amber stays the
      warning colour). Lightness rises with the score; adjacent steps ΔE00 ≥ 15 for normal vision and ≥ 8 under simulated
      protan/deutan/tritan vision (docs/design/contrast.md, V0b C5 — the old one-hue lavender ramp was too uniform). */
@@ -88,6 +90,8 @@
   --warn-bg: #fbe9bf;
   --danger: #a8231a;
   --danger-bg: #fbdcd8;
+  --good: #1d6b38;
+  --bad: #a8231a;
   --fit-0: #d3c6ea;   /* paper theme: lightness falls with the score, so good hours are the darkest marks */
   --fit-1: #b39ce0;
   --fit-2: #6f86c6;
