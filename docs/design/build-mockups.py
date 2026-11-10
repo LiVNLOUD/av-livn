@@ -64,6 +64,10 @@ def grid_at(var: str, hour_utc: int, lat: float, lon: float, scale=1.0):
 
 
 SEL = SPOTS[SEL_ID]
+# map markers are coloured at the selected hour, not at snapshot time (V0b C3, time integrity); see build-mockup-data.py
+_AT = json.loads((M / "data/spots_at_sel.json").read_text()) if (M / "data/spots_at_sel.json").exists() else {"fit": {}}
+FIT_AT = _AT["fit"]
+fit_at = lambda s: FIT_AT.get(s["id"], s["score"]["total"])  # noqa: E731
 ROWS = []
 for k in range(HOURS):
     h, t = PK["h"][F0 + k], PK["tk"][F0 + k]
@@ -114,7 +118,7 @@ compass = lambda d: DIRS[round(d / 45) % 8]  # noqa: E731
 
 
 # ---------------------------------------------------------------- map
-def map_svg(vb: tuple[float, float, float, float], labels: bool = True, mk: float = 1.0, aspect: str = "xMidYMid slice") -> str:
+def map_svg(vb: tuple[float, float, float, float], labels: bool = True, mk: float = 1.0, aspect: str = "xMidYMid slice", sel_id: str = SEL_ID, sel_name: str = "Tirilye İskelesi") -> str:
     x0, y0, w, h = vb
     sea = "".join(f'<path d="{t["d"]}" style="fill:var(--sea-{t["tone"]})" fill-rule="evenodd"/>' for t in sorted(MAP["tones"], key=lambda t: -t["tone"]))
     cont = "".join(f'<path d="{c["d"]}" style="fill:none;stroke:var(--contour)" stroke-width="{0.9 if c["depth"] in (10, 50) else 0.6}" vector-effect="non-scaling-stroke"/>' for c in MAP["contours"])
@@ -134,22 +138,22 @@ def map_svg(vb: tuple[float, float, float, float], labels: bool = True, mk: floa
             plab += f'<text x="{cx + dx * mk:.0f}" y="{cy + dy * mk:.0f}" text-anchor="{anc}" style="fill:var(--land-label);font-size:{12 * mk:.0f}px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">{name}</text>'
     marks = ""
     r = 7 * mk
-    for s in sorted(SPOTS.values(), key=lambda s: (s["id"] in [SEL_ID, *ALT_IDS, UNK["id"]], s["score"]["total"] or 0)):
+    for s in sorted(SPOTS.values(), key=lambda s: (s["id"] in [sel_id, *ALT_IDS, UNK["id"]], fit_at(s) or 0)):
         x, y = s["xy"]
-        key = s["id"] in (SEL_ID, *ALT_IDS, UNK["id"])
+        key = s["id"] in (sel_id, *ALT_IDS, UNK["id"])
         rr = r * (1.25 if key else 0.75)
         op = 1 if key else 0.55
-        marks += f'<g opacity="{op}"><circle cx="{x}" cy="{y}" r="{rr:.1f}" style="fill:var(--fit-{fit_cls(s["score"]["total"])[1]});stroke:var(--ink-0)" stroke-width="{1.5 * mk:.1f}"/>'
+        marks += f'<g opacity="{op}"><circle cx="{x}" cy="{y}" r="{rr:.1f}" style="fill:var(--fit-{fit_cls(fit_at(s))[1]});stroke:var(--ink-0)" stroke-width="{1.5 * mk:.1f}"/>'
         if key:
             ic = KIND_ICON.get(s["kind"], "iskele")
             marks += f'<use href="#i-{ic}" x="{x - rr * 0.62:.1f}" y="{y - rr * 0.62:.1f}" width="{rr * 1.24:.1f}" height="{rr * 1.24:.1f}" style="color:var(--fit-ink)"/>'
         marks += "</g>"
-    sx, sy = SEL["xy"]
+    sx, sy = SPOTS[sel_id]["xy"]
     marks += f'<circle cx="{sx}" cy="{sy}" r="{r * 2.1:.1f}" style="fill:none;stroke:var(--sel)" stroke-width="{2 * mk:.1f}"/>'
     def lab(s, txt, dx, dy, anchor="start", strong=False):
         x, y = s["xy"]
         return f'<text x="{x + dx:.0f}" y="{y + dy:.0f}" text-anchor="{anchor}" style="fill:var(--fg-1);font-size:{(13 if strong else 12) * mk:.0f}px;font-weight:{700 if strong else 560};paint-order:stroke;stroke:var(--ink-0);stroke-width:{3 * mk:.0f}px">{txt}</text>'
-    marks += lab(SEL, "Tirilye İskelesi", 20 * mk, -14 * mk, strong=True)
+    marks += lab(SPOTS[sel_id], sel_name, 20 * mk, -14 * mk, strong=True)
     marks += lab(SPOTS[ALT_IDS[0]], "İDO Güzelyalı", 14 * mk, -12 * mk)
     marks += lab(SPOTS[ALT_IDS[1]], "Mudanya İskelesi", -14 * mk, -12 * mk, "end")
     marks += lab(UNK, "Fıstıklı İskelesi", -14 * mk, 4 * mk, "end")
@@ -208,11 +212,15 @@ def timeline_svg(width: int, compact: bool = False) -> str:
     wy = lambda v: wind_y + 14 + (WH - 14) * (1 - min(v, ymax) / ymax)  # noqa: E731
     top = " ".join(f"{L + (k + .5) * cw:.1f},{wy(r['gust']):.1f}" for k, r in enumerate(ROWS))
     bot = " ".join(f"{L + (k + .5) * cw:.1f},{wy(r['wind']):.1f}" for k, r in reversed(list(enumerate(ROWS))))
-    out.append(f'<polygon points="{top} {bot}" style="fill:var(--wind-1)" opacity=".22"/>')
-    out.append(f'<polyline points="{" ".join(f"{L + (k + .5) * cw:.1f},{wy(r["wind"]):.1f}" for k, r in enumerate(ROWS))}" style="fill:none;stroke:var(--wind-1)" stroke-width="2"/>')
+    # gust band clearly visible (35 % + its own upper edge), the mean wind a heavier line on top (V0b C5)
+    out.append(f'<polygon points="{top} {bot}" style="fill:var(--wind-1)" opacity=".35"/>')
+    out.append(f'<polyline points="{top}" style="fill:none;stroke:var(--wind-1)" stroke-width="1" stroke-dasharray="3 2" opacity=".9"/>')
+    out.append(f'<polyline points="{" ".join(f"{L + (k + .5) * cw:.1f},{wy(r["wind"]):.1f}" for k, r in enumerate(ROWS))}" style="fill:none;stroke:var(--wind-1)" stroke-width="2.75" stroke-linejoin="round"/>')
     for v in (10, 20, 30):
         out.append(f'<line x1="{L}" x2="{width}" y1="{wy(v):.1f}" y2="{wy(v):.1f}" style="stroke:var(--line)" stroke-width="1" stroke-dasharray="2 4"/>')
-    out.append(f'<text x="{width - 2}" y="{wy(20) - 3:.1f}" text-anchor="end" style="fill:var(--fg-3);font-size:10px">20</text>')
+    for v in (10, 20, 30):
+        out.append(f'<text x="{width - 2}" y="{wy(v) - 2:.1f}" text-anchor="end" style="fill:var(--fg-3);font-size:10px">{v}</text>')
+    out.append(f'<g transform="translate({L + 4},{wind_y + WH - 3})"><line x1="0" x2="14" y1="-3" y2="-3" style="stroke:var(--wind-1)" stroke-width="2.75"/><text x="18" y="0" style="fill:var(--fg-2);font-size:10px">ortalama</text><rect x="70" y="-7" width="14" height="8" style="fill:var(--wind-1)" opacity=".35"/><text x="88" y="0" style="fill:var(--fg-2);font-size:10px">hamle aralığı · km/sa</text></g>')
     for k, r in enumerate(ROWS):
         if k % 2 or r["wd"] is None:
             continue
@@ -289,7 +297,7 @@ def decision(compact=False) -> str:
 
 
 def alts_table() -> str:
-    rows = [(SEL, WIN["total"], True), (SPOTS[ALT_IDS[0]], PLAN["today"]["all"]["windows"][1]["total"], False), (SPOTS[ALT_IDS[1]], PLAN["today"]["all"]["windows"][2]["total"], False), (UNK, UNK["score"]["total"], False)]
+    rows = [(SEL, WIN["total"], True), (SPOTS[ALT_IDS[0]], PLAN["today"]["all"]["windows"][1]["total"], False), (SPOTS[ALT_IDS[1]], PLAN["today"]["all"]["windows"][2]["total"], False), (UNK, fit_at(UNK), False)]
     out = ['<div class="alts has-q"><div class="h"><span>Eşdeğer seçenekler (sıra yok)</span><span>Uygunluk</span><span>Erişim</span><span>Rüzgara göre</span><span>Veri</span></div>']
     for s, tot, sel in rows:
         acc, aic, cls = ACCESS.get(s.get("access"), ACCESS[None])

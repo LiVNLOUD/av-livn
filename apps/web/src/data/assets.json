@@ -1,0 +1,180 @@
+{
+ "_note": "Bitmap assets (docs/design/assets-needed.md). The user drops <name>.png into assets-inbox/; scripts/assets-check.mjs converts it to the target. width/height are the stored (@2x) size.",
+ "inbox": "assets-inbox",
+ "assets": [
+  {
+   "name": "istavrit",
+   "group": "species",
+   "target": "apps/web/public/img/species/istavrit.webp",
+   "width": 960,
+   "height": 480,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "izmarit",
+   "group": "species",
+   "target": "apps/web/public/img/species/izmarit.webp",
+   "width": 960,
+   "height": 480,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "levrek",
+   "group": "species",
+   "target": "apps/web/public/img/species/levrek.webp",
+   "width": 960,
+   "height": 480,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "lufer",
+   "group": "species",
+   "target": "apps/web/public/img/species/lufer.webp",
+   "width": 960,
+   "height": 480,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "mirmir",
+   "group": "species",
+   "target": "apps/web/public/img/species/mirmir.webp",
+   "width": 960,
+   "height": 480,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "kolyoz",
+   "group": "species",
+   "target": "apps/web/public/img/species/kolyoz.webp",
+   "width": 960,
+   "height": 480,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "jighead",
+   "group": "tackle",
+   "target": "apps/web/public/img/tackle/jighead.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "silikon-igne-kuyruk",
+   "group": "tackle",
+   "target": "apps/web/public/img/tackle/silikon-igne-kuyruk.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "silikon-kurek-kuyruk",
+   "group": "tackle",
+   "target": "apps/web/public/img/tackle/silikon-kurek-kuyruk.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "mikro-jig",
+   "group": "tackle",
+   "target": "apps/web/public/img/tackle/mikro-jig.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "dropshot-kursun",
+   "group": "tackle",
+   "target": "apps/web/public/img/tackle/dropshot-kursun.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "capari",
+   "group": "tackle",
+   "target": "apps/web/public/img/tackle/capari.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "hamsi-parcasi",
+   "group": "bait",
+   "target": "apps/web/public/img/bait/hamsi-parcasi.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "karides",
+   "group": "bait",
+   "target": "apps/web/public/img/bait/karides.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "midye",
+   "group": "bait",
+   "target": "apps/web/public/img/bait/midye.webp",
+   "width": 640,
+   "height": 640,
+   "alpha": true,
+   "maxKB": 120
+  },
+  {
+   "name": "og",
+   "group": "og",
+   "target": "apps/web/public/og.png",
+   "width": 1200,
+   "height": 630,
+   "alpha": false,
+   "maxKB": 300,
+   "format": "png"
+  },
+  {
+   "name": "app-1024",
+   "group": "app-icon",
+   "target": "apps/web/public/icons/app-1024.png",
+   "width": 1024,
+   "height": 1024,
+   "alpha": false,
+   "maxKB": 600,
+   "format": "png",
+   "derive": [
+    {
+     "target": "apps/web/public/icons/icon-192.png",
+     "size": 192
+    },
+    {
+     "target": "apps/web/public/icons/icon-512.png",
+     "size": 512
+    },
+    {
+     "target": "apps/web/public/icons/apple-touch-icon.png",
+     "size": 180
+    },
+    {
+     "target": "apps/web/public/icons/icon-maskable-512.png",
+     "size": 512,
+     "maskable": true
+    }
+   ]
+  }
+ ]
+}

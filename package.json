@@ -13,10 +13,12 @@
   },
   "scripts": {
     "build": "npm run build -w apps/web",
-    "test": "npm run build && npm run test -w packages/scoring && npm run test -w workers/api && npm run test -w apps/web",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "test": "npm run build && npm run test -w packages/scoring && npm run test -w workers/api && npm run test -w apps/web && node --test scripts/assets-check.test.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "assets": "node scripts/assets-check.mjs --report docs/design/assets-check.md"
   },
   "devDependencies": {
+    "sharp": "0.35.5",
     "web-push": "^3.6.7"
   }
 }

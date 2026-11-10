@@ -1,14 +1,28 @@
 # Gereken bitmap görseller (Faz V, yön A)
 
-Bu görselleri kullanıcı ChatGPT ile üretip projeye ekler. **Toplam 21 görsel**, beş grup:
+Bu görselleri kullanıcı ChatGPT ile üretip projeye ekler. **Toplam 17 görsel**, dört grup:
 
 | Grup | Adet |
 |---|---|
 | Tür çizimleri | 6 |
 | Takım ve yem çizimleri | 9 |
-| Boş durum görselleri | 3 |
 | Paylaşım (OG) görseli | 1 |
-| PWA uygulama simgesi | 2 |
+| Uygulama simgesi (`app-1024.png`; 192/512/180 ve maskable betikle türetilir) | 1 |
+
+Boş durumlar (fotoğraf yok, veri yok, çevrimdışı) bitmap değildir; simge + kısa metinle çözülür (V0b C7).
+
+## Teslim akışı
+1. ChatGPT çıktısını **PNG olarak**, tablodaki **dosya adıyla** `assets-inbox/` klasörüne koy (ör. `assets-inbox/istavrit.png`, `assets-inbox/app-1024.png`) ve main'e gönder. Boyutlandırma ve dönüştürme gerekmez.
+2. `npm run assets` (`scripts/assets-check.mjs`) her dosyayı otomatik denetler:
+   - biçim PNG;
+   - ölçü en az hedef kadar;
+   - en/boy oranı hedefin ±%15'i içinde;
+   - tür/takım/yemde alfa kanalı ve şeffaf köşeler; OG ve uygulama simgesinde opaklık;
+   - WebP (OG ve simgede PNG) hedef ölçüye boyutlandırma ve dosya boyutu sınırı.
+3. Geçenler hedef yola yazılır ve gelen kutusundan silinir. Kalanlar gerekçesiyle raporlanır ve gelen kutusunda kalır. `app-1024.png`'den `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` (180) ve `icon-maskable-512.png` türetilir: çizim merkezdeki %80 güvenli alana sığdırılır, zemin simgenin köşe rengiyle doldurulur.
+4. Her görsel ayrıca satırdaki **kabul kontrol listesiyle gözle** denetlenir. Uymayan kullanılmaz; gerekçe aşağıdaki denetim kaydına yazılır.
+
+Manifest (ad, hedef, ölçü, alfa, boyut sınırı): `apps/web/src/data/assets.json`.
 
 ## Kurallar
 - **Yalnız bu türler bitmap olabilir.** Hepsi yukarıdaki tabloda listelendi.
@@ -25,11 +39,11 @@ Bu görselleri kullanıcı ChatGPT ile üretip projeye ekler. **Toplam 21 görse
 - **Yer tutucu ve otomatik kullanım.** Görseller gelene kadar bileşenler kesikli çerçeveli yer tutucu gösterir: "çizim — görsel bekleniyor" ve dosya yolu (bkz. `docs/design/mockups/dossier-tirilye-*.html`).
   - V1'de `<Illustration kind name>` bileşeni derleme anında `apps/web/public/img/**` dizinini tarar. Dosya adı eşleşirse görseli kullanır, yoksa yer tutucuyu gösterir.
 - **Kabul denetimi.** Gelen her görsel iki adımda denetlenir:
-  1. Otomatik ön kontrol (V1, `scripts/assets-check.mjs`): biçim, piksel ölçüsü, şeffaflık (alfa kanalı), dosya boyutu.
+  1. Otomatik ön kontrol (`scripts/assets-check.mjs`, testli): biçim, piksel ölçüsü, oran, şeffaflık (alfa kanalı), dosya boyutu.
   2. Satırdaki kabul listesiyle gözle kontrol.
   - Uymayan görsel kullanılmaz. Hangi maddeden kaldığı raporlanır, yer tutucu kalır.
-- **Biçim:** şeffaf WebP (alfa), `@2x` boyutta tek dosya. Tarayıcı CSS ile yarıya ölçekler. Ayrıca @1x üretilmez. İstisnalar OG (PNG, opak) ve PWA simgesidir (PNG).
-- **Boyut sınırı:** tür ve takım görselleri ≤ 120 KB, boş durum görselleri ≤ 150 KB, OG ≤ 300 KB.
+- **Biçim:** teslim PNG; yayın şeffaf WebP (alfa), `@2x` boyutta tek dosya, dönüşümü betik yapar. Tarayıcı CSS ile yarıya ölçekler. İstisnalar OG (PNG, opak) ve uygulama simgesidir (PNG).
+- **Boyut sınırı:** tür ve takım görselleri ≤ 120 KB, OG ≤ 300 KB.
 
 ## Ortak stil ön eki (her prompt'un başına aynen eklenir)
 > Temiz, sade teknik illüstrasyon; yandan profil, düz renk alanları ve çok hafif gölge, tutarlı ince koyu kontur (eşit kalınlık), ışık sol üstten. Arka plan tamamen şeffaf. Görselde hiçbir yazı, harf, sayı, etiket, marka veya logo olmasın. Fotogerçekçi değil, 3B render değil, karikatür değil. Renk paleti sınırlı: koyu mürekkep #08111a (kontur), deniz tonları #2c8f98 / #1f7380 / #134a58, gümüş-gri #b0c2cc ve #e8eff3, koyu gri #262e34, vurgu için lavanta #a48ce3 (az). Canlı turuncu, kırmızı ve sarı kullanma. Nesnenin doğal desenleri (çizgi, leke, benek) bu tonlarla ama ayırt edilir biçimde çizilsin. Nesne kadrajı yatayda %85 doldursun, kenarlarda boşluk kalsın.
@@ -37,7 +51,7 @@ Bu görselleri kullanıcı ChatGPT ile üretip projeye ekler. **Toplam 21 görse
 ## Tür çizimleri (6)
 Ortak özellikler:
 - Kullanıldığı yer: tür seçici, kıyı dosyası "Bu merayı tanı", Sahadayım av kaydı.
-- Biçim: şeffaf WebP, **960 × 480 px (@2x)**, ekranda 480 × 240. Baş sola bakar.
+- Teslim: şeffaf PNG, en az **960 × 480 px**, oran 2:1 → yayın WebP 960 × 480 (@2x), ekranda 480 × 240. Baş sola bakar.
 
 | Dosya | Cevapladığı soru | ChatGPT prompt'u (Türkçe, ortak ön ekten sonra) | Kabul kontrol listesi |
 |---|---|---|---|
@@ -51,7 +65,7 @@ Ortak özellikler:
 ## Takım ve yem çizimleri (9)
 Ortak özellikler:
 - Kullanıldığı yer: kıyı dosyası "Takım", Sahadayım takım kartı, takım kutusu.
-- Biçim: şeffaf WebP, **640 × 640 px (@2x)**, ekranda 320 × 320. Markasız; renkler paletle sınırlı.
+- Teslim: şeffaf PNG, en az **640 × 640 px**, kare → yayın WebP 640 × 640 (@2x), ekranda 320 × 320. Markasız; renkler paletle sınırlı.
 
 | Dosya | Cevapladığı soru | ChatGPT prompt'u (Türkçe, ortak ön ekten sonra) | Kabul kontrol listesi |
 |---|---|---|---|
@@ -65,33 +79,39 @@ Ortak özellikler:
 | `apps/web/public/img/bait/karides.webp` | "Karides yemi neye benzer?" | Tek bir küçük çiğ karides, yandan, kabuklu. | ☐ **segmentli gövde**, kuyruk yelpazesi ☐ uzun antenler ☐ boyut oranı küçük yem karidesi (iri değil) ☐ pişmiş turuncu değil, yarı saydam gri ☐ yazı yok |
 | `apps/web/public/img/bait/midye.webp` | "Midye yemi nasıl?" | Tek bir açılmış midye (Mytilus galloprovincialis): koyu kabuk, içinde turuncu-krem et; yanında iğneye takılacak et parçası değil, yalnız açık midye. | ☐ **koyu mavi-siyah uzun kabuk** ☐ açık kabukta **et görünür** ☐ tek midye ☐ yazı yok |
 
-## Boş durum görselleri (3)
-Ortak özellikler:
-- Biçim: şeffaf WebP, **720 × 480 px (@2x)**, ekranda 360 × 240.
-- Sade, tek nesneli, küçük, dikkat dağıtmayan.
-
-| Dosya | Ekran / bileşen | Cevapladığı soru | ChatGPT prompt'u | Kabul kontrol listesi |
-|---|---|---|---|---|
-| `apps/web/public/img/empty/fotograf-yok.webp` | kıyı dosyası, fotoğraf alanı (şematik görünümün yanında küçük) | "Neden fotoğraf yok?" | Boş bir fotoğraf çerçevesi ile önünde sakin bir kıyı çizgisi silüeti; çerçeve içi boş. | ☐ belirli bir yer **tanınmıyor** (mera izlenimi vermiyor) ☐ çerçeve boş ☐ yazı yok |
-| `apps/web/public/img/empty/veri-yok.webp` | plan, çizelge ve harita katmanında veri gelmediğinde | "Veri neden görünmüyor?" | Boş bir çizelge kâğıdı ve üzerinde soru işaretine benzemeyen, kesik kesik bir dalga çizgisi. | ☐ grafik değerleri **yok** (sahte veri izlenimi vermez) ☐ soru işareti/yazı yok |
-| `apps/web/public/img/empty/cevrimdisi.webp` | PWA çevrimdışı ekranı, Sahadayım | "İnternet yok, ne olur?" | Kıyıda bir iskele babası ve gevşek bir halat; uzakta zayıf sinyal çizgileri. | ☐ sakin, uyarı rengi yok ☐ marka/telefon modeli yok ☐ yazı yok |
-
 ## Paylaşım (OG) görseli (1)
 
 | Dosya | Biçim | Ekran / bileşen | Cevapladığı soru | ChatGPT prompt'u | Kabul kontrol listesi |
 |---|---|---|---|---|---|
-| `apps/web/public/og.png` | opak PNG, **1200 × 630 px** | bağlantı paylaşım kartı. Başlık `og:title` ile verilir; görselde yazı yok. | "Bu bağlantı ne?" | Gece, sakin bir Marmara kıyısı: alçak bir iskele silüeti, iskele ucunda tek bir sokak lambası, suda hafif yansıma, uzakta koy. Koyu mürekkep mavisi gökyüzü. Sol üçte birlik alan sade kalsın. | ☐ **belirli bir gerçek mera değil**: genel kıyı, tanınabilir yer işareti yok ☐ yazı/logo yok ☐ arka plan opak, palet tonlarında ☐ sol üçte bir sade |
+| `assets-inbox/og.png` → `apps/web/public/og.png` | opak PNG, **1200 × 630 px** | bağlantı paylaşım kartı. Başlık `og:title` ile verilir; görselde yazı yok. | "Bu bağlantı ne?" | Gece, sakin bir Marmara kıyısı: alçak bir iskele silüeti, iskele ucunda tek bir sokak lambası, suda hafif yansıma, uzakta koy. Koyu mürekkep mavisi gökyüzü. Sol üçte birlik alan sade kalsın. | ☐ **belirli bir gerçek mera değil**: genel kıyı, tanınabilir yer işareti yok ☐ yazı/logo yok ☐ arka plan opak, palet tonlarında ☐ sol üçte bir sade |
 
-## PWA uygulama simgesi (2)
+## Uygulama simgesi (1)
 
-| Dosya | Biçim | Ekran / bileşen | Cevapladığı soru | ChatGPT prompt'u | Kabul kontrol listesi |
+| Dosya (teslim) | Biçim | Ekran / bileşen | Cevapladığı soru | ChatGPT prompt'u | Kabul kontrol listesi |
 |---|---|---|---|---|---|
-| `apps/web/public/icons/app-1024.png` | opak PNG, **1024 × 1024**. `icon-192.png`, `icon-512.png`, `apple-touch` (180) betikle türetilir. | ana ekran simgesi | "Telefonumdaki hangi uygulama?" | Kare uygulama simgesi: koyu mürekkep mavisi #08111a zemin, ortada sade beyaz-turkuaz bir iskele silüeti ve üstünde küçük bir lamba ışığı; düz, tek renk tonlarıyla, 2–3 şekil. Köşeler kare (yuvarlatmayı işletim sistemi yapar). | ☐ 48 px'e küçültüldüğünde **seçilebilir** ☐ en çok 3 şekil ☐ yazı/harf yok ☐ köşeler kare, zemin opak |
-| `apps/web/public/icons/app-maskable-1024.png` | opak PNG, **1024 × 1024**, maskable | Android uyarlanır simge | aynı | Aynı simge; ana şekil merkezdeki %80'lik güvenli dairenin içinde, zemin kenarlara kadar dolu. | ☐ ana şekil merkez %80 daire içinde ☐ kenarlar zemin rengiyle dolu ☐ ilk simgeyle aynı çizim |
+| `assets-inbox/app-1024.png` → `apps/web/public/icons/app-1024.png` | opak PNG, **1024 × 1024**. Betik `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` (180) ve `icon-maskable-512.png` (çizim %80 güvenli alanda, zemin köşe rengiyle) türetir. | ana ekran simgesi, Android uyarlanır simge | "Telefonumdaki hangi uygulama?" | Kare uygulama simgesi: koyu mürekkep mavisi #08111a zemin, ortada sade beyaz-turkuaz bir iskele silüeti ve üstünde küçük bir lamba ışığı; düz, tek renk tonlarıyla, 2–3 şekil. Ana şekil merkezdeki %70'lik alanda kalsın; zemin kenarlara kadar dolu ve düz renk. Köşeler kare. | ☐ 48 px'e küçültüldüğünde **seçilebilir** ☐ en çok 3 şekil ☐ yazı/harf yok ☐ köşeler kare, zemin opak ve **düz renk** (maskable türetme köşe rengini kullanır) ☐ maskable sürümde şekil kırpılmıyor |
 
 ## Denetim kaydı
 Gelen her görsel buraya bir satır olarak eklenecek: dosya, tarih, otomatik kontrol (geçti/kaldı), kontrol listesi sonucu, karar (kullanıldı / reddedildi + gerekçe).
 
 | Dosya | Tarih | Otomatik | Kontrol listesi | Karar |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| izmarit.png | 10.11.2026 | geçti | ☑ orta gövdede koyu leke ☑ küçük ağız ☑ tek uzun sırt yüzgeci ☑ scute yok ☑ çatal kuyruk | kullanıldı |
+| levrek.png | 10.11.2026 | geçti | ☑ iki ayrı sırt yüzgeci, ilki dikenli ☑ solungaç kapağında koyu leke ☑ gümüş, şerit yok ☑ hafif çatal kuyruk | kullanıldı |
+| lufer.png | 10.11.2026 | geçti | ☑ mavi-yeşil sırt ☑ belirgin sivri dişler ☑ göğüs yüzgeci dibinde koyu leke ☑ çatal kuyruk ☑ iki sırt yüzgeci | kullanıldı |
+| mirmir.png | 10.11.2026 | geçti | ☑ dikey ince koyu bantlar ☑ sivri burun ☑ tek sırt yüzgeci ☑ çatal kuyruk | kullanıldı |
+| kolyoz.png | 10.11.2026 | geçti | ☑ sırtta dalgalı çizgiler ☑ karın yanlarında benekler ☑ finletler ☑ iri göz ☑ çatal kuyruk | kullanıldı |
+| istavrit.png | 10.11.2026 | geçti | ☐ **gövdede istavritte olmayan dikey koyu bantlar ve sırtta dalgalı desen** (uskumru/kolyoz deseni; türü karıştırır) ☐ kemiksi pul sırası yalnız arka yarıda, 'baştan kuyruğa' değil ☑ çatal kuyruk ☑ iri göz ☑ solungaç lekesi | **reddedildi**; yeniden üretilmeli (prompt'a 'gövdede bant/çizgi yok, düz gümüş yan; scute sırası solungaç kapağından kuyruğa' eklenmeli). Gelen kutusunda duruyor. |
+| jighead.png | 10.11.2026 | geçti | ☑ yuvarlak kurşun baş, göz baştan çıkıyor ☑ iğne ince, baş ≈ iğne boyunun 1/4'ü ☑ uç yukarı ☑ marka yok | kullanıldı. Not: iğne koyu renk, koyu temada soluk; bileşen açık zemin plakasıyla gösterecek (V2). |
+| silikon-igne-kuyruk.png | 10.11.2026 | geçti | ☑ halkalı ince gövde ☑ iğne gibi incelen kuyruk ☑ iğne yok | kullanıldı |
+| silikon-kurek-kuyruk.png | 10.11.2026 | geçti | ☑ uçta dikey yassı kürek ☑ halkalı gövde ☑ iğne yok | kullanıldı |
+| dropshot-kursun.png | 10.11.2026 | geçti | ☑ damla biçimli kurşun ☑ üstte döner + klips ☑ iğne yok | kullanıldı |
+| capari.png | 10.11.2026 | geçti | ☑ tek ana misina, kısa köstekler ☑ 6 küçük iğne, eşit aralık ☑ iğnelerde tüy süs ☑ uçta küçük kurşun | kullanıldı. Not: çizgiler çok ince; küçük boyutta ve koyu temada soluk (V2'de açık plaka). |
+| hamsi-parcasi.png | 10.11.2026 | geçti | ☑ gümüş gövde, sırtta koyu şerit ☑ parça, bütün balık değil ☑ kesik yüzey açık, kan yok | kullanıldı |
+| karides.png | 10.11.2026 | geçti | ☑ segmentli gövde, kuyruk yelpazesi ☑ uzun antenler ☑ küçük yem karidesi ☑ yarı saydam gri | kullanıldı |
+| midye.png | 10.11.2026 | geçti | ☑ koyu mavi-siyah uzun kabuk ☑ açık kabukta et ☑ tek midye | kullanıldı |
+| og.png | 10.11.2026 | geçti (ortadan %21 kırpma) | ☑ genel kıyı, tanınabilir yer işareti yok ☑ yazı/logo yok ☑ opak ☑ sol üçte bir sade (kırpma sonrası da) | kullanıldı |
+| app-1024.png | 10.11.2026 | geçti | ☐ **48 px'te seçilemiyor** (iskele ince bir çizgiye iniyor, ışık hüzmesi bulanık leke) ☑ en çok 3 şekil ☑ yazı yok ☑ köşeler opak | **reddedildi**; 192/512/180 ve maskable türetilmedi, mevcut simgeler duruyor. Yeniden üretim için: kalın, tek parça iskele silüeti, çizgi kalınlığı simgenin ≥ %6'sı, ışık düz bir daire. |
+| micro-jig.png | 10.11.2026 | — | dosya adı manifestle eşleşmiyor (beklenen `mikro-jig.png`); dokunulmadı | **eşleşmedi**: çizim mikro jig listesine uyuyor; `mikro-jig.png` olarak yeniden adlandırılırsa bir sonraki çalıştırmada işlenir |
+
+Otomatik adımın tam çıktısı: `docs/design/assets-check.md`.

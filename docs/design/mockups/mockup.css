@@ -63,8 +63,8 @@ body.notes .q { display: block; }
 .trust3 .v.lo { color: var(--warn); }
 .trust3 .d { font-size: var(--fs-1); color: var(--fg-2); line-height: 1.35; }
 .fit { display: inline-grid; place-items: center; min-width: 34px; height: 24px; padding: 0 6px; border-radius: 12px; font-weight: var(--w-bold); font-size: var(--fs-2); }
-.fit.f0 { background: var(--fit-0); color: var(--fg-1); } .fit.f1 { background: var(--fit-1); color: var(--fg-1); } .fit.f2 { background: var(--fit-2); color: var(--fit-ink); }
-.fit.f3 { background: var(--fit-3); color: var(--fit-ink); } .fit.f4 { background: var(--fit-4); color: var(--fit-ink); }
+.fit.f0 { background: var(--fit-0); color: var(--fit-t0); } .fit.f1 { background: var(--fit-1); color: var(--fit-t1); } .fit.f2 { background: var(--fit-2); color: var(--fit-t2); }
+.fit.f3 { background: var(--fit-3); color: var(--fit-t3); } .fit.f4 { background: var(--fit-4); color: var(--fit-t4); }
 
 /* equal options */
 .alts { display: grid; gap: 0; }

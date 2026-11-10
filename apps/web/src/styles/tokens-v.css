@@ -37,13 +37,16 @@
   --warn-bg: #3a2c10;
   --danger: #ff7666;  /* safety only (gust/wave gate) */
   --danger-bg: #3d1a17;
-  /* suitability ("uygunluk puanı"): one-hue lightness ramp, colour-blind safe, no amber/red, distinct from the sea */
-  --fit-0: #3e3a5e;   /* < 30 */
-  --fit-1: #5b4f8f;   /* 30–45 */
-  --fit-2: #7d68bf;   /* 45–60 */
-  --fit-3: #a48ce3;   /* 60–75 */
-  --fit-4: #d3c3fb;   /* ≥ 75 */
-  --fit-ink: #0b0a1a; /* number on the two lightest steps */
+  /* suitability ("uygunluk puanı"): sequential multi-hue scale (viridis-like, stopping before yellow so amber stays the
+     warning colour). Lightness rises with the score; adjacent steps ΔE00 ≥ 15 for normal vision and ≥ 8 under simulated
+     protan/deutan/tritan vision (docs/design/contrast.md, V0b C5 — the old one-hue lavender ramp was too uniform). */
+  --fit-0: #46277a;   /* < 30 */
+  --fit-1: #30608d;   /* 30–45 */
+  --fit-2: #1f928b;   /* 45–60 */
+  --fit-3: #4fbf6a;   /* 60–75 */
+  --fit-4: #a6dc4a;   /* ≥ 75 */
+  --fit-t0: #e8eff3; --fit-t1: #e8eff3; --fit-t2: #04121e; --fit-t3: #04121e; --fit-t4: #04121e; /* number on each step */
+  --fit-ink: #04121e;
   /* weather layers (fixed scales, D2) */
   --wind-0: rgb(232 239 243 / 0);
   --wind-1: #b9d9e8;
@@ -85,11 +88,12 @@
   --warn-bg: #fbe9bf;
   --danger: #a8231a;
   --danger-bg: #fbdcd8;
-  --fit-0: #e3dcf3;
-  --fit-1: #c4b5ea;
-  --fit-2: #9b85d6;
-  --fit-3: #6f55b6;
-  --fit-4: #46328a;
+  --fit-0: #d3c6ea;   /* paper theme: lightness falls with the score, so good hours are the darkest marks */
+  --fit-1: #b39ce0;
+  --fit-2: #6f86c6;
+  --fit-3: #227479;
+  --fit-4: #1b4d2a;
+  --fit-t0: #142330; --fit-t1: #142330; --fit-t2: #04121e; --fit-t3: #ffffff; --fit-t4: #ffffff;
   --fit-ink: #ffffff;
   --wind-0: rgb(20 35 48 / 0);
   --wind-1: #4f7f95;

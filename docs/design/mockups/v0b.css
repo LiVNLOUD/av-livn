@@ -65,31 +65,59 @@ table.cov td { padding: 6px; border-bottom: 1px solid var(--line); vertical-alig
 .mob.dossier .dtabs { overflow: hidden; gap: var(--s3); }
 .mob.dossier .phs { grid-template-columns: 1fr; }
 
+/* ---- V0b C1–C3: summary-first dossier, drawer ≤ 40 % of the map, main text ≥ 14 px */
+.A .stage.dstage { grid-template-columns: minmax(0, 1fr) minmax(0, 40%); height: 920px; }
+.dstage > .map { height: 920px; }
+.dstage .drawer { overflow: auto; max-height: calc(920px - 32px); gap: var(--s4); }
+.dh-t h1 { font-size: var(--fs-4); }
+.fitnow { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: var(--fs-2); color: var(--fg-2); line-height: 1.2; }
+.dtabs a { font-size: var(--fs-3); }
+.verdict-1 { font-size: var(--fs-4); line-height: var(--lh-4); font-weight: var(--w-med); margin: 0 0 var(--s3); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.fact { display: flex; gap: var(--s3); align-items: flex-start; background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--radius-s); padding: var(--s3); }
+.fact .fk { font-size: var(--fs-2); color: var(--fg-2); }
+.fact .fv { font-size: var(--fs-4); font-weight: var(--w-bold); line-height: 1.25; }
+.fact .fs { font-size: var(--fs-2); color: var(--fg-2); line-height: 1.35; }
+.view .schem-frame { aspect-ratio: 16 / 10; border-radius: var(--radius-s); overflow: hidden; }
+.view .schem-frame svg { width: 100%; height: 100%; display: block; }
+.vnote { font-size: var(--fs-2); color: var(--fg-2); margin: 6px 0 0; }
+a.street { display: inline-flex; align-items: center; min-height: var(--touch); font-size: var(--fs-2); color: var(--act); text-decoration: underline; text-underline-offset: 2px; }
+.mini { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--s3); align-items: start; }
+.mini span { display: block; font-size: var(--fs-2); color: var(--fg-2); margin-top: 4px; }
+.mini .sect-leg { display: none; }
+.drawer h2 { font-size: var(--fs-4); margin-bottom: var(--s2); }
+.drawer section p { font-size: var(--fs-3); }
+ul.srcs { margin: 0; padding-left: 1.1em; font-size: var(--fs-2); color: var(--fg-2); display: grid; gap: 4px; }
+.mob.dossier .facts { grid-template-columns: 1fr 1fr; }
+.mob.dossier .mini { grid-template-columns: 1fr; }
+.mob.dossier .mini-rose { justify-self: center; text-align: center; }
+
 /* ---------------------------------------------------------------- Sahadayım (separate from the plan screen) */
-.saha { min-height: 100vh; display: grid; gap: var(--s4); padding: var(--s4); align-content: start; }
+.saha { --s-fg: var(--fg-1); --s-fg2: var(--fg-2); min-height: 100vh; display: grid; gap: var(--s3); padding: var(--s4) var(--s4) 176px; align-content: start; color: var(--s-fg); }
 .saha .num { font-variant-numeric: tabular-nums; }
 .s-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s3); }
 .s-clock { font-size: var(--num-xl); line-height: 1; font-weight: var(--w-bold); letter-spacing: -.02em; }
-.s-spot { font-size: var(--fs-2); color: var(--fg-2); margin-top: 6px; }
-.s-exit { min-height: var(--touch-wet); min-width: var(--touch-wet); border-radius: var(--radius); border: 1px solid var(--line-2); background: transparent; color: var(--fg-1); font: inherit; }
+.s-spot { font-size: var(--fs-3); color: var(--s-fg2); margin-top: 6px; }
+.s-tools { display: flex; gap: var(--s2); }
+.s-tool { min-height: var(--touch-wet); min-width: var(--touch-wet); border-radius: var(--radius); border: 1px solid var(--line-2); background: transparent; color: var(--s-fg); font: inherit; font-size: var(--fs-3); }
 .s-cond { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: var(--s2); }
 .s-cond > div:not(.q) { display: grid; gap: 2px; justify-items: start; background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--s3); }
 .s-cond b { font-size: var(--num-l); line-height: 1; }
-.s-cond span { font-size: var(--fs-1); color: var(--fg-2); }
-.s-cond .s-arrow { width: 28px; height: 28px; color: var(--fg-1); }
-.s-rig { background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--s3); }
-.s-k { font-size: var(--fs-2); font-weight: var(--w-med); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.s-rig svg { display: block; width: 100%; max-height: 300px; }
+.s-cond span { font-size: var(--fs-2); color: var(--s-fg2); }
+.s-cond .s-arrow { width: 28px; height: 28px; }
+.s-rig { background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--s2) var(--s3); }
+.s-k { font-size: var(--fs-3); font-weight: var(--w-med); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.s-rig svg { display: block; width: 100%; height: 140px; }
 .s-tip summary { min-height: var(--touch-wet); display: flex; align-items: center; font-weight: var(--w-med); padding: 0 var(--s3); border: 1px solid var(--line); border-radius: var(--radius); }
-.s-tip p { margin: var(--s2) var(--s3); color: var(--fg-2); }
-.s-btns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
-.s-b { min-height: 72px; border-radius: var(--radius); font: inherit; font-size: var(--fs-4); font-weight: var(--w-bold); border: 2px solid var(--act); background: transparent; color: var(--fg-1); }
+.s-tip p { margin: var(--s2) var(--s3); color: var(--s-fg2); font-size: var(--fs-3); }
+.s-limit { font-size: var(--fs-2); color: var(--s-fg2); border: 1px dashed var(--line-2); border-radius: var(--radius); padding: var(--s2) var(--s3); }
+.s-limit i { color: var(--s-fg); }
+/* the four log buttons live in the thumb zone, always on screen (V0b C6) */
+.s-btns { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); padding: var(--s2) var(--s3) calc(var(--s3) + env(safe-area-inset-bottom)); background: var(--ink-0); border-top: 1px solid var(--line); }
+.s-b { min-height: 72px; border-radius: var(--radius); font: inherit; font-size: var(--fs-4); font-weight: var(--w-bold); border: 2px solid var(--act); background: var(--ink-2); color: var(--s-fg); }
 .s-b.alt { border-color: var(--line-2); }
-.s-limit { font-size: var(--fs-2); color: var(--fg-2); border: 1px dashed var(--line-2); border-radius: var(--radius); padding: var(--s3); }
-.s-limit i { color: var(--fg-1); }
-/* night: dimmer text, no bright panels, nothing moves */
-.saha.night { --fg-1: #c4d0d7; --fg-2: #98aab4; --line: #1c2d3d; --act: #3f8fcc; --sel: #9fb0ba; background: #050b11; }
-.saha.night .s-cond > div:not(.q), .saha.night .s-rig { background: #0a141d; }
-.saha.night * { animation: none !important; transition: none !important; }
-.saha.day .s-b { background: var(--ink-2); }
-.mob .chips .chip { min-height: var(--touch); }
+.saha .notes-toggle, body:has(.saha) .notes-toggle { bottom: 176px; }
+/* night = the app's red mode (sahadayim/index.astro body.red), reds raised to pass AA on black: #ff3b2f 5.9:1, #f0362a 5.3:1 */
+.saha.red { --s-fg: #ff3b2f; --s-fg2: #f0362a; --ink-0: #000; --ink-1: #0d0201; --ink-2: #1a0403; --line: #3a0a06; --line-2: #6e140c; --act: #ff3b2f; background: #000; }
+.saha.red .tag { color: var(--s-fg2); border-color: var(--line-2); }
+.saha.red * { animation: none !important; transition: none !important; }

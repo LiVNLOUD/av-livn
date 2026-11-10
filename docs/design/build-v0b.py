@@ -37,8 +37,10 @@ def q(text: str, pos: str = "right:0;top:-30px") -> str:
 
 
 # ------------------------------------------------------------------ dossier pieces
-def schematic(d: dict, r: int = 230, photo: dict | None = None, label: str = "şematik görünüm") -> str:
-    """Plan view in metres around the spot from stored geometry only (land, DTM bands, OSM structure)."""
+def schematic(d: dict, r: int = 230, photo: dict | None = None, label: str = "şematik görünüm", aspect: float = 1.0) -> str:
+    """Plan view in metres around the spot from stored geometry only (land, DTM bands, OSM structure).
+    aspect = height / width of the frame, so the label, scale bar and north arrow are never cropped."""
+    ry = r * aspect
     bands = "".join(f'<path d="{b["d"]}" style="fill:var(--sea-{TONE(b["dmin"])})" fill-rule="evenodd"/>' for b in sorted(d["bands"], key=lambda b: -b["dmin"]))
     land = f'<path d="{d["land"]}" style="fill:var(--land);stroke:var(--land-line)" stroke-width="1.5" vector-effect="non-scaling-stroke" fill-rule="evenodd"/>'
     st = ""
@@ -54,11 +56,11 @@ def schematic(d: dict, r: int = 230, photo: dict | None = None, label: str = "ş
                f'<path d="M{x:.0f},{y:.0f} L{x + 60 * math.sin(a - .35):.0f},{y - 60 * math.cos(a - .35):.0f} M{x:.0f},{y:.0f} L{x + 60 * math.sin(a + .35):.0f},{y - 60 * math.cos(a + .35):.0f}" style="stroke:var(--act)" stroke-width="2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>'
                f'<text x="{x + 12:.0f}" y="{y + 22:.0f}" style="fill:var(--fg-1);font-size:13px;paint-order:stroke;stroke:var(--ink-0);stroke-width:3px">çekim noktası {photo["captured_at"][8:10]}.{photo["captured_at"][5:7]}.{photo["captured_at"][:4]}</text></g>')
     mk = '<circle cx="0" cy="0" r="9" style="fill:var(--fit-3);stroke:var(--sel)" stroke-width="3" vector-effect="non-scaling-stroke"/>'
-    scale = f'<g transform="translate({-r + 20},{r - 24})"><path d="M0,0h100" style="stroke:var(--fg-1)" stroke-width="3" vector-effect="non-scaling-stroke"/><text x="0" y="-8" style="fill:var(--fg-1);font-size:13px">100 m</text></g>'
-    north = f'<g transform="translate({r - 30},{-r + 34})"><path d="M0,-16 L7,6 L0,1 L-7,6 Z" style="fill:var(--fg-1)"/><text x="0" y="22" text-anchor="middle" style="fill:var(--fg-1);font-size:13px;font-weight:700">K</text></g>'
-    tag = f'<text x="{-r + 14}" y="{-r + 26}" style="fill:var(--fg-1);font-size:13px;font-weight:600;paint-order:stroke;stroke:var(--ink-0);stroke-width:3px">{label}</text>'
-    return (f'<svg class="schem" viewBox="{-r} {-r} {2 * r} {2 * r}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="{label}">'
-            f'<rect x="{-r}" y="{-r}" width="{2 * r}" height="{2 * r}" style="fill:var(--sea-open)"/>{bands}{land}{st}{cam}{mk}{scale}{north}{tag}</svg>')
+    scale = f'<g transform="translate({-r + 20},{ry - 24})"><path d="M0,0h100" style="stroke:var(--fg-1)" stroke-width="3" vector-effect="non-scaling-stroke"/><text x="0" y="-8" style="fill:var(--fg-1);font-size:13px">100 m</text></g>'
+    north = f'<g transform="translate({r - 30},{-ry + 34})"><path d="M0,-16 L7,6 L0,1 L-7,6 Z" style="fill:var(--fg-1)"/><text x="0" y="22" text-anchor="middle" style="fill:var(--fg-1);font-size:13px;font-weight:700">K</text></g>'
+    tag = f'<text x="{-r + 14}" y="{-ry + 26}" style="fill:var(--fg-1);font-size:13px;font-weight:600;paint-order:stroke;stroke:var(--ink-0);stroke-width:3px">{label}</text>'
+    return (f'<svg class="schem" viewBox="{-r} {-ry} {2 * r} {2 * ry}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="{label}">'
+            f'<rect x="{-r}" y="{-ry}" width="{2 * r}" height="{2 * ry}" style="fill:var(--sea-open)"/>{bands}{land}{st}{cam}{mk}{scale}{north}{tag}</svg>')
 
 
 def section(d: dict, field: dict | None, w: int = 420) -> str:
@@ -147,125 +149,178 @@ def placeholder(kind: str, name: str, path: str) -> str:
     return f'<figure class="ph has-q"><div class="ph-box"><span>çizim — görsel bekleniyor</span><code>{path}</code></div><figcaption>{name} · <span class="tag">çizim</span></figcaption>{q("Bu tür / takım neye benziyor?")}</figure>'
 
 
-def wind_now(d: dict) -> str:
+def wind_now(d: dict):
     wd = bm.grid_at("wd", HOUR, d["lat"], d["lon"])
-    ws = bm.grid_at("ws", HOUR, d["lat"], d["lon"]) if "ws" in bm.G["vars"] else None
-    rel = bm.wind_rel({"shore_normal_deg": d["shore_normal_deg"]}, wd)
-    return wd, f'<div class="cond has-q"><span>{i("ruzgar")} {SR["loc"]:%H}:00 rüzgar {bm.compass(wd)} yönünden · kıyıya göre <b>{rel}</b></span><span>{i("akinti")} akıntı: bu maket verisinde yok</span>{q("Rüzgar ve akıntı bu kıyıya göre nereden geliyor?")}</div>'
+    return wd, bm.wind_rel({"shore_normal_deg": d["shore_normal_deg"]}, wd)
 
 
-def dossier_header(d: dict, fit: int | None, acc: str) -> str:
+def open_sectors(d: dict) -> str:
+    """Directions with > 5 km of open water (OSM fetch), merged into compass ranges, e.g. 'KB–D açık'."""
+    ks = [k for k, e in enumerate(d["rose"]) if e["osm_km"] > 5]
+    if not ks:
+        return "her yönden korunaklı"
+    runs, cur = [], [ks[0]]
+    for k in ks[1:]:
+        if k == cur[-1] + 1:
+            cur.append(k)
+        else:
+            runs.append(cur)
+            cur = [k]
+    runs.append(cur)
+    if len(runs) > 1 and runs[0][0] == 0 and runs[-1][-1] == 15:  # wrap around north
+        runs[0] = runs[-1] + runs[0]
+        runs.pop()
+    return ", ".join(DIRS16[r[0]] if len(r) == 1 else f"{DIRS16[r[0]]}–{DIRS16[r[-1]]}" for r in runs) + " açık"
+
+
+# What is known per spot; every value comes from stored data (dossier.json, snapshot, the 8 Nov field note in REVISION-V).
+SPOT_FACTS = {
+    TIRILYE: {"access": ("Açık", "kayıt: açık erişim"), "lamp": ("goruldu", "Lamba var", "saha kaydı; ışığın suya düştüğü doğrulanmadı"),
+              "depth": ("~5 m", "saha ölçümü 8 Kas · DTM 0–2 m diyor"), "photo": None},
+    KORDON: {"access": ("Açık", "kayıt: açık erişim"), "lamp": ("bilinmiyor", "Bilinmiyor", "saha kaydı yok"),
+             "depth": ("0–2 m", "DTM tahmini · saha kaydı yok"), "photo": "street"},
+}
+LAMP_ICON = {"dogrulandi": "lamba", "goruldu": "lamba", "bilinmiyor": "erisim-bilinmiyor"}
+
+
+def verdict_line(sid: str, fit) -> str:
+    f = SPOT_FACTS[sid]
+    lvl = "iyi" if fit is not None and fit >= 75 else "orta" if fit is not None and fit >= 60 else "zayıf"
+    unknown = [n for n, bad in (("derinlik", "saha kaydı yok" in f["depth"][1]), ("lamba", f["lamp"][0] == "bilinmiyor")) if bad]
+    tail = f"; {' ve '.join(unknown)} bilinmiyor" if unknown else "; av kaydıyla doğrulanmadı"
+    return f'{SR["loc"]:%H}:00 için uygunluk {lvl}{tail}.'
+
+
+def fact(icon: str, k: str, v: str, sub: str) -> str:
+    return f'<div class="fact">{i(icon, "i l")}<div><div class="fk">{k}</div><div class="fv">{v}</div><div class="fs">{sub}</div></div></div>'
+
+
+def summary(sid: str, mobile: bool) -> str:
+    d, f = DOS[sid], SPOT_FACTS[sid]
+    wd, rel = wind_now(d)
+    facts = "".join([
+        fact("erisim-acik", "Erişim", *f["access"]),
+        fact(LAMP_ICON[f["lamp"][0]], "Lamba", f["lamp"][1], f["lamp"][2]),
+        fact("derinlik", "Derinlik", *f["depth"]),
+        fact("ruzgar", "Rüzgara açıklık", open_sectors(d), f'{SR["loc"]:%H}:00 rüzgar {bm.compass(wd)} · kıyıya göre {rel}'),
+    ])
+    view = schematic(d, 150 if mobile else 170, None, "şematik görünüm", aspect=10 / 16)
+    link = ""
+    if f["photo"] == "street":
+        im = d["mapillary"]["images"][0]
+        date = f'{im["captured_at"][8:10]}.{im["captured_at"][5:7]}.{im["captured_at"][:4]}'
+        link = f'<a class="street" href="{im["url"]}">Yakındaki sokak görüntüsü (merayı göstermiyor) · {date} · Mapillary</a>'
+    note = ("Fotoğraf yok: merayı gösteren görüntü bulunamadı. Çizim gerçek OSM geometrisinden." if f["photo"]
+            else "Fotoğraf yok: 200 m içinde görüntü bulunamadı. Çizim gerçek OSM geometrisinden.")
+    field = {"m": 0, "depth": 5} if sid == TIRILYE else None
+    return (f'<section class="sum has-q"><p class="verdict-1">{verdict_line(sid, d["hour_fit"]["fit"])}</p>'
+            f'{q("Bu merayı tek bakışta nasıl tanırım?", "right:0;top:-30px")}<div class="facts">{facts}</div></section>'
+            f'<section class="view has-q"><div class="schem-frame">{view}</div><p class="vnote">{note}</p>{link}'
+            f'{q("Yer nasıl görünüyor? (yalnız gerçek geometri)", "right:0;top:-30px")}</section>'
+            f'<section class="mini has-q"><div class="mini-rose">{rose(d, wd, 150)}<span>Rüzgara açıklık · ok: {SR["loc"]:%H}:00 rüzgarı</span></div>'
+            f'<div class="mini-sect">{section(d, field, 300)}<span>Kıyı kesiti · ayrıntı Kaynaklar sekmesinde</span></div>'
+            f'{q("Hangi rüzgarlara açık, ne kadar derin?", "right:0;top:-30px")}</section>')
+
+
+def sources(sid: str) -> str:
+    d, f = DOS[sid], SPOT_FACTS[sid]
+    chain = ""
+    if f["photo"] == "street":
+        im = d["mapillary"]["images"][0]
+        date = f'{im["captured_at"][8:10]}.{im["captured_at"][5:7]}.{im["captured_at"][:4]}'
+        chain = ('<section class="chain"><h2>Fotoğraf kanıt zinciri</h2><dl>'
+                 '<dt>Merayı gösteriyor mu?</dt><dd><b class="warn-t">Hayır</b>: görüntüler meradan 130–138 m uzakta, iç sokaktan; mera ve su kareye girmiyor. Bu yüzden vitrinde değil.</dd>'
+                 f'<dt>Tarih · lisans</dt><dd>{date} · {d["mapillary"]["license"]}</dd>'
+                 '<dt>Direk/armatür · ışığın yönü · gece</dt><dd>bilinmiyor · bilinmiyor · doğrulanmadı</dd></dl></section>')
+    conflict = ('<p><b>Derinlik çelişkisi:</b> DTM bu noktada 0–2 m diyor; 8 Kasım saha ölçümü ~5 m (kurşun; misina açısı belirsiz). '
+                'İki kaynak ayrı çizilir, ortalaması alınmaz; saha kaydına belirsizlik atanır (D4).</p>') if sid == TIRILYE else ""
+    field = {"m": 0, "depth": 5} if sid == TIRILYE else None
+    struct = "OSM way/483965349 (man_made=pier)" if sid == TIRILYE else "OSM kıyı çizgisi"
+    return (f'{chain}<section><h2>Aydınlatma</h2>{lamp3(f["lamp"][0], f["lamp"][2])}</section>'
+            f'<section><h2>Kıyı kesiti</h2>{section(d, field)}{conflict}</section>'
+            f'<section><h2>Dip bilgisi kaynakları</h2>{depth_cov(sid == TIRILYE)}</section>'
+            f'<section><h2>Kaynaklar</h2><ul class="srcs"><li>Kıyı: OSM kara poligonu; yapı: {struct}</li>'
+            '<li>Derinlik: EMODnet DTM 2024 türevi (~115 m hücre)</li>'
+            '<li>Rüzgara açıklık: OSM kara poligonuna 16 yönde uzaklık (<code>fetch_km</code>, 119/119 mera)</li>'
+            '<li>Rüzgar: Open-Meteo (CC BY 4.0) + DWD</li><li>Fotoğraf: Mapillary, CC BY-SA 4.0</li></ul></section>')
+
+
+def dossier_header(sid: str, tab: str) -> str:
+    d = DOS[sid]
     kind_tr = {"pier": "İskele", "promenade": "Kordon"}.get(d["kind"], d["kind"])
     ic = {"pier": "iskele", "promenade": "kordon"}.get(d["kind"], "iskele")
-    fitb = f'<div class="fitnow"><span class="fit {bm.fit_cls(fit)}">{round(fit)}</span>uygunluk şimdi ({TAKEN:%H:%M})</div>' if fit is not None else ""
-    return f'''<header class="dh has-q"><div class="dh-t">{i(ic, "i l")}<div><h1>{d["name"]}</h1>
-      <div class="meta">{kind_tr} · erişim {acc} · {d["length_m"] or "?"} m yapı · kıyı normali {d["shore_normal_deg"]}° ({bm.compass(d["shore_normal_deg"])})</div></div>{fitb}</div>
-      <nav class="dtabs"><a class="on">Kıyı dosyası</a><a>Saatler</a><a>Takım</a><a>Kayıtlar</a></nav>{q("Bu mera ne tür bir yer, erişebilir miyim?")}</header>'''
+    hf = d["hour_fit"]["fit"]
+    fitb = f'<div class="fitnow"><span class="fit {bm.fit_cls(hf)}">{round(hf)}</span><span>uygunluk<br>{SR["loc"]:%H}:00</span></div>'
+    tabs = "".join(f'<a class="{"on" if t == tab else ""}">{t}</a>' for t in ("Özet", "Saatler", "Takım", "Kaynaklar"))
+    return (f'<header class="dh has-q"><div class="dh-t">{i(ic, "i l")}<div><h1>{d["name"]}</h1>'
+            f'<div class="meta">{kind_tr} · {d["length_m"] or "?"} m</div></div>{fitb}</div>'
+            f'<nav class="dtabs">{tabs}</nav>{q("Bu mera ne, seçili saatte ne kadar uygun?")}</header>')
 
 
-def kordon_body(mobile: bool) -> str:
-    d = DOS[KORDON]
-    im = d["mapillary"]["images"][0]
-    fit = bm.SPOTS[KORDON]["score"]["total"]
-    wd, wn = wind_now(d)
-    date = f'{im["captured_at"][8:10]}.{im["captured_at"][5:7]}.{im["captured_at"][:4]}'
-    photo = f'''<section class="photo has-q"><div class="ph-frame"><img src="{im["thumb"]}" alt="Mapillary görüntüsü, {date}" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add('noimg')">
-        <div class="noimg-card">Fotoğraf yüklenemedi · <a href="{im["url"]}">Mapillary'de aç</a></div>
-        <div class="ovl"><span class="pin">{i("kanit-olcum")} Çekim: {date} · yön {im["compass_deg"]}° ({bm.compass(im["compass_deg"])}) · meraya {im["distance_m"]} m</span></div></div>
-      <div class="credit">Mapillary · {d["mapillary"]["license"]} · <a href="{im["url"]}">görüntü {im["image_id"][-6:]}</a> · 200 m içinde {d["mapillary"]["found"]} görüntü</div>
-      <div class="chips"><span class="chip on">İşaretler</span><span class="tag">{i("erisim-bilinmiyor")} Giriş/yürüyüş yönü: doğrulanmadı</span><span class="tag">Avlanma bölümü: doğrulanmadı</span><span class="tag">Aydınlatma: doğrulanmadı</span></div>
-      {q("Burası gerçekte neye benziyor, fotoğraf ne zaman ve nereden çekildi?")}</section>
-      <section class="chain has-q"><h2>Fotoğraf kanıt zinciri</h2><dl>
-        <dt>Fotoğraf merayı gösteriyor mu?</dt><dd><b class="warn-t">Hayır.</b> Otomatik eşleşme "meraya dönük" diyor (pusula {im["compass_deg"]}°, meraya yön {im["bearing_to_spot_deg"]}°); elle inceleme: görüntüler meradan 130–138 m uzakta, iç sokak/meydandan; mera ve su kareye girmiyor.</dd>
-        <dt>Tarih</dt><dd>{date}</dd>
-        <dt>Görülen direk/armatür</dt><dd>bilinmiyor</dd>
-        <dt>Işığın suya yönelimi</dt><dd>bilinmiyor</dd>
-        <dt>Gece çalıştığı doğrulandı mı?</dt><dd>hayır</dd></dl>
-        <p class="faint">Kaynak: <code>docs/audit/mapillary-review.md</code>. Görüntü olması "lamba yok" demek değildir.</p>{q("Bu fotoğrafa ne kadar güvenebilirim?")}</section>'''
-    know = f'''<section class="know"><h2>Bu merayı tanı</h2>
-      {lamp3("bilinmiyor", "Saha kaydı yok; Mapillary incelemesi aydınlatmayı göstermiyor.")}
-      <div class="has-q"><div class="k">Kıyı kesiti (deniz yönünde, {d["shore_normal_deg"]}°)</div>{section(d, None)}<p class="faint">Kesit: 0 m'de kara, sonra DTM'ye göre ~280 m'ye kadar 0–2 m, ardından 2–5 m aralığı. Saha derinlik kaydı yok.</p>{q("Kıyıdan açığa doğru ne kadar derinleşiyor, bu ne kadar kesin?")}</div>
-      {depth_cov(False)}
-      <div class="has-q"><div class="k">Rüzgara açıklık</div>{rose(d, wd)}{q("Hangi rüzgarlara açık?")}</div>
-      {wn}</section>'''
-    plan = f'<section class="plan has-q"><div class="k">Plan görünümü · <span class="tag">şematik</span></div>{schematic(d, 230, im, "plan: OSM kıyısı + DTM tonları")}{q("Mera, kıyı ve fotoğrafın çekildiği yer nerede?")}</section>'
-    return dossier_header(d, fit, "açık") + (photo + plan + know if mobile else f'<div class="dgrid"><div>{photo}{plan}</div><div>{know}</div></div>')
-
-
-def tirilye_body(mobile: bool) -> str:
-    d = DOS[TIRILYE]
-    fit = bm.SPOTS[TIRILYE]["score"]["total"]
-    wd, wn = wind_now(d)
-    sch = f'''<section class="photo has-q"><div class="ph-frame schem-frame">{schematic(d, 140, None, "şematik görünüm")}</div>
-      <div class="credit">Fotoğraf yok: 200 m içinde Mapillary görüntüsü bulunamadı. Başka yerin fotoğrafı ya da üretilmiş görsel kullanılmaz. Çizim: OSM <code>way/483965349</code> (man_made=pier) + kıyı + DTM tonları.</div>
-      <div class="chips"><span class="chip on">İşaretler</span><span class="tag">Giriş/yürüyüş yönü: doğrulanmadı</span><span class="tag">Avlanma bölümü: doğrulanmadı</span></div>
-      {q("Fotoğraf yoksa yer nasıl? (yalnız gerçek geometri)")}</section>'''
-    know = f'''<section class="know"><h2>Bu merayı tanı</h2>
-      {lamp3("goruldu", "Saha kaydı: iskele aydınlatması var. Işığın suya düştüğü ayrıca kaydedilmedi.")}
-      <div class="has-q"><div class="k">Kıyı kesiti (deniz yönünde, {d["shore_normal_deg"]}°)</div>{section(d, {"m": 0, "depth": 5})}
-        <p class="faint"><b>Çelişki gösteriliyor:</b> DTM bu noktada 0–2 m diyor; 8 Kasım saha ölçümü ~5 m. İki kaynak ayrı çizilir, ortalaması alınmaz. Saha kaydına belirsizlik atanır ve tutarlılık denetimine girer (D4).</p>
-        {q("Kıyıdan açığa doğru ne kadar derinleşiyor; kaynaklar uyuşuyor mu?")}</div>
-      {depth_cov(True)}
-      <div class="has-q"><div class="k">Rüzgara açıklık · OSM kara poligonuna uzaklık, log ölçek; ok = şu anki rüzgar</div>{rose(d, wd)}{q("Hangi rüzgarlara açık, şu an rüzgar nereden?")}</div>
-      {wn}</section>'''
-    side = f'{strip_layers()}<div class="phs">{placeholder("species", "İstavrit", "img/species/istavrit.webp")}{placeholder("tackle", "Dropshot kurşunu", "img/tackle/dropshot-kursun.webp")}</div>'
-    return dossier_header(d, fit, "açık") + (sch + know + side if mobile else f'<div class="dgrid"><div>{sch}{side}</div><div>{know}</div></div>')
-
-
-def dossier_page(name: str, body_fn, mobile: bool, theme: str = "dark") -> None:
+def dossier_page(name: str, sid: str, mobile: bool, tab: str = "Özet", theme: str = "dark") -> None:
+    body_in = dossier_header(sid, tab) + (summary(sid, mobile) if tab == "Özet" else sources(sid))
+    src = DOS[sid]["hour_fit"]["source"]
+    hsrc = "anlık görüntü" if src == "snapshot" else "ayrı canlı okuma, " + src[5:] + " UTC"
+    foot = FOOT.replace("</div>", f' Uygunluk {SR["loc"]:%H}:00: {hsrc}.</div>')
     if mobile:
-        body = f'<div class="mob dossier">{bm.header(compact=True)}<div class="m-back"><button class="chip">‹ Plan</button><b>Kıyı dosyası</b></div><div class="dwrap">{body_fn(True)}</div>{FOOT}</div>'
+        body = (f'<div class="mob dossier">{bm.header(compact=True)}<div class="m-back"><button class="chip">‹ Plan</button>'
+                f'<b>Kıyı dosyası</b></div><div class="dwrap">{body_in}</div>{foot}</div>')
     else:
-        d = DOS[KORDON if "kordon" in name else TIRILYE]
-        vb = (d_xy := bm.SPOTS[KORDON if "kordon" in name else TIRILYE]["xy"])
-        mp = bm.map_svg((vb[0] - 110, vb[1] - 150, 520, 300), mk=0.35)  # spot in the visible strip left of the drawer
-        body = f'''<div class="A">{bm.header()}<main class="stage dstage"><div class="map">{mp}</div>
-          <aside class="drawer card raised">{body_fn(False)}</aside></main>{FOOT}</div>'''
+        xy = bm.SPOTS[sid]["xy"]
+        W = 300  # map units across 1440 px; the spot sits mid-way in the 60 % left of the drawer
+        Hh = W * 920 / 1440
+        mp = bm.map_svg((xy[0] - 0.30 * W, xy[1] - Hh / 2, W, Hh), mk=0.45, sel_id=sid, sel_name=DOS[sid]["name"].split(" (")[0])
+        body = (f'<div class="A">{bm.header()}<main class="stage dstage"><div class="map">{mp}</div>'
+                f'<aside class="drawer card raised">{body_in}</aside></main>{foot}</div>')
     page(name, body, theme, 390 if mobile else 1440)
+
 
 
 # ------------------------------------------------------------------ Sahadayım
 def rig_drawing() -> str:
-    """Dropshot + cut anchovy: the real tie-up order (hook above the weight on the same line). Teaching drawing."""
-    return '''<svg class="rig" viewBox="0 0 240 300" role="img" aria-label="Dropshot ve hamsi bağlantı düzeni (eğitim çizimi)">
-      <path d="M120,8 V250" style="stroke:var(--fg-1)" stroke-width="2"/>
-      <text x="128" y="22" style="fill:var(--fg-2);font-size:13px">ana misina</text>
-      <path d="M120,108 h10 c5,0 7,3 7,8 v10 a8,8 0 0 1 -16,0 v-4 l4,4" style="fill:none;stroke:var(--fg-1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M126,131 c8,-4 22,-4 32,1 c-9,6 -23,6 -32,-1 z M158,132 l7,-5 v10 z" style="fill:var(--fg-2);stroke:var(--fg-1)" stroke-width="1.5"/>
-      <text x="146" y="104" style="fill:var(--fg-1);font-size:14px;font-weight:600">iğne + hamsi</text>
-      <text x="168" y="150" style="fill:var(--fg-2);font-size:12px">palomar</text>
-      <path d="M86,112 v128" style="stroke:var(--fg-2)" stroke-width="1.5"/><path d="M80,118 l6,-6 l6,6 M80,234 l6,6 l6,-6" style="fill:none;stroke:var(--fg-2)" stroke-width="1.5"/>
-      <text x="78" y="180" text-anchor="end" style="fill:var(--fg-2);font-size:13px">30–50 cm</text>
-      <path d="M120,248 l-10,16 a12,12 0 1 0 20,0 z" style="fill:var(--fg-1)"/>
-      <text x="138" y="268" style="fill:var(--fg-1);font-size:14px;font-weight:600">dropshot kurşunu</text>
-      <path d="M10,286 h220" style="stroke:var(--fg-2)" stroke-width="3"/><text x="12" y="282" style="fill:var(--fg-3);font-size:12px">dip</text>
-    </svg>'''
+    """Dropshot + cut anchovy: the real tie-up order (hook above the weight on the same line). Teaching drawing, compact."""
+    return ('<svg class="rig" viewBox="0 0 300 150" role="img" aria-label="Dropshot ve hamsi bağlantı düzeni (eğitim çizimi)">'
+            '<path d="M150,4 V118" style="stroke:var(--s-fg)" stroke-width="2"/>'
+            '<path d="M150,44 h9 c4,0 6,3 6,7 v8 a7,7 0 0 1 -14,0 v-3 l3,3" style="fill:none;stroke:var(--s-fg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+            '<path d="M155,64 c7,-3 19,-3 27,1 c-8,5 -19,5 -27,-1 z M182,65 l6,-4 v8 z" style="fill:var(--s-fg2);stroke:var(--s-fg)" stroke-width="1.2"/>'
+            '<text x="196" y="52" style="fill:var(--s-fg);font-size:15px;font-weight:600">iğne + hamsi</text>'
+            '<path d="M118,46 v66" style="stroke:var(--s-fg2)" stroke-width="1.5"/><path d="M113,51 l5,-5 l5,5 M113,107 l5,5 l5,-5" style="fill:none;stroke:var(--s-fg2)" stroke-width="1.5"/>'
+            '<text x="110" y="84" text-anchor="end" style="fill:var(--s-fg2);font-size:15px">30–50 cm</text>'
+            '<path d="M150,116 l-8,12 a10,10 0 1 0 16,0 z" style="fill:var(--s-fg)"/>'
+            '<text x="168" y="134" style="fill:var(--s-fg);font-size:15px;font-weight:600">kurşun</text>'
+            '<path d="M40,146 h220" style="stroke:var(--s-fg2)" stroke-width="2.5"/></svg>')
 
 
 def sahadayim(theme: str) -> None:
+    """Field screen, separate from the plan: clock and conditions on top, a small rig picture, and the four log buttons
+    fixed in the thumb zone at the bottom (V0b C6). Night = the app's existing red mode (body.red), with AA-checked reds."""
     d = DOS[TIRILYE]
     wd = bm.grid_at("wd", HOUR, d["lat"], d["lon"])
     night = theme == "dark"
-    body = f'''<div class="saha {'night' if night else 'day'}">
-      <header class="s-top"><div><div class="s-clock num">{SR["loc"]:%H}:42</div><div class="s-spot">Tirilye İskelesi · av süresi 0:42 · son takım değişimi {SR["loc"]:%H}:20</div></div><button class="s-exit">Çık</button></header>
+    body = f'''<div class="saha {'red' if night else 'day'}">
+      <header class="s-top"><div><div class="s-clock num">{SR["loc"]:%H}:42</div><div class="s-spot">Tirilye İskelesi · 0:42 · takım {SR["loc"]:%H}:20</div></div>
+        <div class="s-tools"><button class="s-tool" title="Kırmızı gece modu" aria-pressed="{'true' if night else 'false'}">●</button><button class="s-tool">Çık</button></div></header>
       <section class="s-cond has-q">
         <div><svg class="s-arrow" viewBox="0 0 24 24" style="transform:rotate({(wd + 180) % 360:.0f}deg)"><path d="M12 3l5 14l-5 -3l-5 3z" style="fill:currentColor"/></svg><b class="num">{bm.FMT_NUM(SR["wind"])}</b><span>km/sa {bm.compass(wd)} · {bm.wind_rel(bm.SPOTS[TIRILYE], wd)}</span></div>
         <div>{i("hamle", "i l")}<b class="num">{bm.FMT_NUM(SR["gust"])}</b><span>hamle</span></div>
         <div>{i("yagis", "i l")}<b>yok</b><span>yağış</span></div>
         {q("Şu an rüzgar nereden, ne kadar; yağmur var mı?", "left:0;top:-34px")}</section>
-      <section class="s-rig has-q"><div class="s-k">Takım: dropshot + hamsi parçası <span class="tag ev-assumed">eğitim çizimi</span></div>{rig_drawing()}{q("Takımımı doğru bağladım mı?", "right:0;top:-30px")}</section>
-      <details class="s-tip"><summary>Kısa bilgi</summary><p>15 dk vuruş yoksa dropshot + hamsi parçasına geç. Kurşun dibe değince misinayı hafif gergin tut.</p></details>
-      <section class="s-btns has-q"><button class="s-b">Vuruş aldım</button><button class="s-b">Balık aldım</button><button class="s-b">Sonuç yok</button><button class="s-b alt">Dip: __ m</button>{q("Ne olduğunu tek dokunuşla nasıl kaydederim?", "left:0;top:-34px")}</section>
-      <div class="s-limit has-q"><b>Günlük miktar uyarısı (≥ 4 kg)</b> — yer tutucu: <i>mevzuat doğrulanacak (V2)</i>. Rakam kural olarak gösterilmez.{q("Yasal sınıra yaklaşıyor muyum? (önce mevzuat)", "left:0;top:-30px")}</div>
-      {FOOT}</div>'''
+      <section class="s-rig has-q"><div class="s-k">Dropshot + hamsi parçası <span class="tag ev-assumed">eğitim çizimi</span></div>{rig_drawing()}{q("Takımımı doğru bağladım mı?", "right:0;top:-30px")}</section>
+      <div class="s-limit has-q"><b>Günlük miktar uyarısı (≥ 4 kg)</b>: yer tutucu, <i>mevzuat doğrulanacak (V2)</i>.{q("Yasal sınıra yaklaşıyor muyum? (önce mevzuat)", "left:0;top:-30px")}</div>
+      <details class="s-tip"><summary>Kısa bilgi</summary><p>15 dk vuruş yoksa dropshot + hamsi parçasına geç.</p></details>
+      <nav class="s-btns has-q"><button class="s-b">Vuruş aldım</button><button class="s-b">Balık aldım</button><button class="s-b">Sonuç yok</button><button class="s-b alt">Dip: __ m</button>{q("Ne olduğunu tek dokunuşla nasıl kaydederim?", "left:0;top:-34px")}</nav>
+      </div>'''
     page(f"sahadayim-{'gece' if night else 'gunduz'}", body, theme, 390)
 
 
+
 if __name__ == "__main__":
-    dossier_page("dossier-kordon-desktop", kordon_body, False)
-    dossier_page("dossier-kordon-mobile", kordon_body, True)
-    dossier_page("dossier-tirilye-desktop", tirilye_body, False)
-    dossier_page("dossier-tirilye-mobile", tirilye_body, True)
+    dossier_page("dossier-kordon-desktop", KORDON, False)
+    dossier_page("dossier-kordon-mobile", KORDON, True)
+    dossier_page("dossier-tirilye-desktop", TIRILYE, False)
+    dossier_page("dossier-tirilye-mobile", TIRILYE, True)
+    dossier_page("dossier-tirilye-kaynaklar", TIRILYE, False, "Kaynaklar")
+    dossier_page("dossier-kordon-kaynaklar", KORDON, True, "Kaynaklar")
     sahadayim("light")
     sahadayim("dark")
     print("written", sorted(p.name for p in M.glob("dossier-*.html")) + sorted(p.name for p in M.glob("sahadayim-*.html")))

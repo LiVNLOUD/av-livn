@@ -137,3 +137,11 @@ Kaynak: `docs/REVISION-V.md` (D1–D9 düzeltmeleri geçerli). Belirteçler `app
   - Lamba dili üç durumludur. Kesitte DTM tahmini kesikli bant olarak, saha kaydı ise ayrı nokta olarak çizilir; kaynaklar çelişirse ortalaması alınmaz, çelişki gösterilir.
   - Sahadayım plan ekranından ayrıdır: büyük saat, 72 px düğmeler (≥ 56 px kuralı), eğitim çizimi bağlama düzeni. Gecede kısık renkler, hareket yok. Mevzuat rakamları doğrulanana kadar yalnız yer tutucu olarak gösterilir.
 - **Bitmap görseller:** yalnız `docs/design/assets-needed.md` listesindekiler (21 görsel: tür, takım/yem, boş durum, OG, PWA simgesi), altında "çizim" etiketiyle. Mera için yapay görsel üretilmez.
+- **V0b düzeltmeleri (C1–C7, 10 Kasım):**
+  - **Kıyı dosyası özetle başlar:** 4 simgeli bilgi (erişim, lamba, derinlik, rüzgara açıklık) ve tek cümle karar. Tablolar, kanıt zinciri ve kaynak listeleri **Kaynaklar** sekmesindedir. Ana metin ≥ 14 px. Masaüstünde çekmece haritanın ≤ %40'ını kaplar (ölçülen %37,8); seçili mera haritada görünür kalır.
+  - **Fotoğraf kuralı:** fotoğraf vitrine yalnız inceleme "merayı gösteriyor" derse çıkar. Göstermeyen görüntü "yakındaki sokak görüntüsü (merayı göstermiyor)" bağlantısıdır; vitrinde şematik görünüm durur.
+  - **Zaman bütünlüğü** kıyı dosyasında ve haritada da geçerlidir: başlıktaki uygunluk ve işaret renkleri seçili saati gösterir, "şimdi"yi değil.
+  - **Uygunluk ölçeği:** tek tonlu lavanta yerine sıralı, çok tonlu ve renk körü güvenli ölçek kullanılır. Komşu basamaklar normal görmede ΔE00 ≥ 12, benzetilmiş protan/deutan/tritan görmede ≥ 8 farklıdır; açıklık tekdüzedir (`contrast.mjs` denetler).
+  - **Rüzgar:** çizgi 2,75 px; hamle bandı %35 opak, üst kenarı ayrıca çizilir; lejantlıdır.
+  - **Sahadayım:** 4 kayıt düğmesi ekranın altına sabittir (başparmak bölgesi, 72 px). Gece görünümü uygulamanın kırmızı modudur; kırmızılar siyah üzerinde AA'yı geçecek kadar açıktır (#ff3b2f 5,9:1, #f0362a 5,3:1). Canlı sayfadaki eski tonlar (#c0261c 3,5:1, #9c1f17 2,6:1) V2'de bu değerlere çekilecek.
+  - **Bitmap görseller:** 17 adet. Teslim PNG olarak `assets-inbox/` klasörüne yapılır; `npm run assets` (`scripts/assets-check.mjs`, testli) denetler, dönüştürür ve maskable simgeyi türetir. Gözle denetim ve denetim kaydı `docs/design/assets-needed.md`'de tutulur.

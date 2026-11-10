@@ -155,7 +155,12 @@ def dossier() -> None:
     snap = json.loads((OUT / "snapshot.json").read_text())
     spots = {s["id"]: s for s in snap["spots"]["spots"]}
     mapi = json.loads((ROOT / "apps/web/public/tiles/mapillary.json").read_text())
-    rose = {r["spot"]: r for r in json.loads((ROOT / "docs/audit/fetch_rose.json").read_text())["spots"]}
+    # 16-direction fetch from the OSM land polygon, for all spots (pipeline/av_pipeline/spots/fetch_rose.py → data/spots.geojson);
+    # docs/audit/fetch_rose.json was an old 16-spot audit run and is not used here.
+    feats = {f["properties"]["id"]: f["properties"] for f in json.loads((ROOT / "data/spots.geojson").read_text())["features"]}
+    with_rose = sum(1 for p in feats.values() if p.get("fetch_km") and len(p["fetch_km"]) == 16)
+    print(f"fetch rose: {with_rose}/{len(feats)} spots")
+    rose = {sid: {"rose": [{"dir": k * 22.5, "osm_km": km} for k, km in enumerate(p["fetch_km"])]} for sid, p in feats.items() if p.get("fetch_km")}
     osm = {e["id"]: e for e in json.loads((ROOT / "docs/audit/osm_structures.json").read_text())["elements"]}
     landgj = json.loads((ROOT / "data/osm/land_marmara.geojson").read_text())
     land_all = unary_union([shape(f["geometry"]).buffer(0) for f in landgj["features"]])
@@ -228,6 +233,19 @@ def dossier() -> None:
                     "mapillary": {"license": mapi["license"], "found": m.get("found", 0), "facing": m.get("facing", 0),
                                   "images": [{k: v for k, v in im.items()} for im in m.get("selected", [])[:3]]},
                     "rose": rose.get(sid, {}).get("rose")}
+    # suitability at the mockup's selected hour (V0b C3): from the snapshot where the spot has a series, else a live read
+    win = snap["windows"]["plan"]["bursa"]["today"]["all"]["windows"][0]["peak"]
+    for sid, v in out.items():
+        det = snap["details"].get(sid)
+        src = "snapshot"
+        if not det:
+            det, src = get(f"/api/spots/{sid}?model=v2"), "live " + dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes")
+        row = next((h for h in det["packed"]["h"] if h[0][:13] == win[:13]), None)
+        v["hour_fit"] = {"hour": win, "fit": row[1] if row else None, "source": src}
+    # every spot's suitability at that same hour, so map markers follow the selected hour too (time integrity)
+    at = get(f"/api/spots?at={win[:13]}:00:00Z")
+    (OUT / "spots_at_sel.json").write_text(json.dumps({"hour": win, "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"),
+        "scored_at": at.get("scored_at"), "fit": {sp["id"]: sp["score"]["total"] for sp in at["spots"]}}, ensure_ascii=False))
     (OUT / "dossier.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
     for sid, v in out.items():
         print(sid, v["name"], "bands", len(v["bands"]), "transect", [(t["m"], t.get("land"), t.get("dmin"), t.get("dmax")) for t in v["transect"][:8]], "imgs", len(v["mapillary"]["images"]), "rose", bool(v["rose"]))

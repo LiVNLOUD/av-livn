@@ -336,3 +336,14 @@ D9 (mobil yoğunluk): 390 px ilk ekranda yalnız ana karar ve küçük koşul
 ## V1 notu (10 Kasım, V0b'de eklendi)
 - Yön seçimi: **A (Atlas)**. B reddedildi; maketleri karşılaştırma için `docs/design/mockups/` altında "reddedildi" notuyla duruyor.
 - D8 "önce" ölçümü (`scripts/v-audit.mjs`): orta mobil (4× CPU, yavaş 4G) soğuk önbellekte karar kartı **1,77 sn** (hedef ≤ 1,5 sn); /harita/ sıcak önbellekte etkileşimli harita **7,8 sn**. V1'de ikisi de hedef altına inmeli ve aynı betikle yeniden ölçülmeli.
+
+## V0b düzeltmeleri (10 Kasım, kullanıcı)
+1. Kıyı dosyası "akademik rapor" gibi: küçük puntolu tablolar, uzun paragraflar. Özetle başlasın: simgeli 3–4 temel bilgi (erişim, lamba, derinlik, rüzgara açıklık) + tek cümle karar. Tablolar, kaynak listeleri ve uzun açıklamalar "Kaynaklar" sekmesine. Ana bilgi ≥ 14 px. Masaüstünde çekmece haritanın en çok %40'ını kaplasın; seçili mera haritada görünür kalsın.
+2. Merayı göstermeyen fotoğraf (ör. Kordon Ömerbey, 130 m içeriden sokak görüntüsü) dosyanın vitrininde olmasın: "fotoğraf yok" sayılır ve şematik görünüm gösterilir; sokak görüntüsü "yakındaki sokak görüntüsü (merayı göstermiyor)" diye küçük bağlantı olarak verilir.
+3. Kıyı dosyası başlığındaki uygunluk seçili saati izlesin ("şimdi" değil); zaman bütünlüğü kuralı dosyada da geçerli.
+4. Rüzgara açıklık gülü 119 meranın tamamı için hesaplansın (OSM kara poligonundan; yalnız 16 merada var). "Hesaplanmadı" kalmasın.
+5. Av zaman çizelgesi: uygunluk çubukları tek tonlu morda birbirine çok benziyor; iyi ve zayıf saatler tek bakışta ayırt edilsin (sıralı ve renk körü güvenli skala, belirgin ton farkı). Rüzgar çizgisi ve hamle bandı daha görünür olsun.
+6. Sahadayım: Vuruş aldım / Balık aldım / Sonuç yok / Dip düğmeleri ekranın altına sabit (başparmak bölgesi), kaydırmadan erişilebilir; takım çizimi alanı küçülsün. Mevcut kırmızı gece modu korunsun (gece görünümü kırmızıya kaydırılmış, gece görüşünü bozmayan seçenek).
+7. assets-needed.md: boş durum görselleri (3) çıkar, simge + metinle çözülsün; maskable simge ayrı üretilmez, app-1024.png'den betikle türetilir (güvenli alana sığdırıp zemini doldurarak); kullanıcı ChatGPT çıktısını PNG olarak yükler (assets-inbox/), WebP dönüşümü, boyutlandırma, alfa ve boyut kontrolü scripts/assets-check.mjs ile otomatik; toplam 17 görsel.
+
+Not (uygulama sırasında): 4. maddedeki "yalnız 16 merada var" bilgisi V0b raporundaki bir hataydı. 119 meranın hepsinde OSM kara poligonundan hesaplanmış 16 yönlü açıklık (`fetch_km`, `pipeline/av_pipeline/spots/fetch_rose.py`) zaten vardı ve puanlamada kullanılıyordu; 16 meralık dosya eski bir denetim çıktısıydı (`docs/audit/fetch_rose.json`). Maketler artık bu veriyi kullanır.

@@ -21,10 +21,15 @@
 | dark | danger #ff7666 | ink-1 #0e1a25 | 6.73 | 4.5 | AA |
 | dark | danger #ff7666 | ink-2 #152534 | 5.97 | 4.5 | AA |
 | dark | danger #ff7666 | danger-bg #3d1a17 | 5.91 | 4.5 | AA |
-| dark | fit-ink #0b0a1a | fit-3 #a48ce3 | 6.94 | 4.5 | AA |
-| dark | fit-ink #0b0a1a | fit-4 #d3c3fb | 12.09 | 4.5 | AA |
-| dark | fg-1 #e8eff3 | fit-0 #3e3a5e | 9.17 | 4.5 | AA |
-| dark | fg-1 #e8eff3 | fit-1 #5b4f8f | 6.11 | 4.5 | AA |
+| dark | fit-t0 #e8eff3 | fit-0 #46277a | 9.87 | 4.5 | AA |
+| dark | fit-t1 #e8eff3 | fit-1 #30608d | 5.68 | 4.5 | AA |
+| dark | fit-t2 #04121e | fit-2 #1f928b | 4.99 | 4.5 | AA |
+| dark | fit-t3 #04121e | fit-3 #4fbf6a | 8.10 | 4.5 | AA |
+| dark | fit-t4 #04121e | fit-4 #a6dc4a | 11.67 | 4.5 | AA |
+| dark | fit-0 #46277a | ink-1 #0e1a25 | 1.54 | 1.5 | AA |
+| dark | fit-4 #a6dc4a | ink-1 #0e1a25 | 10.86 | 3 | AA |
+| dark | wind-1 #b9d9e8 | ink-0 #08111a | 12.80 | 3 | AA |
+| dark | wind-1 #b9d9e8 | ink-1 #0e1a25 | 11.86 | 3 | AA |
 | dark | land-label #9aa8b1 | land #262e34 | 5.65 | 3 | AA |
 | dark | fg-1 #e8eff3 | sea-3 #185d6b | 6.42 | 4.5 | AA |
 | dark | fg-1 #e8eff3 | sea-4 #134a58 | 8.41 | 4.5 | AA |
@@ -54,10 +59,15 @@
 | light | danger #a8231a | ink-1 #faf7ef | 6.72 | 4.5 | AA |
 | light | danger #a8231a | ink-2 #ffffff | 7.19 | 4.5 | AA |
 | light | danger #a8231a | danger-bg #fbdcd8 | 5.59 | 4.5 | AA |
-| light | fit-ink #ffffff | fit-3 #6f55b6 | 5.75 | 4.5 | AA |
-| light | fit-ink #ffffff | fit-4 #46328a | 10.08 | 4.5 | AA |
-| light | fg-1 #142330 | fit-0 #e3dcf3 | 12.03 | 4.5 | AA |
-| light | fg-1 #142330 | fit-1 #c4b5ea | 8.49 | 4.5 | AA |
+| light | fit-t0 #142330 | fit-0 #d3c6ea | 9.93 | 4.5 | AA |
+| light | fit-t1 #142330 | fit-1 #b39ce0 | 6.66 | 4.5 | AA |
+| light | fit-t2 #04121e | fit-2 #6f86c6 | 5.31 | 4.5 | AA |
+| light | fit-t3 #ffffff | fit-3 #227479 | 5.47 | 4.5 | AA |
+| light | fit-t4 #ffffff | fit-4 #1b4d2a | 9.81 | 4.5 | AA |
+| light | fit-0 #d3c6ea | ink-1 #faf7ef | 1.50 | 1.5 | AA |
+| light | fit-4 #1b4d2a | ink-1 #faf7ef | 9.16 | 3 | AA |
+| light | wind-1 #4f7f95 | ink-0 #f2eee3 | 3.77 | 3 | AA |
+| light | wind-1 #4f7f95 | ink-1 #faf7ef | 4.08 | 3 | AA |
 | light | land-label #6d6450 | land #e7e0cf | 4.45 | 3 | AA |
 | light | fg-1 #142330 | sea-3 #93c5d1 | 8.49 | 4.5 | AA |
 | light | fg-1 #142330 | sea-4 #72adbf | 6.43 | 4.5 | AA |
@@ -67,19 +77,19 @@
 | light | sel #142330 | sea-5 #5a97ad | 4.92 | 3 | AA |
 | light | sel #142330 | land #e7e0cf | 12.16 | 3 | AA |
 
+## Uygunluk ölçeği: komşu basamak farkı (ΔE00)
+
+| Tema | Görüş | 0→1 | 1→2 | 2→3 | 3→4 | Eşik | Sonuç |
+|---|---|---|---|---|---|---|---|
+| dark | normal | 21.9 | 27.7 | 23.7 | 15.6 | 12 | ayrık |
+| dark | protan | 13.9 | 22.9 | 25.3 | 11.8 | 8 | ayrık |
+| dark | deutan | 11.2 | 18.8 | 29.7 | 13.8 | 8 | ayrık |
+| dark | tritan | 27.7 | 16.2 | 12.0 | 14.9 | 8 | ayrık |
+| dark | açıklık L* | 24 → 39 → 55 → 69 → 82 | | tekdüze | |
+| light | normal | 12.7 | 15.3 | 25.9 | 22.1 | 12 | ayrık |
+| light | protan | 12.1 | 8.6 | 18.7 | 24.8 | 8 | ayrık |
+| light | deutan | 12.1 | 11.5 | 17.2 | 25.2 | 8 | ayrık |
+| light | tritan | 9.9 | 26.1 | 13.8 | 15.2 | 8 | ayrık |
+| light | açıklık L* | 82 → 69 → 57 → 45 → 29 | | tekdüze | |
+
 tüm çiftler AA
-
-## Gece Sahadayım (v0b.css kısık değerleri)
-
-| Tema | Metin | Yüzey | Oran | Eşik | Sonuç |
-|---|---|---|---|---|---|
-| gece Sahadayım | fg-1 #c4d0d7 | gece zemin #050b11 | 12.57 | 4.5 | AA |
-| gece Sahadayım | fg-1 #c4d0d7 | gece kart #0a141d | 11.81 | 4.5 | AA |
-| gece Sahadayım | fg-2 #98aab4 | gece zemin #050b11 | 8.23 | 4.5 | AA |
-| gece Sahadayım | fg-2 #98aab4 | gece kart #0a141d | 7.73 | 4.5 | AA |
-| gece Sahadayım | fg-3 #8ea3b0 | gece zemin #050b11 | 7.55 | 4.5 | AA |
-| gece Sahadayım | fg-3 #8ea3b0 | gece kart #0a141d | 7.09 | 4.5 | AA |
-| gece Sahadayım | act (düğme kenarı) #3f8fcc | gece zemin #050b11 | 5.66 | 3 | AA |
-| gece Sahadayım | act (düğme kenarı) #3f8fcc | gece kart #0a141d | 5.32 | 3 | AA |
-| gece Sahadayım | sel #9fb0ba | gece zemin #050b11 | 8.84 | 3 | AA |
-| gece Sahadayım | sel #9fb0ba | gece kart #0a141d | 8.31 | 3 | AA |
