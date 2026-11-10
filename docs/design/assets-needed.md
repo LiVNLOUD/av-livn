@@ -113,5 +113,8 @@ Gelen her görsel buraya bir satır olarak eklenecek: dosya, tarih, otomatik kon
 | og.png | 10.11.2026 | geçti (ortadan %21 kırpma) | ☑ genel kıyı, tanınabilir yer işareti yok ☑ yazı/logo yok ☑ opak ☑ sol üçte bir sade (kırpma sonrası da) | kullanıldı |
 | app-1024.png | 10.11.2026 | geçti | ☐ **48 px'te seçilemiyor** (iskele ince bir çizgiye iniyor, ışık hüzmesi bulanık leke) ☑ en çok 3 şekil ☑ yazı yok ☑ köşeler opak | **reddedildi**; 192/512/180 ve maskable türetilmedi, mevcut simgeler duruyor. Yeniden üretim için: kalın, tek parça iskele silüeti, çizgi kalınlığı simgenin ≥ %6'sı, ışık düz bir daire. |
 | micro-jig.png | 10.11.2026 | — | dosya adı manifestle eşleşmiyor (beklenen `mikro-jig.png`); dokunulmadı | **eşleşmedi**: çizim mikro jig listesine uyuyor; `mikro-jig.png` olarak yeniden adlandırılırsa bir sonraki çalıştırmada işlenir |
+| istavrit.png (2. teslim) | 10.11.2026 | geçti | ☑ gövdede bant/çizgi yok, düz gümüş yan ☑ kemiksi pul sırası solungaç kapağından kuyruğa ☑ yan çizgi göğüs yüzgeci hizasında kıvrılıyor ☑ derin çatal kuyruk ☑ iri göz ☑ solungaç kapağında koyu leke ☑ iki sırt yüzgeci | kullanıldı |
+| mikro-jig.png (ad düzeltildi) | 10.11.2026 | geçti | ☑ metal, parlak, ince-uzun gövde ☑ üst halka ve kısa misinalı asist iğne ☑ boy/en ≈ 5:1 ☑ iğne gövdeden küçük ☑ yazı yok | kullanıldı |
+| og.png → app-1024.png (2. teslim) | 10.11.2026 | geçti | ☑ 48 px'te seçilebilir (kalın iskele, düz daire ışık) ☑ 3 şekil ☑ yazı yok ☑ zemin opak, düz renk ☑ maskable daire maskesinde kırpılmıyor | kullanıldı. Dosya `og.png` adıyla yüklenmişti ama içerik uygulama simgesi (kare, simge tasarımı); mevcut paylaşım görseli ezilmedi, `app-1024.png` olarak işlendi. Türetilenler: `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `icon-maskable-512.png`. |
 
-Otomatik adımın tam çıktısı: `docs/design/assets-check.md`.
+Durum: **17/17 hazır**. Otomatik adımın son çıktısı: `docs/design/assets-check.md`.
