@@ -1,0 +1,78 @@
+/* Faz V0a home compositions A ("Atlas") and B ("Kokpit"). Mockup only. */
+.top { display: flex; align-items: center; gap: var(--s4); padding: var(--s2) var(--s4); background: var(--ink-1); border-bottom: 1px solid var(--line); min-height: 56px; }
+.top .brand { font-size: var(--fs-4); font-weight: var(--w-bold); letter-spacing: -.01em; }
+.top .brand span { color: var(--act); }
+.top .sel-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.top nav { margin-left: auto; display: flex; gap: var(--s4); align-items: center; font-size: var(--fs-2); color: var(--fg-2); }
+.top nav a.on { color: var(--fg-1); font-weight: var(--w-med); box-shadow: 0 2px 0 var(--sel); padding-bottom: 2px; }
+.top.c { gap: var(--s2); padding: var(--s2) var(--s4); }
+.top.c .chip { min-height: var(--touch); }
+.top.c .chip:first-of-type { margin-left: auto; }
+
+.decision { display: grid; gap: var(--s4); }
+.say { font-size: var(--fs-5); line-height: var(--lh-5); font-weight: var(--w-bold); font-stretch: 85%; }
+.say small { display: block; font-size: var(--fs-2); line-height: 1.4; font-weight: var(--w-med); color: var(--warn); margin-top: 6px; font-stretch: 100%; }
+.cond { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: var(--fs-2); color: var(--fg-2); }
+.cond span { display: inline-flex; gap: 5px; align-items: center; }
+.cond svg { width: 16px; height: 16px; }
+.method { display: grid; gap: 4px; font-size: var(--fs-2); background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--radius-s); padding: var(--s2) var(--s3); }
+.method .k, .states .k { font-size: var(--fs-1); color: var(--fg-3); }
+.method a, .legend-mini a { color: var(--act); text-decoration: underline; text-underline-offset: 2px; }
+.states { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.states .k { width: 100%; }
+
+/* timeline */
+.tl-wrap { display: grid; gap: 6px; }
+.tl-head { display: flex; gap: var(--s3); align-items: baseline; flex-wrap: wrap; font-size: var(--fs-2); }
+.tl-head .faint { font-size: var(--fs-1); }
+.tl2 { position: relative; display: grid; grid-template-columns: 104px minmax(0, 1fr); }
+.tl2 .labs { position: relative; }
+.tl2 .lab { left: 0; right: 8px; display: flex; gap: 5px; align-items: center; font-size: var(--fs-1); color: var(--fg-3); white-space: nowrap; }
+.tl2 .lab.main { color: var(--fg-1); font-weight: var(--w-med); }
+.tl2 .lab svg { width: 14px; height: 14px; flex: none; }
+.tl2 .track svg { display: block; overflow: visible; }
+
+/* A — Atlas: the map is the page; decision floats, timeline docks under it */
+.A { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto auto; }
+.A .stage { position: relative; height: 600px; }
+.A .stage .map { position: absolute; inset: 0; }
+.A .float { position: absolute; left: 16px; top: 16px; width: 400px; padding: var(--s4); display: grid; gap: var(--s4); box-shadow: 0 8px 28px rgb(0 0 0 / .35); }
+.A .maptools { position: absolute; left: 432px; top: 16px; }
+.A .dock { margin: 0; border-radius: 0; border-width: 1px 0 0; padding: var(--s3) var(--s4); display: grid; grid-template-columns: minmax(0, 1fr) 520px; gap: var(--s5); align-items: start; }
+.A .dock-r { display: grid; gap: var(--s4); }
+
+/* B — Kokpit: reading column left, map right */
+.B { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+.B .cols { display: grid; grid-template-columns: 680px minmax(0, 1fr); min-height: 860px; }
+.B .left { padding: var(--s5) var(--s5) var(--s5) var(--s6); display: grid; gap: var(--s5); align-content: start; border-right: 1px solid var(--line); background: var(--ink-1); }
+.B .right { position: relative; }
+.B .right .map { position: absolute; inset: 0; }
+.B .maptools { position: absolute; left: 16px; top: 16px; right: 16px; }
+
+/* 390 px */
+.mob { min-height: 100vh; display: flex; flex-direction: column; }
+.mob .m-card { padding: var(--s4); }
+.mob .say { font-size: 1.5rem; }
+.mob .where .name { font-size: var(--fs-3); }
+.mob .m-map { position: relative; height: 150px; overflow: hidden; border-bottom: 1px solid var(--line); background: var(--sea-open); }
+.mob .m-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mob .m-map-cap { position: absolute; right: 12px; bottom: 10px; min-height: var(--touch); display: inline-flex; align-items: center; padding: 0 var(--s3); border-radius: var(--radius-s); background: var(--ink-1); border: 1px solid var(--line-2); font-size: var(--fs-2); color: var(--act); }
+.mob .m-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); padding: 0 var(--s4) var(--s4); }
+.mob .m-mini { margin: 0 var(--s4) var(--s4); font-size: var(--fs-1); }
+.mob .spark { display: flex; align-items: flex-end; gap: 2px; height: 30px; margin-top: 4px; }
+.mob .spark i { flex: 1; border-radius: 1px; }
+.spark i.f0 { background: var(--fit-0); } .spark i.f1 { background: var(--fit-1); } .spark i.f2 { background: var(--fit-2); } .spark i.f3 { background: var(--fit-3); } .spark i.f4 { background: var(--fit-4); }
+.mob .m-seg { position: sticky; bottom: 0; margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--ink-1); border-top: 1px solid var(--line); }
+.mob .m-seg button { min-height: 56px; font: inherit; font-size: var(--fs-2); background: none; border: 0; color: var(--fg-2); }
+.mob .m-seg button.on { color: var(--fg-1); font-weight: var(--w-med); box-shadow: inset 0 3px 0 var(--sel); }
+.mob .m-back { display: flex; gap: var(--s3); align-items: center; padding: var(--s2) var(--s4); }
+.mob .m-back .chip { min-height: var(--touch); }
+.mob .m-detail { position: relative; display: grid; gap: var(--s3); padding-bottom: var(--s4); }
+.mob .m-detail .tl-wrap { padding: 0 var(--s3); }
+.mob .tl2 { grid-template-columns: 74px minmax(0, 1fr); }
+.mob .mock-foot { margin-top: var(--s4); }
+.mob .notes-toggle { bottom: 70px; }
+
+.alts .h, .alts .r { grid-template-columns: minmax(0, 1.5fr) 64px minmax(0, 1fr) 92px 96px; }
+.A .float .say { font-size: 1.6rem; }
+.mob .legend-mini a { display: inline-flex; align-items: center; min-height: var(--touch); }

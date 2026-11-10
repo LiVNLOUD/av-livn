@@ -1,0 +1,150 @@
+"""Faz V0: real data for the design mockups (docs/design/mockups/data/). Run with the pipeline venv:
+  pipeline/.venv/bin/python docs/design/build-mockup-data.py
+- map.json: land (OSM land polygons) and five depth tones + contours from the site's own EMODnet-derived
+  bathy.pmtiles, clipped to the Gemlik–Mudanya box and projected to an SVG viewBox (no invented detail: the tiles are
+  the ~115 m DTM, simplified for drawing);
+- snapshot.json: live API snapshot (spots, plan windows, the selected spot's hourly series, weather grid) with its
+  time, so every number on a mockup is traceable."""
+
+from __future__ import annotations
+
+import datetime as dt
+import gzip
+import json
+import math
+import sys
+import urllib.request
+from pathlib import Path
+
+import mapbox_vector_tile
+from pmtiles.reader import MmapSource, Reader
+from shapely.geometry import box, mapping, shape
+from shapely.ops import transform, unary_union
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "docs/design/mockups/data"
+BBOX = (28.50, 40.30, 29.22, 40.58)  # W S E N
+W = 1200
+LAT0 = (BBOX[1] + BBOX[3]) / 2
+KX = math.cos(math.radians(LAT0))
+H = round(W * (BBOX[3] - BBOX[1]) / ((BBOX[2] - BBOX[0]) * KX))
+TONES = [(0, 2), (2, 5), (5, 10), (10, 30), (30, 1e9)]
+CONTOURS = (5, 10, 20, 50)
+BASE = "https://av.livn.tr"
+UA = {"User-Agent": "av-livn-design-mockups/0.1 (+https://av.livn.tr)"}
+
+
+def px(lon: float, lat: float) -> tuple[float, float]:
+    return ((lon - BBOX[0]) / (BBOX[2] - BBOX[0]) * W, (BBOX[3] - lat) / (BBOX[3] - BBOX[1]) * H)
+
+
+def path_d(geom) -> str:
+    """SVG path data (1 decimal) for polygons / lines in lon/lat."""
+    out = []
+    def ring(coords, close):
+        pts = [px(x, y) for x, y in coords]
+        if len(pts) < 2:
+            return ""
+        return "M" + "L".join(f"{a:.1f},{b:.1f}" for a, b in pts) + ("Z" if close else "")
+    gs = getattr(geom, "geoms", [geom])
+    for g in gs:
+        if g.geom_type == "Polygon":
+            out.append(ring(g.exterior.coords, True))
+            out += [ring(i.coords, True) for i in g.interiors]
+        elif g.geom_type == "LineString":
+            out.append(ring(g.coords, False))
+    return "".join(out)
+
+
+def tiles(z: int):
+    n = 2**z
+    def tx(lon): return int((lon + 180) / 360 * n)
+    def ty(lat): return int((1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * n)
+    for x in range(tx(BBOX[0]), tx(BBOX[2]) + 1):
+        for y in range(ty(BBOX[3]), ty(BBOX[1]) + 1):
+            yield x, y
+
+
+def bathy(z: int = 11):
+    f = open(ROOT / "apps/web/public/tiles/bathy.pmtiles", "rb")
+    r = Reader(MmapSource(f))
+    n = 2**z
+    tones = {i: [] for i in range(len(TONES))}
+    cont = {d: [] for d in CONTOURS}
+    for x, y in tiles(z):
+        t = r.get(z, x, y)
+        if not t:
+            continue
+        d = mapbox_vector_tile.decode(gzip.decompress(t) if t[:2] == b"\x1f\x8b" else t, default_options={"y_coord_down": True})
+        def to_ll(gx, gy, ext):
+            lon = (x + gx / ext) / n * 360 - 180
+            lat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (y + gy / ext) / n))))
+            return lon, lat
+        for layer, store in (("bands", "t"), ("contours", "c")):
+            if layer not in d:
+                continue
+            ext = d[layer]["extent"]
+            for ft in d[layer]["features"]:
+                g = transform(lambda a, b, ext=ext: to_ll(a, b, ext), shape(ft["geometry"]))
+                p = ft["properties"]
+                if store == "t":
+                    i = next(k for k, (lo, hi) in enumerate(TONES) if p["dmin"] >= lo and p["dmin"] < hi)
+                    tones[i].append(g.buffer(0))
+                elif p.get("depth") in cont:
+                    cont[p["depth"]].append(g)
+    clip = box(*BBOX)
+    t_out = []
+    for i, gs in tones.items():
+        if gs:
+            g = unary_union(gs).intersection(clip).simplify(0.0006)
+            t_out.append({"tone": i + 1, "range_m": list(TONES[i]), "d": path_d(g)})
+    c_out = []
+    for dpt, gs in cont.items():
+        if gs:
+            g = unary_union(gs).intersection(clip).simplify(0.0006)
+            c_out.append({"depth": dpt, "d": path_d(g)})
+    return t_out, c_out
+
+
+def land():
+    gj = json.loads((ROOT / "data/osm/land_marmara.geojson").read_text())
+    clip = box(*BBOX).buffer(0.01)
+    g = unary_union([shape(f["geometry"]).buffer(0) for f in gj["features"]]).intersection(clip).simplify(0.0004)
+    return path_d(g)
+
+
+def get(path: str):
+    with urllib.request.urlopen(urllib.request.Request(BASE + path, headers=UA), timeout=60) as r:
+        return json.load(r)
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    t_out, c_out = bathy()
+    if "--map-only" in sys.argv:
+        snap = json.loads((OUT / "snapshot.json").read_text())
+        for s in snap["spots"]["spots"]:
+            s["xy"] = [round(v, 1) for v in px(s["lon"], s["lat"])]
+        (OUT / "snapshot.json").write_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":")))
+    (OUT / "map.json").write_text(json.dumps({"bbox": BBOX, "w": W, "h": H, "land": land(), "tones": t_out, "contours": c_out,
+                                               "source": "OSM kara poligonu; EMODnet DTM 2024 (~115 m) türevi bathy.pmtiles, çizim için sadeleştirildi"}, separators=(",", ":")))
+    if "--map-only" in sys.argv:  # re-project the existing snapshot instead of taking a new one
+        print(f"map {W}×{H} (snapshot kept)")
+        return
+    spots = get("/api/spots")
+    win = get("/api/windows")
+    grid = get("/api/grid/wx")
+    spread = get("/api/grid/spread")
+    pick = win["plan"]["bursa"]["today"]["all"]["windows"] or win["plan"]["bursa"]["all"]["windows"]
+    ids = list(dict.fromkeys([w["spot_id"] for w in pick][:4]))
+    details = {i: get(f"/api/spots/{i}?model=v2") for i in ids}
+    for s in spots["spots"]:
+        s["xy"] = [round(v, 1) for v in px(s["lon"], s["lat"])]
+    snap = {"taken_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"), "base": BASE, "spots": spots, "windows": win, "grid_wx": grid,
+            "spread_cells": [{k: c[k] for k in ("id", "lat", "lon", "w", "g")} for c in spread.get("cells", [])], "details": details}
+    (OUT / "snapshot.json").write_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":")))
+    print(f"map {W}×{H}, tones {len(t_out)}, contours {len(c_out)}; snapshot {snap['taken_at']} spots {len(spots['spots'])} picks {ids}")
+
+
+if __name__ == "__main__":
+    main()

@@ -88,3 +88,42 @@ Teknik ayrıntılar yalnız "Neden? Ayrıntılar" çekmecesindedir: puan, bant, 
 1. Ana görsel av planıdır (M1); ısı haritası ikincil sekmededir. Renk yalnız puan anlamına gelir, süs yok.
 2. Belirsizlik görünür: bant genişse hücre taralı/soluk; "varsayıma dayanıyor" rozeti.
 3. Karanlıkta okunur: ≥ 4.5:1 kontrast, 44 px dokunma hedefi, hareket yalnız kullanıcı eylemine yanıt (parçacıklar yalnız Rüzgar/Akıntı katmanı seçilince; azaltılmış hareket tercihinde kapalı).
+
+## Faz V görsel dil (V0a taslağı — "Bursa kıyıları için bir deniz atlası ve av kokpiti")
+Kaynak: `docs/REVISION-V.md` (D1–D9 düzeltmeleri geçerli). Belirteçler `apps/web/src/styles/tokens-v.css`; V1'de sayfalara bağlanacak, şimdilik yalnız maketlerde kullanılıyor.
+- **İki tema.** Koyu "gece": mürekkep mavisi zemin, `--ink-0..3` kart katmanları ton farkıyla ayrılır. Açık "atlas": kâğıt harita zemini; koyu temanın tersi değil, ayrı tasarlandı.
+- **Deniz ve kara.** Deniz petrol → turkuaz, 5 derinlik tonu: 0–2, 2–5, 5–10, 10–30, >30 m, ayrıca açık deniz. Kara sessiz ama sudan ayırt edilir.
+- **Renk rolleri ayrı.**
+  - `--act`: tek eylem rengi.
+  - `--sel`: seçim/odak halkası; dolgu değildir.
+  - `--warn` (amber): yalnız uyarı (düşük güven, eksik veri, erişim bilinmiyor).
+  - `--danger`: yalnız güvenlik (hamle/dalga sınırı).
+  - **Uygunluk puanı** `--fit-0..4`: tek tonlu lavanta açıklık rampası. Amber/kırmızı yok, denizden ayrı, renk körü güvenli. Sınırlar <30, 30–45, 45–60, 60–75, ≥75 ve zaman boyunca sabit (D2).
+- **Kanıt dili.** Ölçüm düz/kalın, model ince, uzaktan gözlem noktalı, varsayım kesikli ve soluk taralı. Doku yalnız harita, kesit ve etiketlerde kullanılır; kart zemininde kullanılmaz.
+- **Ölçekler.** Altı yazı boyutu + `--num-l` / `--num-xl`. Bricolage'da `tabular-nums` ölçüldü ve çalışıyor (`docs/design/v0-findings.md`).
+- **Grafik ve dokunma boyutları.** Zaman çizelgesi ana satır 30 px, ikincil 18 px. İşaret 22 px, seçili 30 px. Dokunma hedefi 44 px; Sahadayım'da 56 px.
+- **Hareket.** 150–220 ms ve yalnız seçime tepki olarak. `prefers-reduced-motion` açıkken 0.
+- **Kontrast.** `node docs/design/contrast.mjs` → `docs/design/contrast.md`: 66 çiftin hepsi AA.
+- **Simgeler.** `apps/web/src/icons/` (32 adet): 24 px, 1,5 px çizgi, `currentColor`. Türkçe etiketler `icons.json`'da. Örnek sayfa: `docs/design/mockups/icons.html`.
+- **Gerçek veri / eğitim çizimi ayrımı.**
+  - Haritalar OSM kıyısı + sitenin EMODnet türevi `bathy.pmtiles`'ından çizilir. Rakamlar tarihli canlı API anlık görüntüsünden gelir (`docs/design/build-mockup-data.py`).
+  - Bugünkü veride olmayan durumlar "örnek durum — bugünkü veride yok" şeridinde gösterilir.
+  - Takım düzeni gibi çizimler "eğitim çizimi" diye etiketlenir.
+- **Bileşen → kullanıcı sorusu** (maketlerde "Sorular" düğmesiyle açılır):
+
+  | Bileşen | Cevapladığı soru |
+  |---|---|
+  | Üst şerit | Hangi tür, kıyı, saat aralığı? |
+  | Karar cümlesi | Gitmeye değer mi, ne kadar eminim? |
+  | Seçili mera | Nereye, hangi saatlerde? |
+  | Koşul özeti | O saatte hava/deniz nasıl, rüzgar kıyıya göre nereden? |
+  | Üç güven | Hava mı, mera bilgisi mi, av kaydı mı eksik? |
+  | Başlangıç önerisi | Elimdeki takımla nasıl başlarım? |
+  | Zaman çizelgesi | Hangi saatlerde koşullar ve uygunluk uyuşuyor? |
+  | Eşdeğer seçenekler | Yakın puanlı yerler erişim, rüzgar ve veri bakımından nasıl ayrışıyor? |
+  | Durum şeridi | Bir şey ters ya da eksikse hemen fark eder miyim? |
+  | Lejant | Renkler ne demek, hangi saat? |
+  | Katman çipleri | Haritada neyi görmek istiyorum? |
+- **Ana ekran kompozisyonları (V0a, seçim bekliyor).** A "Atlas": tam ekran harita, kayan karar paneli, altta çizelge ve seçenekler. B "Kokpit": solda karar, çizelge ve seçenekler; sağda harita.
+  - Dosyalar: `docs/design/mockups/home-{a,b}-*.html`; üretici `docs/design/build-mockups.py`; ekran görüntüleri `docs/design/mockups/shots/`.
+  - 390 px ilk ekranda yalnız karar ve küçük koşul özeti var (D9). Harita ve çizelge tek dokunuşla açılır: A'da itilen ekran, B'de alt sekmeler.

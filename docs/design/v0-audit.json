@@ -1,0 +1,174 @@
+{
+ "base": "https://av.livn.tr",
+ "at": "2026-11-10T08:38:15.682Z",
+ "particles_1440": {
+  "samples": [
+   {
+    "canvas": true,
+    "w": 1440,
+    "h": 836,
+    "css": [
+     1440,
+     836
+    ],
+    "drawn": 9830,
+    "raf": true
+   },
+   {
+    "canvas": true,
+    "w": 1440,
+    "h": 836,
+    "css": [
+     1440,
+     836
+    ],
+    "drawn": 47435,
+    "raf": true
+   },
+   {
+    "canvas": true,
+    "w": 1440,
+    "h": 836,
+    "css": [
+     1440,
+     836
+    ],
+    "drawn": 95198,
+    "raf": true
+   }
+  ],
+  "field": {
+   "layer": true,
+   "zoom": 10.930828477519956
+  },
+  "info": "0\n65 km/sa\nRüzgar hızı (km/sa), Open-Meteo tahmini. Parçacıklar akış yönünü gösterir.\nKaynak: Open-Meteo (best_match), tahmin"
+ },
+ "particles_390": {
+  "samples": [
+   {
+    "canvas": true,
+    "w": 390,
+    "h": 708,
+    "css": [
+     390,
+     708
+    ],
+    "drawn": 5350,
+    "raf": true
+   },
+   {
+    "canvas": true,
+    "w": 390,
+    "h": 708,
+    "css": [
+     390,
+     708
+    ],
+    "drawn": 24521,
+    "raf": true
+   },
+   {
+    "canvas": true,
+    "w": 390,
+    "h": 708,
+    "css": [
+     390,
+     708
+    ],
+    "drawn": 46802,
+    "raf": true
+   }
+  ],
+  "field": {
+   "layer": true,
+   "zoom": 9.274773323841966
+  },
+  "info": "0\n65 km/sa\nRüzgar hızı (km/sa), Open-Meteo tahmini. Parçacıklar akış yönünü gösterir.\nKaynak: Open-Meteo (best_match), tahmin"
+ },
+ "grid": {
+  "nlat": 7,
+  "nlon": 12,
+  "cells": 84,
+  "dlat": 0.1,
+  "dlon": 0.1,
+  "built_at": "2026-11-10T08:08:01.622Z",
+  "hours": 72,
+  "now_wind_kmh": {
+   "min": 1,
+   "max": 24
+  },
+  "scale_kmh": [
+   0,
+   65
+  ],
+  "wind_72h": {
+   "min": 0,
+   "max": 42,
+   "p90": 28
+  }
+ },
+ "harita_1920": {
+  "map_ready_ms": 2489,
+  "legend": {
+   "open": true,
+   "area_pct": 9.9
+  },
+  "slider_changes_wind_image": true
+ },
+ "harita_1440": {
+  "map_ready_ms": 2233,
+  "legend": {
+   "open": true,
+   "area_pct": 16.1
+  },
+  "slider_changes_wind_image": true
+ },
+ "harita_390": {
+  "map_ready_ms": 1901,
+  "legend": {
+   "open": false,
+   "area_pct": 1.1
+  },
+  "slider_changes_wind_image": true
+ },
+ "d8_desktop_1440": {
+  "cold": {
+   "skeleton_fcp_ms": 308,
+   "decision_ms": 793,
+   "map_interactive_ms": 2166
+  },
+  "warm": {
+   "skeleton_fcp_ms": 268,
+   "decision_ms": 487,
+   "map_interactive_ms": 1280
+  },
+  "harita_map_ready_warm_ms": null
+ },
+ "d8_mobile_390": {
+  "cold": {
+   "skeleton_fcp_ms": 592,
+   "decision_ms": 1773,
+   "map_interactive_ms": null
+  },
+  "warm": {
+   "skeleton_fcp_ms": 344,
+   "decision_ms": 796,
+   "map_interactive_ms": null
+  },
+  "harita_map_ready_warm_ms": 7769
+ },
+ "plan_card": {
+  "verdict": "Evet",
+  "trust": "Düşük",
+  "why": [
+   "İskele: model bu yer tipini avantajlı sayıyor (tip tercihi varsayım, av kaydıyla doğrulanmadı).",
+   "Hava sakin: rüzgar 3 km/sa, dalga 0,0 m (hava tahmini).",
+   "En iyi saat 18:00, alacakaranlık."
+  ]
+ },
+ "lamp_wording": {
+  "count_probability_text": 0,
+  "example": null
+ },
+ "spots": 119
+}

@@ -1,0 +1,130 @@
+{
+ "ruzgar": {
+  "label": "Rüzgar",
+  "group": "hava"
+ },
+ "hamle": {
+  "label": "Hamle",
+  "group": "hava"
+ },
+ "dalga": {
+  "label": "Dalga",
+  "group": "hava"
+ },
+ "akinti": {
+  "label": "Akıntı",
+  "group": "hava"
+ },
+ "yagis": {
+  "label": "Yağış",
+  "group": "hava"
+ },
+ "bulut": {
+  "label": "Bulut",
+  "group": "hava"
+ },
+ "sicaklik": {
+  "label": "Su sıcaklığı",
+  "group": "hava"
+ },
+ "ay": {
+  "label": "Ay",
+  "group": "hava"
+ },
+ "lamba": {
+  "label": "Aydınlatma",
+  "group": "yer"
+ },
+ "derinlik": {
+  "label": "Derinlik",
+  "group": "yer"
+ },
+ "guvenlik": {
+  "label": "Güvenlik",
+  "group": "yer"
+ },
+ "erisim-acik": {
+  "label": "Erişim açık",
+  "group": "yer"
+ },
+ "erisim-kisitli": {
+  "label": "Erişim kısıtlı",
+  "group": "yer"
+ },
+ "erisim-bilinmiyor": {
+  "label": "Erişim bilinmiyor",
+  "group": "yer"
+ },
+ "iskele": {
+  "label": "İskele",
+  "group": "yapı"
+ },
+ "mendirek": {
+  "label": "Mendirek",
+  "group": "yapı"
+ },
+ "kordon": {
+  "label": "Kordon / taş tahkimat",
+  "group": "yapı"
+ },
+ "kaya": {
+  "label": "Kayalık",
+  "group": "yapı"
+ },
+ "kumsal": {
+  "label": "Kumsal",
+  "group": "yapı"
+ },
+ "dere-agzi": {
+  "label": "Dere ağzı",
+  "group": "yapı"
+ },
+ "liman": {
+  "label": "Liman",
+  "group": "yapı"
+ },
+ "marina": {
+  "label": "Marina",
+  "group": "yapı"
+ },
+ "lrf": {
+  "label": "LRF: jighead + silikon",
+  "group": "yöntem"
+ },
+ "mikro-jig": {
+  "label": "Mikro jig",
+  "group": "yöntem"
+ },
+ "dropshot": {
+  "label": "Dropshot + yem",
+  "group": "yöntem"
+ },
+ "dip-takimi": {
+  "label": "Dip takımı",
+  "group": "yöntem"
+ },
+ "samandira": {
+  "label": "Şamandıralı takım",
+  "group": "yöntem"
+ },
+ "capari": {
+  "label": "Çapari",
+  "group": "yöntem"
+ },
+ "kanit-olcum": {
+  "label": "Ölçüm",
+  "group": "kanıt"
+ },
+ "kanit-model": {
+  "label": "Model / tahmin",
+  "group": "kanıt"
+ },
+ "kanit-uzaktan": {
+  "label": "Uzaktan gözlem",
+  "group": "kanıt"
+ },
+ "kanit-varsayim": {
+  "label": "Varsayım",
+  "group": "kanıt"
+ }
+}
