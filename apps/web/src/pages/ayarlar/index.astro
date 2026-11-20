@@ -127,6 +127,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .seg label { display: flex; gap: 6px; align-items: center; justify-content: center; min-height: 48px; border: 1px solid var(--swell); border-radius: 10px; font-size: var(--fs-2); }
   .seg label:has(input:checked) { border-color: var(--sodium); color: var(--sodium); }
+  .seg input[type=radio] { width: 18px; height: 18px; min-height: 0; padding: 0; flex: none; accent-color: var(--act); }
   .favs, .sent { list-style: none; padding: 0; margin: 0; }
   .favs :global(label) { display: flex; gap: 10px; align-items: center; min-height: 44px; border-bottom: 1px solid var(--swell); }
   .favs :global(input) { width: 20px; height: 20px; }

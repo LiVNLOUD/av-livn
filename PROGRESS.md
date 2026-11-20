@@ -561,3 +561,57 @@ Yeni özellik yok. Rapor: `docs/audit/monitor-72h.md`.
   - /harita/'nın telefonda ilk açılışı 7,6 sn (MapLibre ~1,1 MB, ilk kez iniyor).
   - 1440×900'de saat şeridi açıkken panelde "Ne kadar güvenilir?" kaydırma ister.
   - Ölçümler emülasyondur; gerçek cihaz ölçümü yok.
+
+## Faz V2 — yöntem-bağımsız takım, bağlama sahnesi, Sahadayım (20 Kasım) ✅ DUR
+
+**Mevzuat (D7).** 6/2 Tebliğ, 2026/26 (RG 16.09.2026) ile yeniden okundu:
+- istavrit asgari boyu **13 → 12 cm**;
+- izmarit Çizelge 7'de yok (boy sınırı yok, kg'ye dahil);
+- md. 15(4) değişmedi.
+- Tek kaynak `packages/scoring/src/regulation.ts`. Boy ölçüm biçimi doğrulanmadı, kodlanmadı.
+
+**Yöntem motoru** (`methods.ts`, %100 kapsam):
+- havuz: LRF, mikro jig, çapari (tüylü/yemli), dropshot + yem, dip, şamandıra; yemler hamsi, karides, midye;
+- birincil ve ikincil yöntem; ikincil, öbür kategoriden;
+- gerekçe satırları kanıt türüyle: koşul, literatür, saha, hipotez, envanter;
+- kontrollü değişiklik merdiveni, süre kullanıcı ayarlı.
+
+**Envanter** (yalnız cihazda): sahip olunan ölçüler, mod ve yemler; markasız çizimlerle.
+
+**Bağlama sahnesi:**
+- yöntem başına gerçek düzen;
+- dokununca parça adı ve ölçüsü;
+- "Nasıl kullanılır?" eğitim animasyonu, hareket azaltmada durağan.
+- Plan kartında ("Ne ile başla?" altında) ve mera kartında.
+
+**Sahadayım:**
+- büyük saat, mera, rüzgar/hamle/yağış;
+- büyük takım çizimi;
+- altta dört büyük düğme: Vuruş / Balık / Sonuç yok / Dip;
+- bölümlü çıkış;
+- kg (girilen ağırlık, kişi başı) ve boy uyarıları;
+- gece kırmızısı AA.
+
+**Veri:**
+- migrasyon 0018: `catch_outing`; bölüm, vuruş, yem ve yöntem alanları; ağırlık;
+- "Dip" tutarlılık denetimi: geçerse puana girer, geçmezse onay kuyruğuna düşer;
+- kalibrasyonda çıkış tek birim (D5).
+
+**Yönetici** (`/admin/cikislar/`):
+- çıkış ekleme ve bölme; 8 Kasım'ı kullanıcı girer, tahminle doldurulmaz;
+- yöntem verimi (yalnız betimleyici);
+- derinlik onay kuyruğu.
+
+**Kabul:**
+- birim testleri: puanlama 305, worker 172, web 89, betik 9; pytest calibrate 12;
+- e2e 201;
+- e2e-v1 (V2 denetimleri dahil) yeşil;
+- CI deploy yeşil.
+
+**Ekran görüntüleri:** `docs/screenshots/v2-takim/` (1440 ve 390).
+
+**Kalan riskler:**
+- Yöntem sıralaması saha kuralıdır (C), doğrulanmadı.
+- 8 Kasım kaydı henüz girilmedi.
+- Sahadayım ekran görüntüleri yerel derlemeden alındı (yönetici anahtarı).
+- Levrek için yöntem havuzu yok.

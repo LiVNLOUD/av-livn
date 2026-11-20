@@ -206,3 +206,21 @@ Kurallar:
   - ilk ziyarette web fontu karar kartı hazır olunca yüklenir.
 
 Ekran görüntüleri: `docs/screenshots/v1/` (canlı, dsf 2; üretici `scripts/shots-v1.mjs`).
+
+## V2 — takım ve Sahadayım (20 Kasım)
+- **Yöntem kartı** (`scripts/methodcard.ts`):
+  - birincil ve ikincil sekme;
+  - gerekçe satırları kanıt rozetiyle (koşul / literatür / saha gözlemi / hipotez kesikli / envanter);
+  - sahne: "Nasıl bağlanır?" / "Nasıl kullanılır?";
+  - açılır değişiklik merdiveni.
+  - Plan kartında "Ne ile başla?" altında açılır bölüm.
+- **Bağlama sahnesi** (`scripts/rigscene.ts`):
+  - teknik çizim;
+  - her parça yanında adıyla, dokununca ölçüsüyle;
+  - iğnenin silikon içindeki yeri kesikli çizgi;
+  - kullanım görünümü numaralı adımlar + kesikli yol, "eğitim animasyonu · su altı görünümü değil" etiketli.
+- **Envanter çizimleri** (`scripts/gearIcons.ts`): 24 px, tek çizgi kalınlığı, markasız.
+- **Sahadayım:**
+  - plan ekranından ayrı tam ekran, alt sekme çubuğunun üstünde;
+  - ana düğmeler 72 px, ikincil 52 px;
+  - gece: siyah üstünde #ff3b2f / #f0362a, beyaz panel yok, hareket yok.
