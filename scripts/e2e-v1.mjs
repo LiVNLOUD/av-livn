@@ -13,6 +13,7 @@
 //      This only proves that drawing works at low speed; it says nothing about the data being current.
 //   7. scenarios from fixture grids: dry / rainy, missing hour, calm / strong wind → the legend state and text match
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 
@@ -349,6 +350,49 @@ if (!/av\.livn\.tr/.test(base)) {
   const ov = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
   ov <= 0 ? ok('Sahadayım 390: no horizontal overflow') : fail(`Sahadayım overflow ${ov}px`);
   await ctx.close();
+}
+
+// ---------------------------------------------------------------- V2.9: every content drawing is used on a screen
+{
+  const manifest = JSON.parse(readFileSync(new URL('../apps/web/src/data/assets.json', import.meta.url), 'utf8'));
+  const want = manifest.assets.filter((a) => ['species', 'tackle', 'bait'].includes(a.group)).map((a) => a.name);
+  const seen = new Map();
+  const collect = async (p, where) => {
+    const imgs = await p.evaluate(() => [...document.querySelectorAll('img[data-asset]')].map((i) => ({ n: i.dataset.asset, w: i.getAttribute('width'), h: i.getAttribute('height'), alt: i.getAttribute('alt'), ok: i.complete ? i.naturalWidth > 0 : null })));
+    for (const i of imgs) {
+      if (!i.w || !i.h || !i.alt) fail(`${where}: ${i.n} without width/height/alt`);
+      if (i.ok === false) fail(`${where}: ${i.n} did not load`);
+      seen.set(i.n, [...(seen.get(i.n) ?? []), where]);
+    }
+  };
+  {
+    const { p, ctx } = await page(390, 844);
+    await p.goto(base + '/ayarlar/', { waitUntil: 'networkidle' });
+    await p.locator('#gear').scrollIntoViewIfNeeded();
+    await p.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach((i) => (i.loading = 'eager')));
+    await p.waitForTimeout(800);
+    await collect(p, 'envanter');
+    await p.goto(base + '/', { waitUntil: 'networkidle' });
+    await waitPlan(p);
+    await p.locator('#m-more').click();
+    if (await p.locator('#rig-card').isVisible()) {
+      await p.locator('#rig-card > summary').click();
+      await p.waitForTimeout(300);
+      await collect(p, 'yöntem kartı');
+    }
+    await ctx.close();
+  }
+  if (!/av\.livn\.tr/.test(base)) {
+    const { p, ctx } = await page(390, 844);
+    await ctx.addInitScript(() => { localStorage.setItem('av-livn-admin', 'dev-token'); localStorage.setItem('av-livn-saha-hint', '1'); localStorage.removeItem('av-livn-live-session'); });
+    await p.goto(base + '/sahadayim/', { waitUntil: 'networkidle' });
+    await p.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach((i) => (i.loading = 'eager')));
+    await p.waitForTimeout(800);
+    await collect(p, 'tür seçimi');
+    await ctx.close();
+  }
+  const missing = want.filter((n) => !seen.has(n));
+  missing.length ? fail(`unused content drawings: ${missing.join(', ')}`) : ok(`all ${want.length} content drawings are used (${[...seen.entries()].map(([n, w]) => `${n}: ${[...new Set(w)].join('/')}`).join('; ')})`);
 }
 
 await b.close();

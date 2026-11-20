@@ -155,7 +155,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   .log :global(li) { display: flex; justify-content: space-between; gap: 10px; padding: 6px 2px; border-bottom: 1px solid var(--line); }
   .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--ink-1); border-top: 2px solid var(--act); padding: 16px 12px calc(16px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .sheet[hidden] { display: none; }
-  .sheet > button { min-height: 64px; border-radius: 14px; border: 1px solid var(--line); background: var(--ink-2); color: var(--fg-1); font-size: var(--fs-3); font-weight: 700; }
+  .sheet > button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 64px; border-radius: 14px; border: 1px solid var(--line); background: var(--ink-2); color: var(--fg-1); font-size: var(--fs-3); font-weight: 700; }
   #end { grid-template-columns: 1fr; }
   #end p { margin: 0; }
   .cancel { background: transparent !important; }
@@ -164,6 +164,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
      (V0b: #ff3b2f 5,9:1, #f0362a 5,3:1; the old #c0261c 3,5:1 and #9c1f17 2,6:1 did not) */
   :global(body.red), :global(body.red) .live, :global(body.red) .sheet { background: #000 !important; color: #ff3b2f !important; }
   :global(body.red) .live button, :global(body.red) .sheet button, :global(body.red) .sheet input { background: #160302 !important; color: #ff3b2f !important; border-color: #5a0d08 !important; }
+  :global(body.red) .sheet { border-top-color: #5a0d08 !important; }
   :global(body.red) .act.fish { background: #3a0805 !important; color: #ff3b2f !important; }
   :global(body.red) .lv-id span, :global(body.red) .log, :global(body.red) .lv-sec, :global(body.red) .lv-note { color: #f0362a !important; }
   :global(body.red) .log :global(li) { border-color: #2a0604; }
@@ -186,6 +187,12 @@ import AdminLogin from '../../components/AdminLogin.astro';
   import { rigScene, sinkerFor } from '../../scripts/rigscene';
   import { frameIndex, loadGrid, nearest } from '../../scripts/layers';
   import { compass8 } from '../../scripts/plan';
+  import { assetImg, SPECIES_ASSET } from '../../scripts/media';
+  // V2.9: species drawings on the long-press sheet (istavrit / izmarit told apart at a glance)
+  document.querySelectorAll<HTMLButtonElement>('#species button[data-sp]').forEach((b) => {
+    const a = SPECIES_ASSET[b.dataset.sp ?? ''];
+    if (a) b.insertAdjacentHTML('afterbegin', assetImg(a, { size: 72, cls: 'sp-img', lazy: false }));
+  });
   import { loadMy, toProfiles } from '../../scripts/mytackle';
   const myProfiles = toProfiles(loadMy()).profiles;
   import { api as speciesUrl, currentSpecies } from '../../scripts/species';

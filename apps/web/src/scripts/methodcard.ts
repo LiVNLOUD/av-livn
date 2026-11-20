@@ -2,6 +2,7 @@
 // evidence-typed reasons, the rig scene (Nasıl bağlanır? / Nasıl kullanılır?), tap-to-name parts and the change ladder.
 import { BAIT_TR, LADDER_MINUTES, SINK_NOTE, type MethodAdvice, type MethodId, type MethodPick, type ReasonKind } from '@av-livn/scoring';
 import { rigScene, sinkerFor, type RigOptions } from './rigscene';
+import { assetImg, BAIT_ASSET, methodAsset, partAsset } from './media';
 
 const KIND_TR: Record<ReasonKind, string> = { kosul: 'koşul', literatur: 'literatür', saha: 'saha gözlemi', hipotez: 'hipotez', varsayim: 'varsayım', envanter: 'envanter' };
 const LADDER_KEY = 'av-livn-ladder-min';
@@ -28,6 +29,8 @@ export interface CardInput {
   currentMs: number | null;
   /** Big drawing for Sahadayım. */
   big?: boolean;
+  /** V2.9: soft-lure tail from the tackle engine, for the drawings. */
+  tail?: 'kurek' | 'igne';
 }
 
 /** Renders the card into el; returns a setter for the chosen method (Sahadayım uses it when the method changes). */
@@ -37,12 +40,17 @@ export function mountMethodCard(el: HTMLElement, c: CardInput): { show(id: Metho
   let cur: MethodPick = advice.primary;
   let view: 'bagla' | 'kullan' = 'bagla';
   const sinkerG = sinkerFor(c.depthM, c.currentMs);
+  // V2.9: the main part of each method and its bait, as small drawings beside the tab text
+  const pickImgs = (p: MethodPick) => {
+    const m = methodAsset(p.id, c.tail);
+    return `<span class="mc-imgs">${m ? assetImg(m, { size: 36 }) : ''}${p.bait ? assetImg(BAIT_ASSET[p.bait]!, { size: 36 }) : ''}</span>`;
+  };
   const draw = () => {
     const scene = rigScene(cur.id, view, { ...c.lure, bait: cur.bait, sinkerG });
     const reasons = cur.reasons.map((r) => `<li><span class="mk mk-${r.kind}">${KIND_TR[r.kind]}</span> ${esc(r.text)}</li>`).join('');
     const min = ladderMinutes();
     el.innerHTML = `
-      <div class="mc-pick" role="tablist" aria-label="Yöntem">${picks.map((p, i) => `<button type="button" role="tab" class="mc-tab" data-m="${p.id}" aria-selected="${p.id === cur.id}">${i === 0 ? 'Birincil' : 'İkincil'}: ${esc(methodLine(p))}${p.owned === false ? ' <span class="mk mk-envanter">elinde yok</span>' : ''}</button>`).join('')}</div>
+      <div class="mc-pick" role="tablist" aria-label="Yöntem">${picks.map((p, i) => `<button type="button" role="tab" class="mc-tab" data-m="${p.id}" aria-selected="${p.id === cur.id}">${pickImgs(p)}${i === 0 ? 'Birincil' : 'İkincil'}: ${esc(methodLine(p))}${p.owned === false ? ' <span class="mk mk-envanter">elinde yok</span>' : ''}</button>`).join('')}</div>
       <ul class="mc-why">${reasons}</ul>
       <div class="mc-view" role="tablist" aria-label="Görünüm"><button type="button" role="tab" data-v="bagla" aria-selected="${view === 'bagla'}">Nasıl bağlanır?</button><button type="button" role="tab" data-v="kullan" aria-selected="${view === 'kullan'}">Nasıl kullanılır?</button></div>
       <div class="mc-scene${c.big ? ' big' : ''}">${scene.svg}<p class="mc-part" aria-live="polite">${view === 'bagla' ? 'Bir parçaya dokunun: adı ve ölçüsü burada.' : scene.steps.map((s, i) => `${i + 1}. ${esc(s)}`).join(' · ')}</p></div>
@@ -55,7 +63,12 @@ export function mountMethodCard(el: HTMLElement, c: CardInput): { show(id: Metho
     el.querySelectorAll<HTMLButtonElement>('.mc-view button').forEach((b) => b.addEventListener('click', () => { view = b.dataset.v as typeof view; draw(); }));
     const label = el.querySelector<HTMLElement>('.mc-part')!;
     el.querySelectorAll<SVGGElement>('.rs-part').forEach((g) => {
-      const say = () => { label.textContent = g.getAttribute('aria-label') ?? ''; el.querySelectorAll('.rs-part.on').forEach((x) => x.classList.remove('on')); g.classList.add('on'); };
+      const say = () => {
+        const a = partAsset(g.dataset.part ?? '', { tail: c.tail, bait: cur.bait });
+        label.innerHTML = `${a ? assetImg(a, { size: 64 }) : ''}<span>${esc(g.getAttribute('aria-label') ?? '')}</span>`;
+        el.querySelectorAll('.rs-part.on').forEach((x) => x.classList.remove('on'));
+        g.classList.add('on');
+      };
       g.addEventListener('click', say);
       g.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') { e.preventDefault(); say(); } });
     });

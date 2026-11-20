@@ -68,7 +68,7 @@ import Base from '../layouts/Base.astro';
         <article class="card main-pick" id="pick">
           <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub"><span id="verdict-sub"></span> <span class="fresh" id="fresh"></span></p></div>
           <div class="qa q2" hidden><h2 class="q q-row">Nereye, ne zaman? <a id="a-maplink" class="q-link" href="/harita/" title="Bu saatte rüzgar, dalga, akıntı ve yağış haritası">haritada aç</a></h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="cond" id="a-cond" hidden></p><p class="a-sub now-line" id="a-now" hidden></p></div>
-          <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p><details class="rig-more" id="rig-card" hidden><summary><span id="t-rig">Yöntem, bağlama ve kullanım </span><span class="muted fs-1" id="rig-hour"></span></summary><div class="rig-box" id="rig"></div></details></div>
+          <div class="qa q3" hidden><h2 class="q q-sp"><span id="a-tk-sp"></span>Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p><details class="rig-more" id="rig-card" hidden><summary><span id="t-rig">Yöntem, bağlama ve kullanım </span><span class="muted fs-1" id="rig-hour"></span></summary><div class="rig-box" id="rig"></div></details></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
           <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p><ul class="trust3" id="a-trust3" aria-label="Üç ayrı güven"></ul><p class="a-sub models-line" id="a-models" hidden></p></div>
           <details class="why-more" id="why-more" hidden>
@@ -417,6 +417,7 @@ import Base from '../layouts/Base.astro';
   import { icon, kindIcon } from '../scripts/icons';
   import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
   import { depthSourceOf, methodLine, mountMethodCard } from '../scripts/methodcard';
+  import { assetImg, SPECIES_ASSET } from '../scripts/media';
   import { sinkerFor } from '../scripts/rigscene';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
@@ -1090,6 +1091,7 @@ import Base from '../layouts/Base.astro';
     const line = species === 'levrek' ? tackleLevrekLine(t as ReturnType<typeof tackleLevrek>) : tackleLine(t as ReturnType<typeof tackle>);
     const g = species === 'levrek' ? (t as ReturnType<typeof tackleLevrek>).weightG : (t as ReturnType<typeof tackle>).jigG;
     $('a-tackle').textContent = personalLine(line, t.profile, myTk.personal);
+    $('a-tk-sp').innerHTML = assetImg(SPECIES_ASSET[species] ?? '', { size: 40, cls: 'sp-img', lazy: innerWidth < 1024 });
     const own = myTk.personal[t.profile];
     // short under the line; the class's line sizes and the legal size are under "Neden?"
     $('a-tackle-sub').innerHTML = `<span class="tag ev-assumed">başlangıç önerisi</span> ${own ? 'Senin takımına göre' : 'Genel takım sınıfı'} · <a href="/ayarlar/#takimim">${own ? 'Takımım' : 'Kendi takımını gir'}</a>`;
@@ -1207,7 +1209,7 @@ import Base from '../layouts/Base.astro';
       const inv = toOwned(loadMy());
       const month = new Date(Date.parse(colIso) + TZ_OFF * HOUR).getUTCMonth() + 1;
       const advice = recommendMethods({ month, light: t.light, depthM: input.depthM, currentMs: input.currentMs, gustKmh: input.gustKmh, waveM: input.waveM ?? null, kind: input.kind ?? 'diger', mode: inv.mode, owned: inv.owned, baits: inv.baits, ...ctx });
-      mountMethodCard($('rig'), { advice, lure: { jigG: t.jigG, lureCm: t.lureCm, color: row('renk')?.value, hookNo: t.hook }, depthM: input.depthM, currentMs: input.currentMs });
+      mountMethodCard($('rig'), { advice, lure: { jigG: t.jigG, lureCm: t.lureCm, color: row('renk')?.value, hookNo: t.hook }, depthM: input.depthM, currentMs: input.currentMs, tail: /iğne kuyruk/.test(row('silikon')?.value ?? '') ? 'igne' : 'kurek' });
       // the plan's "Ne ile başla?" names the primary method; the LRF detail line stays when LRF leads
       const pm = advice.primary;
       if (pm.id !== 'lrf') $('a-tackle').textContent = `${methodLine(pm)}${pm.bait ? ` · kurşun ${sinkerFor(input.depthM, input.currentMs)} g · #${t.hook} iğne` : ''}`;

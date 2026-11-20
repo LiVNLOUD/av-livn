@@ -28,4 +28,8 @@ retry "av.livn.tr/ serves app" home
 retry "livn.tr/ 200" status200 https://livn.tr/
 retry "www.livn.tr/ 200" status200 https://www.livn.tr/
 retry "livn.tr/win 301 -> win.ps1" win
+# V2.9: every content drawing (species, tackle, bait) listed in assets.json is served
+for path in $(node -e "const m=require('./apps/web/src/data/assets.json');for(const a of m.assets)if(['species','tackle','bait'].includes(a.group))console.log(a.target.replace(/^apps\/web\/public/,''))"); do
+  retry "av.livn.tr$path 200" status200 "https://av.livn.tr$path"
+done
 exit $fail

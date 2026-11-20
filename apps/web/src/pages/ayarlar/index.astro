@@ -106,7 +106,8 @@ import AdminLogin from '../../components/AdminLogin.astro';
   .stack { display: grid; gap: 12px; }
   fieldset { border: 1px solid var(--swell); border-radius: 10px; padding: 8px 12px 12px; margin: 0; }
   .gear-groups { display: grid; gap: 10px; margin-top: 10px; }
-  .gear-groups :global(.gg) { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 8px; align-items: start; }
+  .gear-groups :global(.gg-img) { display: grid; gap: 2px; justify-items: center; }
+  .gear-groups :global(.gg) { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 4px 8px; align-items: start; }
   .gear-groups :global(.gg .gear-ic) { margin-top: 10px; color: var(--fg-2); }
   .gear-groups :global(.gg b) { font-size: var(--fs-2); grid-column: 2; }
   .gear-groups :global(.chips) { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
@@ -141,6 +142,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   import { getToken, mountLogin, showLogin } from '../../scripts/admin';
   import { BAITS, fmtG, fromServer, GEAR_OPTIONS, loadMy, parseMy, saveMy, type MyGear, type MyTackle } from '../../scripts/mytackle';
   import { gearSvg, type GearIcon } from '../../scripts/gearIcons';
+  import { assetImg, BAIT_ASSET } from '../../scripts/media';
 
   // M2: Takımım (device only)
   const tkForm = document.getElementById('my-tackle') as HTMLFormElement;
@@ -158,12 +160,15 @@ import AdminLogin from '../../components/AdminLogin.astro';
     ['kursun', 'Kurşun (dropshot / dip)', 'kursun', 'g'], ['igne', 'İğne', 'igne', 'no'], ['flags', 'Diğer', 'samandira', ''], ['baits', 'Yem', 'hamsi', ''],
   ];
   const BAIT_TR: Record<string, string> = { hamsi: 'hamsi', karides: 'karides', midye: 'midye' };
-  const chip = (group: string, value: string, label: string, icon?: GearIcon) => `<button type="button" class="chip" data-g="${group}" data-v="${value}" aria-pressed="false">${icon ? gearSvg(icon, 18) : ''}${label}</button>`;
+  const chip = (group: string, value: string, label: string, icon?: GearIcon, img?: string) => `<button type="button" class="chip" data-g="${group}" data-v="${value}" aria-pressed="false">${img ? assetImg(img, { size: 28 }) : icon ? gearSvg(icon, 18) : ''}${label}</button>`;
+  // V2.9: the drawing of each item beside its group (tackle) or on its chip (sabiki, bait); hook and float stay icons
+  const HEAD_IMG: Record<string, string[]> = { jighead: ['jighead'], silikon: ['silikon-igne-kuyruk', 'silikon-kurek-kuyruk'], mikroJig: ['mikro-jig'], kursun: ['dropshot-kursun'] };
   document.getElementById('gear-groups')!.innerHTML = GROUPS.map(([g, title, icon, unit]) => {
-    const items = g === 'flags' ? chip('flags', 'samandira', 'şamandıra', 'samandira') + chip('flags', 'capari', 'çapari', 'capari')
-      : g === 'baits' ? BAITS.map((b) => chip('baits', b, BAIT_TR[b]!, b as GearIcon)).join('')
+    const items = g === 'flags' ? chip('flags', 'samandira', 'şamandıra', 'samandira') + chip('flags', 'capari', 'çapari', 'capari', 'capari')
+      : g === 'baits' ? BAITS.map((b) => chip('baits', b, BAIT_TR[b]!, b as GearIcon, BAIT_ASSET[b])).join('')
       : GEAR_OPTIONS[g].map((v) => chip(g, String(v), unit === 'no' ? `#${v}` : `${fmtG(v)} ${unit}`)).join('');
-    return `<div class="gg">${gearSvg(icon)}<b>${title}</b><div class="chips">${items}</div></div>`;
+    const head = HEAD_IMG[g] ? `<span class="gg-img">${HEAD_IMG[g]!.map((n) => assetImg(n, { size: 44 })).join('')}</span>` : gearSvg(icon);
+    return `<div class="gg">${head}<b>${title}</b><div class="chips">${items}</div></div>`;
   }).join('');
   const chips = () => [...document.querySelectorAll<HTMLButtonElement>('#gear-groups .chip')];
   chips().forEach((c) => c.addEventListener('click', () => c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'))));

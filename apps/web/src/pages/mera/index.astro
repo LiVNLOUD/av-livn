@@ -23,7 +23,7 @@ import Base from '../../layouts/Base.astro';
     <p class="flag" id="render-err" hidden>Sayfanın bir bölümü gösterilemedi (gösterim hatası). Veriler alındı; sorun bizde, bildirildi.</p>
 
     <section class="tackle card" aria-labelledby="t-tk" hidden>
-      <div class="tk-head"><h2 id="t-tk">Takım ve yem</h2><span class="fs-1 muted" id="tk-ver">açık veriyle</span></div>
+      <div class="tk-head"><h2 id="t-tk"><span id="tk-sp"></span>Takım ve yem</h2><span class="fs-1 muted" id="tk-ver">açık veriyle</span></div>
       <p class="fs-2 tk-diff" id="tk-diff" hidden></p>
       <dl class="tk" id="tk"></dl>
       <p class="fs-1 muted tk-notes" id="tk-notes"></p>
@@ -163,6 +163,7 @@ import Base from '../../layouts/Base.astro';
   import { adminGet, getToken } from '../../scripts/admin';
   import { loadMy, toOwned, toProfiles } from '../../scripts/mytackle';
   import { depthSourceOf, mountMethodCard } from '../../scripts/methodcard';
+  import { assetImg, SPECIES_ASSET } from '../../scripts/media';
   import { bandOf, bandV2, fieldBand, tackleClass, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, recommendMethods, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
   import { api, currentSpecies, SPECIES_TR } from '../../scripts/species';
   import { forecastColumns, renderForecast, type PackedHour } from '../../scripts/forecast';
@@ -249,6 +250,7 @@ import Base from '../../layouts/Base.astro';
     const setName = myTk.personal[t.profile] ? profiles.find((p) => p.id === t.profile)!.name : tackleClass(t.profile, t.g).label;
     $('tk').innerHTML = t.rows.map((r) => `<div><dt>${esc(r.label)}</dt><dd><b>${esc(r.key === 'takim' ? (r.value.startsWith('LRF (hafif') ? r.value : setName) : r.value)}</b></dd></div>`).join('');
     $('tk-notes').textContent = t.notes.join(' ');
+    $('tk-sp').innerHTML = assetImg(SPECIES_ASSET[species] ?? '', { size: 40, cls: 'sp-img' });
     // V2.4: method card (istavrit): primary/secondary with reasons, rig scene, change ladder
     const mBox = $('tk-method-box');
     mBox.hidden = species !== 'istavrit';
@@ -258,7 +260,7 @@ import Base from '../../layouts/Base.astro';
       const month = new Date(Date.parse(H[i]![0] as string) + 3 * 3_600_000).getUTCMonth() + 1;
       const inp = tkInput(v);
       const advice = recommendMethods({ month, light: lt.light, depthM: inp.depthM, currentMs: inp.currentMs, gustKmh: inp.gustKmh, waveM: inp.waveM ?? null, kind: d.spot.kind, mode: inv.mode, owned: inv.owned, baits: inv.baits, depthSource: depthSourceOf(d), spotId: d.spot.id });
-      mountMethodCard($('tk-method'), { advice, lure: { jigG: lt.jigG, lureCm: lt.lureCm, color: lt.color, hookNo: lt.hook }, depthM: inp.depthM, currentMs: inp.currentMs });
+      mountMethodCard($('tk-method'), { advice, lure: { jigG: lt.jigG, lureCm: lt.lureCm, color: lt.color, hookNo: lt.hook }, depthM: inp.depthM, currentMs: inp.currentMs, tail: /iğne kuyruk/.test(lt.rows.find((r) => r.key === 'silikon')?.value ?? '') ? 'igne' : 'kurek' });
     }
     $('tk-why').innerHTML = t.rows
       .map((r) => `<li><b>${esc(r.label)}:</b> ${esc(r.why)} <a class="tag ev ev-${r.evidence}" href="/model/#kanit-${r.evidence}" title="Kanıt düzeyi ${r.evidence}">kanıt ${r.evidence}</a>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`)

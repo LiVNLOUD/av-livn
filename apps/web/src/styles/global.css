@@ -346,3 +346,12 @@ body.app .stale.on { display: none; }
 .rigscene .rs-step text { fill: var(--fg-1); font-size: 9px; text-anchor: middle; font-family: inherit; }
 .rigscene .rs-dot { fill: var(--act); }
 .rigscene .rs-route { fill: none; stroke: var(--fg-2); stroke-width: 1.2; stroke-dasharray: 3 3; }
+
+/* V2.9 bitmap drawings (scripts/media.ts) */
+.asset-img { display: inline-block; vertical-align: middle; object-fit: contain; flex: none; }
+.mc-imgs { display: inline-flex; gap: 2px; margin-right: 6px; vertical-align: middle; }
+.mc-imgs:empty { display: none; }
+.mc-part { display: flex; align-items: center; gap: var(--s2); }
+.sp-img { margin-right: 6px; }
+/* night (red) mode: drawings become dim red monochrome, never bright colour */
+body.red .asset-img { filter: grayscale(1) brightness(.5) sepia(1) hue-rotate(-50deg) saturate(9); opacity: .8; }
