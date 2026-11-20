@@ -26,6 +26,16 @@ import AdminLogin from '../../components/AdminLogin.astro';
           <div class="two"><label class="lbl">Atar en az (g)<input name="min" inputmode="decimal" placeholder="6" /></label><label class="lbl">Atar en çok (g)<input name="max" inputmode="decimal" placeholder="30" /></label></div>
           <div class="two"><label class="lbl">Ana ip<input name="line" maxlength="60" placeholder="PE 0.8" /></label><label class="lbl">Lider<input name="leader" maxlength="60" placeholder="≈10 lb florokarbon" /></label></div>
         </fieldset>
+        <!-- V2.3: what I own and what I fish with; the method suggestion puts owned gear first -->
+        <fieldset id="gear"><legend>Elimdekiler <span class="muted">(yöntem önerisi önce bunları kullanır)</span></legend>
+          <div class="seg" role="radiogroup" aria-label="Yöntem tercihi">
+            <label><input type="radio" name="mode" value="hepsi" /> Hepsi</label>
+            <label><input type="radio" name="mode" value="suni" /> Yalnız suni yem</label>
+            <label><input type="radio" name="mode" value="dogal" /> Yalnız doğal yem</label>
+          </div>
+          <div id="gear-groups" class="gear-groups"></div>
+          <p class="hint">Hiçbirini seçmezseniz öneri envanteri bilmiyor sayar; seçtiğiniz ölçüler "elimde var", seçmedikleriniz "yok" demektir.</p>
+        </fieldset>
         <div class="btns">
           <button type="submit" class="primary">Bu cihazda kaydet</button>
           <button type="button" id="tk-clear" class="ghost">Temizle (genel sınıfa dön)</button>
@@ -95,6 +105,13 @@ import AdminLogin from '../../components/AdminLogin.astro';
   .hint { font-size: var(--fs-2); color: var(--mist); }
   .stack { display: grid; gap: 12px; }
   fieldset { border: 1px solid var(--swell); border-radius: 10px; padding: 8px 12px 12px; margin: 0; }
+  .gear-groups { display: grid; gap: 10px; margin-top: 10px; }
+  .gear-groups :global(.gg) { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 8px; align-items: start; }
+  .gear-groups :global(.gg .gear-ic) { margin-top: 10px; color: var(--fg-2); }
+  .gear-groups :global(.gg b) { font-size: var(--fs-2); grid-column: 2; }
+  .gear-groups :global(.chips) { grid-column: 2; display: flex; flex-wrap: wrap; gap: 6px; }
+  .gear-groups :global(.chip) { min-height: 44px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg-1); font: inherit; font-size: var(--fs-2); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .gear-groups :global(.chip[aria-pressed='true']) { background: var(--act); border-color: var(--act); color: var(--act-ink); }
   legend { padding: 0 4px; font-weight: 600; }
   .owner-login { margin-top: 32px; border-top: 1px solid var(--swell); padding-top: 8px; }
   .owner-login summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--mist); }
@@ -121,7 +138,8 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, mountLogin, showLogin } from '../../scripts/admin';
-  import { fmtG, fromServer, loadMy, parseMy, saveMy, type MyTackle } from '../../scripts/mytackle';
+  import { BAITS, fmtG, fromServer, GEAR_OPTIONS, loadMy, parseMy, saveMy, type MyGear, type MyTackle } from '../../scripts/mytackle';
+  import { gearSvg, type GearIcon } from '../../scripts/gearIcons';
 
   // M2: Takımım (device only)
   const tkForm = document.getElementById('my-tackle') as HTMLFormElement;
@@ -133,7 +151,41 @@ import AdminLogin from '../../components/AdminLogin.astro';
       for (const f of ['min', 'max', 'line', 'leader'] as const) (fs.querySelector(`[name="${f}"]`) as HTMLInputElement).value = v ? (typeof v[f] === 'number' ? fmtG(v[f] as number) : String(v[f])) : '';
     }
   };
+  // V2.3: inventory chips (sizes owned) and the method preference
+  const GROUPS: [keyof typeof GEAR_OPTIONS | 'flags' | 'baits', string, GearIcon, string][] = [
+    ['jighead', 'Jighead', 'jighead', 'g'], ['silikon', 'Silikon', 'silikon', 'cm'], ['mikroJig', 'Mikro jig', 'mikroJig', 'g'],
+    ['kursun', 'Kurşun (dropshot / dip)', 'kursun', 'g'], ['igne', 'İğne', 'igne', 'no'], ['flags', 'Diğer', 'samandira', ''], ['baits', 'Yem', 'hamsi', ''],
+  ];
+  const BAIT_TR: Record<string, string> = { hamsi: 'hamsi', karides: 'karides', midye: 'midye' };
+  const chip = (group: string, value: string, label: string, icon?: GearIcon) => `<button type="button" class="chip" data-g="${group}" data-v="${value}" aria-pressed="false">${icon ? gearSvg(icon, 18) : ''}${label}</button>`;
+  document.getElementById('gear-groups')!.innerHTML = GROUPS.map(([g, title, icon, unit]) => {
+    const items = g === 'flags' ? chip('flags', 'samandira', 'şamandıra', 'samandira') + chip('flags', 'capari', 'çapari', 'capari')
+      : g === 'baits' ? BAITS.map((b) => chip('baits', b, BAIT_TR[b]!, b as GearIcon)).join('')
+      : GEAR_OPTIONS[g].map((v) => chip(g, String(v), unit === 'no' ? `#${v}` : `${fmtG(v)} ${unit}`)).join('');
+    return `<div class="gg">${gearSvg(icon)}<b>${title}</b><div class="chips">${items}</div></div>`;
+  }).join('');
+  const chips = () => [...document.querySelectorAll<HTMLButtonElement>('#gear-groups .chip')];
+  chips().forEach((c) => c.addEventListener('click', () => c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'))));
+  const fillGear = (m: MyTackle | null) => {
+    const g = m?.gear;
+    chips().forEach((c) => {
+      const { g: grp, v } = c.dataset as { g: string; v: string };
+      const on = !g ? false : grp === 'flags' ? !!g[v as 'samandira' | 'capari'] : grp === 'baits' ? g.baits.includes(v as never) : (g[grp as keyof typeof GEAR_OPTIONS] as number[]).includes(Number(v));
+      c.setAttribute('aria-pressed', String(on));
+    });
+    tkForm.querySelectorAll<HTMLInputElement>('input[name=mode]').forEach((r) => (r.checked = r.value === (m?.mode ?? 'hepsi')));
+  };
+  const readGear = (): { mode: string; gear: MyGear | null } => {
+    const on = chips().filter((c) => c.getAttribute('aria-pressed') === 'true');
+    const list = (grp: string) => on.filter((c) => c.dataset.g === grp).map((c) => Number(c.dataset.v));
+    const mode = tkForm.querySelector<HTMLInputElement>('input[name=mode]:checked')?.value ?? 'hepsi';
+    if (!on.length) return { mode, gear: null };
+    return { mode, gear: { jighead: list('jighead'), silikon: list('silikon'), mikroJig: list('mikroJig'), kursun: list('kursun'), igne: list('igne'),
+      samandira: on.some((c) => c.dataset.v === 'samandira'), capari: on.some((c) => c.dataset.v === 'capari'),
+      baits: on.filter((c) => c.dataset.g === 'baits').map((c) => c.dataset.v as MyGear['baits'][number]) } };
+  };
   fillTk(loadMy());
+  fillGear(loadMy());
   tkForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const raw: Record<string, unknown> = {};
@@ -143,12 +195,16 @@ import AdminLogin from '../../components/AdminLogin.astro';
       if (!v('min') && !v('max')) continue;
       raw[k] = { min: Number(v('min').replace(',', '.')), max: Number(v('max').replace(',', '.')), line: v('line'), leader: v('leader') };
     }
+    const sets = Object.keys(raw);
+    const { mode, gear } = readGear();
+    if (mode !== 'hepsi') raw.mode = mode;
+    if (gear) raw.gear = gear;
     const m = parseMy(JSON.stringify(raw));
-    if (Object.keys(raw).length && (!m || Object.keys(raw).some((k) => !m[k as keyof MyTackle]))) { tkMsg.textContent = 'Atar aralığını gram olarak girin (en az ≤ en çok, 0,1–100 g).'; return; }
+    if (sets.length && (!m || sets.some((k) => !m[k as keyof MyTackle]))) { tkMsg.textContent = 'Atar aralığını gram olarak girin (en az ≤ en çok, 0,1–100 g).'; return; }
     saveMy(m);
     tkMsg.textContent = m ? 'Kaydedildi: öneriler bu cihazda senin takımına göre.' : 'Takım girilmedi; genel sınıflar kullanılıyor.';
   });
-  document.getElementById('tk-clear')!.addEventListener('click', () => { saveMy(null); fillTk(null); tkMsg.textContent = 'Silindi; genel takım sınıfları kullanılıyor.'; });
+  document.getElementById('tk-clear')!.addEventListener('click', () => { saveMy(null); fillTk(null); fillGear(null); tkMsg.textContent = 'Silindi; genel takım sınıfları kullanılıyor.'; });
   document.getElementById('tk-move')!.addEventListener('click', async () => {
     const r = await fetch('/api/admin/tackle', { cache: 'no-store', headers: { authorization: `Bearer ${getToken()}` } }).catch(() => null);
     if (!r || !r.ok) { tkMsg.textContent = 'Sunucudaki profil okunamadı (yönetici anahtarı gerekli).'; return; }
