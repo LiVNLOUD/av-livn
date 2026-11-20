@@ -162,7 +162,7 @@ import Base from '../../layouts/Base.astro';
   import { PALETTE } from '../../scripts/palette';
   import { adminGet, getToken } from '../../scripts/admin';
   import { loadMy, toOwned, toProfiles } from '../../scripts/mytackle';
-  import { mountMethodCard } from '../../scripts/methodcard';
+  import { depthSourceOf, mountMethodCard } from '../../scripts/methodcard';
   import { bandOf, bandV2, fieldBand, tackleClass, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, recommendMethods, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
   import { api, currentSpecies, SPECIES_TR } from '../../scripts/species';
   import { forecastColumns, renderForecast, type PackedHour } from '../../scripts/forecast';
@@ -257,7 +257,7 @@ import Base from '../../layouts/Base.astro';
       const inv = toOwned(loadMy());
       const month = new Date(Date.parse(H[i]![0] as string) + 3 * 3_600_000).getUTCMonth() + 1;
       const inp = tkInput(v);
-      const advice = recommendMethods({ month, light: lt.light, depthM: inp.depthM, currentMs: inp.currentMs, gustKmh: inp.gustKmh, waveM: inp.waveM ?? null, kind: d.spot.kind, mode: inv.mode, owned: inv.owned, baits: inv.baits });
+      const advice = recommendMethods({ month, light: lt.light, depthM: inp.depthM, currentMs: inp.currentMs, gustKmh: inp.gustKmh, waveM: inp.waveM ?? null, kind: d.spot.kind, mode: inv.mode, owned: inv.owned, baits: inv.baits, depthSource: depthSourceOf(d), spotId: d.spot.id });
       mountMethodCard($('tk-method'), { advice, lure: { jigG: lt.jigG, lureCm: lt.lureCm, color: lt.color, hookNo: lt.hook }, depthM: inp.depthM, currentMs: inp.currentMs });
     }
     $('tk-why').innerHTML = t.rows

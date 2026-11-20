@@ -42,7 +42,14 @@ export interface MethodContext {
   owned?: Partial<Record<Gear, boolean>>;
   /** Baits the angler can get; empty/missing = no preference. */
   baits?: Bait[];
+  /** V2.9: where depthM comes from — an estimate (DTM / structure length; the default) or an approved field depth. */
+  depthSource?: 'tahmin' | 'saha';
+  /** V2.9: spot id, for field observations tied to one spot. */
+  spotId?: string;
 }
+
+/** Tirilye İskelesi: the only spot with the 8 Kasım field observation. */
+export const TIRILYE_ISKELESI = 'osm-way-483965349';
 
 export interface Reason { text: string; kind: ReasonKind }
 export interface MethodPick {
@@ -81,6 +88,12 @@ function score(id: MethodId, c: MethodContext): { w: number; reasons: Reason[] }
   const wave = c.waveM ?? 0;
   const deep = c.depthM >= 4;
   const rough = gust >= 30 || wave >= 0.5;
+  // V2.9: every depth-based line says where the depth comes from; an estimate is an assumption, not a condition
+  const field = c.depthSource === 'saha';
+  const dk: ReasonKind = field ? 'kosul' : 'varsayim';
+  const dw = field ? 'saha derinliği' : 'tahmini derinlik';
+  const deepLine = (t: string): Reason => ({ text: `${dw} ≥ 4 m: ${t}`, kind: dk });
+  const day = (t: string): Reason => ({ text: `gündüz: ${t}`, kind: 'kosul' });
   switch (id) {
     case 'lrf':
       if (lit) { w += 1; r.push({ text: 'aydınlık gecede yüzeye yakın silikon çalışır', kind: 'kosul' }); }
@@ -90,22 +103,26 @@ function score(id: MethodId, c: MethodContext): { w: number; reasons: Reason[] }
       w += 0.3;
       break;
     case 'mikro_jig':
-      if (!night && deep) { w += 1; r.push({ text: 'gündüz derin suda dibe hızlı iner', kind: 'kosul' }); }
+      if (!night && deep) { w += 1; r.push(deepLine('ağır yem dibe hızlı iner'), day('balık dipte beslenir')); }
       if (rough) { w += 0.3; r.push({ text: 'ağır yem rüzgarda kontrol edilir', kind: 'kosul' }); }
-      if (!deep) { w -= 0.7; r.push({ text: 'sığ suda dibe takılır', kind: 'kosul' }); }
+      if (!deep) { w -= 0.7; r.push({ text: `${dw} < 4 m: sığ suda dibe takılır`, kind: dk }); }
       break;
     case 'capari_tuylu':
-      if (!night) { w += 0.6; r.push({ text: 'gündüz sürüde çoklu iğne', kind: 'kosul' }); }
+      if (!night) { w += 0.6; r.push(day('sürüde çoklu iğne')); }
       r.push({ text: 'Boğaz\'da çapari birim çaba avı LRF\'den düşük ölçüldü (R19)', kind: 'literatur' });
       w -= 0.2;
       break;
     case 'dropshot_yem':
-      if (deep || !night) { w += 0.8; r.push({ text: 'yem dipten belli yükseklikte durur; derinlik ve gündüz için uygun', kind: 'kosul' }); }
+      if (deep || !night) {
+        w += 0.8;
+        if (deep) r.push(deepLine('yem dipten belli yükseklikte durur'));
+        if (!night) r.push(day('dipte beslenen balığa yem dipte sunulur'));
+      }
       if (cur >= 0.4 || rough) { w += 0.3; r.push({ text: 'kurşun yemi akıntıda yerinde tutar', kind: 'kosul' }); }
       if (c.kind === 'iskele' || c.kind === 'mendirek') { w += 0.2; r.push({ text: 'yapı dibine dik indirilebilir', kind: 'kosul' }); }
       break;
     case 'dip':
-      if (!night && deep) { w += 0.6; r.push({ text: 'gündüz dipte beslenen balık için', kind: 'kosul' }); }
+      if (!night && deep) { w += 0.6; r.push(deepLine('dip takımı dibi tarar'), day('dipte beslenen balık için')); }
       if (c.kind === 'kumsal') { w += 0.4; r.push({ text: 'kumsalda uzak atış, düz dip', kind: 'kosul' }); }
       if (c.kind === 'kayalik') { w -= 0.6; r.push({ text: 'kayalıkta dip takımı takılır', kind: 'kosul' }); }
       break;
@@ -115,15 +132,15 @@ function score(id: MethodId, c: MethodContext): { w: number; reasons: Reason[] }
       if (lit) { w += 0.4; r.push({ text: 'ışık altında yüzeye yakın sürüye', kind: 'kosul' }); }
       break;
     case 'capari_yemli':
-      if (!night) { w += 0.5; r.push({ text: 'gündüz sürüde, iğnelerde yem', kind: 'kosul' }); }
+      if (!night) { w += 0.5; r.push(day('sürüde, iğnelerde yem')); }
       break;
   }
   const def = METHODS[id];
+  // V2.9: hypothesis and field-observation lines inform; they never change the weight
   if (def.category === 'dogal' && AUTUMN_MONTHS.includes(c.month)) {
-    w += 0.3;
     r.push({ text: 'sonbahar hamsi göçü: istavrit yem balığıyla beslenir, doğal yem işe yarayabilir — göçün varlığı bu merada bu saatte doğal yemin üstün olduğunu göstermez', kind: 'hipotez' });
   }
-  if (id === 'dropshot_yem' && c.month === 11) r.push({ text: '8 Kas Tirilye: LRF 0 vuruş, dropshot + hamsi her atışta vuruş (tek gece, sıra ve süre bilinmiyor; kontrollü karşılaştırma değil)', kind: 'saha' });
+  if (id === 'dropshot_yem' && c.month === 11 && c.spotId === TIRILYE_ISKELESI) r.push({ text: '8 Kas Tirilye: LRF 0 vuruş, dropshot + hamsi her atışta vuruş (tek gece, sıra ve süre bilinmiyor; kontrollü karşılaştırma değil)', kind: 'saha' });
   return { w, reasons: r };
 }
 

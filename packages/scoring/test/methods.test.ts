@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AUTUMN_MONTHS, LADDER_MINUTES, METHODS, SINK_NOTE, ladder, pickBait, recommendMethods, type MethodContext } from '../src/methods';
+import { AUTUMN_MONTHS, LADDER_MINUTES, METHODS, SINK_NOTE, TIRILYE_ISKELESI, ladder, pickBait, recommendMethods, type MethodContext } from '../src/methods';
 
 const base: MethodContext = { month: 6, light: 'gündüz', depthM: 5, currentMs: 0.1, gustKmh: 15, waveM: 0.2, kind: 'iskele' };
 const ids = (a: { id: string }[]) => a.map((m) => m.id);
@@ -37,7 +37,7 @@ describe('recommendMethods', () => {
     expect(sam.reasons.some((r) => /sürüklenir/.test(r.text))).toBe(true);
   });
   it('autumn: natural methods carry the anchovy-run line as a HYPOTHESIS; Nov dropshot cites 8 Kas as one field observation', () => {
-    const a = recommendMethods({ ...base, month: 11 });
+    const a = recommendMethods({ ...base, month: 11, spotId: TIRILYE_ISKELESI });
     const ds = a.ranked.find((m) => m.id === 'dropshot_yem')!;
     expect(ds.bait).toBe('hamsi');
     expect(ds.reasons.find((r) => r.kind === 'hipotez')!.text).toMatch(/göstermez/);
@@ -49,6 +49,28 @@ describe('recommendMethods', () => {
     // December: hypothesis but no 8 Kas line
     const dec = recommendMethods({ ...base, month: 12 }).ranked.find((m) => m.id === 'dropshot_yem')!;
     expect(dec.reasons.some((r) => r.kind === 'saha')).toBe(false);
+  });
+  it('V2.9: the 8 Kas line only at Tirilye İskelesi; hypothesis and field lines never change the weight', () => {
+    const other = recommendMethods({ ...base, month: 11, spotId: 'osm-way-1' }).ranked.find((m) => m.id === 'dropshot_yem')!;
+    expect(other.reasons.some((r) => r.kind === 'saha')).toBe(false);
+    const w = (month: number, spotId?: string) => Object.fromEntries(recommendMethods({ ...base, month, spotId }).ranked.map((m) => [m.id, m.weight]));
+    // same conditions, with (Nov at Tirilye: hypothesis + field line) and without (June: neither line)
+    expect(w(11, TIRILYE_ISKELESI)).toEqual(w(6));
+    expect(w(11, 'osm-way-1')).toEqual(w(6));
+  });
+  it('V2.9: Nov 18:00 at night with an estimated depth ≥ 4 m — no "gündüz" line; depth lines are assumptions', () => {
+    const a = recommendMethods({ ...base, month: 11, light: 'karanlık gece', depthM: 6 });
+    const all = a.ranked.flatMap((m) => m.reasons);
+    expect(all.some((r) => /gündüz/.test(r.text))).toBe(false);
+    const depth = all.filter((r) => /derinli(k|ği) [≥<]/.test(r.text));
+    expect(depth.length).toBeGreaterThan(0);
+    expect(depth.every((r) => r.kind === 'varsayim' && /tahmini derinlik/.test(r.text))).toBe(true);
+    // with an approved field depth the same lines are conditions
+    const f = recommendMethods({ ...base, month: 11, light: 'karanlık gece', depthM: 6, depthSource: 'saha' }).ranked.flatMap((m) => m.reasons).filter((r) => /derinli(k|ği) [≥<]/.test(r.text));
+    expect(f.every((r) => r.kind === 'kosul' && /saha derinliği/.test(r.text))).toBe(true);
+    // shallow estimate: the micro jig warning is an assumption too
+    const sh = recommendMethods({ ...base, depthM: 2 }).ranked.find((m) => m.id === 'mikro_jig')!.reasons.find((r) => /< 4 m/.test(r.text))!;
+    expect(sh.kind).toBe('varsayim');
   });
   it('mode limits the pool; secondary is the next of the same category', () => {
     const s = recommendMethods({ ...base, mode: 'suni' });

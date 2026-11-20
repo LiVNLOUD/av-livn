@@ -60,7 +60,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     <p class="lv-wx" id="l-wx" aria-label="Hava"></p>
     <p class="lv-sec" id="l-sec"></p>
     <div class="lv-rig" id="l-rig"></div>
-    <details class="lv-info"><summary>Kısa uygulama bilgisi</summary><ol id="l-steps"></ol><p class="lv-note" id="l-tk"></p></details>
+    <details class="lv-info" id="l-info" hidden><summary>Kısa uygulama bilgisi</summary><ol id="l-steps"></ol><p class="lv-note" id="l-tk"></p></details>
     <p class="lv-warn" id="l-warn" role="status"></p>
     <ol class="log" id="log"></ol>
     <div class="lv-minor">
@@ -363,15 +363,18 @@ import AdminLogin from '../../components/AdminLogin.astro';
       `<span>${pr === null ? 'yağış –' : pr / 10 < 0.1 ? 'yağış yok' : `yağış ${(pr / 10).toFixed(1).replace('.', ',')} mm/sa`}</span>`,
     ].join('');
   }
+  // V2.9: the folded how-to is shown only when it has something in it (steps or the tackle line)
+  const syncInfo = () => { $('l-info').hidden = !$('l-steps').textContent!.trim() && !$('l-tk').textContent!.trim(); };
   // the rig in use, drawn large; the short how-to is folded away
   function drawRig() {
     if (!live) return;
     const m = seg().method;
     const id = v2method(m.method) as MethodId;
-    if (!(['lrf', 'mikro_jig', 'capari_tuylu', 'capari_yemli', 'dropshot_yem', 'dip', 'samandira'] as string[]).includes(id)) { $('l-rig').innerHTML = ''; $('l-steps').innerHTML = ''; return; }
+    if (!(['lrf', 'mikro_jig', 'capari_tuylu', 'capari_yemli', 'dropshot_yem', 'dip', 'samandira'] as string[]).includes(id)) { $('l-rig').innerHTML = ''; $('l-steps').innerHTML = ''; syncInfo(); return; }
     const sc = rigScene(id, 'bagla', { jigG: m.jig_g, lureCm: m.lure_len_cm, color: m.lure_color, bait: (m.bait as never) ?? null, sinkerG: here ? sinkerFor(here.depthM, here.currentMs) : undefined });
     $('l-rig').innerHTML = sc.svg;
     $('l-steps').innerHTML = rigScene(id, 'kullan').steps.map((x) => `<li>${x}</li>`).join('');
+    syncInfo();
   }
   setInterval(() => { if (live && !$('live').hidden) $('l-clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 5000);
   function activeMs(s: Seg, end = Date.now()) {

@@ -416,7 +416,7 @@ import Base from '../layouts/Base.astro';
   import { frameIndex, loadGrid, nearest, type Grid } from '../scripts/layers';
   import { icon, kindIcon } from '../scripts/icons';
   import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
-  import { methodLine, mountMethodCard } from '../scripts/methodcard';
+  import { depthSourceOf, methodLine, mountMethodCard } from '../scripts/methodcard';
   import { sinkerFor } from '../scripts/rigscene';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
@@ -1103,7 +1103,7 @@ import Base from '../layouts/Base.astro';
       const sc = hs ? hs.t[col + hoursOffset()] : null;
       $('a-when').textContent += ` · kart şu saate göre: ${fmtTime(colIso)}${sc != null ? ` (puan ${Math.round(sc)})` : ''}`;
     }
-    drawRig(t, colIso, input);
+    drawRig(t, colIso, input, { depthSource: depthSourceOf(d), spotId: w.spot_id });
     planReady();
     const tkWhy = document.getElementById('tk-why');
     if (tkWhy) tkWhy.innerHTML = tkHead + t.rows.map((r) => `<li><b>${esc(r.label)}: ${esc(r.value)}</b> — ${esc(r.why)} <span class="tag ev-${r.evidence}" title="Kanıt düzeyi">kanıt ${r.evidence}</span>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`).join('') + t.notes.map((n) => `<li class="muted">${esc(n)}</li>`).join('');
@@ -1200,13 +1200,13 @@ import Base from '../layouts/Base.astro';
     el.innerHTML = parts.map((x) => `<span>${x}</span>`).join('');
     el.hidden = false;
   }
-  function drawRig(t: ReturnType<typeof tackle> | ReturnType<typeof tackleLevrek>, colIso: string, input: TackleInput) {
+  function drawRig(t: ReturnType<typeof tackle> | ReturnType<typeof tackleLevrek>, colIso: string, input: TackleInput, ctx: { depthSource: 'saha' | 'tahmin'; spotId: string } = { depthSource: 'tahmin', spotId: '' }) {
     const row = (k: string) => t.rows.find((r) => r.key === k);
     // V2.4: istavrit — primary and secondary method (artificial and natural bait) with the rig scene
     if ('jigG' in t) {
       const inv = toOwned(loadMy());
       const month = new Date(Date.parse(colIso) + TZ_OFF * HOUR).getUTCMonth() + 1;
-      const advice = recommendMethods({ month, light: t.light, depthM: input.depthM, currentMs: input.currentMs, gustKmh: input.gustKmh, waveM: input.waveM ?? null, kind: input.kind ?? 'diger', mode: inv.mode, owned: inv.owned, baits: inv.baits });
+      const advice = recommendMethods({ month, light: t.light, depthM: input.depthM, currentMs: input.currentMs, gustKmh: input.gustKmh, waveM: input.waveM ?? null, kind: input.kind ?? 'diger', mode: inv.mode, owned: inv.owned, baits: inv.baits, ...ctx });
       mountMethodCard($('rig'), { advice, lure: { jigG: t.jigG, lureCm: t.lureCm, color: row('renk')?.value, hookNo: t.hook }, depthM: input.depthM, currentMs: input.currentMs });
       // the plan's "Ne ile başla?" names the primary method; the LRF detail line stays when LRF leads
       const pm = advice.primary;

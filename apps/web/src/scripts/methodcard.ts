@@ -7,6 +7,13 @@ const KIND_TR: Record<ReasonKind, string> = { kosul: 'koşul', literatur: 'liter
 const LADDER_KEY = 'av-livn-ladder-min';
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
+/** V2.9: 'saha' only when the spot's depth component comes from an approved field depth (score source 'saha'). */
+export function depthSourceOf(d: unknown): 'saha' | 'tahmin' {
+  const comps = (d as { packed?: { meta?: { comps?: unknown[][] } } | null } | null)?.packed?.meta?.comps;
+  const c = Array.isArray(comps) ? comps.find((x) => Array.isArray(x) && x[0] === 'derinlik') : undefined;
+  return c && c[4] === 'saha' ? 'saha' : 'tahmin';
+}
+
 export const methodLine = (m: MethodPick) => `${m.name}${m.bait ? ` (${BAIT_TR[m.bait]})` : ''}`;
 
 export function ladderMinutes(): number {
