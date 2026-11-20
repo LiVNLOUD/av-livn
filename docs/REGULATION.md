@@ -15,6 +15,21 @@
 | 9 | Yayımı tarihinde yürürlüğe girer | 16.09.2026 |
 
 - md. 15(4) (5 kg / 4 kg) bu değişiklikte **değişmedi**.
+- **119 merayla kesişme denetimi (V2.9, 20 Kasım).** Meraların kutusu: boylam 28,19–29,15, enlem 40,36–40,56. Hiçbir madde kesişmiyor:
+
+  | Madde | Neden kesişmiyor |
+  |---|---|
+  | md. 4(4) | belge yaşı; mera ya da tür değil |
+  | Çizelge 1 | tamamen yasak türler; istavrit, izmarit, levrek, lüfer, kolyoz, mırmır listede yok |
+  | Çizelge 6 ilk satır | içsular bölümü (md. 11(7)); deniz meralarına uygulanmaz. Satırın türü görüntüden okunmadı |
+  | md. 13(14) yüzen adalar | içsular bölümü (md. 13) |
+  | Çizelge 7 dil / lagos / orkinos | hedef türlerimiz değil; istavrit 12 cm uygulandı (V2.1) |
+  | md. 16(7)–(8) | gemiyle av ve orkinos; kıyı meralarına uygulanmaz. 1 Eylül 2027'den itibaren tekneyle avlananlar için ruhsat |
+  | md. 17(1)(k) Çanakkale Köprüsü | ~40,33K 26,65D, kutunun ~1,5° batısında |
+  | md. 17(1)(ş) Antalya Üç Adalar | 36,45K 30,55D |
+  | md. 17(6) Boğaz trafik ayırım şeridi | İstanbul Boğazı ~41,0K; Çanakkale Boğazı ~26,4D |
+
+  Kod değişikliği yok.
 
 ## Günlük miktar ve boy ölçümü — birebir metin (okuma 2026-11-20, V2.9)
 Kaynak: 6/2 Tebliğ (2024/21), RG 11.08.2024 sayı 32629. Metin, Lexpera "Resmî Gazete metin" sayfasından alındı; Resmî Gazete sayfasına konteynerden erişilemedi.
