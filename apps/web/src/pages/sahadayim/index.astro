@@ -28,7 +28,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
       <h2>Yöntem <span class="muted">(seans boyunca; değiştirilebilir)</span></h2>
       <div class="two">
         <label class="lbl">Hedef tür<select id="target"><option value="istavrit">istavrit</option><option value="levrek">levrek</option><option value="lüfer">lüfer / çinekop</option><option value="kolyoz">kolyoz</option><option value="karagöz">karagöz / mırmır</option><option value="sargos">sargos</option><option value="çipura">çipura</option><option value="mezgit">mezgit</option><option value="diger">diğer</option></select></label>
-        <label class="lbl">Yöntem<select id="method"><option value="lrf">LRF</option><option value="spin">spin</option><option value="capari">çapari</option><option value="diger">diğer</option></select></label>
+        <label class="lbl">Yöntem<select id="method"><option value="lrf">LRF jighead + silikon</option><option value="mikro_jig">mikro jig</option><option value="capari_tuylu">çapari (tüylü)</option><option value="capari_yemli">çapari (yemli)</option><option value="dropshot_yem">dropshot + yem</option><option value="dip">dip takımı + yem</option><option value="samandira">şamandıralı + yem</option><option value="spin">spin</option><option value="diger">diğer</option></select></label>
         <label class="lbl">Jighead (g)<input id="jig" inputmode="decimal" placeholder="1,5" /></label>
         <label class="lbl">İğne no<input id="hook" placeholder="#8" /></label>
       </div>
@@ -38,6 +38,8 @@ import AdminLogin from '../../components/AdminLogin.astro';
       </div>
       <div class="two">
         <label class="lbl">Kamış<input id="rods" inputmode="numeric" value="1" /></label>
+        <label class="lbl">Kişi<input id="people" inputmode="numeric" value="1" /></label>
+        <label class="lbl">Yem<select id="bait"><option value="">yok (suni)</option><option value="hamsi">hamsi parçası</option><option value="karides">karides</option><option value="midye">midye</option></select></label>
         <label class="lbl">İskele ışığı altında<select id="lamp"><option value="">bilinmiyor</option><option value="1">evet</option><option value="0">hayır</option></select></label>
       </div>
       <button type="button" id="start" class="primary big">Seansı başlat</button>
@@ -48,35 +50,42 @@ import AdminLogin from '../../components/AdminLogin.astro';
   </div>
 
   <section id="live" class="live" hidden aria-label="Seans">
-    <div class="top">
-      <div><b id="l-spot"></b><span id="l-time">0:00</span><span class="l-tk" id="l-tk"></span></div>
-      <div class="tools">
-        <button type="button" id="red" aria-pressed="false" title="Kırmızı gece modu">●</button>
-        <button type="button" id="pause" aria-pressed="false">Mola</button>
-      </div>
+    <!-- V2.6: separate from the plan screen — big clock, spot, wind/gust/rain at a glance, the rig in use, the time
+         fished and the last tackle change; four large controls fixed at the bottom (wet hands, no sideways scroll) -->
+    <header class="lv-top">
+      <div class="lv-clock" id="l-clock">--:--</div>
+      <div class="lv-id"><b id="l-spot"></b><span id="l-time">0:00</span></div>
+      <button type="button" id="red" aria-pressed="false" title="Kırmızı gece modu">●</button>
+    </header>
+    <p class="lv-wx" id="l-wx" aria-label="Hava"></p>
+    <p class="lv-sec" id="l-sec"></p>
+    <div class="lv-rig" id="l-rig"></div>
+    <details class="lv-info"><summary>Kısa uygulama bilgisi</summary><ol id="l-steps"></ol><p class="lv-note" id="l-tk"></p></details>
+    <p class="lv-warn" id="l-warn" role="status"></p>
+    <ol class="log" id="log"></ol>
+    <div class="lv-minor">
+      <button type="button" id="undo">Geri al</button>
+      <button type="button" id="len">Boy</button>
+      <button type="button" id="kg">Kg</button>
+      <button type="button" id="chg-method">Yöntem</button>
+      <button type="button" id="pause" aria-pressed="false">Mola</button>
+      <button type="button" id="finish" class="fin">Bitir</button>
     </div>
-    <button type="button" id="plus" class="plus" aria-describedby="plus-hint">
-      <span class="pc" id="count">0</span>
-      <span class="pl" id="plus-label">+1 istavrit</span>
-      <span class="ph" id="plus-hint">uzun bas: başka tür</span>
-    </button>
+    <div class="lv-main">
+      <button type="button" id="bite" class="act"><span class="n" id="bites">0</span><span>Vuruş aldım</span></button>
+      <button type="button" id="plus" class="act fish" aria-describedby="plus-hint"><span class="n" id="count">0</span><span id="plus-label">Balık aldım</span><span class="ph" id="plus-hint">uzun bas: tür</span></button>
+      <button type="button" id="nothing" class="act" aria-pressed="false"><span class="n">0</span><span>Sonuç yok</span></button>
+      <button type="button" id="depth" class="act"><span class="n" id="depth-v">—</span><span>Dip: __ m</span></button>
+    </div>
     <div class="sheet" id="species" hidden role="dialog" aria-label="Tür seç">
       <button type="button" data-sp="istavrit">istavrit</button>
+      <button type="button" data-sp="izmarit">izmarit</button>
       <button type="button" data-sp="levrek">levrek</button>
       <button type="button" data-sp="lüfer">lüfer</button>
       <button type="button" data-sp="mırmır">mırmır</button>
       <button type="button" data-sp="kolyoz">kolyoz</button>
       <button type="button" data-sp="diğer">diğer</button>
       <button type="button" data-sp="" class="cancel">Vazgeç</button>
-    </div>
-    <div class="row">
-      <button type="button" id="undo">Geri al</button>
-      <button type="button" id="len">Boy ekle</button>
-      <button type="button" id="method">Yöntem</button>
-    </div>
-    <ol class="log" id="log"></ol>
-    <div class="row">
-      <button type="button" id="finish" class="fin">Bitir</button>
     </div>
     <div class="sheet" id="end" hidden role="dialog" aria-label="Seansı bitir">
       <p id="e-sum"></p>
@@ -112,39 +121,54 @@ import AdminLogin from '../../components/AdminLogin.astro';
   .msg { min-height: 1.4em; font-size: var(--fs-2); }
   .msg.err { color: var(--storm); }
 
-  /* live session: full screen, glove targets ≥ 64 px */
-  .live { position: fixed; inset: 0; z-index: 20; background: var(--sea); color: var(--foam); display: grid; grid-template-rows: auto 1fr auto minmax(0, 18vh) auto; gap: 10px;
-    padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom)); }
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .top b { display: block; font-size: var(--fs-3); line-height: 1.2; }
-  .top span { color: var(--mist); font-variant-numeric: tabular-nums; }
-  .top .l-tk { display: block; color: var(--sodium); font-size: var(--fs-2); }
-  .tools { display: flex; gap: 8px; }
-  .tools button, .row button { min-height: 64px; min-width: 64px; border-radius: 14px; border: 1px solid var(--swell); background: #13283a; color: var(--foam); font-weight: 700; font-size: var(--fs-3); padding: 0 14px; }
-  .tools button[aria-pressed='true'] { background: var(--sodium-dim); }
-  .plus { border: 0; border-radius: 24px; background: var(--sodium); color: #1a1205; display: grid; place-content: center; text-align: center; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-  .plus:active { transform: scale(0.985); }
-  .pc { font-size: var(--fs-6); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-  .pl { font-size: var(--fs-5); font-weight: 800; }
-  .ph { font-size: var(--fs-2); opacity: 0.75; margin-top: 4px; }
-  .row { display: flex; gap: 8px; }
-  .row button { flex: 1; }
-  .row .fin { background: transparent; border-color: var(--foam); }
-  .log { list-style: none; margin: 0; padding: 0; overflow: auto; font-size: var(--fs-2); color: var(--mist); }
-  .log :global(li) { display: flex; justify-content: space-between; gap: 10px; padding: 6px 2px; border-bottom: 1px solid var(--swell); }
-  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #0a1520; border-top: 2px solid var(--sodium); padding: 16px 12px calc(16px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* V2.6 live session: full screen, separate from the plan; glove targets ≥ 64 px, four main controls fixed at the bottom */
+  .live { position: fixed; inset: 0; z-index: 40; background: var(--ink-0); color: var(--fg-1); overflow-y: auto; overflow-x: hidden;
+    padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + 2 * 72px + 76px + env(safe-area-inset-bottom)); display: grid; gap: 8px; align-content: start; }
+  .lv-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+  .lv-clock { font-size: 2.6rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+  .lv-id { min-width: 0; }
+  .lv-id b { display: block; font-size: var(--fs-3); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lv-id span { color: var(--fg-2); font-size: var(--fs-2); font-variant-numeric: tabular-nums; }
+  #red { min-width: 56px; min-height: 56px; border-radius: 14px; border: 1px solid var(--line); background: var(--ink-2); color: var(--fg-1); font-size: 1.4rem; }
+  .lv-wx { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: var(--fs-3); font-weight: 650; }
+  .lv-wx :global(.arr) { display: inline-block; font-size: 1.2em; line-height: 1; }
+  .lv-sec { margin: 0; font-size: var(--fs-2); color: var(--fg-2); }
+  .lv-rig { display: grid; justify-items: center; }
+  .lv-rig :global(svg) { width: min(100%, 300px); max-height: 34vh; }
+  .lv-info summary { min-height: 44px; display: flex; align-items: center; font-weight: 650; cursor: pointer; }
+  .lv-info ol { margin: 0; padding-left: 1.2em; font-size: var(--fs-2); display: grid; gap: 2px; }
+  .lv-note { font-size: var(--fs-2); color: var(--fg-2); margin: 6px 0 0; }
+  .lv-warn { margin: 0; color: var(--warn); font-weight: 650; font-size: var(--fs-2); min-height: 0; }
+  .lv-warn:empty { display: none; }
+  .lv-minor { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; position: fixed; left: 12px; right: 12px; bottom: calc(12px + 2 * 72px + 16px + env(safe-area-inset-bottom)); }
+  .lv-minor button { min-height: 52px; border-radius: 12px; border: 1px solid var(--line); background: var(--ink-2); color: var(--fg-1); font-weight: 700; font-size: var(--fs-2); }
+  .lv-minor button[aria-pressed='true'] { background: var(--line-2); }
+  .lv-minor .fin { border-color: var(--fg-1); }
+  .lv-main { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .act { min-height: 72px; border-radius: 16px; border: 1px solid var(--line-2); background: var(--ink-2); color: var(--fg-1); display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0 10px; padding: 6px 14px; text-align: left; font-weight: 750; font-size: var(--fs-3); touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .act .n { grid-row: span 2; font-size: 1.9rem; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 1.6ch; text-align: center; }
+  .act .ph { font-size: var(--fs-1); font-weight: 500; opacity: .8; }
+  .act.fish { background: var(--act); color: var(--act-ink); border-color: var(--act); }
+  .act[aria-pressed='true'] { border-color: var(--warn); box-shadow: inset 0 0 0 2px var(--warn); }
+  .act:active { transform: scale(0.985); }
+  .log { list-style: none; margin: 0; padding: 0; font-size: var(--fs-2); color: var(--fg-2); }
+  .log :global(li) { display: flex; justify-content: space-between; gap: 10px; padding: 6px 2px; border-bottom: 1px solid var(--line); }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--ink-1); border-top: 2px solid var(--act); padding: 16px 12px calc(16px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .sheet[hidden] { display: none; }
-  .sheet > button { min-height: 64px; border-radius: 14px; border: 1px solid var(--swell); background: #13283a; color: var(--foam); font-size: var(--fs-3); font-weight: 700; }
+  .sheet > button { min-height: 64px; border-radius: 14px; border: 1px solid var(--line); background: var(--ink-2); color: var(--fg-1); font-size: var(--fs-3); font-weight: 700; }
   #end { grid-template-columns: 1fr; }
   #end p { margin: 0; }
   .cancel { background: transparent !important; }
 
-  /* red night mode: keeps dark adaptation; everything in deep red on black */
-  :global(body.red), :global(body.red) .live, :global(body.red) .sheet { background: #000 !important; color: #c0261c !important; }
-  :global(body.red) .live button, :global(body.red) .sheet button, :global(body.red) .sheet input { background: #160302 !important; color: #e0352a !important; border-color: #4a0b07 !important; }
-  :global(body.red) .plus { background: #5a0d08 !important; color: #ff4a3d !important; }
-  :global(body.red) .top span, :global(body.red) .log { color: #9c1f17 !important; }
+  /* red night mode: keeps dark adaptation; deep red on black, no bright panel. Reds lightened to pass AA on black
+     (V0b: #ff3b2f 5,9:1, #f0362a 5,3:1; the old #c0261c 3,5:1 and #9c1f17 2,6:1 did not) */
+  :global(body.red), :global(body.red) .live, :global(body.red) .sheet { background: #000 !important; color: #ff3b2f !important; }
+  :global(body.red) .live button, :global(body.red) .sheet button, :global(body.red) .sheet input { background: #160302 !important; color: #ff3b2f !important; border-color: #5a0d08 !important; }
+  :global(body.red) .act.fish { background: #3a0805 !important; color: #ff3b2f !important; }
+  :global(body.red) .lv-id span, :global(body.red) .log, :global(body.red) .lv-sec, :global(body.red) .lv-note { color: #f0362a !important; }
   :global(body.red) .log :global(li) { border-color: #2a0604; }
+  :global(body.red) .lv-rig :global(svg *) { stroke: #f0362a !important; fill: none !important; }
+  :global(body.red) .lv-rig :global(svg text) { fill: #f0362a !important; stroke: none !important; }
 </style>
 
 <script>
@@ -158,18 +182,26 @@ import AdminLogin from '../../components/AdminLogin.astro';
     document.getElementById('hint-ok')!.addEventListener('click', () => { card.hidden = true; try { localStorage.setItem(HINT, '1'); } catch {} });
   }
   import { LEGAL_MIN_CM } from '../../scripts/format';
-  import { tackle, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
+  import { bagCheck, sizeWarning, tackle, tackleLevrek, tackleLevrekLine, tackleLine, type MethodId } from '@av-livn/scoring';
+  import { rigScene, sinkerFor } from '../../scripts/rigscene';
+  import { frameIndex, loadGrid, nearest } from '../../scripts/layers';
+  import { compass8 } from '../../scripts/plan';
   import { loadMy, toProfiles } from '../../scripts/mytackle';
   const myProfiles = toProfiles(loadMy()).profiles;
   import { api as speciesUrl, currentSpecies } from '../../scripts/species';
 
   type Spot = { id: string; name: string; lat: number; lon: number; place: string | null };
   type Fish = { t: number; species: string; length_cm: number | null };
-  type Method = { jig_g?: number; hook_no?: string; lure_len_cm?: number; lure_color?: string; under_lamp?: boolean; rods: number; target_species?: string; method?: string };
+  type Method = { jig_g?: number; hook_no?: string; lure_len_cm?: number; lure_color?: string; under_lamp?: boolean; rods: number; target_species?: string; method?: string; bait?: string; people?: number };
   /** I6: the forecast shown before the start, kept on the device and sent with the session (prospective). */
   type StartForecast = { captured_at: string; model_version: string; species: string; hours: { hour: number; total: number | null; p10: number | null; p90: number | null; rank: number | null }[] };
-  type Seg = { start: number; end?: number; method: Method; fish: Fish[]; pausedMs: number };
-  type Live = { spot: Spot; segs: Seg[]; pauseAt: number | null; forecast?: StartForecast | null };
+  // V2.5: a segment is a method section of the outing: its own effort, bites (vuruş) and catch; "Sonuç yok" is explicit
+  type Seg = { start: number; end?: number; method: Method; fish: Fish[]; pausedMs: number; bites?: number; zero?: boolean };
+  type Live = { spot: Spot; segs: Seg[]; pauseAt: number | null; forecast?: StartForecast | null; people?: number; kg?: { total: number; largest: number } | null; depth?: number | null };
+  const METHOD_TR: Record<string, string> = { lrf: 'LRF', mikro_jig: 'mikro jig', capari_tuylu: 'çapari (tüylü)', capari_yemli: 'çapari (yemli)', dropshot_yem: 'dropshot + yem', dip: 'dip takımı', samandira: 'şamandıra', spin: 'spin', diger: 'diğer', capari: 'çapari (tüylü)' };
+  const BAIT_TR: Record<string, string> = { hamsi: 'hamsi', karides: 'karides', midye: 'midye' };
+  /** Old saved choices (I6 methods) → V2 pool. */
+  const v2method = (m: string | undefined) => (m === 'capari' ? 'capari_tuylu' : m ?? 'lrf');
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const LIVE = 'av-livn-live-session';
@@ -205,14 +237,17 @@ import AdminLogin from '../../components/AdminLogin.astro';
   function methodFromForm(): Method {
     const lamp = $<HTMLSelectElement>('lamp').value;
     return { jig_g: num('jig'), hook_no: txt('hook'), lure_len_cm: num('lurelen'), lure_color: txt('lurecol'), under_lamp: lamp === '' ? undefined : lamp === '1', rods: Math.max(1, Math.round(num('rods') ?? 1)),
-      target_species: $<HTMLSelectElement>('target').value, method: $<HTMLSelectElement>('method').value };
+      target_species: $<HTMLSelectElement>('target').value, method: $<HTMLSelectElement>('method').value,
+      bait: $<HTMLSelectElement>('bait').value || undefined, people: Math.min(20, Math.max(1, Math.round(num('people') ?? 1))) };
   }
   function methodToForm(m: Partial<Method>) {
     const set = (id: string, v: unknown) => ($<HTMLInputElement>(id).value = v === undefined || v === null ? '' : String(v).replace('.', ','));
     set('jig', m.jig_g); set('hook', m.hook_no); set('lurelen', m.lure_len_cm); set('lurecol', m.lure_color); set('rods', m.rods ?? 1);
     $<HTMLSelectElement>('lamp').value = m.under_lamp === undefined ? '' : m.under_lamp ? '1' : '0';
     if (m.target_species) $<HTMLSelectElement>('target').value = m.target_species;
-    if (m.method) $<HTMLSelectElement>('method').value = m.method;
+    $<HTMLSelectElement>('method').value = v2method(m.method);
+    $<HTMLSelectElement>('bait').value = m.bait ?? '';
+    set('people', m.people ?? 1);
   }
   /** I6: capture the public forecast for the next 6 hours at the start (best effort; offline → none). */
   async function captureForecast(spotId: string, sp: 'istavrit' | 'levrek'): Promise<StartForecast | null> {
@@ -267,12 +302,13 @@ import AdminLogin from '../../components/AdminLogin.astro';
       // A method change closes the current segment: each segment is saved as its own session (one method each).
       resume();
       seg().end = Date.now();
-      live.segs.push({ start: Date.now(), method: m, fish: [], pausedMs: 0 });
+      live.segs.push({ start: Date.now(), method: m, fish: [], pausedMs: 0, bites: 0 });
       changingMethod = false;
       $('start').textContent = 'Seansı başlat';
+      drawRig();
     } else {
       if (!chosen) return say('Önce mera seçin.', true);
-      live = { spot: chosen, segs: [{ start: Date.now(), method: m, fish: [], pausedMs: 0 }], pauseAt: null, forecast: null };
+      live = { spot: chosen, segs: [{ start: Date.now(), method: m, fish: [], pausedMs: 0, bites: 0 }], pauseAt: null, forecast: null, people: m.people ?? 1, kg: null, depth: null };
       const target: 'istavrit' | 'levrek' = m.target_species === 'levrek' ? 'levrek' : 'istavrit';
       captureForecast(chosen.id, target).then((f) => { if (live && f) { live.forecast = f; save(); } });
     }
@@ -302,10 +338,42 @@ import AdminLogin from '../../components/AdminLogin.astro';
       if (!v) return;
       const input = { depthM: v[0] ?? 3, currentMs: v[1], windKmh: v[2], gustKmh: v[3], crossKmh: v[4], sunAlt: v[5] ?? 0, lampP: v[6], turbidity: v[7], sstDev: v[8], waveM: v[9] ?? null, kind: b?.spot?.kind };
       $('l-tk').textContent = sp === 'levrek' ? `Levrek: ${tackleLevrekLine(tackleLevrek(input, myProfiles))}` : tackleLine(tackle(input, myProfiles));
+      here = { depthM: input.depthM, currentMs: input.currentMs ?? null, wind: input.windKmh ?? null, gust: input.gustKmh ?? null };
+      drawRig();
+      drawWx();
     }).catch(() => {});
+    loadGrid('wx').then((g) => { grid = g; drawWx(); }).catch(() => {});
     lock();
+    drawRig();
     draw();
   }
+  // V2.6: glance line — wind direction and speed, gust, rain at this hour (no moving graphics)
+  let here: { depthM: number; currentMs: number | null; wind: number | null; gust: number | null } | null = null;
+  let grid: Awaited<ReturnType<typeof loadGrid>> | null = null;
+  function drawWx() {
+    if (!live) return;
+    const hour = Math.floor(Date.now() / 3_600_000);
+    const k = grid ? frameIndex(grid, hour) : null;
+    const wd = grid && k !== null ? nearest(grid, grid.vars.wd?.[k] ?? [], live.spot.lon, live.spot.lat) : null;
+    const pr = grid && k !== null ? nearest(grid, grid.vars.pr?.[k] ?? [], live.spot.lon, live.spot.lat) : null;
+    const f0 = (x: number | null | undefined) => (x == null ? '–' : String(Math.round(x)));
+    $('l-wx').innerHTML = [
+      `<span><span class="arr" style="transform:rotate(${wd ?? 0}deg)" aria-hidden="true">↓</span> rüzgar ${f0(here?.wind)} km/sa${wd !== null ? ` ${compass8(wd)}` : ''}</span>`,
+      `<span>hamle ${f0(here?.gust)}</span>`,
+      `<span>${pr === null ? 'yağış –' : pr / 10 < 0.1 ? 'yağış yok' : `yağış ${(pr / 10).toFixed(1).replace('.', ',')} mm/sa`}</span>`,
+    ].join('');
+  }
+  // the rig in use, drawn large; the short how-to is folded away
+  function drawRig() {
+    if (!live) return;
+    const m = seg().method;
+    const id = v2method(m.method) as MethodId;
+    if (!(['lrf', 'mikro_jig', 'capari_tuylu', 'capari_yemli', 'dropshot_yem', 'dip', 'samandira'] as string[]).includes(id)) { $('l-rig').innerHTML = ''; $('l-steps').innerHTML = ''; return; }
+    const sc = rigScene(id, 'bagla', { jigG: m.jig_g, lureCm: m.lure_len_cm, color: m.lure_color, bait: (m.bait as never) ?? null, sinkerG: here ? sinkerFor(here.depthM, here.currentMs) : undefined });
+    $('l-rig').innerHTML = sc.svg;
+    $('l-steps').innerHTML = rigScene(id, 'kullan').steps.map((x) => `<li>${x}</li>`).join('');
+  }
+  setInterval(() => { if (live && !$('live').hidden) $('l-clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 5000);
   function activeMs(s: Seg, end = Date.now()) {
     const paused = s.pausedMs + (live!.pauseAt && s === seg() && !s.end ? end - live!.pauseAt : 0);
     return Math.max(0, end - s.start - paused);
@@ -317,13 +385,29 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const min = Math.floor(ms / 60000);
     $('l-time').textContent = `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}${live!.pauseAt ? ' · mola' : ''}${min >= 10 && fish.length ? ` · ${(fish.length / (ms / 3_600_000)).toFixed(1).replace('.', ',')}/sa` : ''}`;
     $('pause').setAttribute('aria-pressed', String(!!live!.pauseAt));
-    $('log').innerHTML = [...fish].reverse().slice(0, 30).map((f) => `<li><span>${new Date(f.t).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} ${f.species}</span><span>${f.length_cm ? `${String(f.length_cm).replace('.', ',')} cm${LEGAL_MIN_CM[f.species] && f.length_cm < LEGAL_MIN_CM[f.species]! ? ` ⚠ ${LEGAL_MIN_CM[f.species]} cm altı` : ''}` : ''}</span></li>`).join('');
+    $('l-clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    const sg = seg();
+    const n = live!.segs.length;
+    const secMin = Math.round(activeMs(sg) / 60000);
+    $('l-sec').textContent = `Bölüm ${n} · ${METHOD_TR[v2method(sg.method.method)] ?? sg.method.method}${sg.method.bait ? ` + ${BAIT_TR[sg.method.bait]}` : ''} · ${secMin} dk · ${n > 1 ? `son takım değişimi ${new Date(sg.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}` : `başlangıç ${new Date(sg.start).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`}`;
+    $('bites').textContent = String(sg.bites ?? 0);
+    $('count').textContent = String(sg.fish.length);
+    $('nothing').setAttribute('aria-pressed', String(!!sg.zero));
+    $('depth-v').textContent = live!.depth != null ? String(live!.depth).replace('.', ',') : '—';
+    // per-section size warnings (regulation.ts) and the bag check on the entered weight, per person (md. 15(4))
+    const warn: string[] = [];
+    const small = sg.fish.filter((f) => sizeWarning(f.species, f.length_cm));
+    if (small.length) warn.push(`Bu bölümde ${small.length} balık yasal boyun altında — denize geri bırakın.`);
+    if (live!.kg) { const b = bagCheck(live!.kg.total / (live!.people ?? 1), live!.kg.largest); if (b.level !== 'ok') warn.push(b.text); }
+    $('l-warn').textContent = warn.join(' ');
+    $('log').innerHTML = [...fish].reverse().slice(0, 30).map((f) => `<li><span>${new Date(f.t).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} ${f.species}</span><span>${f.length_cm ? `${String(f.length_cm).replace('.', ',')} cm${sizeWarning(f.species, f.length_cm) ? ` ⚠ ${LEGAL_MIN_CM[f.species]} cm altı` : ''}` : ''}</span></li>`).join('');
   }
   setInterval(() => live && !$('live').hidden && draw(), 15000);
 
   function add(species: string) {
     if (live!.pauseAt) resume();
     seg().fish.push({ t: Date.now(), species, length_cm: null });
+    seg().zero = false;
     navigator.vibrate?.(30);
     save();
     draw();
@@ -363,7 +447,37 @@ import AdminLogin from '../../components/AdminLogin.astro';
     live!.pauseAt = null;
   }
   $('pause').addEventListener('click', () => { if (live!.pauseAt) resume(); else live!.pauseAt = Date.now(); save(); draw(); });
-  $('method').addEventListener('click', () => {
+  // V2.5: the four main controls — bite, fish (above), nothing, depth — and the bag weight
+  $('bite').addEventListener('click', () => { if (live!.pauseAt) resume(); seg().bites = (seg().bites ?? 0) + 1; navigator.vibrate?.(20); save(); draw(); });
+  $('nothing').addEventListener('click', () => { const sg = seg(); if (sg.fish.length) return; sg.zero = !sg.zero; save(); draw(); });
+  $('depth').addEventListener('click', async () => {
+    const v = prompt('Dip (m): kurşun dibe değdiğinde okunan derinlik', live!.depth ? String(live!.depth).replace('.', ',') : '');
+    if (v === null || v.trim() === '') return;
+    const d = Number(v.replace(',', '.'));
+    if (!(d > 0 && d < 200)) return;
+    live!.depth = d;
+    save();
+    draw();
+    const body = { depth_m: d, at: new Date().toISOString() };
+    try {
+      const j = await api(`/api/admin/spots/${encodeURIComponent(live!.spot.id)}/depth`, 'POST', body);
+      $('l-warn').textContent = j.status === 'onayli' ? `Dip ${v} m kaydedildi; puan güncelleniyor.` : 'Dip kaydedildi; tutarlılık denetiminden geçmedi, yönetici onayını bekliyor.';
+    } catch (e) {
+      if (!(e as { fatal?: boolean }).fatal) store.set(QUEUE, [...store.get<unknown[]>(QUEUE, []), { kind: 'depth', spot: live!.spot.id, body }]);
+    }
+  });
+  $('kg').addEventListener('click', () => {
+    const t = prompt(`Toplam ağırlık (kg, ${live!.people ?? 1} kişinin toplamı)`, live!.kg ? String(live!.kg.total).replace('.', ',') : '');
+    if (t === null) return;
+    const total = Number(t.replace(',', '.'));
+    if (!(total > 0 && total < 100)) { live!.kg = null; save(); draw(); return; }
+    const l = prompt('En büyük balık (kg, bilmiyorsanız boş)', '');
+    const largest = l ? Number(l.replace(',', '.')) : 0;
+    live!.kg = { total, largest: largest > 0 && largest < total ? largest : 0 };
+    save();
+    draw();
+  });
+  $('chg-method').addEventListener('click', () => {
     $('live').hidden = true;
     document.body.style.overflow = '';
     methodToForm(seg().method);
@@ -395,17 +509,18 @@ import AdminLogin from '../../components/AdminLogin.astro';
           else bySp.set(f.species, (bySp.get(f.species) ?? 0) + 1);
         }
         for (const [species, count] of bySp) items.push({ species, count });
+        const tm = v2method(s.method.method);
         return {
           spot_id: live!.spot.id, start_at: new Date(s.start).toISOString(), end_at: new Date(Math.max(end, s.start + 60000)).toISOString(),
           active_min: Math.min(act, span), rods: s.method.rods, jig_g: s.method.jig_g, hook_no: s.method.hook_no, lure_len_cm: s.method.lure_len_cm,
           lure_color: s.method.lure_color, under_lamp: s.method.under_lamp, zero_catch: zero || items.length === 0, items, note,
-          target_species: s.method.target_species ?? 'istavrit', method: s.method.method,
+          target_species: s.method.target_species ?? 'istavrit', tackle_method: tm, bait: s.method.bait, bites: s.bites ?? 0,
           // the start forecast belongs to the first segment only (later segments started after it was captured)
           start_forecast: i === 0 ? live!.forecast ?? undefined : undefined,
         };
       })
       // A method tried without a catch is a zero-catch session for that method; only sub-minute empty segments are dropped.
-      .filter((p, _i, arr) => p.items.length > 0 || arr.length === 1 || Date.parse(p.end_at) - Date.parse(p.start_at) >= 120_000);
+      .filter((p, i, arr) => p.items.length > 0 || arr.length === 1 || !!segs[i]!.zero || Date.parse(p.end_at) - Date.parse(p.start_at) >= 120_000);
   }
   $('finish').addEventListener('click', () => {
     resume();
@@ -419,13 +534,14 @@ import AdminLogin from '../../components/AdminLogin.astro';
   $('e-back').addEventListener('click', () => ($('end').hidden = true));
   async function finish(zero: boolean) {
     const act = Number($<HTMLInputElement>('e-active').value) || undefined;
-    const bodies = payloads(zero, act, $<HTMLInputElement>('e-note').value.trim() || undefined);
+    const note = $<HTMLInputElement>('e-note').value.trim() || undefined;
+    const sections = payloads(zero, act, undefined);
+    // V2.5: one outing with its method sections (the independent unit, D5); sections keep their own effort, bites, catch
+    const outing = { spot_id: live!.spot.id, start_at: sections[0]!.start_at, end_at: sections[sections.length - 1]!.end_at, people: live!.people ?? 1, note, sections };
     const left: unknown[] = [];
     let warn: string[] = [];
-    for (const b of bodies) {
-      try { const j = await api('/api/admin/catch', 'POST', b); warn = warn.concat(j.warnings ?? []); }
-      catch (e) { if ((e as { fatal?: boolean }).fatal) { say(`Kaydedilmedi: ${(e as Error).message}`, true); return; } left.push(b); }
-    }
+    try { const j = await api('/api/admin/catch/outing', 'POST', outing); warn = warn.concat(j.warnings ?? []); }
+    catch (e) { if ((e as { fatal?: boolean }).fatal) { say(`Kaydedilmedi: ${(e as Error).message}`, true); return; } left.push({ kind: 'outing', body: outing }); }
     if (left.length) store.set(QUEUE, [...store.get<unknown[]>(QUEUE, []), ...left]);
     live = null;
     store.set(LIVE, null);
@@ -443,7 +559,11 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const q = store.get<unknown[]>(QUEUE, []);
     if (!q.length || !token) return;
     const left = [];
-    for (const b of q) { try { await api('/api/admin/catch', 'POST', b); } catch (e) { if (!(e as { fatal?: boolean }).fatal) left.push(b); } }
+    for (const b of q as { kind?: string; body?: unknown; spot?: string }[]) {
+      // queued items: an outing (V2.5), a depth entry, or an older single session
+      const [path, body] = b.kind === 'outing' ? ['/api/admin/catch/outing', b.body] : b.kind === 'depth' ? [`/api/admin/spots/${encodeURIComponent(b.spot!)}/depth`, b.body] : ['/api/admin/catch', b];
+      try { await api(path, 'POST', body); } catch (e) { if (!(e as { fatal?: boolean }).fatal) left.push(b); }
+    }
     store.set(QUEUE, left);
     $('pending').textContent = left.length ? `${left.length} seans gönderilmeyi bekliyor.` : '';
   }

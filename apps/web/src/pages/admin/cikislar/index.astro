@@ -1,0 +1,176 @@
+---
+import Base from '../../../layouts/Base.astro';
+import AdminLogin from '../../../components/AdminLogin.astro';
+---
+<Base title="Çıkışlar — av.livn" description="Bölümlü av çıkışları, derinlik onayı ve yöntem verimi (yönetici).">
+  <div class="wrap wide cx">
+    <h1>Çıkışlar</h1>
+    <p class="muted fs-2 prose">Bir çıkış, bir merada bir gecedir; içinde yöntem bölümleri vardır. Her bölümün eforu, vuruşu ve avı ayrıdır; sıfır av açıkça girilir. Kalibrasyonda çıkış tek birim sayılır (aynı gecenin bölümleri bağımsız değildir). Süreleri ve bölüm başına avı bilmiyorsanız boş bırakmayın, tahminle doldurmayın: o bölümü kaydetmeyin.</p>
+    <AdminLogin />
+    <p class="msg fs-2" id="msg" role="status"></p>
+    <section id="panel" hidden>
+      <h2>Çıkış ekle / düzenle</h2>
+      <form id="f" class="stack" novalidate>
+        <div class="grid3">
+          <label>Mera<select id="o-spot"></select></label>
+          <label>Başlangıç<input type="datetime-local" id="o-start" /></label>
+          <label>Bitiş<input type="datetime-local" id="o-end" /></label>
+          <label>Kişi<input id="o-people" inputmode="numeric" value="1" /></label>
+          <label class="chk"><input type="checkbox" id="o-retro" checked /> Sonradan, hafızadan giriliyor</label>
+          <label class="wide">Not<input id="o-note" maxlength="200" /></label>
+        </div>
+        <ol id="secs" class="secs"></ol>
+        <div class="actions">
+          <button type="button" class="btn small secondary" id="add-sec">Bölüm ekle</button>
+          <button type="submit" class="btn small">Kaydet</button>
+          <button type="button" class="btn small secondary" id="reset">Yeni çıkış</button>
+        </div>
+        <p class="fs-1 muted">Av satırı: <code>tür adet [kg]</code>, her satıra bir tür (ör. <code>istavrit 60 4,6</code>, <code>izmarit 12</code>). İzmarit kayda girer, hedef tür olmadığı için kalibrasyona girmez.</p>
+      </form>
+
+      <h2>Kayıtlı çıkışlar</h2>
+      <div class="tbl"><table><thead><tr><th>Tarih</th><th>Mera</th><th>Kişi</th><th>Bölümler (yöntem · dk · vuruş · av)</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+
+      <h2>Yöntem verimi <span class="muted fs-2">(yalnız betimleyici)</span></h2>
+      <p class="fs-2 muted prose">Kamış-saat başına vuruş ve av; yanında bağımsız çıkış sayısı. Bu tablo yöntem seçmez ve sıralama değildir: aynı gecenin bölümleri bağımsız değildir, sıra ve sürü hareketi bilinmez. Önerilen otomatik ölçüt (uygulanmadı): her yöntemde farklı gün ve merada en az 10 bağımsız çıkış (docs/TACKLE.md).</p>
+      <div class="tbl"><table><thead><tr><th>Yöntem</th><th>Çıkış</th><th>Bölüm</th><th>Kamış-saat</th><th>Vuruş/sa</th><th>Av/sa</th></tr></thead><tbody id="yield"></tbody></table></div>
+
+      <h2>Derinlik onay kuyruğu</h2>
+      <p class="fs-2 muted prose">Sahadayım'daki "Dip: __ m" kayıtlarından otomatik tutarlılık denetimini geçemeyenler. Onaylanana kadar puana girmez.</p>
+      <ul id="queue" class="queue"></ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .cx h2 { font-size: var(--fs-4); margin: 24px 0 8px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .grid3 label, .secs label { display: grid; gap: 4px; font-size: var(--fs-2); color: var(--fg-2); }
+  .grid3 .wide { grid-column: 1 / -1; }
+  .chk { display: flex !important; align-items: center; gap: 8px; }
+  .chk input { width: auto; }
+  .secs { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
+  .secs :global(li) { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .secs :global(li > b) { grid-column: 1 / -1; }
+  .secs :global(textarea) { min-height: 64px; font: inherit; color: var(--fg-1); background: var(--ink-1); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: var(--fs-2); }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .queue { list-style: none; padding: 0; display: grid; gap: 8px; }
+  .queue :global(li) { border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: var(--fs-2); }
+  .queue :global(.bad) { color: var(--warn); }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+</style>
+
+<script>
+  import { getToken, mountLogin } from '../../../scripts/admin';
+  import { itemsText, parseItems, yieldByMethod, type SectionRow } from '../../../scripts/outing';
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const esc = (s: unknown) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const METHODS: [string, string][] = [['lrf', 'LRF jighead + silikon'], ['mikro_jig', 'mikro jig'], ['capari_tuylu', 'çapari (tüylü)'], ['capari_yemli', 'çapari (yemli)'], ['dropshot_yem', 'dropshot + yem'], ['dip', 'dip takımı + yem'], ['samandira', 'şamandıralı + yem'], ['spin', 'spin'], ['diger', 'diğer']];
+  const MT = Object.fromEntries(METHODS);
+  let token = getToken();
+  let editing: string | null = null;
+  type Sec = { id?: string; start_at: string; end_at: string; tackle_method: string | null; bait: string | null; bites: number | null; zero_catch: number | boolean; active_min: number; rods: number; target_species: string | null; method: string | null; items: { species: string; count: number; weight_kg?: number | null }[] };
+  type Outing = { id: string; spot_id: string; spot_name: string; start_at: string; end_at: string; people: number; note: string | null; sections: Sec[] };
+  let outings: Outing[] = [];
+
+  async function api(path: string, method = 'GET', body?: unknown) {
+    const r = await fetch(path, { method, headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error ?? String(r.status));
+    return j;
+  }
+  const say = (t: string) => ($('msg').textContent = t);
+  // datetime-local in Türkiye time (UTC+3) ↔ ISO
+  const toLocal = (iso: string) => new Date(Date.parse(iso) + 3 * 3_600_000).toISOString().slice(0, 16);
+  const toIso = (v: string) => new Date(Date.parse(v + ':00Z') - 3 * 3_600_000).toISOString();
+
+  function secRow(s: Partial<Sec> = {}) {
+    const li = document.createElement('li');
+    if (s.id) li.dataset.id = s.id;
+    li.innerHTML = `<b>Bölüm</b>
+      <label>Başlangıç<input type="datetime-local" class="s-start" value="${s.start_at ? toLocal(s.start_at) : ''}"></label>
+      <label>Bitiş<input type="datetime-local" class="s-end" value="${s.end_at ? toLocal(s.end_at) : ''}"></label>
+      <label>Yöntem<select class="s-method">${METHODS.map(([v, t]) => `<option value="${v}"${v === (s.tackle_method ?? 'lrf') ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label>Yem<select class="s-bait"><option value="">yok</option>${['hamsi', 'karides', 'midye'].map((b) => `<option${b === s.bait ? ' selected' : ''}>${b}</option>`).join('')}</select></label>
+      <label>Vuruş (bilinmiyorsa boş)<input class="s-bites" inputmode="numeric" value="${s.bites ?? ''}"></label>
+      <label>Kamış<input class="s-rods" inputmode="numeric" value="${s.rods ?? 1}"></label>
+      <label class="chk"><input type="checkbox" class="s-zero"${s.zero_catch ? ' checked' : ''}> Sıfır av</label>
+      <label style="grid-column:1/-1">Av<textarea class="s-items">${esc(itemsText(s.items ?? []))}</textarea></label>
+      <button type="button" class="btn small secondary s-del">Bölümü sil</button>`;
+    li.querySelector('.s-del')!.addEventListener('click', () => { li.remove(); renumber(); });
+    $('secs').append(li);
+    renumber();
+  }
+  const renumber = () => $('secs').querySelectorAll('li > b').forEach((b, i) => (b.textContent = `Bölüm ${i + 1}`));
+
+  function fill(o: Outing | null) {
+    editing = o?.id ?? null;
+    $<HTMLSelectElement>('o-spot').value = o?.spot_id ?? '';
+    $<HTMLInputElement>('o-start').value = o ? toLocal(o.start_at) : '';
+    $<HTMLInputElement>('o-end').value = o ? toLocal(o.end_at) : '';
+    $<HTMLInputElement>('o-people').value = String(o?.people ?? 1);
+    $<HTMLInputElement>('o-note').value = o?.note ?? '';
+    $('secs').innerHTML = '';
+    (o?.sections ?? [{}]).forEach((s) => secRow(s));
+  }
+
+  function body() {
+    const retro = $<HTMLInputElement>('o-retro').checked;
+    const sections = [...$('secs').querySelectorAll<HTMLLIElement>('li')].map((li, i) => {
+      const q = <T extends HTMLElement>(c: string) => li.querySelector(c) as T;
+      const it = parseItems(q<HTMLTextAreaElement>('.s-items').value);
+      if (!it.ok) throw new Error(`Bölüm ${i + 1}: av satırı okunamadı: "${(it as { line: string }).line}"`);
+      const bites = q<HTMLInputElement>('.s-bites').value.trim();
+      const zero = q<HTMLInputElement>('.s-zero').checked;
+      return { ...(li.dataset.id ? { id: li.dataset.id } : {}), start_at: toIso(q<HTMLInputElement>('.s-start').value), end_at: toIso(q<HTMLInputElement>('.s-end').value),
+        tackle_method: q<HTMLSelectElement>('.s-method').value, bait: q<HTMLSelectElement>('.s-bait').value || undefined, bites: bites === '' ? undefined : Number(bites),
+        rods: Number(q<HTMLInputElement>('.s-rods').value) || 1, zero_catch: zero, items: zero || !it.ok ? [] : it.items, target_species: 'istavrit', retro };
+    });
+    return { spot_id: $<HTMLSelectElement>('o-spot').value, start_at: toIso($<HTMLInputElement>('o-start').value), end_at: toIso($<HTMLInputElement>('o-end').value),
+      people: Number($<HTMLInputElement>('o-people').value) || 1, note: $<HTMLInputElement>('o-note').value.trim() || undefined, sections };
+  }
+
+  async function load() {
+    const [o, q] = await Promise.all([api('/api/admin/catch/outing'), api('/api/admin/depth-queue')]);
+    outings = o.outings;
+    $('rows').innerHTML = outings.map((x) => `<tr><td>${esc(new Date(x.start_at).toLocaleDateString('tr-TR'))}</td><td>${esc(x.spot_name)}</td><td>${x.people}</td><td>${x.sections.map((s) => `${esc(MT[s.tackle_method ?? ''] ?? s.method ?? '?')} · ${s.active_min} dk · ${s.bites ?? '–'} · ${s.zero_catch ? 'sıfır' : s.items.map((i) => `${i.count} ${esc(i.species)}`).join(', ')}`).join('<br>')}</td>
+      <td><button type="button" class="btn small secondary" data-edit="${x.id}">Düzenle</button> <button type="button" class="btn small secondary" data-del="${x.id}">Sil</button></td></tr>`).join('') || '<tr><td colspan="5" class="muted">Kayıt yok.</td></tr>';
+    $('rows').querySelectorAll<HTMLButtonElement>('[data-edit]').forEach((b) => b.addEventListener('click', () => { fill(outings.find((x) => x.id === b.dataset.edit)!); window.scrollTo(0, 0); }));
+    $('rows').querySelectorAll<HTMLButtonElement>('[data-del]').forEach((b) => b.addEventListener('click', async () => { if (confirm('Çıkış ve bölümleri silinsin mi?')) { await api(`/api/admin/catch/outing/${b.dataset.del}`, 'DELETE'); load(); } }));
+    const secs: SectionRow[] = outings.flatMap((x) => x.sections.map((s) => ({ outing_id: x.id, tackle_method: s.tackle_method, method: s.method, active_min: s.active_min, rods: s.rods, bites: s.bites, target_species: s.target_species, items: s.items })));
+    const f2 = (v: number | null) => (v === null ? '–' : String(v).replace('.', ','));
+    $('yield').innerHTML = yieldByMethod(secs).map((r) => `<tr><td>${esc(MT[r.method] ?? r.method)}</td><td>${r.outings}</td><td>${r.sections}</td><td>${f2(r.hours)}</td><td>${f2(r.bitesPerH)}</td><td>${f2(r.fishPerH)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">Kayıt yok.</td></tr>';
+    $('queue').innerHTML = q.items.map((i: { obs_id: string; name: string; observed_at: string; depth_m: number; uncertainty_m: number; method_note: string; check: { name: string; ok: boolean; note: string }[] }) =>
+      `<li><b>${esc(i.name)}</b> · ${esc(new Date(i.observed_at).toLocaleString('tr-TR'))} · <b>${String(i.depth_m).replace('.', ',')} m</b> (±${String(i.uncertainty_m).replace('.', ',')} m; ${esc(i.method_note)})
+        <ul>${(i.check ?? []).map((c) => `<li class="${c.ok ? '' : 'bad'}">${c.ok ? '✓' : '✗'} ${esc(c.note)}</li>`).join('')}</ul>
+        <button type="button" class="btn small" data-ok="${i.obs_id}">Onayla</button> <button type="button" class="btn small secondary" data-no="${i.obs_id}">Reddet</button></li>`).join('') || '<li class="muted">Bekleyen kayıt yok.</li>';
+    $('queue').querySelectorAll<HTMLButtonElement>('[data-ok],[data-no]').forEach((b) => b.addEventListener('click', async () => {
+      await api(`/api/admin/field/${b.dataset.ok ?? b.dataset.no}`, 'PATCH', { status: b.dataset.ok ? 'onayli' : 'reddedildi' });
+      load();
+    }));
+  }
+
+  $('add-sec').addEventListener('click', () => secRow({ start_at: undefined }));
+  $('reset').addEventListener('click', () => fill(null));
+  $('f').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const b = body();
+      const j = editing ? await api(`/api/admin/catch/outing/${editing}`, 'PUT', b) : await api('/api/admin/catch/outing', 'POST', b);
+      say(`Kaydedildi.${j.warnings?.length ? ' ' + j.warnings.join(' ') : ''}`);
+      fill(null);
+      load();
+    } catch (err) { say(`Kaydedilmedi: ${(err as Error).message}`); }
+  });
+
+  mountLogin(document.getElementById('login') as HTMLFormElement, async () => {
+    token = getToken();
+    $('panel').hidden = false;
+    const s = await fetch('/api/spots').then((r) => r.json()).catch(() => ({ spots: [] }));
+    $('o-spot').innerHTML = '<option value="">Mera seçin</option>' + (s.spots as { id: string; name: string }[]).sort((a, b) => a.name.localeCompare(b.name, 'tr')).map((x) => `<option value="${x.id}">${esc(x.name)}</option>`).join('');
+    fill(null);
+    load().catch((err) => say(`Yüklenemedi: ${(err as Error).message}`));
+  });
+</script>

@@ -60,6 +60,7 @@ const TABS: [string, string, string, boolean][] = [
           <span class="sep admin-only" hidden></span>
           {NAV_ADMIN.map(([href, label]) => <a class="admin-only" href={href} aria-current={cur(href)} hidden>{label}</a>)}
           <a class="admin-only" href="/admin/adaylar/" aria-current={cur('/admin/adaylar')} hidden>Adaylar</a>
+          <a class="admin-only" href="/admin/cikislar/" aria-current={cur('/admin/cikislar')} hidden>Çıkışlar</a>
           <a class="admin-only" href="/admin/" aria-current={path === '/admin/' ? 'page' : undefined} hidden>Panel</a>
         </nav>
         {themeable && <button type="button" class="theme-btn" id="theme-btn" aria-pressed="false" title="Gündüz (açık) / gece (koyu) görünüm">Gündüz</button>}
