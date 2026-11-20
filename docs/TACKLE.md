@@ -104,3 +104,37 @@ Teknik: iskele ışığının sınırına at, düşüşte bekle
 - Yerinde kontrol: misina gevşediği an dip; sayıyı bir kez dipte doğrula.
 - Kamış uygunluğu toplam atış ağırlığıyla bakılır: jighead + silikon (≈ 0,1 g/cm). LRF üst sınırı aşılırsa uyarı yazılır.
 - Profiller (marka, misina) yalnız kayıtlı profilden gelir; kayıtlı olmayan kalınlık tahmin edilmez.
+
+## V2 — Yöntem havuzu (istavrit; `packages/scoring/src/methods.ts`)
+
+| Yöntem | Kategori | Gereken parça | Öne çıktığı koşul (saha kuralı, C) |
+|---|---|---|---|
+| LRF jighead + silikon | suni | jighead, silikon | aydınlık gece / alacakaranlık, sakin su; rüzgar, dalga ve akıntıda geri düşer |
+| Mikro jig | suni | mikro jig | gündüz, derin su (≥ 4 m), rüzgarlı hava; sığda geri düşer |
+| Çapari (tüylü) | suni | çapari | gündüz sürü |
+| Dropshot + yem | doğal | dropshot kurşunu, iğne | derin su ya da gündüz; akıntı; iskele/mendirek dibi |
+| Dip takımı + yem | doğal | dip kurşunu, iğne | gündüz derin; kumsal; kayalıkta geri düşer |
+| Şamandıralı + yem | doğal | şamandıra, iğne | sakin su; ışık altı; dalga ve akıntıda geri düşer |
+| Çapari (yemli) | doğal | çapari | gündüz sürü |
+
+- **Yem:** kullanıcının listesi önce gelir. Liste yoksa Ekim–Şubat hamsi parçası, diğer aylarda karides; kayalıkta midye.
+- **Gerekçe satırları** kanıt türünü taşır (D6):
+
+  | Tür | Örnek |
+  |---|---|
+  | koşul | o saatin hava ve derinlik koşulu |
+  | literatür | R19: Boğaz'da LRF birim çaba avı çapariden yüksek; komşu bölge, tek çalışma |
+  | saha | 8 Kas Tirilye: tek gece, sıra ve süre bilinmiyor; kontrollü karşılaştırma değil |
+  | hipotez | sonbahar hamsi göçü → doğal yem |
+  | envanter | elde var / yok |
+
+  - Hipotez satırı yalnız doğal yöntemlerde, Ekim–Aralık'ta görünür. Göçün varlığı bu merada bu saatte doğal yemin üstün olduğunu göstermez.
+- **Birincil ve ikincil:** "hepsi" modunda ikincil yöntem her zaman öbür kategoriden seçilir; böylece suni ve doğal yem birlikte sunulur. "Yalnız suni" ya da "yalnız doğal" modunda ikincil aynı kategoriden gelir.
+- **Envanter:** elde olan parça +0,5, olmayan −2. Envanterde belirtilmeyen parça yansızdır.
+- **Kontrollü değişiklik merdiveni** (her adımda tek değişken): katman → ağırlık/saydırma → boy/profil → renk → yöntem.
+  - Adım süresi varsayılan 15 dk ve kullanıcı ayarlıdır. Bu bir **saha rehberi**dir, bilimsel eşik değildir.
+- **Batış süresi** ağırlıktan tahmindir; ölçülmüş derinlik değildir.
+- **Yöntem verimi** (V2.7) yalnız betimleyicidir.
+  - Önerilen otomatik üstünlük ölçütü (uygulanmadı): her yöntem için **farklı gün ve farklı merada en az 10 bağımsız çıkış**.
+  - Karşılaştırma aynı çıkış içindeki bölüm sırası dengelenerek yapılır.
+  - Aynı gecenin bölümleri bağımsız sayılmaz (D5).
