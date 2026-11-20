@@ -11,6 +11,7 @@ import { ACTIVE, adminSpot, loadSnapshots, STATUSES, type SatBandRow, type SpotR
 import { fieldRecords, oceanMap, rescoreSpot, SPECIES, UPSERT_V2_SQL, type FieldDepthRow, type FieldObsRow, type ListEntryV2 } from '../precompute_v2';
 
 import { CLEAR_PRE_SQL } from '../lib/views';
+import { depthCheck } from '../lib/depthcheck';
 
 export const adminRoutes = new Hono<{ Bindings: Env }>();
 
@@ -415,6 +416,45 @@ adminRoutes.post('/spots/:id/field', async (c) => {
   await c.env.DB.batch([...obsStatements(c.env.DB, obsId, id, v.value, now, false), syncLamp(c.env.DB, id, now)]);
   const r = c.req.query('rescore') === '0' ? null : await rescoreNow(c.env.DB, id, now);
   return c.json({ ok: true, obs_id: obsId, ...(r === null ? { rescore: 'skipped', score: null } : { ...scoreJson(r), ...(await startScoring(c, now)) }) }, 201);
+});
+
+// V2.5 / D4: one-tap "Dip: __ m" from Sahadayım — stored raw (plumb, method note, uncertainty); used at once when the
+// automatic check passes, otherwise left 'onaysiz' for the review queue below.
+adminRoutes.post('/spots/:id/depth', async (c) => {
+  const id = c.req.param('id');
+  const b = await c.req.json<Record<string, unknown>>().catch(() => null);
+  const depth = typeof b?.depth_m === 'number' && Number.isFinite(b.depth_m) ? b.depth_m : NaN;
+  const dist = typeof b?.distance_m === 'number' && Number.isFinite(b.distance_m) && b.distance_m >= 0 && b.distance_m <= 500 ? b.distance_m : null;
+  if (!(depth > 0 && depth <= 200)) return c.json({ ok: false, error: 'invalid_depth' }, 400);
+  const spot = await c.env.DB.prepare('SELECT id, kind, max_depth_100m FROM spots WHERE id = ?1').bind(id).first<{ id: string; kind: string; max_depth_100m: number | null }>();
+  if (!spot) return c.json({ ok: false, error: 'not_found' }, 404);
+  const prev = await c.env.DB.prepare(
+    "SELECT d.depth_m FROM field_depth d JOIN field_obs o ON o.id = d.obs_id WHERE o.spot_id = ?1 AND o.source_kind = 'saha' AND o.status = 'onayli' AND d.method = 'plumb' AND d.depth_m IS NOT NULL",
+  ).bind(id).all<{ depth_m: number }>();
+  const chk = depthCheck({ depthM: depth, distanceM: dist, kind: spot.kind, neighbours: prev.results.map((r) => r.depth_m), dtmMax100m: spot.max_depth_100m });
+  const now = new Date();
+  const at = typeof b?.at === 'string' && !Number.isNaN(Date.parse(b.at)) ? new Date(b.at).toISOString() : now.toISOString();
+  const obsId = `obs-${crypto.randomUUID().slice(0, 12)}`;
+  const status = chk.ok ? 'onayli' : 'onaysiz';
+  await c.env.DB.batch([
+    c.env.DB.prepare("INSERT INTO field_obs (id, spot_id, observed_at, note, created_at, source_kind, status, evidence_json, check_json) VALUES (?1, ?2, ?3, ?4, ?5, 'saha', ?6, ?7, ?8)")
+      .bind(obsId, id, at, 'Dip (Sahadayım)', now.toISOString(), status, JSON.stringify({ kanit: 'saha, av sırasında', method: 'kurşun' }), JSON.stringify(chk.checks)),
+    c.env.DB.prepare("INSERT INTO field_depth (obs_id, distance_m, method, depth_m, uncertainty_m, method_note) VALUES (?1, ?2, 'plumb', ?3, ?4, ?5)")
+      .bind(obsId, dist ?? 0, depth, chk.uncertaintyM, chk.methodNote),
+  ]);
+  if (!chk.ok) return c.json({ ok: true, obs_id: obsId, status, check: chk, rescore: 'waiting_review' }, 201);
+  const r = await rescoreNow(c.env.DB, id, now);
+  return c.json({ ok: true, obs_id: obsId, status, check: chk, ...scoreJson(r), ...(await startScoring(c, now)) }, 201);
+});
+
+// D4 review queue: field depths that failed the automatic check (approve/reject with PATCH /field/:obs {status}).
+adminRoutes.get('/depth-queue', async (c) => {
+  const r = await c.env.DB.prepare(
+    `SELECT o.id AS obs_id, o.spot_id, s.name, o.observed_at, o.check_json, d.depth_m, d.distance_m, d.uncertainty_m, d.method_note
+       FROM field_obs o JOIN field_depth d ON d.obs_id = o.id LEFT JOIN spots s ON s.id = o.spot_id
+      WHERE o.source_kind = 'saha' AND o.status = 'onaysiz' ORDER BY o.observed_at DESC LIMIT 100`,
+  ).all<Record<string, unknown> & { check_json: string | null }>();
+  return c.json({ ok: true, items: r.results.map((x) => ({ ...x, check: x.check_json ? JSON.parse(x.check_json) : null, check_json: undefined })) });
 });
 
 adminRoutes.patch('/field/:obs', async (c) => {

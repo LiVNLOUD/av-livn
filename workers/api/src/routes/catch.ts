@@ -2,7 +2,7 @@
 // explicit zero catch. On save the model output for the session hours is frozen from what is already stored:
 // spot_scores_v2_history (full output of past hours) and the live list (score/band/rank of current/future
 // hours). Hours older than the history are filled by score.yml from the hourly observations ("recomputed").
-import { LEGAL_MIN_CM, sizeWarning } from '@av-livn/scoring';
+import { bagCheck, LEGAL_MIN_CM, sizeWarning } from '@av-livn/scoring';
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { SPECIES, type ListEntryV2 } from '../precompute_v2';
@@ -17,6 +17,8 @@ export interface CatchItem {
   species: string;
   count: number;
   length_cm: number | null;
+  /** V2.5: weight entered by the angler (bag check); never estimated. */
+  weight_kg?: number | null;
 }
 export interface SessionInput {
   spot_id: string;
@@ -39,7 +41,18 @@ export interface SessionInput {
   retro: boolean;
   /** Model output the angler saw before starting (Sahadayım "başla"), if captured in time. */
   start_forecast: StartForecast | null;
+  /** V2.5: method from the V2 pool, bait, bites (vuruş; explicit 0 allowed), and the outing it belongs to. */
+  tackle_method?: TackleMethod | null;
+  bait?: 'hamsi' | 'karides' | 'midye' | null;
+  bites?: number | null;
+  outing_id?: string | null;
+  section_no?: number | null;
 }
+export const TACKLE_METHODS = ['lrf', 'mikro_jig', 'capari_tuylu', 'capari_yemli', 'dropshot_yem', 'dip', 'samandira', 'spin', 'diger'] as const;
+export type TackleMethod = (typeof TACKLE_METHODS)[number];
+const BAITS = ['hamsi', 'karides', 'midye'] as const;
+/** The coarse I6 method from the V2 one (the old column keeps its four values). */
+export const coarseMethod = (m: TackleMethod): SessionInput['method'] => (m === 'lrf' ? 'lrf' : m === 'mikro_jig' || m === 'spin' ? 'spin' : m.startsWith('capari') ? 'capari' : 'diger');
 
 /** I6: forecast captured on the device before the session (Sahadayım start / plan screen). */
 export interface StartForecast {
@@ -84,12 +97,16 @@ export function validateSession(b: Record<string, unknown>, now: Date): { ok: tr
     if (!str(species, 40)) return { ok: false, error: 'invalid_species' };
     if (!num(it.count, 1, 500) || !Number.isInteger(it.count)) return { ok: false, error: 'invalid_count' };
     if (!none(it.length_cm) && !num(it.length_cm, 1, 150)) return { ok: false, error: 'invalid_length' };
-    items.push({ species: species.trim().toLocaleLowerCase('tr'), count: it.count, length_cm: none(it.length_cm) ? null : (it.length_cm as number) });
+    if (!none(it.weight_kg) && !num(it.weight_kg, 0.001, 50)) return { ok: false, error: 'invalid_weight' };
+    items.push({ species: species.trim().toLocaleLowerCase('tr'), count: it.count, length_cm: none(it.length_cm) ? null : (it.length_cm as number), weight_kg: none(it.weight_kg) ? null : (it.weight_kg as number) });
   }
   const target = none(b.target_species) ? null : String(b.target_species).trim().toLocaleLowerCase('tr');
   if (!target || !TARGETS.includes(target)) return { ok: false, error: 'invalid_target_species' };
   if (!none(b.method) && !METHODS.includes(b.method as (typeof METHODS)[number])) return { ok: false, error: 'invalid_method' };
   if (!none(b.retro) && typeof b.retro !== 'boolean') return { ok: false, error: 'invalid_retro' };
+  if (!none(b.tackle_method) && !TACKLE_METHODS.includes(b.tackle_method as TackleMethod)) return { ok: false, error: 'invalid_tackle_method' };
+  if (!none(b.bait) && !BAITS.includes(b.bait as (typeof BAITS)[number])) return { ok: false, error: 'invalid_bait' };
+  if (!none(b.bites) && (!num(b.bites, 0, 9999) || !Number.isInteger(b.bites))) return { ok: false, error: 'invalid_bites' };
   let startForecast: StartForecast | null = null;
   if (!none(b.start_forecast)) {
     const f = b.start_forecast as Partial<StartForecast>;
@@ -124,7 +141,10 @@ export function validateSession(b: Record<string, unknown>, now: Date): { ok: tr
       note: none(b.note) ? null : (b.note as string),
       items,
       target_species: target,
-      method: none(b.method) ? null : (b.method as SessionInput['method']),
+      method: none(b.method) ? (none(b.tackle_method) ? null : coarseMethod(b.tackle_method as TackleMethod)) : (b.method as SessionInput['method']),
+      tackle_method: none(b.tackle_method) ? null : (b.tackle_method as TackleMethod),
+      bait: none(b.bait) ? null : (b.bait as SessionInput['bait']),
+      bites: none(b.bites) ? null : (b.bites as number),
       retro: b.retro === true || (none(b.retro) && now.getTime() > end.getTime() + RETRO_H * HOUR),
       start_forecast: startForecast,
     },
@@ -205,16 +225,17 @@ async function saveSession(env: Env, id: string, v: SessionInput, now: Date, rep
     ...(replace ? [env.DB.prepare('DELETE FROM catch_item WHERE session_id = ?1').bind(id)] : []),
     env.DB.prepare(
       `INSERT INTO catch_session (id, spot_id, start_at, end_at, active_min, rods, jig_g, hook_no, lure_len_cm, lure_color, under_lamp, zero_catch, note, created_at, model_json, freeze_status,
-         target_species, method, retro, forecast_kind, forecast_meta)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
+         target_species, method, retro, forecast_kind, forecast_meta, outing_id, section_no, bites, bait, tackle_method)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26)
        ON CONFLICT(id) DO UPDATE SET spot_id = excluded.spot_id, start_at = excluded.start_at, end_at = excluded.end_at, active_min = excluded.active_min,
        rods = excluded.rods, jig_g = excluded.jig_g, hook_no = excluded.hook_no, lure_len_cm = excluded.lure_len_cm, lure_color = excluded.lure_color,
        under_lamp = excluded.under_lamp, zero_catch = excluded.zero_catch, note = excluded.note, model_json = excluded.model_json, freeze_status = excluded.freeze_status,
-       target_species = excluded.target_species, method = excluded.method, retro = excluded.retro, forecast_kind = excluded.forecast_kind, forecast_meta = excluded.forecast_meta`,
+       target_species = excluded.target_species, method = excluded.method, retro = excluded.retro, forecast_kind = excluded.forecast_kind, forecast_meta = excluded.forecast_meta,
+       outing_id = excluded.outing_id, section_no = excluded.section_no, bites = excluded.bites, bait = excluded.bait, tackle_method = excluded.tackle_method`,
     ).bind(id, v.spot_id, v.start_at, v.end_at, v.active_min, v.rods, v.jig_g, v.hook_no, v.lure_len_cm, v.lure_color,
       v.under_lamp === null ? null : v.under_lamp ? 1 : 0, v.zero_catch ? 1 : 0, v.note, now.toISOString(), model, status,
-      v.target_species, v.method, v.retro ? 1 : 0, kind, meta),
-    ...v.items.map((i) => env.DB.prepare('INSERT INTO catch_item (session_id, species, count, length_cm) VALUES (?1, ?2, ?3, ?4)').bind(id, i.species, i.count, i.length_cm)),
+      v.target_species, v.method, v.retro ? 1 : 0, kind, meta, v.outing_id ?? null, v.section_no ?? null, v.bites ?? null, v.bait ?? null, v.tackle_method ?? null),
+    ...v.items.map((i) => env.DB.prepare('INSERT INTO catch_item (session_id, species, count, length_cm, weight_kg) VALUES (?1, ?2, ?3, ?4, ?5)').bind(id, i.species, i.count, i.length_cm, i.weight_kg ?? null)),
   ]);
   return { freeze_status: status, missing, forecast_kind: kind, refrozen: !keep && !!prev };
 }
@@ -297,3 +318,104 @@ catchRoutes.get('/export.csv', async (c) => {
   const csv = toCsv((s!.results as Record<string, unknown>[]).map((x) => ({ s: x, items: items.filter((it) => it.session_id === x.id) })));
   return c.body(csv, 200, { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="av-gunlugu.csv"', 'cache-control': 'no-store' });
 });
+
+// ---------------------------------------------------------------- V2.5 outings: one trip, several method sections (D5)
+export interface OutingInput { spot_id: string; start_at: string; end_at: string; people: number; note: string | null; sections: (SessionInput & { id?: string })[] }
+
+/** Validates an outing and its sections (each a session of the same spot inside the trip's time span). */
+export function validateOuting(b: Record<string, unknown>, now: Date): { ok: true; value: OutingInput; warnings: string[] } | { ok: false; error: string } {
+  if (!str(b.spot_id, 80)) return { ok: false, error: 'invalid_spot' };
+  const start = new Date(String(b.start_at));
+  const end = new Date(String(b.end_at));
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) return { ok: false, error: 'invalid_time' };
+  const people = none(b.people) ? 1 : b.people;
+  if (!num(people, 1, 20) || !Number.isInteger(people)) return { ok: false, error: 'invalid_people' };
+  if (!none(b.note) && !str(b.note, 1000)) return { ok: false, error: 'invalid_note' };
+  if (!Array.isArray(b.sections) || b.sections.length < 1 || b.sections.length > 20) return { ok: false, error: 'invalid_sections' };
+  const sections: OutingInput['sections'] = [];
+  const warnings: string[] = [];
+  for (const [i, raw] of (b.sections as Record<string, unknown>[]).entries()) {
+    const v = validateSession({ ...raw, spot_id: b.spot_id }, now);
+    if (!v.ok) return { ok: false, error: `section_${i + 1}_${v.error}` };
+    if (Date.parse(v.value.start_at) < start.getTime() - 60_000 || Date.parse(v.value.end_at) > end.getTime() + 60_000) return { ok: false, error: `section_${i + 1}_outside_outing` };
+    warnings.push(...v.warnings.map((w) => `Bölüm ${i + 1}: ${w}`));
+    sections.push({ ...v.value, section_no: i + 1, ...(typeof raw.id === 'string' ? { id: raw.id } : {}) });
+  }
+  // md. 15(4) per person, on entered weights only (no estimate from length)
+  const weights = sections.flatMap((s) => s.items).filter((i) => i.weight_kg != null);
+  if (weights.length) {
+    const total = weights.reduce((a, i) => a + i.weight_kg!, 0) / people;
+    const largest = Math.max(...weights.map((i) => i.weight_kg! / i.count));
+    const bag = bagCheck(total, largest);
+    if (bag.level !== 'ok') warnings.push(`${bag.text} (kişi başı ${String(Math.round(total * 10) / 10).replace('.', ',')} kg, ${people} kişi)`);
+  }
+  return { ok: true, warnings, value: { spot_id: b.spot_id, start_at: start.toISOString(), end_at: end.toISOString(), people, note: none(b.note) ? null : (b.note as string), sections } };
+}
+
+async function saveOuting(env: Env, id: string, o: OutingInput, now: Date, replace: boolean) {
+  await env.DB.prepare(
+    `INSERT INTO catch_outing (id, spot_id, start_at, end_at, people, note, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+     ON CONFLICT(id) DO UPDATE SET spot_id = excluded.spot_id, start_at = excluded.start_at, end_at = excluded.end_at, people = excluded.people, note = excluded.note`,
+  ).bind(id, o.spot_id, o.start_at, o.end_at, o.people, o.note, now.toISOString()).run();
+  const keep = new Set<string>();
+  const out: { id: string; freeze_status: string }[] = [];
+  for (const s of o.sections) {
+    const sid = s.id ?? `ses-${crypto.randomUUID().slice(0, 12)}`;
+    const exists = !!s.id && !!(await env.DB.prepare('SELECT id FROM catch_session WHERE id = ?1').bind(sid).first());
+    const r = await saveSession(env, sid, { ...s, outing_id: id }, now, exists);
+    keep.add(sid);
+    out.push({ id: sid, freeze_status: r.freeze_status });
+  }
+  if (replace) {
+    const old = await env.DB.prepare('SELECT id FROM catch_session WHERE outing_id = ?1').bind(id).all<{ id: string }>();
+    for (const r of old.results.filter((x) => !keep.has(x.id)))
+      await env.DB.batch([env.DB.prepare('DELETE FROM catch_item WHERE session_id = ?1').bind(r.id), env.DB.prepare('DELETE FROM catch_session WHERE id = ?1').bind(r.id)]);
+  }
+  return out;
+}
+
+catchRoutes.post('/outing', async (c) => {
+  const b = await c.req.json<Record<string, unknown>>().catch(() => null);
+  if (!b || typeof b !== 'object') return c.json({ ok: false, error: 'invalid_json' }, 400);
+  const now = new Date();
+  const v = validateOuting(b, now);
+  if (!v.ok) return c.json(v, 400);
+  if (!(await c.env.DB.prepare('SELECT id FROM spots WHERE id = ?1').bind(v.value.spot_id).first())) return c.json({ ok: false, error: 'not_found' }, 404);
+  const id = `out-${crypto.randomUUID().slice(0, 12)}`;
+  const sections = await saveOuting(c.env, id, v.value, now, false);
+  return c.json({ ok: true, id, sections, warnings: v.warnings }, 201);
+});
+
+catchRoutes.put('/outing/:id', async (c) => {
+  const id = c.req.param('id');
+  if (!(await c.env.DB.prepare('SELECT id FROM catch_outing WHERE id = ?1').bind(id).first())) return c.json({ ok: false, error: 'not_found' }, 404);
+  const b = await c.req.json<Record<string, unknown>>().catch(() => null);
+  if (!b || typeof b !== 'object') return c.json({ ok: false, error: 'invalid_json' }, 400);
+  const now = new Date();
+  const v = validateOuting(b, now);
+  if (!v.ok) return c.json(v, 400);
+  const sections = await saveOuting(c.env, id, v.value, now, true);
+  return c.json({ ok: true, id, sections, warnings: v.warnings });
+});
+
+catchRoutes.get('/outing', async (c) => {
+  const [o, s, i] = await c.env.DB.batch([
+    c.env.DB.prepare('SELECT o.*, p.name AS spot_name FROM catch_outing o JOIN spots p ON p.id = o.spot_id ORDER BY start_at DESC LIMIT 100'),
+    c.env.DB.prepare('SELECT id, outing_id, section_no, start_at, end_at, active_min, rods, tackle_method, method, bait, bites, zero_catch, target_species, retro, note FROM catch_session WHERE outing_id IS NOT NULL ORDER BY section_no'),
+    c.env.DB.prepare('SELECT i.* FROM catch_item i JOIN catch_session s ON s.id = i.session_id WHERE s.outing_id IS NOT NULL'),
+  ]);
+  const items = i!.results as (CatchItem & { session_id: string })[];
+  const secs: (Record<string, unknown> & { items: unknown[] })[] = (s!.results as Record<string, unknown>[]).map((x) => ({ ...x, items: items.filter((it) => it.session_id === x.id).map(({ species, count, length_cm, weight_kg }) => ({ species, count, length_cm, weight_kg })) }));
+  return c.json({ ok: true, outings: (o!.results as Record<string, unknown>[]).map((x) => ({ ...x, sections: secs.filter((t) => t.outing_id === x.id) })) });
+});
+
+catchRoutes.delete('/outing/:id', async (c) => {
+  const id = c.req.param('id');
+  const ss = await c.env.DB.prepare('SELECT id FROM catch_session WHERE outing_id = ?1').bind(id).all<{ id: string }>();
+  await c.env.DB.batch([
+    ...ss.results.flatMap((r) => [c.env.DB.prepare('DELETE FROM catch_item WHERE session_id = ?1').bind(r.id), c.env.DB.prepare('DELETE FROM catch_session WHERE id = ?1').bind(r.id)]),
+    c.env.DB.prepare('DELETE FROM catch_outing WHERE id = ?1').bind(id),
+  ]);
+  return c.json({ ok: true });
+});
+

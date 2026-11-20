@@ -118,3 +118,22 @@ def test_i6_row_uses_start_forecast_only_when_frozen_before():
     pro = cal.session_from_row({**row, "retro": 0, "forecast_kind": "dondurulmus"})
     assert pro.score == 83 and pro.prospective is True
     assert "WHERE s.target_species = ?1" in cal.SQL
+
+
+def test_group_outings_merges_sections_into_one_independent_unit():
+    """D5: two method sections of one night count once; effort and catches add up; rows without an outing stay."""
+    rows = [
+        {"spot_id": "a", "start_at": "2026-11-08T18:00:00Z", "active_min": 180, "rods": 1, "count": 60, "retro": 1, "outing_id": "o1", "section_no": 2, "model_json": "B"},
+        {"spot_id": "a", "start_at": "2026-11-08T17:00:00Z", "active_min": 60, "rods": 2, "count": 0, "retro": 0, "outing_id": "o1", "section_no": 1, "model_json": "A"},
+        {"spot_id": "b", "start_at": "2026-11-01T18:00:00Z", "active_min": 90, "rods": 1, "count": 5, "retro": 0, "outing_id": None, "section_no": None},
+    ]
+    out = cal.group_outings(rows)
+    assert len(out) == 2
+    one = next(r for r in out if r.get("outing_id") == "o1")
+    assert one["active_min"] == 60 * 2 + 180
+    assert one["rods"] == 1
+    assert one["count"] == 60
+    assert one["retro"] == 1
+    assert one["model_json"] == "A"  # first section's frozen model (the start forecast)
+    assert one["sections"] == 2
+    assert [r["spot_id"] for r in out] == ["b", "a"]

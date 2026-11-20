@@ -88,7 +88,8 @@ export function fieldRecords(obs: FieldObsRow[], depths: FieldDepthRow[]): Map<s
       if (k === 'saha' && lamp.state === null) lamp = null;
     }
     // Depths: only the best source that has any (sources are not mixed).
-    const withDepth = ordered.filter((o) => depths.some((d) => d.obs_id === o.id));
+    // D4: a field depth that failed the automatic check waits for review ('onaysiz') and does not count yet
+    const withDepth = ordered.filter((o) => depths.some((d) => d.obs_id === o.id) && !(kindOf(o) === 'saha' && o.status === 'onaysiz'));
     const depthKind = withDepth.length ? kindOf(withDepth[0]!) : null;
     const ids = new Set(withDepth.filter((o) => kindOf(o) === depthKind).map((o) => o.id));
     const ds = depths.filter((d) => ids.has(d.obs_id));

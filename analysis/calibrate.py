@@ -241,10 +241,37 @@ def fake_sessions(n: int, beta: float = 1.2, lam0: float = 3.0, seed: int = 7, n
 
 
 # I6: only sessions that targeted this species (another species' session is not a zero for it; NULL = unknown target)
-SQL = """SELECT s.spot_id, s.start_at, s.active_min, s.rods, s.model_json, s.retro, s.forecast_kind,
+SQL = """SELECT s.spot_id, s.start_at, s.active_min, s.rods, s.model_json, s.retro, s.forecast_kind, s.outing_id, s.section_no,
   COALESCE((SELECT SUM(i.count) FROM catch_item i WHERE i.session_id = s.id AND i.species = ?1), 0) AS count
 FROM catch_session s WHERE s.target_species = ?1 ORDER BY s.start_at"""
 SPECIES = ("istavrit", "levrek")
+
+
+def group_outings(rows: list[dict]) -> list[dict]:
+    """D5: the sections of one outing (same trip, several methods) are not independent sessions. They are merged into
+    one row: catches summed, effort summed (active minutes × rods, carried as rods = 1), the first section's frozen
+    model (its start forecast is the one the angler saw), retro if any section is retro. Rows without an outing stay
+    as they are."""
+    out: list[dict] = []
+    groups: dict[str, list[dict]] = {}
+    for r in rows:
+        oid = r.get("outing_id")
+        if oid:
+            groups.setdefault(oid, []).append(r)
+        else:
+            out.append(r)
+    for secs in groups.values():
+        secs = sorted(secs, key=lambda r: (r.get("section_no") or 0, str(r.get("start_at") or "")))
+        first = secs[0]
+        out.append({
+            **first,
+            "active_min": sum((r.get("active_min") or 0) * max(1, int(r.get("rods") or 1)) for r in secs),
+            "rods": 1,
+            "count": sum(int(r.get("count") or 0) for r in secs),
+            "retro": int(any(r.get("retro") for r in secs)),
+            "sections": len(secs),
+        })
+    return sorted(out, key=lambda r: str(r.get("start_at") or ""))
 
 
 def report_key(species: str) -> str:
@@ -268,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
         d1 = D1()
         report = {}
         for sp in SPECIES if a.species == "all" else (a.species,):
-            sessions = [x for x in (session_from_row(r, sp) for r in d1.query(SQL, [sp])) if x]
+            sessions = [x for x in (session_from_row(r, sp) for r in group_outings(d1.query(SQL, [sp]))) if x]
             report[sp] = {**fit(sessions), "species": sp}
             if a.write:
                 d1.query("INSERT INTO meta (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value", [report_key(sp), json.dumps(report[sp], ensure_ascii=False)])
