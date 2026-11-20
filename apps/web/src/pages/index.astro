@@ -9,6 +9,10 @@ import Base from '../layouts/Base.astro';
        not wait for a second round trip after the page modules have run. -->
   <script is:inline slot="head">
     (function () {
+      // V1.7 (D8): on a first visit the web font (~60 KB) would share the slow link with the plan's requests; the page
+      // draws in the system font until the card is ready, then the font loads (it swaps in, as it always did)
+      try { if (!localStorage.getItem('av-livn-font')) document.documentElement.setAttribute('data-font-wait', ''); } catch (e) {}
+      setTimeout(function () { document.documentElement.removeAttribute('data-font-wait'); }, 3000);
       var sp = 'istavrit';
       try {
         var q = new URLSearchParams(location.search).get('tur');
@@ -22,11 +26,11 @@ import Base from '../layouts/Base.astro';
         var take = function (b) { if (b && b.windows) b.windows.slice(0, 3).forEach(function (w) { if (ids.indexOf(w.spot_id) < 0) ids.push(w.spot_id); }); };
         var pb = d && d.plan && d.plan.bursa;
         [pb && pb.today, pb, d && d.today].forEach(function (g) { if (g) { take(g.all); take(g.open); } });
-        ids.slice(0, 6).forEach(function (id) { var u = api('/api/spots/' + encodeURIComponent(id) + '?model=v2'); if (!pre[u]) { pre[u] = fetch(u); pre[u].catch(function () {}); } });
+        ids.slice(0, 6).forEach(function (id) { var u = api('/api/spots/' + encodeURIComponent(id) + '?model=v2'); if (!pre[u]) { pre[u] = fetch(u, { priority: 'high' }); pre[u].catch(function () {}); } });
       };
       ['/api/windows', '/api/spots', '/api/trust-gate'].forEach(function (p) {
         var u = api(p);
-        pre[u] = fetch(u, { cache: 'no-cache' });
+        pre[u] = fetch(u, { cache: 'no-cache', priority: 'high' });
         if (p === '/api/windows') pre[u] = pre[u].then(function (r) { if (r.ok) r.clone().json().then(details).catch(function () {}); return r; });
         // the header's freshness check reads the same answer (a copy) instead of downloading the spot list again
         if (p === '/api/spots') window.__avSpots = pre[u].then(function (r) { return r.clone(); });
@@ -493,6 +497,9 @@ import Base from '../layouts/Base.astro';
     if (planIsReady) return;
     planIsReady = true;
     performance.mark('plan-ready');
+    // V1.7: the web font may load now (first visit); later visits do not wait for it
+    document.documentElement.removeAttribute('data-font-wait');
+    void document.fonts?.load('1em "Bricolage Grotesque Variable"').then((f) => { if (f.length) try { localStorage.setItem('av-livn-font', '1'); } catch {} }).catch(() => {});
     const run = () => afterPlan.splice(0).forEach((f) => f());
     if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 300 }); else setTimeout(run, 0);
   }

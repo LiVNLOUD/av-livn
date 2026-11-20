@@ -295,3 +295,6 @@ body.app .stale.on { display: none; }
 .trust3 .t3-k { color: var(--fg-2); }
 .trust3 .t3-d { grid-column: 1 / -1; color: var(--fg-2); font-size: var(--fs-1); line-height: var(--lh-1); }
 .trust3 b[data-l=''] { color: var(--fg-2); font-weight: 600; }
+
+/* V1.7 (D8): first visit to the home page — system font until the plan card is ready (index.astro) */
+:root[data-font-wait] { font-family: system-ui, sans-serif; }
