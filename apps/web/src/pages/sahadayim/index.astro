@@ -197,7 +197,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   type StartForecast = { captured_at: string; model_version: string; species: string; hours: { hour: number; total: number | null; p10: number | null; p90: number | null; rank: number | null }[] };
   // V2.5: a segment is a method section of the outing: its own effort, bites (vuruş) and catch; "Sonuç yok" is explicit
   type Seg = { start: number; end?: number; method: Method; fish: Fish[]; pausedMs: number; bites?: number; zero?: boolean };
-  type Live = { spot: Spot; segs: Seg[]; pauseAt: number | null; forecast?: StartForecast | null; people?: number; kg?: { total: number; largest: number } | null; depth?: number | null };
+  type Live = { spot: Spot; segs: Seg[]; pauseAt: number | null; forecast?: StartForecast | null; people?: number; kg?: { total: number; largest: number } | null; depth?: number | null; depthMsg?: string };
   const METHOD_TR: Record<string, string> = { lrf: 'LRF', mikro_jig: 'mikro jig', capari_tuylu: 'çapari (tüylü)', capari_yemli: 'çapari (yemli)', dropshot_yem: 'dropshot + yem', dip: 'dip takımı', samandira: 'şamandıra', spin: 'spin', diger: 'diğer', capari: 'çapari (tüylü)' };
   const BAIT_TR: Record<string, string> = { hamsi: 'hamsi', karides: 'karides', midye: 'midye' };
   /** Old saved choices (I6 methods) → V2 pool. */
@@ -399,6 +399,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const small = sg.fish.filter((f) => sizeWarning(f.species, f.length_cm));
     if (small.length) warn.push(`Bu bölümde ${small.length} balık yasal boyun altında — denize geri bırakın.`);
     if (live!.kg) { const b = bagCheck(live!.kg.total / (live!.people ?? 1), live!.kg.largest); if (b.level !== 'ok') warn.push(b.text); }
+    if (live!.depthMsg) warn.push(live!.depthMsg);
     $('l-warn').textContent = warn.join(' ');
     $('log').innerHTML = [...fish].reverse().slice(0, 30).map((f) => `<li><span>${new Date(f.t).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} ${f.species}</span><span>${f.length_cm ? `${String(f.length_cm).replace('.', ',')} cm${sizeWarning(f.species, f.length_cm) ? ` ⚠ ${LEGAL_MIN_CM[f.species]} cm altı` : ''}` : ''}</span></li>`).join('');
   }
@@ -461,9 +462,9 @@ import AdminLogin from '../../components/AdminLogin.astro';
     const body = { depth_m: d, at: new Date().toISOString() };
     try {
       const j = await api(`/api/admin/spots/${encodeURIComponent(live!.spot.id)}/depth`, 'POST', body);
-      $('l-warn').textContent = j.status === 'onayli' ? `Dip ${v} m kaydedildi; puan güncelleniyor.` : 'Dip kaydedildi; tutarlılık denetiminden geçmedi, yönetici onayını bekliyor.';
+      if (live) { live.depthMsg = j.status === 'onayli' ? `Dip ${v} m kaydedildi; puan güncelleniyor.` : 'Dip kaydedildi; tutarlılık denetiminden geçmedi, yönetici onayını bekliyor.'; save(); draw(); }
     } catch (e) {
-      if (!(e as { fatal?: boolean }).fatal) store.set(QUEUE, [...store.get<unknown[]>(QUEUE, []), { kind: 'depth', spot: live!.spot.id, body }]);
+      if (!(e as { fatal?: boolean }).fatal) { store.set(QUEUE, [...store.get<unknown[]>(QUEUE, []), { kind: 'depth', spot: live!.spot.id, body }]); if (live) { live.depthMsg = `Dip ${v} m telefona kaydedildi; bağlantı gelince gönderilecek.`; save(); draw(); } }
     }
   });
   $('kg').addEventListener('click', () => {

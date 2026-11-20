@@ -150,7 +150,7 @@ export function recommendMethods(ctx: MethodContext): MethodAdvice {
   // secondary from the other category when the mode allows it, so artificial and natural are both offered (D6)
   // (every mode holds at least two methods; 'hepsi' always holds both categories)
   const secondary = mode === 'hepsi' ? ranked.find((m) => m.category !== primary.category)! : ranked[1]!;
-  return { primary, secondary, ranked, ladder: ladder(primary, secondary), ladderMinutes: LADDER_MINUTES, note: 'Sıralama saha kuralıdır (kanıt C); yöntem üstünlüğü kanıtı değildir.' };
+  return { primary, secondary, ranked, ladder: ladder(primary, secondary), ladderMinutes: LADDER_MINUTES, note: 'Sıralama doğrulanmamış bir saha kuralıdır; yöntemin üstün olduğunu göstermez.' };
 }
 
 /** Controlled change ladder: one variable per step (layer → weight/sink → size/profile → colour → method). */

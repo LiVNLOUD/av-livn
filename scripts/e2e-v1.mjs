@@ -277,6 +277,80 @@ for (const [path, w, h, theme] of [['/', 1440, 900, 'dark'], ['/', 390, 844, 'da
   }
 }
 
+// ---------------------------------------------------------------- V2: method card, inventory, Sahadayım
+for (const [w, h] of [[1440, 900], [390, 844]]) {
+  const { p, ctx } = await page(w, h);
+  await p.goto(base + '/', { waitUntil: 'networkidle' });
+  await waitPlan(p);
+  if (w < 1024) await p.locator('#m-more').click();
+  const card = p.locator('#rig-card');
+  if (!(await card.isVisible())) { ok(`${w}: method card hidden (levrek or no tackle inputs this hour)`); await ctx.close(); continue; }
+  await p.locator('#rig-card > summary').click();
+  const parts = () => p.evaluate(() => [...document.querySelectorAll('#rig .rs-part')].map((g) => g.getAttribute('data-part')).join(','));
+  const tabs = await p.locator('#rig .mc-tab').count();
+  const a = await parts();
+  await p.locator('#rig .mc-tab').nth(1).click();
+  const bParts = await parts();
+  tabs === 2 && a && bParts && a !== bParts ? ok(`${w}: switching primary → secondary changes the rig layout (${a.split(',').length} → ${bParts.split(',').length} parts)`) : fail(`${w}: method switch did not change the rig (${a} | ${bParts})`);
+  const kinds = await p.evaluate(() => [...new Set([...document.querySelectorAll('#rig .mk')].map((e) => e.textContent))]);
+  kinds.length ? ok(`${w}: reasons carry evidence kinds (${kinds.join(', ')})`) : fail(`${w}: no evidence kinds on the reasons`);
+  await p.locator('#rig .mc-view button[data-v=kullan]').click();
+  (await p.locator('#rig svg').getAttribute('aria-label'))?.includes('eğitim animasyonu') ? ok(`${w}: use view labelled "eğitim animasyonu"`) : fail(`${w}: use view not labelled`);
+  await p.locator('#rig .mc-view button[data-v=bagla]').click();
+  await p.locator('#rig .rs-part').first().dispatchEvent('click');
+  const label = await p.textContent('#rig .mc-part');
+  /·/.test(label ?? '') ? ok(`${w}: tapping a part names it ("${label}")`) : fail(`${w}: part tap gave "${label}"`);
+  const ov = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  ov <= 0 ? ok(`${w}: no overflow with the method card open`) : fail(`${w}: overflow ${ov}px`);
+  await ctx.close();
+}
+{
+  const { p, ctx } = await page(390, 844);
+  await p.goto(base + '/ayarlar/', { waitUntil: 'networkidle' });
+  await p.locator('#gear-groups .chip[data-g=kursun]').first().click();
+  await p.locator('input[name=mode][value=dogal]').check();
+  await p.locator('#my-tackle button[type=submit]').click();
+  await p.reload({ waitUntil: 'networkidle' });
+  const kept = await p.evaluate(() => ({ chip: document.querySelector('#gear-groups .chip[data-g=kursun]')?.getAttribute('aria-pressed'), mode: document.querySelector('input[name=mode]:checked')?.value, stored: localStorage.getItem('av-livn-my-tackle') }));
+  kept.chip === 'true' && kept.mode === 'dogal' ? ok('inventory: owned sinker and "yalnız doğal" kept on this device') : fail(`inventory not kept: ${JSON.stringify(kept)}`);
+  await ctx.close();
+}
+if (!/av\.livn\.tr/.test(base)) {
+  // Sahadayım needs the admin key: local dev server only (ADMIN_TOKEN dev-token)
+  const { p, ctx } = await page(390, 844);
+  await ctx.addInitScript(() => { localStorage.setItem('av-livn-admin', 'dev-token'); localStorage.setItem('av-livn-saha-hint', '1'); localStorage.removeItem('av-livn-live-session'); });
+  await p.unroute(/\/api\//);
+  await p.route(/\/api\//, async (route) => {
+    const u = new URL(route.request().url());
+    if (!apiOrigin || u.pathname.startsWith('/api/admin')) return route.continue();
+    const r = await fetch(apiOrigin + u.pathname + u.search, { headers: { accept: 'application/json' } });
+    await route.fulfill({ status: r.status, body: await r.text(), headers: { 'content-type': 'application/json' } });
+  });
+  p.on('dialog', (d) => d.accept('4,5'));
+  await p.goto(base + '/sahadayim/', { waitUntil: 'networkidle' });
+  await p.selectOption('#spot', { index: 3 });
+  await p.selectOption('#method', 'dropshot_yem');
+  await p.locator('#start').click();
+  await p.waitForTimeout(1500);
+  await p.locator('#bite').click(); await p.locator('#bite').click(); await p.locator('#plus').click();
+  const c = await p.evaluate(() => ({ bites: document.getElementById('bites').textContent, fish: document.getElementById('count').textContent, rig: document.querySelectorAll('#l-rig .rs-part').length }));
+  c.bites === '2' && c.fish === '1' && c.rig > 3 ? ok(`Sahadayım: bites ${c.bites}, fish ${c.fish}, rig drawn (${c.rig} parts)`) : fail(`Sahadayım counts ${JSON.stringify(c)}`);
+  await p.locator('#depth').click();
+  await p.waitForTimeout(1200);
+  const dv = await p.textContent('#depth-v');
+  dv === '4,5' ? ok(`Sahadayım: Dip entry kept (${dv} m; ${await p.textContent('#l-warn')})`) : fail(`Sahadayım: depth shows "${dv}"`);
+  const small = await p.evaluate(() => [...document.querySelectorAll('.lv-main .act')].map((b) => Math.round(b.getBoundingClientRect().height)));
+  small.every((x) => x >= 64) ? ok(`Sahadayım: four main controls ≥ 64 px (${small.join(', ')})`) : fail(`Sahadayım: controls ${small.join(', ')} px`);
+  const visible = await p.evaluate(() => { const r = document.getElementById('depth').getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!top?.closest('#depth'); });
+  visible ? ok('Sahadayım: bottom controls not covered (tab bar under the live screen)') : fail('Sahadayım: a bottom control is covered');
+  await p.locator('#red').click();
+  const red = await p.evaluate(() => ({ on: document.body.classList.contains('red'), color: getComputedStyle(document.querySelector('.lv-sec')).color, bg: getComputedStyle(document.querySelector('.live')).backgroundColor }));
+  red.on && red.bg === 'rgb(0, 0, 0)' && /rgb\((24\d|25\d), /.test(red.color) ? ok(`Sahadayım night mode: red on black (${red.color})`) : fail(`night mode ${JSON.stringify(red)}`);
+  const ov = await p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  ov <= 0 ? ok('Sahadayım 390: no horizontal overflow') : fail(`Sahadayım overflow ${ov}px`);
+  await ctx.close();
+}
+
 await b.close();
 console.log(failed ? `${failed} failed` : 'all ok');
 process.exit(failed ? 1 : 0);

@@ -26,7 +26,7 @@ describe('recommendMethods', () => {
     expect(a.secondary.category).toBe('dogal');
     expect(a.ranked).toHaveLength(7);
     expect(a.ladderMinutes).toBe(LADDER_MINUTES);
-    expect(a.note).toMatch(/kanıt C/);
+    expect(a.note).toMatch(/doğrulanmamış bir saha kuralı/);
   });
   it('day, deep, current: a sinking method leads; LRF is marked down for current', () => {
     const a = recommendMethods({ ...base, depthM: 8, currentMs: 0.5, gustKmh: 35 });
