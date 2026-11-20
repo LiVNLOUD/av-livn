@@ -347,3 +347,23 @@ D9 (mobil yoğunluk): 390 px ilk ekranda yalnız ana karar ve küçük koşul
 7. assets-needed.md: boş durum görselleri (3) çıkar, simge + metinle çözülsün; maskable simge ayrı üretilmez, app-1024.png'den betikle türetilir (güvenli alana sığdırıp zemini doldurarak); kullanıcı ChatGPT çıktısını PNG olarak yükler (assets-inbox/), WebP dönüşümü, boyutlandırma, alfa ve boyut kontrolü scripts/assets-check.mjs ile otomatik; toplam 17 görsel.
 
 Not (uygulama sırasında): 4. maddedeki "yalnız 16 merada var" bilgisi V0b raporundaki bir hataydı. 119 meranın hepsinde OSM kara poligonundan hesaplanmış 16 yönlü açıklık (`fetch_km`, `pipeline/av_pipeline/spots/fetch_rose.py`) zaten vardı ve puanlamada kullanılıyordu; 16 meralık dosya eski bir denetim çıktısıydı (`docs/audit/fetch_rose.json`). Maketler artık bu veriyi kullanır.
+
+## Token tasarrufu, V3/V4 daraltma (20 Kasım, kullanıcı; V1 onayından sonra)
+
+V2–V4'te uygulanır:
+
+- Ekran görüntüleri yalnız 1440 ve 390 px. Bağımsız görsel inceleme yalnız V4 sonunda bir kez.
+- Raporlar kısa: değişenler, kabul sonuçları, kalan riskler. Test çıktısını yapıştırma; CI sonucu yeterli.
+- **V3 daraltıldı.** Kalanlar:
+  - Dean profili yalnız uygun kumsallarda (D3);
+  - "Dip: __ m" ham kayıt + tutarlılık denetimi (D4);
+  - harita veri kalitesi ve kesit.
+  - ÇED taraması en fazla 1 saat; sonuç yoksa raporla, geç.
+  - OpenSeaMap ve SDB yeniden denemesi yalnız D5 ölçütleri sağlanırsa.
+- **V4 daraltıldı.** Kalanlar:
+  - kıyı dosyası (özet öncelikli);
+  - Mapillary kanıt zinciri;
+  - liste/detay düzeni.
+  - /tasarim sayfası çıkarıldı.
+
+Not: V2'nin "Dip: __ m" girişi (madde 7), D4'ün ham kayıt ve tutarlılık denetimiyle birlikte V2'de yapılır. V3 bu kayıtları kullanır.
