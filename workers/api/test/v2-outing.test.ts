@@ -18,41 +18,56 @@ beforeAll(async () => {
   await writeScoresV2(now);
 });
 
-describe('depthCheck (D4)', () => {
-  const base = { distanceM: null, kind: 'iskele', neighbours: [], dtmMax100m: null };
-  it('a plausible entry passes and gets an uncertainty and a method note', () => {
+describe('depthCheck (D4, V2.9)', () => {
+  const base = { distanceM: null, kind: 'iskele', neighbours: [] as number[], dtmMax100m: null };
+  const st = (r: ReturnType<typeof depthCheck>, n: string) => r.checks.find((c) => c.name === n)!.state;
+  it('a check that cannot be evaluated is not a pass; the first field depth of a spot always waits for review', () => {
+    // Tirilye, 5 m, no neighbours, no distance, DTM 2 m
+    const r = depthCheck({ ...base, depthM: 5, dtmMax100m: 2 });
+    expect(st(r, 'olabilirlik')).toBe('gecti');
+    expect(st(r, 'kiyi_uzakligi')).toBe('degerlendirilmedi');
+    expect(st(r, 'komsu_kayitlar')).toBe('degerlendirilmedi');
+    expect(st(r, 'diger_kaynaklar')).toBe('gecti');
+    expect(r.ok).toBe(false);
+    expect(depthCheck({ ...base, depthM: 5 }).checks.every((c) => c.name === 'olabilirlik' || c.state === 'degerlendirilmedi')).toBe(true);
+  });
+  it('auto-approval: range passed + neighbours evaluated and agreeing + distance or DTM evaluated and passed', () => {
+    expect(depthCheck({ ...base, depthM: 5, neighbours: [5.2, 4.8], dtmMax100m: 2 }).ok).toBe(true);
+    expect(depthCheck({ ...base, depthM: 5, neighbours: [5.2, 4.8], distanceM: 10 }).ok).toBe(true);
+    // neighbours agree but nothing geometric was evaluated
+    expect(depthCheck({ ...base, depthM: 5, neighbours: [5.2] }).ok).toBe(false);
+    // neighbours disagree
+    expect(depthCheck({ ...base, depthM: 12, neighbours: [4, 5], dtmMax100m: 6 }).ok).toBe(false);
+    expect(st(depthCheck({ ...base, depthM: 60 }), 'olabilirlik')).toBe('kaldi');
+    expect(st(depthCheck({ ...base, depthM: 12, distanceM: 5, kind: 'kumsal' }), 'kiyi_uzakligi')).toBe('kaldi');
+    expect(st(depthCheck({ ...base, depthM: 25, dtmMax100m: 1.5 }), 'diger_kaynaklar')).toBe('kaldi');
+  });
+  it('uncertainty and method note', () => {
     const r = depthCheck({ ...base, depthM: 5 });
-    expect(r.ok).toBe(true);
     expect(r.uncertaintyM).toBe(0.8);
     expect(r.methodNote).toMatch(/misina açısı ve akıntı belirsiz/);
     expect(depthCheck({ ...base, depthM: 1 }).uncertaintyM).toBe(0.5);
   });
-  it('fails out of range, too deep for the distance, far from neighbours, or grossly deeper than the DTM', () => {
-    expect(depthCheck({ ...base, depthM: 60 }).checks.find((c) => c.name === 'olabilirlik')!.ok).toBe(false);
-    expect(depthCheck({ ...base, depthM: 12, distanceM: 5 }).ok).toBe(false);
-    expect(depthCheck({ ...base, depthM: 12, distanceM: 5, kind: 'kumsal' }).checks.find((c) => c.name === 'kiyi_uzakligi')!.note).toMatch(/en çok ~4,5 m/);
-    expect(depthCheck({ ...base, depthM: 5, neighbours: [5.2, 4.8, 6] }).ok).toBe(true);
-    expect(depthCheck({ ...base, depthM: 12, neighbours: [4, 5] }).checks.find((c) => c.name === 'komsu_kayitlar')!.ok).toBe(false);
-    // Tirilye: DTM 0–2 m, field ~5 m — the DTM's near-shore smoothing is tolerated
-    expect(depthCheck({ ...base, depthM: 5, dtmMax100m: 1.5 }).ok).toBe(true);
-    expect(depthCheck({ ...base, depthM: 25, dtmMax100m: 1.5 }).checks.find((c) => c.name === 'diger_kaynaklar')!.ok).toBe(false);
-  });
 });
 
 describe('Dip: __ m endpoint and review queue', () => {
-  it('a passing entry is approved and rescored; a failing one waits in the queue and does not count', async () => {
-    const ok = await post('/api/admin/spots/osm-way-1/depth', { depth_m: 5 });
-    expect(ok.status).toBe(201);
-    const a = await ok.json<{ status: string; check: { ok: boolean } }>();
+  it('the first entry waits in the queue; after its approval an agreeing second entry is approved and rescored', async () => {
+    const first = await post('/api/admin/spots/osm-way-1/depth', { depth_m: 5 });
+    expect(first.status).toBe(201);
+    const f = await first.json<{ status: string; obs_id: string }>();
+    expect(f.status).toBe('onaysiz');
+    expect((await app.request(`/api/admin/field/${f.obs_id}`, { method: 'PATCH', headers: AUTH, body: JSON.stringify({ status: 'onayli' }) }, env)).status).toBe(200);
+    const ok = await post('/api/admin/spots/osm-way-1/depth', { depth_m: 5.3, distance_m: 15 });
+    const a = await ok.json<{ status: string }>();
     expect(a.status).toBe('onayli');
     const bad = await post('/api/admin/spots/osm-way-1/depth', { depth_m: 35, distance_m: 4 });
     const b = await bad.json<{ status: string; obs_id: string; rescore: string }>();
     expect(b.status).toBe('onaysiz');
     expect(b.rescore).toBe('waiting_review');
-    const q = await (await app.request('/api/admin/depth-queue', { headers: AUTH }, env)).json<{ items: { obs_id: string; depth_m: number; check: { name: string; ok: boolean }[]; method_note: string }[] }>();
+    const q = await (await app.request('/api/admin/depth-queue', { headers: AUTH }, env)).json<{ items: { obs_id: string; depth_m: number; check: { name: string; state: string }[]; method_note: string }[] }>();
     const it = q.items.find((x) => x.obs_id === b.obs_id)!;
     expect(it.depth_m).toBe(35);
-    expect(it.check.some((c) => !c.ok)).toBe(true);
+    expect(it.check.some((c) => c.state === 'kaldi')).toBe(true);
     expect(it.method_note).toMatch(/kurşun/);
     expect((await post('/api/admin/spots/osm-way-1/depth', { depth_m: -1 })).status).toBe(400);
     expect((await post('/api/admin/spots/yok/depth', { depth_m: 3 })).status).toBe(404);

@@ -13,7 +13,9 @@ export interface DepthCheckInput {
   /** DTM-based deepest point within 100 m of the spot (m, positive down), when known. */
   dtmMax100m: number | null;
 }
-export interface DepthCheck { name: 'olabilirlik' | 'kiyi_uzakligi' | 'komsu_kayitlar' | 'diger_kaynaklar'; ok: boolean; note: string }
+/** V2.9: a check that could not be evaluated is not a pass. */
+export type CheckState = 'gecti' | 'kaldi' | 'degerlendirilmedi';
+export interface DepthCheck { name: 'olabilirlik' | 'kiyi_uzakligi' | 'komsu_kayitlar' | 'diger_kaynaklar'; state: CheckState; note: string }
 export interface DepthCheckResult { ok: boolean; checks: DepthCheck[]; uncertaintyM: number; methodNote: string }
 
 /** Plausible range for a sinker reaching the bottom from the shore in the Gemlik–Mudanya coast (m). */
@@ -27,24 +29,35 @@ export function depthCheck(i: DepthCheckInput): DepthCheckResult {
   const d = i.depthM;
   const checks: DepthCheck[] = [];
   const [lo, hi] = DEPTH_RANGE;
-  checks.push({ name: 'olabilirlik', ok: d >= lo && d <= hi, note: `${f1(d)} m, kıyıdan av için ${f1(lo)}–${hi} m aralığı` });
+  const st = (ok: boolean): CheckState => (ok ? 'gecti' : 'kaldi');
+  checks.push({ name: 'olabilirlik', state: st(d >= lo && d <= hi), note: `${f1(d)} m, kıyıdan av için ${f1(lo)}–${hi} m aralığı` });
   if (i.distanceM !== null && i.distanceM > 0) {
     // steepest believable average slope: 1:1 off a pier or breakwater edge, 1:2 elsewhere
     const steep = i.kind === 'iskele' || i.kind === 'mendirek' || i.kind === 'rihtim' ? 1 : 0.5;
     const max = i.distanceM * steep + 2;
-    checks.push({ name: 'kiyi_uzakligi', ok: d <= max, note: `${f1(i.distanceM)} m uzakta en çok ~${f1(max)} m beklenir` });
-  } else checks.push({ name: 'kiyi_uzakligi', ok: true, note: 'uzaklık girilmedi; değerlendirilmedi' });
+    checks.push({ name: 'kiyi_uzakligi', state: st(d <= max), note: `${f1(i.distanceM)} m uzakta en çok ~${f1(max)} m beklenir` });
+  } else checks.push({ name: 'kiyi_uzakligi', state: 'degerlendirilmedi', note: 'uzaklık girilmedi' });
   if (i.neighbours.length) {
     const m = med(i.neighbours);
     const tol = Math.max(2, 0.5 * m);
-    checks.push({ name: 'komsu_kayitlar', ok: Math.abs(d - m) <= tol, note: `aynı meradaki ${i.neighbours.length} kayıt medyanı ${f1(m)} m (±${f1(tol)} m)` });
-  } else checks.push({ name: 'komsu_kayitlar', ok: true, note: 'bu merada başka saha kaydı yok' });
+    checks.push({ name: 'komsu_kayitlar', state: st(Math.abs(d - m) <= tol), note: `aynı meradaki ${i.neighbours.length} kayıt medyanı ${f1(m)} m (±${f1(tol)} m)` });
+  } else checks.push({ name: 'komsu_kayitlar', state: 'degerlendirilmedi', note: 'bu merada onaylı başka saha kaydı yok' });
   if (i.dtmMax100m !== null) {
     // DTM smooths the near-shore bottom towards shallow (Tirilye: DTM 0–2 m, field ~5 m): only a gross mismatch fails
     const max = 3 * Math.max(0, i.dtmMax100m) + 6;
-    checks.push({ name: 'diger_kaynaklar', ok: d <= max, note: `DTM 100 m içinde en derin ${f1(i.dtmMax100m)} m; DTM kıyıda sığa yumuşatır, ${f1(max)} m'ye kadar kabul` });
-  } else checks.push({ name: 'diger_kaynaklar', ok: true, note: 'karşılaştırılacak kaynak yok' });
+    checks.push({ name: 'diger_kaynaklar', state: st(d <= max), note: `DTM 100 m içinde en derin ${f1(i.dtmMax100m)} m; DTM kıyıda sığa yumuşatır, ${f1(max)} m'ye kadar kabul` });
+  } else checks.push({ name: 'diger_kaynaklar', state: 'degerlendirilmedi', note: 'karşılaştırılacak kaynak yok' });
   // a sinker read on a sloping line overstates depth; current and line angle add spread
   const uncertaintyM = Math.round(Math.max(0.5, 0.15 * d) * 10) / 10;
-  return { ok: checks.every((c) => c.ok), checks, uncertaintyM, methodNote: METHOD_NOTE };
+  return { ok: autoApprove(checks), checks, uncertaintyM, methodNote: METHOD_NOTE };
+}
+
+/**
+ * V2.9 / D4: automatic approval needs evidence, not the absence of objections. Plausible range passed, the spot's
+ * own approved field depths evaluated and agreeing, and at least one independent geometric check (distance from the
+ * edge or the DTM) evaluated and passed. Anything else waits for review — so a spot's first field depth always does.
+ */
+export function autoApprove(checks: DepthCheck[]): boolean {
+  const s = (n: DepthCheck['name']) => checks.find((c) => c.name === n)?.state;
+  return s('olabilirlik') === 'gecti' && s('komsu_kayitlar') === 'gecti' && (s('kiyi_uzakligi') === 'gecti' || s('diger_kaynaklar') === 'gecti');
 }

@@ -142,9 +142,9 @@ import AdminLogin from '../../../components/AdminLogin.astro';
     const secs: SectionRow[] = outings.flatMap((x) => x.sections.map((s) => ({ outing_id: x.id, tackle_method: s.tackle_method, method: s.method, active_min: s.active_min, rods: s.rods, bites: s.bites, target_species: s.target_species, items: s.items })));
     const f2 = (v: number | null) => (v === null ? '–' : String(v).replace('.', ','));
     $('yield').innerHTML = yieldByMethod(secs).map((r) => `<tr><td>${esc(MT[r.method] ?? r.method)}</td><td>${r.outings}</td><td>${r.sections}</td><td>${f2(r.hours)}</td><td>${f2(r.bitesPerH)}</td><td>${f2(r.fishPerH)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">Kayıt yok.</td></tr>';
-    $('queue').innerHTML = q.items.map((i: { obs_id: string; name: string; observed_at: string; depth_m: number; uncertainty_m: number; method_note: string; check: { name: string; ok: boolean; note: string }[] }) =>
+    $('queue').innerHTML = q.items.map((i: { obs_id: string; name: string; observed_at: string; depth_m: number; uncertainty_m: number; method_note: string; check: { name: string; state: 'gecti' | 'kaldi' | 'degerlendirilmedi'; note: string }[] }) =>
       `<li><b>${esc(i.name)}</b> · ${esc(new Date(i.observed_at).toLocaleString('tr-TR'))} · <b>${String(i.depth_m).replace('.', ',')} m</b> (±${String(i.uncertainty_m).replace('.', ',')} m; ${esc(i.method_note)})
-        <ul>${(i.check ?? []).map((c) => `<li class="${c.ok ? '' : 'bad'}">${c.ok ? '✓' : '✗'} ${esc(c.note)}</li>`).join('')}</ul>
+        <ul>${(i.check ?? []).map((c) => `<li class="${c.state === 'kaldi' ? 'bad' : ''}">${c.state === 'gecti' ? '✓ geçti' : c.state === 'kaldi' ? '✗ kaldı' : '– değerlendirilmedi'}: ${esc(c.note)}</li>`).join('')}</ul>
         <button type="button" class="btn small" data-ok="${i.obs_id}">Onayla</button> <button type="button" class="btn small secondary" data-no="${i.obs_id}">Reddet</button></li>`).join('') || '<li class="muted">Bekleyen kayıt yok.</li>';
     $('queue').querySelectorAll<HTMLButtonElement>('[data-ok],[data-no]').forEach((b) => b.addEventListener('click', async () => {
       await api(`/api/admin/field/${b.dataset.ok ?? b.dataset.no}`, 'PATCH', { status: b.dataset.ok ? 'onayli' : 'reddedildi' });
