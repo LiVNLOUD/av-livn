@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="av.livn — Av planı" app>
+<Base title="av.livn — Av planı" app themeable>
   <!-- Q2: start the plan's data requests at once, before the page modules load (~0.6 s earlier on the critical path).
        Same URLs as scripts/species.ts api(); the page takes each response once (preFetch) or fetches itself. -->
   <script is:inline>
@@ -46,7 +46,7 @@ import Base from '../layouts/Base.astro';
         <p class="stale-card" id="stale-card" role="alert" hidden></p>
         <article class="card main-pick" id="pick">
           <div class="qa q1"><h2 class="q">Bugün gitmeye değer mi?</h2><p class="a big" id="verdict">Yükleniyor…</p><p class="a-sub"><span id="verdict-sub"></span> <span class="fresh" id="fresh"></span></p></div>
-          <div class="qa q2" hidden><h2 class="q q-row">Nereye, ne zaman? <a id="a-maplink" class="q-link" href="/harita/" title="Bu saatte rüzgar, dalga, akıntı ve yağış haritası">haritada aç</a></h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="a-sub now-line" id="a-now" hidden></p></div>
+          <div class="qa q2" hidden><h2 class="q q-row">Nereye, ne zaman? <a id="a-maplink" class="q-link" href="/harita/" title="Bu saatte rüzgar, dalga, akıntı ve yağış haritası">haritada aç</a></h2><p class="a big nm" id="a-where"></p><p class="a-sub tm" id="a-when"></p><p class="cond" id="a-cond" hidden></p><p class="a-sub now-line" id="a-now" hidden></p></div>
           <div class="qa q3" hidden><h2 class="q">Ne ile başla?</h2><p class="a tk-line" id="a-tackle">hesaplanıyor…</p><p class="a-sub" id="a-tackle-sub"></p></div>
           <div class="qa q4" hidden><h2 class="q">Neden?</h2><ul class="a why" id="a-why"></ul></div>
           <div class="qa q5" hidden><h2 class="q">Ne kadar güvenilir?</h2><p class="a big trust" id="a-trust"></p><p class="a-sub" id="a-trust-sub"></p><ul class="trust3" id="a-trust3" aria-label="Üç ayrı güven"></ul><p class="a-sub models-line" id="a-models" hidden></p></div>
@@ -56,26 +56,32 @@ import Base from '../layouts/Base.astro';
             <p class="fs-2">Puan, o saatteki koşulların bu tür için tanımlı <b>ideal senaryoya göre yeri</b> (0–100); sahada doğrulanmış yakalama olasılığı değildir. <b>Bant</b> ve <b>“ilk 3'te”</b> payı yalnız model parametrelerinin belirsizliğini gösterir; hava tahmininin hatası dahil değildir. <b>Güçlü:</b> zirve ≥ 65 ve veri tam; <b>görece:</b> mevcut seçeneklerin en iyisi. Rüzgar ya da dalga verisi yoksa öneri verilmez.</p>
             <p class="fs-2"><a href="/model/">Model nasıl çalışıyor?</a> · <a href="https://github.com/LiVNLOUD/av-livn/blob/main/docs/DATA-SOURCES.md">Veri kaynakları</a></p>
           </details>
+          <!-- V1.4 / D9: on phones the first screen is the decision and the conditions; map and timeline one tap away -->
+          <div class="m-jump" id="m-jump"><button type="button" class="btn" id="m-tl">Saat saat çizelge</button><a class="btn secondary" id="m-map" href="/harita/">Harita</a><button type="button" class="btn secondary" id="m-more" aria-expanded="false">Takım ve güven</button></div>
           <div class="go" id="pick-go" hidden><button type="button" class="btn" id="pick-open">Merayı ve saatleri aç</button><a class="btn secondary admin-only" id="pick-field" href="/sahadayim/" hidden>Sahadayım'da başlat</a></div>
         </article>
        </div>
-       <!-- O4: the plan region is filled with the pick's 24 h strip, the tackle picture and the alternatives -->
-       <div class="plan-side">
-        <section class="card side-card" id="strip-card" hidden aria-labelledby="t-strip">
-          <h2 class="side-h" id="t-strip">Önümüzdeki 24 saat <span class="muted fs-1" id="strip-name"></span></h2>
-          <div class="strip-box" id="strip"></div>
-          <p class="fs-1 muted strip-legend"><span class="lg-win" aria-hidden="true"></span> önerilen pencere · <span class="lg-gate" aria-hidden="true"></span> güvenlik saati · üst şerit gece/gündüz · bir saate dokununca kart o saate geçer</p>
-        </section>
-        <section class="card side-card" id="rig-card" hidden aria-labelledby="t-rig">
-          <h2 class="side-h" id="t-rig">Takım görseli <span class="muted fs-1" id="rig-hour"></span></h2>
-          <div class="rig-box" id="rig"></div>
-        </section>
-        <section class="side-alts" id="alts-box" hidden aria-labelledby="alts-h">
-          <h2 class="side-h" id="alts-h">Diğer seçenekler</h2>
-          <ol class="alts" id="alts"></ol>
-        </section>
-       </div>
       </div>
+    </section>
+
+    <!-- V1.4 (direction A): the dock under the map — the spot's av zaman çizelgesi, equivalent options, tackle picture -->
+    <section class="r-dock" id="dock" aria-label="Av zaman çizelgesi ve seçenekler">
+      <section class="card dock-tl" id="strip-card" hidden aria-labelledby="t-strip">
+        <h2 class="side-h" id="t-strip">Av zaman çizelgesi <span class="muted fs-1" id="strip-name"></span></h2>
+        <div class="tl-box"><div class="tl-labs" id="tl-labs" aria-hidden="true"></div><div class="strip-box" id="strip"></div></div>
+        <p class="fs-1 muted strip-legend">yerel saat · <span class="lg-win" aria-hidden="true"></span> önerilen pencere · dikey çizgi: seçili saat (harita ve kart bu saati gösterir) · bir saate dokununca hepsi o saate geçer · rüzgar ekseni 0–40 km/sa</p>
+      </section>
+      <section class="dock-alts" id="alts-box" hidden aria-labelledby="alts-h">
+        <h2 class="side-h" id="alts-h">Eşdeğer seçenekler <span class="muted fs-1">sıralama yok</span></h2>
+        <div class="alts-t" role="table" aria-labelledby="alts-h">
+          <div class="alts-h" role="row"><span role="columnheader">Mera</span><span role="columnheader">Uygunluk</span><span role="columnheader">Erişim</span><span role="columnheader">Rüzgara göre</span><span role="columnheader">Veri</span></div>
+          <ol class="alts" id="alts"></ol>
+        </div>
+      </section>
+      <section class="card dock-rig" id="rig-card" hidden aria-labelledby="t-rig">
+        <h2 class="side-h" id="t-rig">Takım görseli <span class="muted fs-1" id="rig-hour"></span></h2>
+        <div class="rig-box" id="rig"></div>
+      </section>
     </section>
 
     <section class="r-heat" aria-labelledby="t-heat">
@@ -141,7 +147,8 @@ import Base from '../layouts/Base.astro';
   .sp-pick { margin-left: auto; display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-2); color: var(--mist); }
   .sp-pick select { height: 44px; padding-top: 0; padding-bottom: 0; }
   .r-win, .r-heat, .r-spots { grid-area: main; min-width: 0; }
-  .app:not([data-view='plan']) .r-win, .app:not([data-view='heat']) .r-heat, .app:not([data-view='spots']) .r-spots { display: none; }
+  .r-dock { grid-area: dock; min-width: 0; }
+  .app:not([data-view='plan']) .r-win, .app:not([data-view='heat']) .r-heat, .app:not([data-view='spots']) .r-spots, .app:not([data-view='plan']) .r-dock { display: none; }
   .r-map { grid-area: map; display: none; }
   .r-card { grid-area: card; }
   :global(.vh) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -199,7 +206,7 @@ import Base from '../layouts/Base.astro';
   :global(.heat-sum .tk b) { color: var(--sodium); font-weight: 650; }
   :global(.heatmap .hm-focus) { fill: none; stroke: var(--foam); stroke-width: 1; opacity: 0.45; }
   :global(.ramp) { display: inline-block; width: 56px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, rgb(57 50 52), rgb(185 126 80), rgb(71 157 109)); }
-  :global(.gatesw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: #3a1c1f; border: 1px solid var(--storm); }
+  :global(.gatesw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: var(--danger-bg); border: 1px solid var(--storm); }
   :global(.hatchsw) { display: inline-block; width: 14px; height: 10px; border-radius: 2px; background: repeating-linear-gradient(45deg, #0e1c27 0 1.5px, #5d9a76 1.5px 4px); }
   .heat { overflow-x: auto; }
   :global(.heatmap) { display: block; font-family: inherit; }
@@ -273,21 +280,123 @@ import Base from '../layouts/Base.astro';
     .app[data-view='plan'] .timebar, .app[data-view='spots'] .timebar { grid-area: map; align-self: start; justify-self: start; position: sticky; top: var(--s4); z-index: 6; margin: var(--s2); background: var(--deep); }
     .app:not([data-view='heat']) { grid-template-areas: 'views views' 'main map'; }
   }
-  .mini-legend { position: absolute; z-index: 2; left: var(--s3); bottom: var(--s5); margin: 0; padding: var(--s1) var(--s3); border-radius: 8px; background: color-mix(in oklab, var(--deep) 88%, transparent); border: 1px solid var(--swell); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); max-width: calc(100% - 24px); }
+  .mini-legend { position: absolute; z-index: 2; left: var(--s3); right: var(--s3); width: fit-content; bottom: var(--s5); margin: 0; padding: var(--s1) var(--s3); border-radius: 8px; background: color-mix(in oklab, var(--deep) 88%, transparent); border: 1px solid var(--swell); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); max-width: calc(100% - 24px); }
   .mini-legend a { color: var(--foam); }
   .sw-pick { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--sodium); display: inline-block; }
   .sw-forb { width: 14px; height: 10px; display: inline-block; border: 1.2px solid #d65048; background: repeating-linear-gradient(135deg, rgb(214 80 72 / .8) 0 1.6px, transparent 1.6px 5px); }
   .r-card { background: var(--deep); display: flex; flex-direction: column; min-height: 0; border-top: 1px solid var(--swell); }
   .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: var(--s2) var(--s3); border-bottom: 1px solid var(--swell); }
   .r-card iframe { flex: 1; width: 100%; border: 0; background: var(--sea); }
+
+  /* ---------------------------------------------------------------- V1.4: direction A ("Atlas") */
+  /* dock: timeline | equivalent options | tackle picture */
+  .r-dock { display: grid; gap: var(--s4); grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .r-dock > [hidden] { display: none; }
+  .dock-tl { display: grid; gap: var(--s2); padding: var(--s3) var(--s4); min-width: 0; }
+  .dock-rig { display: grid; gap: var(--s2); padding: var(--s3); min-width: 0; }
+  .tl-box { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); min-width: 0; }
+  .tl-labs { position: relative; }
+  :global(.tl-lab) { position: absolute; left: 0; right: 6px; display: flex; gap: 6px; align-items: center; font-size: var(--fs-1); line-height: 1.2; color: var(--fg-2); }
+  :global(.tl-lab.main) { color: var(--fg-1); font-weight: 600; font-size: var(--fs-2); }
+  :global(.tl-lab svg) { width: 14px; height: 14px; flex: none; }
+  .m-jump { display: none; }
+  .cond { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: var(--fs-2); color: var(--fg-1); }
+  .cond[hidden] { display: none; }
+  :global(.cond span) { display: inline-flex; gap: 5px; align-items: center; }
+  :global(.cond svg) { width: 16px; height: 16px; color: var(--fg-2); }
+  /* equivalent options as a compact table: access, coast type, wind vs shore, data */
+  .alts-t { display: grid; gap: 0; min-width: 0; }
+  .alts-h, :global(.alts .alt-b) { display: grid; grid-template-columns: minmax(0, 1.6fr) 4.5rem minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 0.9fr); gap: var(--s2); align-items: center; }
+  .alts-h { font-size: var(--fs-1); color: var(--fg-2); padding: 0 var(--s2) 4px; border-bottom: 1px solid var(--line); }
+  .r-dock :global(.alts) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .r-dock :global(.alts .alt-b) { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: var(--s2); min-height: 44px; font-size: var(--fs-2); }
+  :global(.alts .alt-b.sel) { box-shadow: inset 3px 0 0 var(--sel); }
+  :global(.alts .alt-b > span) { display: flex; gap: 5px; align-items: center; min-width: 0; color: var(--fg-2); }
+  :global(.alts .alt-b .a-n) { color: var(--fg-1); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  :global(.alts .alt-b svg) { width: 16px; height: 16px; flex: none; }
+  :global(.alts .alt-b .w) { color: var(--warn); }
+  :global(.fitpill) { display: inline-grid; place-items: center; min-width: 2.4rem; height: 24px; padding: 0 6px; border-radius: 12px; font-weight: 700; font-size: var(--fs-2); font-variant-numeric: tabular-nums; }
+  :global(.fitpill.f0) { background: var(--fit-0); color: var(--fit-t0); } :global(.fitpill.f1) { background: var(--fit-1); color: var(--fit-t1); } :global(.fitpill.f2) { background: var(--fit-2); color: var(--fit-t2); }
+  :global(.fitpill.f3) { background: var(--fit-3); color: var(--fit-t3); } :global(.fitpill.f4) { background: var(--fit-4); color: var(--fit-t4); }
+  /* timeline colours (timeline.ts classes) */
+  :global(.timeline) { display: block; overflow: visible; }
+  :global(.timeline .tl-hr), :global(.timeline .tl-ax), :global(.timeline .tl-note) { fill: var(--fg-2); font-size: 11px; }
+  :global(.timeline .tl-ax) { font-size: 10px; }
+  :global(.timeline .tl-sky.day) { fill: rgb(232 239 243 / .34); } :global(.timeline .tl-sky.tw) { fill: rgb(232 239 243 / .14); } :global(.timeline .tl-sky.night) { fill: rgb(0 0 0 / .45); }
+  :global([data-theme='light'] .timeline .tl-sky.day) { fill: rgb(255 255 255 / .9); } :global([data-theme='light'] .timeline .tl-sky.night) { fill: rgb(20 35 48 / .18); }
+  :global(.timeline .tl-fit.f0) { fill: var(--fit-0); } :global(.timeline .tl-fit.f1) { fill: var(--fit-1); } :global(.timeline .tl-fit.f2) { fill: var(--fit-2); } :global(.timeline .tl-fit.f3) { fill: var(--fit-3); } :global(.timeline .tl-fit.f4) { fill: var(--fit-4); }
+  :global(.timeline .tl-miss-l) { fill: var(--fg-3); opacity: .5; }
+  :global(.timeline .tl-grid) { stroke: var(--line); stroke-dasharray: 2 4; }
+  :global(.timeline .tl-gust) { fill: var(--wind-1); opacity: .35; }
+  :global(.timeline .tl-wind) { fill: none; stroke: var(--wind-1); stroke-width: 2.75; stroke-linejoin: round; }
+  :global(.timeline .tl-arr) { fill: var(--fg-2); }
+  :global(.timeline .tl-rain) { fill: var(--rain); }
+  :global(.timeline .tl-wave) { fill: none; stroke: var(--sea-1); stroke-width: 2; }
+  :global(.timeline .tl-gate) { fill: var(--danger); }
+  :global(.timeline .tl-win) { fill: none; stroke: var(--fg-1); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  :global(.timeline .tl-sel) { stroke: var(--sel); stroke-width: 2; }
+  :global(.timeline .tl-sel-tag) { fill: var(--sel); } :global(.timeline .tl-sel-t) { fill: var(--ink-0); font-size: 11px; font-weight: 700; }
+  :global(.timeline .tl-hit) { fill: transparent; cursor: pointer; }
+  :global(.timeline .tl-hit:hover) { fill: rgb(255 255 255 / .06); }
+
+  /* ≥1200 plan view: the map is the stage, the decision floats on it, the dock sits under it */
+  @media (min-width: 1024px) {
+    /* the plan view scrolls as a page: map stage first, the dock under it (other views keep the fixed app frame) */
+    :global(body.app:has(.app[data-view='plan'])) { height: auto; overflow: visible; }
+    .app[data-view='plan'] { height: auto; grid-template-columns: minmax(0, 1fr) auto; position: relative; min-height: calc(100dvh - var(--header-h)); grid-template-rows: auto auto minmax(300px, 1fr) auto; grid-template-areas: 'views card' 'tb card' 'map card' 'dock card'; }
+    .app[data-view='plan'] { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'views' 'tb' 'map' 'dock'; }
+    .app[data-view='plan'] .r-map { grid-area: map; border-left: 0; position: relative; top: 0; height: auto; min-height: 0; }
+    /* absolute inside its grid area: the floating panel never sizes the map row */
+    .app[data-view='plan'] .r-win { grid-area: map; position: absolute; top: 0; left: 0; z-index: 5; width: min(470px, 40%); max-height: calc(100% - 2 * var(--s4)); margin: var(--s4); padding: var(--s3); overflow: auto; border-radius: var(--radius); background: var(--ink-1); border: 1px solid var(--line); box-shadow: 0 10px 30px rgb(0 0 0 / .35); }
+    .app[data-view='plan'] .r-win :global(.plan-main) { max-width: none; }
+    /* decision first: the equal-options chips follow the card (the dock table lists the same places) */
+    .app[data-view='plan'] .r-win :global(.plan-main) { display: flex; flex-direction: column; gap: var(--s3); }
+    .app[data-view='plan'] .r-win :global(#stale-card) { order: -1; }
+    .app[data-view='plan'] .r-win :global(#eq-note), .app[data-view='plan'] .r-win :global(#eq-pick) { order: 2; margin: 0; }
+    .app[data-view='plan'] .r-win :global(.main-pick) { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'q1' 'q2' 'q5' 'q3' 'q4' 'more' 'go'; background: var(--ink-2); }
+    .app[data-view='plan'] .r-dock { grid-area: dock; grid-template-columns: minmax(0, 1fr) minmax(0, 560px); padding: var(--s3) var(--s5) var(--s5); border-top: 1px solid var(--line); background: var(--ink-1); }
+    .app[data-view='plan'] .dock-rig { display: none; }
+    /* inside the floating panel the trust is one compact block (the verdict line already says the overall level) */
+    .app[data-view='plan'] .r-win :global(#a-trust) { font-size: var(--fs-4); }
+    .app[data-view='plan'] .r-win :global(#a-trust-sub), .app[data-view='plan'] .r-win :global(#a-models) { display: none; }
+    .app[data-view='plan'] .r-win :global(.main-pick) { gap: var(--s3); padding: var(--s3) var(--s4); }
+  }
+  /* ≥1200: the spot card opens as a column beside the stage (below 1200 it is the full-width bottom sheet) */
+  @media (min-width: 1200px) {
+    .app[data-view='plan'] { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'views card' 'tb card' 'map card' 'dock card'; }
+    .app[data-view='plan'] .r-card:not([hidden]) { position: sticky; top: 0; height: 100dvh; }
+  }
+  @media (min-width: 1700px) { .app[data-view='plan'] .r-dock { grid-template-columns: minmax(0, 1fr) minmax(0, 560px) 300px; } .app[data-view='plan'] .dock-rig:not([hidden]) { display: grid; } }
+  @media (max-width: 767px) { .app[data-view='plan'] { grid-template-areas: 'views' 'tb' 'main' 'dock'; } }
+  /* 768–1023: plan | map side by side, the dock full width under them (phone rules for the first screen apply) */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .app[data-view='plan'] { grid-template-areas: 'views views' 'main map' 'dock dock'; }
+    .app[data-view='plan'] .r-map { position: relative; height: 60vh; top: 0; }
+    .r-dock { grid-template-columns: minmax(0, 1fr); }
+  }
+  /* phones and small tablets (D9): first screen = decision + conditions + two buttons; tackle/why/trust and the
+     timeline one tap away */
+  @media (max-width: 1023px) {
+    .m-jump { display: flex; flex-wrap: wrap; gap: var(--s2); }
+    .m-jump .btn { flex: 1 1 40%; min-height: 48px; justify-content: center; }
+    .app[data-view='plan']:not(.m-more) .r-win :global(.q3), .app[data-view='plan']:not(.m-more) .r-win :global(.q4),
+    .app[data-view='plan']:not(.m-more) .r-win :global(.q5), .app[data-view='plan']:not(.m-more) .r-win :global(.why-more),
+    .app[data-view='plan']:not(.m-more) .r-win :global(.go) { display: none !important; }
+    .app[data-view='plan']:not(.m-tl) .r-dock { display: none; }
+    .tl-box { grid-template-columns: 5.2rem minmax(0, 1fr); }
+    .alts-h, :global(.alts .alt-b) { grid-template-columns: minmax(0, 1.4fr) 3.2rem minmax(0, 1fr); }
+    .alts-h span:nth-child(n+4), :global(.alts .alt-b > span:nth-child(n+4)) { display: none; }
+  }
 </style>
 
 <script>
   import { esc, fmtAgo, fmtDay, fmtTime, freshness, type WeatherRunInfo, KIND_TR, lampV2, swimRule } from '../scripts/format';
   import { IF_DARK, IF_LIT, kindLabel, leadWithRank, tackle, tackleClass, TACKLE_CLASSES, tackleLevrek, tackleLevrekLine, tackleLine } from '@av-livn/scoring';
   import { loadMy, personalLine, toProfiles } from '../scripts/mytackle';
-  import { catchTrust, driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, planPick, spotKnowledge, trust, trustTail, verdictText, weatherSentence, weatherTrust, type TrustRow } from '../scripts/plan';
-  import { stripSvg } from '../scripts/strip';
+  import { catchTrust, compass8, windRel, driverSentence, equalText, lightSentence, modelAgreement, nowVsPlan, planPick, spotKnowledge, trust, trustTail, verdictText, weatherSentence, weatherTrust, type TrustRow } from '../scripts/plan';
+  import { timelineRows, timelineSvg, fitStep } from '../scripts/timeline';
+  import { frameIndex, loadGrid, nearest, type Grid } from '../scripts/layers';
+  import { icon, kindIcon } from '../scripts/icons';
   import { rigSvg, type RigVariant, type Zone } from '../scripts/rig';
   import { api, currentSpecies, LEGAL_MIN, link, saveSpecies, SPECIES_TR, type Species } from '../scripts/species';
   import { renderHeatmap, type HeatRow, type HoursData, type HourSpot } from '../scripts/heatmap';
@@ -352,6 +461,9 @@ import Base from '../layouts/Base.astro';
     mapApi?.focus(id); // O1: one path for plan, map, list and heat map — zoom in and ring the spot
     requestAnimationFrame(() => mapApi?.resize());
   }
+  // V1.4 / D9: phone shortcuts — the timeline and the tackle/why/trust block open in place, the map is a link
+  $('m-tl').addEventListener('click', () => { app.classList.toggle('m-tl'); if (app.classList.contains('m-tl')) { if (cardWin) drawStrip(cardWin, sel); $('dock').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } });
+  $('m-more').addEventListener('click', () => { const on = app.classList.toggle('m-more'); $('m-more').setAttribute('aria-expanded', String(on)); });
   $('drawer-close').addEventListener('click', () => { $('drawer').hidden = true; requestAnimationFrame(() => mapApi?.resize()); });
   addEventListener('message', (e) => { if (e.origin === location.origin && e.data === 'close-card') $('drawer-close').click(); });
 
@@ -376,7 +488,16 @@ import Base from '../layouts/Base.astro';
     if (mapApi || !wide.matches || app.dataset.view === 'heat') return;
     const { mountMap } = await import('../scripts/map');
     mapApi = mountMap({ container: $('map'), at: atIso(), onSpot: (id) => openSpot(id), species, highlight: pickId });
+    padMap();
   }
+  /** V1.4: on wide screens the decision panel floats over the map's left side; the camera keeps spots out from under it. */
+  function padMap() {
+    if (!mapApi) return;
+    const panel = document.querySelector<HTMLElement>('.r-win');
+    const floating = matchMedia('(min-width: 1024px)').matches && app.dataset.view === 'plan' && panel;
+    mapApi.setPadding({ left: floating ? panel!.getBoundingClientRect().width + 32 : 0 });
+  }
+  addEventListener('resize', () => padMap());
   // ---------------------------------------------------------------- M1: views (Plan · Saat çizelgesi · Tüm meralar)
   const VIEW = 'av-livn-view';
   type View = 'plan' | 'heat' | 'spots';
@@ -386,7 +507,7 @@ import Base from '../layouts/Base.astro';
     viewBtns.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.v === v)));
     if (remember) try { sessionStorage.setItem(VIEW, v); } catch {}
     if (v === 'heat') requestAnimationFrame(() => { heat(); summary(); });
-    else ensureMap().then(() => requestAnimationFrame(() => mapApi?.resize()));
+    else ensureMap().then(() => requestAnimationFrame(() => { mapApi?.resize(); padMap(); }));
   }
   viewBtns.forEach((b) => b.addEventListener('click', () => setView(b.dataset.v as View)));
   // the plan is the first view; a tab chosen in this browser session is kept on reload
@@ -700,8 +821,9 @@ import Base from '../layouts/Base.astro';
   const myTk = toProfiles(loadMy());
   type Detail = { from: number; packed: { tk?: (number | null)[][] } | null; field?: { kinds: { lamba: string | null; derinlik: string | null; yapi: string | null; taban: string | null } } | null };
   const details = new Map<string, Promise<Detail | null>>();
+  const detailCache = new Map<string, Detail | null>(); // resolved details, for synchronous redraws (timeline)
   const detail = (id: string) => {
-    if (!details.has(id)) details.set(id, fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species)).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    if (!details.has(id)) details.set(id, fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species)).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d: Detail | null) => { detailCache.set(id, d); return d; }));
     return details.get(id)!;
   };
   let sumSeq = 0;
@@ -843,12 +965,28 @@ import Base from '../layouts/Base.astro';
         mapApi?.focus(eqList[eqSel]!.spot_id); // O1: choosing an option goes to it on the map
       }));
     }
-    // O4: alternatives as small cards beside the main card (name, time, score, trust in plain words)
-    alts.innerHTML = rest.map((w) => {
-      const tr = trust(w, { calibrated: calibrated[species] === true });
-      return `<li><button type="button" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}"><span class="a-n">${esc(w.name)}</span><span class="a-r">${span(w)} · uygunluk ${Math.round(w.total)}${w.tier === 'guclu' ? '' : ' · görece'}</span><span class="a-r">Güven: <b class="trust" data-l="${tr.level}">${tr.level}</b></span></button></li>`;
+    // V1.4: equivalent options as a table — no ranking; access (unknown is not "open"), coast type, wind vs this
+    // shore at the selected hour, and what the spot's data rests on
+    const seen = new Set<string>();
+    const rows = [cur, ...eqList, ...rest].filter((w) => !seen.has(w.spot_id) && seen.add(w.spot_id)).slice(0, 5);
+    alts.innerHTML = rows.map((w) => {
+      const sp = all.find((x) => x.id === w.spot_id);
+      const acc = sp?.private_marina ? ['erisim-kisitli', 'kısıtlı · marina', true] as const
+        : w.access === 'acik' || sp?.access === 'acik' ? ['erisim-acik', 'açık', false] as const
+        : (w.access ?? sp?.access) === 'kisitli_feribot' ? ['erisim-kisitli', 'kısıtlı · feribot', true] as const
+        : ['erisim-bilinmiyor', 'bilinmiyor', true] as const; // unknown access is never shown as open
+      const rel = windRel((sp as { shore_normal_deg?: number | null } | undefined)?.shore_normal_deg, gridAt(wxGrid, 'wd', sp, nowHour + sel));
+      const ls = (sp as { lamp_state?: string } | undefined)?.lamp_state;
+      const data = ls === 'dogrulandi' || ls === 'yok' ? 'saha bilgisi var' : ls === 'goruldu' ? 'fotoğraftan' : 'çoğu tahmin';
+      const k = fitStep(w.total);
+      return `<li><button type="button" class="alt-b${w.spot_id === cur.spot_id ? ' sel' : ''}" data-open="${esc(w.spot_id)}" data-c="${colOf(w)}" title="${esc(w.name)} · ${span(w)}${acc[0] === 'erisim-bilinmiyor' ? ' · erişim bilinmiyor: açık sayılmaz' : ''}">`
+        + `<span>${icon(kindIcon(sp?.kind), { size: 16 })}<span class="a-n">${esc(w.name)}</span></span>`
+        + `<span><b class="fitpill f${k}">${Math.round(w.total)}</b></span>`
+        + `<span class="${acc[2] ? 'w' : ''}">${icon(acc[0], { size: 16 })}${acc[1]}</span>`
+        + `<span>${icon('ruzgar', { size: 16 })}${rel ?? '–'}</span>`
+        + `<span>${data}</span></button></li>`;
     }).join('');
-    $('alts-box').hidden = !rest.length;
+    $('alts-box').hidden = rows.length < 2;
     alts.querySelectorAll<HTMLButtonElement>('button').forEach((x) => x.addEventListener('click', () => openSpot(x.dataset.open!, Number(x.dataset.c))));
     await fillCard(cur, myN, eqList.length, withOutside);
   }
@@ -877,6 +1015,7 @@ import Base from '../layouts/Base.astro';
     $('a-where').textContent = w.name;
     // P3: the map page opens its 72 h slider at the plan's suggested hour, centred on the spot
     $<HTMLAnchorElement>('a-maplink').href = `/harita/?id=${encodeURIComponent(w.spot_id)}&t=${encodeURIComponent(new Date(w.peak).toISOString())}`;
+    $<HTMLAnchorElement>('m-map').href = `/harita/?id=${encodeURIComponent(w.spot_id)}&t=${encodeURIComponent(new Date((nowHour + col) * HOUR).toISOString())}`;
     $('a-when').textContent = [span(w), `en iyi saat ${fmtTime(w.peak)}`, prov, w.access && w.access !== 'acik' ? ACCESS_TR[w.access] ?? 'erişim belirsiz' : null].filter(Boolean).join(' · ');
     // 4) why (plain); 5) trust (L1 rule)
     const why = $('a-why');
@@ -910,6 +1049,8 @@ import Base from '../layouts/Base.astro';
     // 3) tackle, weather and light at the best hour
     const d = await detail(w.spot_id);
     if (myN !== planSeq) return;
+    condLine(s, d, col);
+    drawStrip(w, col); // now with wind, gust, wave and light from the spot's hourly inputs
     // V1.2: spot knowledge from the detail's evidence kinds (field / remote / none)
     renderTrust3(weatherTrust(ag), spotKnowledge(d?.field?.kinds, (s as { lamp_state?: string } | undefined)?.lamp_state), catchTrust(gates[species] ?? null));
     const v = d?.packed?.tk?.[d.from + col];
@@ -971,6 +1112,18 @@ import Base from '../layouts/Base.astro';
   // ---------------------------------------------------------------- O3/O4: strip, rig, now line
   const hoursOffset = () => (hours ? nowHour - Math.floor(Date.parse(hours.from) / HOUR) : 0);
   const hourSpot = (id: string) => hours?.spots.find((x) => x.id === id) ?? null;
+  // ---------------------------------------------------------------- V1.3: av zaman çizelgesi (timeline.ts)
+  let wxGrid: Grid | null = null; // /api/grid/wx (wind direction, rain), loaded after the plan card
+  // when the grid arrives the card, the conditions line and the options table are redrawn (wind direction, rain)
+  const wxReady = new Promise<Grid | null>((res) => whenPlanReady(() => loadGrid('wx').then((g) => { wxGrid = g; res(g); if (cardWin) renderPlan(); })));
+  void wxReady;
+  /** Grid value at a spot for an absolute hour (nearest sea cell; null outside the grid or the 72 h). */
+  const gridAt = (g: Grid | null, v: string, s: { lat: number; lon: number } | undefined, hour: number): number | null => {
+    if (!g || !s || !g.vars[v]) return null;
+    const k = frameIndex(g, hour);
+    return k === null ? null : nearest(g, g.vars[v]![k]!, s.lon, s.lat);
+  };
+  const tlLabels = () => timelineRows().map((r) => `<div class="tl-lab${r.h >= 30 ? ' main' : ''}" style="top:${r.top}px;height:${r.h}px">${r.icon ? icon(r.icon as Parameters<typeof icon>[0], { size: 14 }) : ''}<span>${r.label}</span></div>`).join('');
   function drawStrip(w: Win, col: number) {
     const hs = hourSpot(w.spot_id);
     const card = $('strip-card');
@@ -978,15 +1131,51 @@ import Base from '../layouts/Base.astro';
     const off = hoursOffset();
     const a = Math.floor(Date.parse(w.start) / HOUR) - nowHour;
     const b = Math.floor(Date.parse(w.end) / HOUR) - nowHour + 1;
+    const s = all.find((x) => x.id === w.spot_id);
     const el = $('strip');
-    el.innerHTML = stripSvg({ fromHour: nowHour, t: hs.t.slice(off, off + 24), gated: hs.g.map((g) => g - off).filter((g) => g >= 0 && g < 24), window: [a, b], selected: col }, Math.max(320, el.clientWidth || 640));
+    const cols = [...Array(24).keys()];
+    const d = detailCache.get(w.spot_id) ?? null;
+    const tk = (c: number, i: number) => (d?.packed?.tk?.[d.from + c]?.[i] ?? null) as number | null;
+    const grid = wxGrid;
+    const width = Math.max(320, el.clientWidth || 640);
+    el.innerHTML = timelineSvg({
+      fromHour: nowHour, fit: hs.t.slice(off, off + 24), gated: hs.g.map((g) => g - off).filter((g) => g >= 0 && g < 24), window: [a, b], selected: col,
+      lat: s?.lat, lon: s?.lon,
+      ...(d ? { wind: cols.map((c) => tk(c, 2)), gust: cols.map((c) => tk(c, 3)), wave: cols.map((c) => tk(c, 9)), sun: cols.map((c) => tk(c, 5)) } : {}),
+      ...(grid ? { dir: cols.map((c) => gridAt(grid, 'wd', s, nowHour + c)), rain: cols.map((c) => { const v = gridAt(grid, 'pr', s, nowHour + c); return v === null ? null : v / 10; }) } : {}),
+    }, width);
+    // label column: same rows, scaled with the SVG (it is drawn at width px and shown at the box width)
+    const scale = (el.clientWidth || width) / width;
+    $('tl-labs').innerHTML = tlLabels();
+    $('tl-labs').style.transform = `scaleY(${scale})`;
+    $('tl-labs').style.transformOrigin = 'top';
     $('strip-name').textContent = w.name;
     card.hidden = false;
-    el.querySelectorAll<SVGRectElement>('.st-cell').forEach((r) => r.addEventListener('click', () => {
+    el.querySelectorAll<SVGRectElement>('.tl-hit').forEach((r) => r.addEventListener('click', () => {
       cardCol = Number(r.dataset.c);
       setCol(cardCol, 'timeline');
       fillCard(w, ++planSeq, eqKey.split('|').length, (() => { try { return localStorage.getItem('av-livn-outside-bursa') === '1'; } catch { return false; } })());
     }));
+  }
+  /** V1.4: one line of conditions at the card's hour, with the wind relative to this shore. */
+  function condLine(s: Spot | undefined, d: Detail | null, col: number) {
+    const v = d?.packed?.tk?.[d.from + col];
+    const el = $('a-cond');
+    if (!v) { el.hidden = true; return; }
+    const hour = nowHour + col;
+    const dir = gridAt(wxGrid, 'wd', s, hour);
+    const pr = gridAt(wxGrid, 'pr', s, hour);
+    const rel = windRel((s as { shore_normal_deg?: number | null } | undefined)?.shore_normal_deg, dir);
+    const n = (x: number | null | undefined, k = 0) => (x == null ? '–' : x.toFixed(k).replace('.', ','));
+    const parts = [
+      `${icon('ruzgar', { size: 16 })}rüzgar ${n(v[2])} km/sa${dir !== null ? ` ${compass8(dir)}` : ''}${rel ? ` · ${rel}` : ''}`,
+      `${icon('hamle', { size: 16 })}hamle ${n(v[3])}`,
+      `${icon('yagis', { size: 16 })}${pr === null ? 'yağış –' : pr / 10 < 0.1 ? 'yağış yok' : `yağış ${n(pr / 10, 1)} mm/sa`}`,
+      `${icon('dalga', { size: 16 })}dalga ${v[9] == null ? 'veri yok' : `${n(v[9], 1)} m`}`,
+      `${icon('ay', { size: 16 })}${(v[5] ?? 0) > 0 ? 'gündüz' : (v[5] ?? 0) > -6 ? 'alacakaranlık' : 'gece'}`,
+    ];
+    el.innerHTML = parts.map((x) => `<span>${x}</span>`).join('');
+    el.hidden = false;
   }
   function drawRig(t: ReturnType<typeof tackle> | ReturnType<typeof tackleLevrek>, colIso: string) {
     const row = (k: string) => t.rows.find((r) => r.key === k);
@@ -1056,6 +1245,7 @@ import Base from '../layouts/Base.astro';
     history.replaceState(null, '', u);
     showSpecies();
     details.clear();
+    detailCache.clear();
     focus = null;
     load();
     loadHours();

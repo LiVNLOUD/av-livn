@@ -50,18 +50,21 @@ async function page(w, h, { webgl = true } = {}) {
 const overflow = (p) => p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
 // helpers for M1/M4
-const ANSWERS = ['#verdict', '#a-where', '#a-tackle', '#a-why li', '#a-trust'];
+// V1.4 (direction A, D9): the first screen holds the decision, the chosen spot, its trust and the av zaman çizelgesi
+// (desktop); on phones the decision, the spot and the conditions line — tackle, reasons and trust are one tap away.
+const ANSWERS = ['#verdict', '#a-where', '#a-trust', '#strip svg'];
+const ANSWERS_PHONE = ['#verdict', '#a-where', '#a-cond'];
 /** Every answer visible and inside the first screen (above the bottom tab bar), without scrolling. */
-const firstScreen = (p) => p.evaluate((sels) => {
+const firstScreen = (p, list = ANSWERS) => p.evaluate((sels) => {
   const tab = document.querySelector('nav.tabbar');
   const bottom = innerHeight - (tab && getComputedStyle(tab).display !== 'none' ? tab.getBoundingClientRect().height : 0);
   return sels.map((s) => {
     const e = document.querySelector(s);
-    if (!e || e.closest('[hidden]') || !e.offsetParent) return [s, 'yok'];
+    if (!e || e.closest('[hidden]') || !e.getClientRects().length || getComputedStyle(e).visibility === 'hidden') return [s, 'yok'];
     const r = e.getBoundingClientRect();
     return [s, r.top >= 0 && r.bottom <= bottom ? 'ok' : `ekran dışı (alt ${Math.round(r.bottom)} > ${Math.round(bottom)})`];
   }).filter(([, v]) => v !== 'ok');
-}, ANSWERS);
+}, list);
 /** M1 text rule: a value next to its label is at least 280 px wide; narrower values sit under the label. */
 const narrowColumns = (p) => p.evaluate(() => [...document.querySelectorAll('dd, .qa .a')].filter((e) => e.offsetParent).flatMap((dd) => {
   const r = dd.getBoundingClientRect();
@@ -112,7 +115,8 @@ const waitPlan = (p) => p.waitForFunction(() => {
     const eq = await p.locator('#eq-pick button').count();
     ok(eq ? `home: ${eq} equivalent options — "${(await p.locator('#eq-note').innerText()).trim()}"` : 'home: one main pick');
     const alts = await p.locator('#alts li').count();
-    alts <= 2 ? ok(`home: ${alts} alternatives (≤ 2)`) : fail(`home: ${alts} alternatives`);
+    // V1.4: the options table lists the shown spot and up to four others (no ranking)
+    alts <= 5 ? ok(`home: ${alts} rows in the equivalent options table (≤ 5)`) : fail(`home: ${alts} option rows`);
   }
   const tabs = (await p.locator('nav.tabbar a:visible').allInnerTexts()).map((x) => x.trim());
   JSON.stringify(tabs) === JSON.stringify(['Plan', 'Harita', 'Model']) ? ok('visitor tab bar: Plan, Harita, Model') : fail(`visitor tab bar: ${tabs.join(', ')}`);
@@ -138,6 +142,14 @@ const waitPlan = (p) => p.waitForFunction(() => {
   /alınamadı|uyumsuz|bulunamadı/.test(name) ? fail(`card: error title "${name}"`) : ok(`card: "${name}"`);
   (await p.locator('#chart svg').count()) ? ok('card: chart drawn') : fail('card: no chart');
   const tk = p.locator('.tackle');
+  // the box is withheld while the safety gate is on (by design); then the warning must say why, and the box is
+  // checked at the first safe hour (arrow keys on the chart)
+  if (!(await tk.isVisible())) {
+    const warn = (await p.locator('#warn').innerText()).trim();
+    /güvenli değil/.test(warn) ? ok(`card: no tackle box while the gate is on ("${warn.slice(0, 60)}")`) : fail(`card: tackle box hidden without a gate warning ("${warn.slice(0, 60)}")`);
+    await p.locator('#chart svg').focus();
+    for (let k = 0; k < 72 && !(await tk.isVisible()); k++) await p.keyboard.press('ArrowRight');
+  }
   const tkRows = await p.locator('#tk dt').count();
   (await tk.isVisible()) && tkRows >= 4 ? ok(`card: tackle box with ${tkRows} rows`) : fail(`card: tackle box missing (visible ${await tk.isVisible()}, rows ${tkRows})`);
   (await p.locator('#render-err').isVisible()) ? fail('card: render error banner shown') : ok('card: no render error');
@@ -189,8 +201,16 @@ for (const [w, h] of [[3440, 1440], [1920, 1080], [1440, 900], [768, 1024], [390
   await p.goto(base + '/', { waitUntil: 'networkidle' });
   await waitPlan(p);
   await p.waitForTimeout(1200);
-  const miss = await firstScreen(p);
-  miss.length ? fail(`5 sn testi ${w}: ${miss.map(([s, v]) => `${s} ${v}`).join(', ')}`) : ok(`5 sn testi ${w}: beş cevap ilk ekranda`);
+  const miss = await firstScreen(p, w < 1024 ? ANSWERS_PHONE : ANSWERS);
+  miss.length ? fail(`5 sn testi ${w}: ${miss.map(([s, v]) => `${s} ${v}`).join(', ')}`) : ok(`5 sn testi ${w}: ${w < 1024 ? 'karar, yer ve koşullar' : 'karar, yer, güven ve çizelge'} ilk ekranda`);
+  if (w < 1024) {
+    // D9: one tap opens tackle, reasons and trust; another opens the timeline
+    await p.locator('#m-more').click();
+    const more = await p.evaluate(() => ['#a-tackle', '#a-why li', '#a-trust'].map((s) => [s, !!document.querySelector(s)?.offsetParent]));
+    more.every(([, v]) => v) ? ok(`${w}: "Takım ve güven" shows tackle, reasons and trust`) : fail(`${w}: after "Takım ve güven": ${JSON.stringify(more)}`);
+    await p.locator('#m-tl').click();
+    (await p.locator('#strip svg').isVisible()) ? ok(`${w}: "Saat saat çizelge" opens the timeline`) : fail(`${w}: timeline not shown after one tap`);
+  }
   const narrow = await narrowColumns(p);
   narrow.length ? fail(`${w}: value columns under 280 px: ${narrow.slice(0, 4).join(', ')}`) : ok(`${w}: no value column under 280 px`);
   const ov = await overflow(p);
@@ -339,9 +359,9 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1440, 900], [390, 844]]) {
   for (const l of LAYERS) {
     await p.locator(`.layers input[value=${l}] + span`).click();
     await p.waitForTimeout(l === 'ruzgar' || l === 'akinti' ? 1600 : 800);
-    const info = await p.evaluate(() => { const e = document.getElementById('layer-info'); return e.hidden ? '' : e.textContent; });
+    const [info, state] = await p.evaluate(() => { const e = document.getElementById('layer-info'); return [e.hidden ? '' : e.textContent, e.dataset.state]; });
     if (l === 'puan') info === '' ? ok(`${w}: Puan layer has no weather legend`) : fail(`${w}: Puan shows a legend`);
-    else /veri yok/.test(info) || !/Kaynak:/.test(info) ? fail(`${w}: layer ${l}: ${info.slice(0, 80)}`) : ok(`${w}: layer ${l} drawn with legend and source`);
+    else state !== 'ok' || !/Kaynak:/.test(info) ? fail(`${w}: layer ${l} (${state}): ${info.slice(0, 80)}`) : ok(`${w}: layer ${l} drawn with legend and source`);
     if (l === 'yagis' && !/tahmin, radar değil/.test(info)) fail(`${w}: rain legend must say "tahmin, radar değil"`);
     if (l === 'bulut' && !/ay ışığını/.test(info)) fail(`${w}: cloud legend must mention moonlight`);
     if (shots) await p.screenshot({ path: `${shots}/harita-${l}-${w}.png` });
@@ -415,7 +435,8 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1920, 1080], [1440, 900], [10
   }
   await p.locator('.views [data-v="plan"]').click();
   if (w >= 768) {
-    // spot card in the drawer (opened as from the map / plan)
+    // spot card in the drawer (opened as from the map / plan); below 1024 the button sits behind "Takım ve güven" (D9)
+    if (!(await p.locator('#pick-open').isVisible()) && (await p.locator('#m-more').isVisible())) await p.locator('#m-more').click();
     await p.locator('#pick-open').click();
     await p.waitForTimeout(800);
     const fr = p.frameLocator('#drawer-frame');

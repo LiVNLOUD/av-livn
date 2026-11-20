@@ -41,7 +41,9 @@ export const frameIndex = (g: Grid, hour: number) => { const k = hour - g.from_h
 type Stop = [number, [number, number, number, number]];
 /** Colour ramps (value in display units → rgba). Precipitation and cloud start transparent: no rain, no colour. */
 export const RAMPS: Record<Exclude<LayerName, 'puan'>, { stops: Stop[]; unit: string; label: string; legend: string }> = {
-  ruzgar: { stops: [[0, [40, 90, 150, 0.0]], [8, [40, 120, 170, 0.55]], [20, [70, 180, 120, 0.6]], [32, [235, 200, 60, 0.65]], [45, [235, 110, 60, 0.7]], [65, [200, 50, 90, 0.75]]], unit: 'km/sa', label: 'Rüzgar', legend: 'Rüzgar hızı (km/sa), Open-Meteo tahmini. Parçacıklar akış yönünü gösterir.' },
+  // V1.6 / D2: one fixed scale for every hour (0–65 km/h); calm air is visible too (no transparent start), amber and
+  // red only from strong wind upwards (they are warning colours)
+  ruzgar: { stops: [[0, [70, 120, 175, 0.42]], [8, [55, 150, 185, 0.55]], [16, [70, 185, 150, 0.62]], [25, [175, 215, 120, 0.68]], [40, [242, 184, 75, 0.75]], [65, [255, 118, 102, 0.82]]], unit: 'km/sa', label: 'Rüzgar', legend: 'Rüzgar hızı (km/sa), Open-Meteo tahmini. Akış çizgileri rüzgarın estiği yönü gösterir.' },
   dalga: { stops: [[0, [40, 90, 150, 0.0]], [0.2, [60, 140, 190, 0.5]], [0.6, [90, 190, 170, 0.6]], [1.2, [235, 200, 80, 0.65]], [2, [230, 90, 70, 0.7]]], unit: 'm', label: 'Dalga', legend: 'Belirgin dalga yüksekliği (m), Open-Meteo Marine tahmini (kaba ızgara, kıyı içi korunaklı yerleri göstermez).' },
   akinti: { stops: [[0, [40, 90, 150, 0.0]], [5, [60, 130, 190, 0.45]], [15, [80, 190, 180, 0.6]], [30, [235, 200, 80, 0.65]], [50, [230, 90, 70, 0.7]]], unit: 'cm/s', label: 'Akıntı', legend: 'Yüzey akıntısı (1–5 m ortalaması, cm/s), Copernicus Marine Karadeniz/Marmara 500 m tahmini.' },
   sst: { stops: [[8, [60, 90, 200, 0.6]], [13, [60, 160, 210, 0.6]], [17, [90, 200, 160, 0.6]], [21, [235, 200, 80, 0.6]], [26, [230, 90, 70, 0.65]]], unit: '°C', label: 'Su sıcaklığı', legend: 'Deniz yüzeyi sıcaklığı (°C), Open-Meteo Marine tahmini.' },
@@ -78,21 +80,48 @@ const SPEC: Record<Exclude<LayerName, 'puan'>, { grid: 'wx' | 'sea' | 'cur'; val
   },
 };
 
-/** Field image (one pixel per grid point, north row first) as a data URL; null cells transparent. */
+/** D1: a cell with a value in some hour but none in this one is "missing" (drawn neutral grey, not as zero); a cell
+ *  that never has a value is outside the source (e.g. land for the sea grids) and stays transparent. */
+export const MISSING_RGBA: [number, number, number, number] = [140, 150, 160, 115];
+/** Field pixels (RGBA, one per grid point, north row first). Pure, for the fixture tests. */
+export function fieldPixels(g: Grid, k: number, name: Exclude<LayerName, 'puan'>): Uint8ClampedArray {
+  const px = new Uint8ClampedArray(g.nlat * g.nlon * 4);
+  for (let i = 0; i < g.nlat; i++) for (let j = 0; j < g.nlon; j++) {
+    const p = i * g.nlon + j;
+    const v = SPEC[name].value(g, k, p);
+    const o = ((g.nlat - 1 - i) * g.nlon + j) * 4;
+    if (v == null) {
+      let ever = false;
+      for (let f = 0; f < g.hours && !ever; f++) ever = SPEC[name].value(g, f, p) != null;
+      if (ever) px.set(MISSING_RGBA, o);
+      continue;
+    }
+    const [r, gg, b, a] = rampColor(RAMPS[name].stops, v);
+    px[o] = r; px[o + 1] = gg; px[o + 2] = b; px[o + 3] = Math.round(a * 255);
+  }
+  return px;
+}
+/** Field image as a data URL (fieldPixels on a canvas). */
 function fieldImage(g: Grid, k: number, name: Exclude<LayerName, 'puan'>): string {
   const c = document.createElement('canvas');
   c.width = g.nlon; c.height = g.nlat;
   const ctx = c.getContext('2d')!;
   const img = ctx.createImageData(g.nlon, g.nlat);
-  for (let i = 0; i < g.nlat; i++) for (let j = 0; j < g.nlon; j++) {
-    const v = SPEC[name].value(g, k, i * g.nlon + j);
-    const o = ((g.nlat - 1 - i) * g.nlon + j) * 4;
-    if (v == null) continue;
-    const [r, gg, b, a] = rampColor(RAMPS[name].stops, v);
-    img.data[o] = r; img.data[o + 1] = gg; img.data[o + 2] = b; img.data[o + 3] = Math.round(a * 255);
-  }
+  img.data.set(fieldPixels(g, k, name));
   ctx.putImageData(img, 0, 0);
   return c.toDataURL();
+}
+/** Values of a layer at one hour: does the frame hold any non-zero value? (zero rain says so instead of a blank map) */
+export function frameStats(g: Grid, k: number, name: Exclude<LayerName, 'puan'>): { n: number; max: number | null } {
+  let n = 0, max: number | null = null;
+  for (let p = 0; p < g.nlat * g.nlon; p++) { const v = SPEC[name].value(g, k, p); if (v != null) { n++; max = max === null ? v : Math.max(max, v); } }
+  return { n, max };
+}
+/** Value of a layer at a point and hour (nearest cell), for the tap read-out. */
+export function valueAt(g: Grid, k: number, name: Exclude<LayerName, 'puan'>, lon: number, lat: number): number | null {
+  const j = Math.round((lon - g.lon0) / g.dlon), i = Math.round((lat - g.lat0) / g.dlat);
+  if (i < 0 || j < 0 || i >= g.nlat || j >= g.nlon) return null;
+  return SPEC[name].value(g, k, i * g.nlon + j);
 }
 const corners = (g: Grid): [[number, number], [number, number], [number, number], [number, number]] => {
   const w = g.lon0 - g.dlon / 2, e = g.lon0 + (g.nlon - 0.5) * g.dlon, s = g.lat0 - g.dlat / 2, n = g.lat0 + (g.nlat - 0.5) * g.dlat;
@@ -109,6 +138,8 @@ class Particles {
   private u: (number | null)[] = [];
   private v: (number | null)[] = [];
   private speed = 1;
+  /** wind: light lines; current: short dashed teal traces (the two must look different, V1.6) */
+  color = 'rgba(235,242,245,0.85)';
   constructor(private map: maplibregl.Map, container: HTMLElement) {
     this.cv = document.createElement('canvas');
     this.cv.className = 'particles';
@@ -147,19 +178,24 @@ class Particles {
     while (this.pts.length < n) this.pts.push(this.seed());
     const ctx = this.ctx;
     ctx.globalCompositeOperation = 'destination-in';
-    ctx.fillStyle = 'rgba(0,0,0,0.86)';
+    ctx.fillStyle = 'rgba(0,0,0,0.94)'; // V1.6: longer trails (0.86 erased calm-air strokes before they showed)
     ctx.fillRect(0, 0, this.cv.width, this.cv.height);
     ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = 'rgba(235,242,245,0.6)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    const k = 0.00004 * this.speed * Math.pow(2, 12 - this.map.getZoom()); // degrees per (unit · frame), zoom-scaled
+    const z = this.map.getZoom();
+    const k = 0.00004 * this.speed * Math.pow(2, 12 - z); // degrees per (unit · frame), zoom-scaled
+    // V1.6: at least ~0.6 px per frame, so calm air still draws visible strokes (direction kept, speed not exaggerated in the colour)
+    const minDeg = (0.6 * 360) / (512 * Math.pow(2, z));
     for (const p of this.pts) {
       const u = sample(g, this.u, p.lon, p.lat), v = sample(g, this.v, p.lon, p.lat);
       if (u == null || v == null || ++p.age > 90) { Object.assign(p, this.seed(), { age: 0 }); continue; }
       const a = this.map.project([p.lon, p.lat]);
-      p.lon += u * k / Math.cos((p.lat * Math.PI) / 180);
-      p.lat += v * k;
+      const m = Math.hypot(u, v) * k;
+      const f = m > 0 && m < minDeg ? minDeg / m : 1;
+      p.lon += (u * k * f) / Math.cos((p.lat * Math.PI) / 180);
+      p.lat += v * k * f;
       const b = this.map.project([p.lon, p.lat]);
       ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
     }
@@ -171,7 +207,10 @@ class Particles {
 export interface LayerControl { set(name: LayerName): Promise<void>; setHour(hour: number): Promise<void>; current(): LayerName; info(): string }
 
 /** Adds the weather layers to a map that has a 'land' layer (sea fields go under the land mask). */
-export function weatherLayers(map: maplibregl.Map, container: HTMLElement, onInfo: (html: string) => void): LayerControl {
+/** Legend state, exposed as data-state on the legend so tests do not have to parse the text. */
+export type InfoState = 'ok' | 'loading' | 'nodata' | 'error';
+
+export function weatherLayers(map: maplibregl.Map, container: HTMLElement, onInfo: (html: string, state?: InfoState) => void): LayerControl {
   let name: LayerName = 'puan';
   let hour = Math.floor(Date.now() / 3_600_000);
   const particles = new Particles(map, container);
@@ -207,32 +246,79 @@ export function weatherLayers(map: maplibregl.Map, container: HTMLElement, onInf
         + `<span>${nPts ? `Mor noktalar: uydu lazer ölçümü (ICESat-2 ATL24), ${nPts} nokta, ${years[0]}–${years[years.length - 1]}. Her nokta ölçümdür, ara değer üretilmez.` : 'Bu kıyıda uydu lazer ölçümü yok.'}</span>`
         + `<span>${sdb ? 'Renkli alan: uydu görüntüsünden derinlik tahmini (Sentinel-2), 0–10 m; soluk = belirsiz. Ölçüm değil.' : 'Uydu görüntüsünden tahmin doğrulama eşiğini geçmedi; gösterilmiyor.'}</span>`
         + `<span class="muted">Kaynak: NASA NSIDC ICESat-2 ATL24 v002 (doi:10.5067/ATLAS/ATL24.002)${sdb ? '; Copernicus Sentinel-2' : ''}</span>`
-      : '<b>Uydu derinliği:</b> veri henüz yok.');
+      : '<b>Uydu derinliği:</b> veri henüz yok.', nPts || sdb ? 'ok' : 'nodata');
   }
+  // V1.6: with a weather layer on, the base map goes quiet (no depth fill or contours) so the field reads on its own
+  const BASE = ['bands', 'contours', 'contours-i', 'contours-near', 'interp', 'fade', 'survey-line', 'survey-label'];
+  const baseVis = new Map<string, string>();
+  function quietBase(on: boolean) {
+    for (const id of BASE) {
+      if (!map.getLayer(id)) continue;
+      if (on) { if (!baseVis.has(id)) baseVis.set(id, String(map.getLayoutProperty(id, 'visibility') ?? 'visible')); map.setLayoutProperty(id, 'visibility', 'none'); }
+      else if (baseVis.has(id)) { map.setLayoutProperty(id, 'visibility', baseVis.get(id) as 'visible' | 'none'); baseVis.delete(id); }
+    }
+  }
+  const hh = (h: number) => `${String((h + 3) % 24).padStart(2, '0')}:00`;
+  const RES: Record<'wx' | 'sea' | 'cur', string> = { wx: 'kaynak ~0,1° (~8–11 km) model ızgarası', sea: 'kaynak ~0,1° (~8–11 km) dalga modeli ızgarası', cur: 'kaynak ~500 m (Copernicus Marmara), 0,1° örnekleme' };
   const drawReq = latest(); // V1.1: a slow grid for an older hour/layer never paints over the current choice
   async function draw() {
     const current = drawReq.token();
     if (name !== 'uydu') clearSat();
-    if (name === 'uydu') { clear(); particles.set(null, null, 1); await drawSat(); return; }
-    if (name === 'puan') { clear(); particles.set(null, null, 1); onInfo(''); return; }
+    if (name === 'uydu') { clear(); quietBase(false); particles.set(null, null, 1); await drawSat(); return; }
+    if (name === 'puan') { clear(); quietBase(false); particles.set(null, null, 1); onInfo(''); return; }
     const spec = SPEC[name];
-    const g = await loadGrid(spec.grid);
+    quietBase(true);
+    onInfo(`<b>${RAMPS[name].label}:</b> yükleniyor…`, 'loading'); // D1: loading, no data, error and zero are different states
+    let g: Grid | null;
+    try { g = await loadGrid(spec.grid); } catch { g = null; }
     if (!current()) return;
-    const k = g ? frameIndex(g, hour) : null;
-    if (!g || k === null) { clear(); particles.set(null, null, 1); onInfo(`<b>${RAMPS[name].label}:</b> bu saat için veri yok.`); return; }
+    if (!g) { clear(); particles.set(null, null, 1); onInfo(`<b>${RAMPS[name].label}:</b> veri alınamadı (bağlantı ya da sunucu hatası). Sayfayı yenileyip tekrar deneyin.`, 'error'); return; }
+    const k = frameIndex(g, hour);
+    if (k === null) { clear(); particles.set(null, null, 1); onInfo(`<b>${RAMPS[name].label}:</b> ${hh(hour)} için veri yok (tahmin bu saati kapsamıyor).`, 'nodata'); return; }
     const url = fieldImage(g, k, name);
     const src = map.getSource(SRC) as maplibregl.ImageSource | undefined;
     if (src) src.updateImage({ url, coordinates: corners(g) });
     else {
       map.addSource(SRC, { type: 'image', url, coordinates: corners(g) });
       const sea = spec.grid !== 'wx';
-      map.addLayer({ id: SRC, type: 'raster', source: SRC, paint: { 'raster-resampling': 'linear', 'raster-opacity': 0.85, 'raster-fade-duration': 0 } }, sea ? 'land' : 'spot-labels');
+      map.addLayer({ id: SRC, type: 'raster', source: SRC, paint: { 'raster-resampling': 'linear', 'raster-opacity': 0.9, 'raster-fade-duration': 0 } }, sea ? 'land' : 'spot-labels');
     }
+    particles.color = name === 'akinti' ? 'rgba(120,220,210,0.85)' : 'rgba(235,242,245,0.85)';
     particles.set(spec.uv ? g : null, spec.uv ? spec.uv(g, k) : null, name === 'akinti' ? 6 : 0.22); // wind km/h vs current cm/s: similar on-screen pace, wind slower than raw
     const st = RAMPS[name].stops;
     const grad = st.map(([, c], i) => `rgba(${c[0]},${c[1]},${c[2]},${Math.max(c[3], 0.15)}) ${Math.round((i / (st.length - 1)) * 100)}%`).join(',');
-    onInfo(`<span class="ramp-bar" style="background:linear-gradient(90deg,${grad})"></span><span class="ramp-ends"><span>${st[0]![0]}</span><span>${st[st.length - 1]![0]} ${RAMPS[name].unit}</span></span><span>${RAMPS[name].legend}</span><span class="muted">Kaynak: ${g.source}</span>`);
+    const fs = frameStats(g, k, name);
+    const zero = name === 'yagis' && fs.n > 0 && (fs.max ?? 0) < 0.1 ? `<span><b>${hh(hour)}: yağış yok</b> (tahmin 0 mm/sa; harita bu yüzden boş)</span>` : '';
+    const built = g.built_at ? ` · güncelleme ${new Date(g.built_at).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : '';
+    // D2: small scale + unit + valid hour always; resolution, sampling and smoothing said separately
+    onInfo(`<span class="ramp-bar" style="background:linear-gradient(90deg,${grad})"></span><span class="ramp-ends"><span>${st[0]![0]}</span><span>${st[st.length - 1]![0]} ${RAMPS[name].unit}</span></span>`
+      + `<span><b>${RAMPS[name].label}</b> · geçerli saat ${hh(hour)} · ölçek sabit</span>${zero}<span>${RAMPS[name].legend}</span>`
+      + `<span class="muted">Çözünürlük: ${RES[spec.grid]} · örnekleme: hücre başına 1 değer, saatlik · görsel yumuşatma: doğrusal ara değer (ayrıntı üretmez). Gri alan: o saat için veri yok.</span>`
+      + `<span class="muted">Kaynak: ${g.source}${built}</span>`);
   }
+  // V1.6: tap/click the map with a weather layer on → that hour's value at the point
+  const pop = document.createElement('div');
+  pop.className = 'wx-pop';
+  pop.hidden = true;
+  container.append(pop);
+  map.on('click', async (e) => {
+    if (name === 'puan' || name === 'uydu') { pop.hidden = true; return; }
+    const g = await loadGrid(SPEC[name].grid);
+    const k = g ? frameIndex(g, hour) : null;
+    if (!g || k === null) { pop.hidden = true; return; }
+    const v = valueAt(g, k, name, e.lngLat.lng, e.lngLat.lat);
+    let extra = '';
+    if (name === 'ruzgar' && g.vars.wd) {
+      const j = Math.round((e.lngLat.lng - g.lon0) / g.dlon), i = Math.round((e.lngLat.lat - g.lat0) / g.dlat);
+      const wd = i >= 0 && j >= 0 && i < g.nlat && j < g.nlon ? g.vars.wd[k]?.[i * g.nlon + j] : null;
+      if (wd != null) extra = `, ${Math.round(wd)}° yönünden`;
+    }
+    pop.innerHTML = `<b>${RAMPS[name].label} ${hh(hour)}</b><br>${v == null ? 'bu noktada veri yok' : `${(Math.round(v * 10) / 10).toLocaleString('tr-TR')} ${RAMPS[name].unit}${extra}`}<br><span class="muted">en yakın ızgara hücresi</span>`;
+    pop.style.left = `${e.point.x + 12}px`;
+    pop.style.top = `${e.point.y + 12}px`;
+    pop.hidden = false;
+  });
+  map.on('movestart', () => (pop.hidden = true));
   return {
     async set(n) { name = n; await draw(); },
     async setHour(h) { hour = h; await draw(); },

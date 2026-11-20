@@ -1,3 +1,4 @@
+import { kindIcon } from './icons';
 // Marker declutter without clustering: markers closer than `min` px on screen are spread on a ring around
 // their group's centre (chord between neighbours = min); every spot stays visible, a leader line joins the
 // shown marker to its true position. Recomputed on every zoom, so markers rejoin as you zoom in.
@@ -119,7 +120,7 @@ export function placeBadges(spots: PlaceSpot[], min = 2): { badges: PlaceBadge[]
 
 /** One map feature per shown spot (O2): the spot sits at its shown (maybe spread) position, carries its own
  *  label, and at most one is flagged as the plan's pick; true-position dots never get a label. */
-export interface SpotFeatureIn { id: string; name: string; lon: number; lat: number; total: number | null; gated: boolean; rank: number | null }
+export interface SpotFeatureIn { id: string; name: string; lon: number; lat: number; total: number | null; gated: boolean; rank: number | null; kind?: string | null; lamp_state?: string | null }
 export function spotFeatures(shown: { s: SpotFeatureIn; lon: number; lat: number }[], pickId: string | null) {
   return shown.map(({ s, lon, lat }) => ({
     type: 'Feature' as const,
@@ -128,6 +129,8 @@ export function spotFeatures(shown: { s: SpotFeatureIn; lon: number; lat: number
       id: s.id, name: s.name, total: s.total ?? -1, gated: s.gated, pick: s.id === pickId,
       score: s.gated ? '!' : s.total === null ? '–' : String(Math.round(s.total)),
       label: s.gated ? `${s.name} · güvenlik` : s.name, rank: s.rank ?? 99,
+      // V1.5: structure-type glyph and a light mark only for a field-verified lamp
+      kicon: kindIcon(s.kind), lamp: s.lamp_state === 'dogrulandi',
     },
   }));
 }

@@ -225,3 +225,15 @@ export function catchTrust(gate: { passed: boolean; n: number; min: number } | n
   if (gate.passed) return { key: 'av', label: 'Av verimi doğrulaması', level: 'Yüksek', value: 'Doğrulandı', text: `${gate.n} kayıtlı seansta model basit tahminleri geçti` };
   return { key: 'av', label: 'Av verimi doğrulaması', level: 'Düşük', value: gate.n ? 'Yetersiz' : 'Yok', text: `kayıtlı av n = ${gate.n} (en az ${gate.min} gerekli); uygunluk puanı yerel avla doğrulanmadı` };
 }
+
+// ---------------------------------------------------------------- V1.4: wind relative to the shore, compass
+export type WindRel = 'denizden' | 'karadan' | 'yandan';
+/** Where the wind comes from relative to the shore: shoreNormal points seaward (degrees), windFrom is the direction
+ *  the wind blows from. Within 60° of the normal = from the sea (onshore), beyond 120° = from the land (offshore). */
+export function windRel(shoreNormal: number | null | undefined, windFrom: number | null | undefined): WindRel | null {
+  if (shoreNormal == null || windFrom == null) return null;
+  const d = Math.abs(((windFrom - shoreNormal + 540) % 360) - 180);
+  return d <= 60 ? 'denizden' : d >= 120 ? 'karadan' : 'yandan';
+}
+const DIRS8 = ['K', 'KD', 'D', 'GD', 'G', 'GB', 'B', 'KB'];
+export const compass8 = (deg: number) => DIRS8[Math.round((((deg % 360) + 360) % 360) / 45) % 8]!;

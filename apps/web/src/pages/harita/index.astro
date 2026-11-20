@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 ---
-<Base title="Dip haritası — av.livn" description="Gemlik–Mudanya kıyısı derinlik konturları ve meralar." fullscreen>
+<Base title="Dip haritası — av.livn" description="Gemlik–Mudanya kıyısı derinlik konturları ve meralar." fullscreen themeable>
   <section class="mapwrap">
     <div id="map" class="map" role="region" aria-label="Derinlik haritası ve meralar"></div>
     <aside class="card" id="card" hidden aria-live="polite"></aside>
@@ -17,17 +17,17 @@ import Base from '../../layouts/Base.astro';
     </div>
     <div class="layer-info" id="layer-info" hidden aria-live="polite"></div>
     <details class="legend" id="legend">
-      <summary>Lejant</summary>
+      <summary><span class="lg-ramp" aria-hidden="true"></span> Uygunluk puanı <span class="muted" id="lg-hour"></span> · <span class="muted">Lejant</span></summary>
       <ol class="scale" id="scale"></ol>
       <p><span class="sw survey"></span> <b>Ölçülmüş alan:</b> EMODnet'in yerinde ölçüm (sounding) olan bölgesi; ince çerçeve ve "ölçülmüş alan" yazısı. İçindeki konturlar düz çizgi.</p>
       <p><span class="sw dash"></span> Ölçülmemiş bölge: derinlik GEBCO dolgusu / enterpolasyon. Konturlar kesikli ve soluk; buradaki derinlik tahmindir. Gemlik Körfezi'nin büyük kısmı bu sınıfta.</p>
       <p><label class="lt"><input type="checkbox" id="show-interp" /> <span class="sw hatch"></span> Belirsiz derinlik katmanını göster (ölçülmemiş bölge taralı)</label></p>
       <p>Meralar uzak görünümde yerleşim rozetinde toplanır ("Armutlu · 18 mera", en iyi puanın rengi); rozete dokununca liste açılır, yakınlaşınca her mera kendi yerinde görünür.</p>
-      <p><span class="sw dot"></span> Meralar v2 puan rengiyle: <b class="g">≥ 65</b>, <b class="w">40–65</b>, <b class="b">&lt; 40</b>. Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir.</p>
+      <p><span class="lg-ramp" aria-hidden="true"></span> Meralar seçili saatin uygunluk puanı renginde: &lt; 30, 30–45, 45–60, 60–75, ≥ 75 (koyudan açığa). Yakın meralar yakınlaştırınca ayrılır; ince çizgi gerçek konumu gösterir. Yakında her meranın yanında yapı tipi simgesi; küçük ışık simgesi yalnız aydınlatması sahada doğrulanmış merada.</p>
       <p><label class="lt"><input type="checkbox" id="show-cand" checked /> <span class="sw cand"></span> Aday yerler (OSM envanteri, henüz puanlanmadı)</label></p>
       <p><label class="lt"><input type="checkbox" id="show-forb" checked /> <span class="sw forb"></span> Taralı kırmızı alan: ticari liman, sanayi, askeri alan veya işaretlenmiş yasak alan; mera eklenmez</label></p>
-      <p><span class="sw pick"></span> Turuncu halka: ana sayfadaki önerilen mera</p>
-      <p>Çizgiler 2, 5, 10, 15, 20, 30, 50, 75, 100 m. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki derinliği göstermez. Zoom 15'ten sonra derinlik dolgusu soluklaşır ve 16'da kapanır; bu ölçekte derinlik verisi yetersizdir, yalnız sığ konturlar (≤ 10 m) kesikli kalır.</p>
+      <p><span class="sw pick"></span> Beyaz halka: seçili mera. Gece saatleri seçilince harita koyulaşır.</p>
+      <p>Deniz beş tonda: 0–2, 2–5, 5–10, 10–30, &gt; 30 m. Belirgin çizgiler 5, 10, 20, 50 m. EMODnet DTM ~115 m çözünürlüktedir; atış mesafesindeki derinliği göstermez. Zoom 15'ten sonra derinlik dolgusu soluklaşır ve 16'da kapanır; bu ölçekte derinlik verisi yetersizdir, yalnız sığ konturlar (≤ 10 m) kesikli kalır.</p>
     </details>
     <div class="slider" id="slider" aria-label="Haritanın saati (72 saat)"></div>
   </section>
@@ -35,7 +35,7 @@ import Base from '../../layouts/Base.astro';
 
 <style>
   .mapwrap { position: fixed; inset: 0 0 var(--tabbar-h) 0; }
-  .map { position: absolute; inset: 0 0 var(--slider-h) 0; background: #11293a; }
+  .map { position: absolute; inset: 0 0 var(--slider-h) 0; background: var(--sea-open); }
   .mapwrap { --slider-h: 64px; }
   /* P3: 72-hour slider under the map */
   .slider { position: absolute; left: 0; right: 0; bottom: 0; height: var(--slider-h); padding: 4px 12px 6px; background: var(--deep); border-top: 1px solid var(--swell); display: grid; grid-template-columns: 1fr auto; grid-template-rows: 22px 1fr; column-gap: 10px; align-items: center; }
@@ -53,8 +53,10 @@ import Base from '../../layouts/Base.astro';
   .layers label { flex: none; position: relative; }
   .layers input { position: absolute; opacity: 0; pointer-events: none; }
   .layers span { display: inline-flex; align-items: center; min-height: 32px; padding: 0 10px; border-radius: 16px; background: color-mix(in oklab, var(--sea) 92%, transparent); border: 1px solid var(--swell); color: var(--foam); font-size: var(--fs-1); cursor: pointer; white-space: nowrap; }
-  .layers input:checked + span { background: var(--sodium); color: #0e1c27; border-color: var(--sodium); font-weight: 650; }
+  .layers input:checked + span { background: var(--act); color: var(--act-ink); border-color: var(--act); font-weight: 650; }
   .layers input:focus-visible + span { outline: 2px solid var(--foam); outline-offset: 1px; }
+  :global(.wx-pop) { position: absolute; z-index: 6; pointer-events: none; padding: 6px 9px; border-radius: 8px; background: var(--ink-2); border: 1px solid var(--line-2); color: var(--fg-1); font-size: var(--fs-2); line-height: 1.35; box-shadow: 0 4px 14px rgb(0 0 0 / .3); }
+  :global(.wx-pop .muted) { color: var(--fg-2); font-size: var(--fs-1); }
   .layer-info { position: absolute; z-index: 3; right: 10px; bottom: calc(var(--slider-h) + 30px); max-width: min(300px, calc(100% - 20px)); background: color-mix(in oklab, var(--sea) 94%, transparent); border: 1px solid var(--swell); border-radius: 10px; padding: 8px 10px; font-size: var(--fs-1); color: var(--mist); display: grid; gap: 4px; line-height: 1.35; }
   .layer-info[hidden] { display: none; }
   :global(.ramp-bar) { display: block; height: 8px; border-radius: 4px; }
@@ -70,13 +72,15 @@ import Base from '../../layouts/Base.astro';
   .legend p { margin: 6px 0 0; line-height: 1.4; }
   .legend .lt { display: flex; gap: 6px; align-items: center; min-height: 32px; }
   .legend .lt input { width: 18px; height: 18px; margin: 0; }
-  .sw.pick { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--sodium); background: none; }
-  .sw.cand { width: 10px; height: 10px; transform: rotate(45deg); border: 2px solid #b9c4c9; display: inline-block; margin: 0 4px; }
+  .sw.pick { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--sel); background: none; }
+  .lg-ramp { display: inline-block; width: 56px; height: 8px; border-radius: 4px; margin-right: 6px; vertical-align: middle; background: linear-gradient(90deg, var(--fit-0), var(--fit-1), var(--fit-2), var(--fit-3), var(--fit-4)); }
+  .legend summary .muted { font-weight: 450; margin-left: 4px; }
+  .sw.cand { width: 10px; height: 10px; transform: rotate(45deg); border: 2px solid var(--fg-3); display: inline-block; margin: 0 4px; }
   .sw.forb { width: 14px; height: 10px; background: repeating-linear-gradient(135deg, rgb(214 80 72 / .8) 0 1.6px, transparent 1.6px 5px); border: 1.2px solid #d65048; display: inline-block; }
   .legend b.g { color: var(--good); } .legend b.w { color: var(--warn); } .legend b.b { color: var(--bad); }
   .sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
   .sw.hatch { background: repeating-linear-gradient(135deg, rgb(219 230 234 / .7) 0 1.6px, transparent 1.6px 5.6px), #2f78a6; }
-  .sw.survey { background: transparent; border: 1.5px solid #e9d9a6; }
+  .sw.survey { background: transparent; border: 1.5px solid var(--fg-2); }
   .sw.dash { height: 0; border-top: 2px dashed rgb(219 230 234 / .5); border-radius: 0; vertical-align: 3px; }
   .sw.dot { width: 10px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 2px var(--sea); }
   .scale { list-style: none; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 0; margin: 8px 0 0; }
@@ -115,7 +119,7 @@ import Base from '../../layouts/Base.astro';
   const picker = document.getElementById('layers')!;
   api.ready.then((map) => {
     if (!map) { picker.hidden = true; return; } // no WebGL: the map note stands alone, layers switch off silently
-    const wx = weatherLayers(map, document.getElementById('map')!, (html) => { info.innerHTML = html; info.hidden = !html; });
+    const wx = weatherLayers(map, document.getElementById('map')!, (html, state = 'ok') => { info.innerHTML = html; info.hidden = !html; info.dataset.state = state; });
     const glyphs = spotGlyphs(map);
     const refresh = () => glyphs(hourStore.get().hour, api.spotsNow());
     void wx.setHour(hourStore.get().hour);
@@ -125,6 +129,11 @@ import Base from '../../layouts/Base.astro';
       if (hourStore.get().hour === st.hour) await refresh(); // a newer hour was picked meanwhile: its own refresh follows
     });
     mountSlider(document.getElementById('slider')!, from, HOURS, hourStore.get().hour, (h) => void hourStore.set(h - from, 'slider'));
+    // D2: the legend's always-visible line names the hour the colours belong to
+    const lgHour = document.getElementById('lg-hour')!;
+    const showHour = () => { const d = new Date((hourStore.get().hour + 3) * 3_600_000); lgHour.textContent = `${String(d.getUTCHours()).padStart(2, '0')}:00`; };
+    showHour();
+    hourStore.subscribe(showHour);
     picker.addEventListener('change', (e) => void wx.set((e.target as HTMLInputElement).value as LayerName));
     document.documentElement.dataset.layersReady = '1';
   });

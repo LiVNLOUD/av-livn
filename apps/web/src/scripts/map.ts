@@ -4,29 +4,43 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { PMTiles, Protocol, type RangeResponse, type Source } from 'pmtiles';
 import { esc, KIND_TR, lampV2 } from './format';
 import { getToken } from './admin';
-import { PALETTE } from './palette';
 import { badgeLabel, declutter, mergeBadges, placeBadges, spotFeatures } from './declutter';
 /** O1: zoom when going to a spot. */
 export const FOCUS_ZOOM = 15.5;
 import { api, link, type Species } from './species';
 import { latest, STALE } from './hour';
-import { BANDS_V2 } from '@av-livn/scoring';
+import { skyAt } from '@av-livn/scoring';
+import { icon, type IconName } from './icons';
 
-// Sequential depth scale: shallow = light, deep = dark (blue). Edges match bathy/contours.py BAND_EDGES_M.
-const DEPTH_STOPS: [number, string][] = [
-  [0, '#9fd3e6'], [2, '#7cc0dc'], [5, '#5aa9cf'], [10, '#3f90bd'], [15, '#2f78a6'], [20, '#25648f'],
-  [30, '#1d5279'], [50, '#164264'], [75, '#113551'], [100, '#0d2a41'], [150, '#0a2234'], [200, '#081b2a'],
-];
-// Water beyond the bathymetry: mid-depth tone, so the faded edge blends in. BATHY_BBOX mirrors pipeline av_pipeline/__init__.py.
-const OPEN_WATER = '#11293a';
+// V1.5 map identity: colours come from the design tokens (tokens-v.css) of the current theme — at most five sea
+// tones by depth (0–2, 2–5, 5–10, 10–30, > 30 m), quiet land, the suitability scale for spots, white selection ring.
+// BATHY_BBOX mirrors pipeline av_pipeline/__init__.py.
+const DEPTH_EDGES = [0, 2, 5, 10, 30] as const;
 const BATHY_BBOX = { south: 40.25, west: 28.05, north: 40.65, east: 29.3 };
-const LAND = '#22313a';
+type Pal = Record<'sea1' | 'sea2' | 'sea3' | 'sea4' | 'sea5' | 'open' | 'land' | 'landLine' | 'contour' | 'fg1' | 'fg2' | 'fg3' | 'ink0' | 'sel' | 'danger' | 'warn' | 'f0' | 'f1' | 'f2' | 'f3' | 'f4' | 't0' | 't1' | 't2' | 't3' | 't4' | 'labelLand', string>;
+function palette(): Pal {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (n: string, d: string) => cs.getPropertyValue(n).trim() || d;
+  return {
+    sea1: v('--sea-1', '#2c8f98'), sea2: v('--sea-2', '#1f7380'), sea3: v('--sea-3', '#185d6b'), sea4: v('--sea-4', '#134a58'), sea5: v('--sea-5', '#0f3946'),
+    open: v('--sea-open', '#0c2f3b'), land: v('--land', '#262e34'), landLine: v('--land-line', '#3b4750'), contour: v('--contour', 'rgba(214,236,240,.32)'),
+    fg1: v('--fg-1', '#e8eff3'), fg2: v('--fg-2', '#b0c2cc'), fg3: v('--fg-3', '#8ea3b0'), ink0: v('--ink-0', '#08111a'), sel: v('--sel', '#f5f8fa'),
+    danger: v('--danger', '#ff7666'), warn: v('--warn', '#f2b84b'), labelLand: v('--land-label', '#9aa8b1'),
+    f0: v('--fit-0', '#46277a'), f1: v('--fit-1', '#30608d'), f2: v('--fit-2', '#1f928b'), f3: v('--fit-3', '#4fbf6a'), f4: v('--fit-4', '#a6dc4a'),
+    t0: v('--fit-t0', '#e8eff3'), t1: v('--fit-t1', '#e8eff3'), t2: v('--fit-t2', '#04121e'), t3: v('--fit-t3', '#04121e'), t4: v('--fit-t4', '#04121e'),
+  };
+}
+let PAL = palette();
+const depthColor = () => ['step', ['get', 'dmin'], PAL.sea1, 2, PAL.sea2, 5, PAL.sea3, 10, PAL.sea4, 30, PAL.sea5];
+/** Suitability step colour for a spot's total (−1 = no score) — the same steps as the timeline (timeline.ts FIT_STEPS). */
+const fitColor = () => ['step', ['get', 'total'], PAL.fg3, 0, PAL.f0, 30, PAL.f1, 45, PAL.f2, 60, PAL.f3, 75, PAL.f4];
+const fitInk = () => ['step', ['get', 'total'], PAL.ink0, 0, PAL.t0, 30, PAL.t1, 45, PAL.t2, 60, PAL.t3, 75, PAL.t4];
 const OFM = 'https://tiles.openfreemap.org';
 const NAME = ['coalesce', ['get', 'name:tr'], ['get', 'name']];
 
 type Spot = {
   id: string; name: string; kind: string; place: string | null; lat: number; lon: number; alt: { lat: number; lon: number } | null;
-  access: string | null; score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean };
+  access: string | null; lamp_state?: string; score: { total: number | null; p10: number | null; p90: number | null; rank: number | null; gated: boolean };
 };
 
 let setUp = false;
@@ -81,6 +95,8 @@ export interface MapApi {
   ready: Promise<maplibregl.Map | null>;
   /** P5: spots as currently shown (position, safety cap at the selected hour). */
   spotsNow(): { id: string; lat: number; lon: number; gated: boolean }[];
+  /** V1.4: keep the part of the map under a floating panel out of the way (camera padding in px). */
+  setPadding(p: { left?: number; top?: number; right?: number; bottom?: number }): void;
 }
 
 /** I2: MapLibre 6 needs WebGL2. Without it the map is replaced by a note; list, plan and heat map keep working. */
@@ -91,7 +107,7 @@ export function webgl2Ok(): boolean {
     return false;
   }
 }
-const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {}, focus: () => {}, ready: Promise.resolve(null), spotsNow: () => [] };
+const NOOP: MapApi = { setHour: async () => {}, setSpecies: async () => {}, resize: () => {}, flyTo: () => {}, highlight: () => {}, focus: () => {}, ready: Promise.resolve(null), spotsNow: () => [], setPadding: () => {} };
 function noMap(container: HTMLElement, why: string): MapApi {
   const note = document.createElement('div');
   note.className = 'map-loading map-off-note';
@@ -132,11 +148,33 @@ let pickId: string | null = o.highlight ?? null;
 let setPick: (id: string | null) => void = () => {};
 
 const scaleEl = ui('scale');
-if (scaleEl) scaleEl.innerHTML = DEPTH_STOPS.filter((_, i) => i % 2 === 0)
-  .map(([d, c], i) => `<li style="background:${c};color:${i < 2 ? '#0e1c27' : '#dbe6ea'}">${d}</li>`)
-  .join('');
-const legendEl = ui('legend') as HTMLDetailsElement | null;
-if (legendEl && o.container.clientWidth >= 700) legendEl.open = true;
+const drawScale = () => {
+  if (scaleEl) scaleEl.innerHTML = DEPTH_EDGES.map((d, i) => `<li style="background:${[PAL.sea1, PAL.sea2, PAL.sea3, PAL.sea4, PAL.sea5][i]};color:${PAL.fg1}">${d}${i === DEPTH_EDGES.length - 1 ? '+' : ''}</li>`).join('');
+};
+drawScale();
+// V1 / D2: the legend starts closed at every width; its small summary (scale, unit, hour) is always visible
+
+/** V1.5: structure-type glyphs (and the lamp) as map images — the icon set drawn on a small dark disc, both themes. */
+const KIND_IMAGES: IconName[] = ['iskele', 'mendirek', 'kordon', 'kaya', 'kumsal', 'dere-agzi', 'liman', 'marina', 'lamba'];
+async function addKindImages(map: maplibregl.Map) {
+  const S = 48; // drawn at 2× for sharpness (pixelRatio 2 → 24 px)
+  await Promise.all(KIND_IMAGES.map((name) => new Promise<void>((res) => {
+    const svg = icon(name, { size: 30 }).replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" style="color:${PAL.fg1}" `).replace(/currentColor/g, PAL.fg1);
+    const img = new Image(30, 30);
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = S; c.height = S;
+      const g = c.getContext('2d')!;
+      g.fillStyle = PAL.ink0; g.globalAlpha = 0.85; g.beginPath(); g.arc(S / 2, S / 2, S / 2 - 1, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1;
+      g.drawImage(img, (S - 30) / 2, (S - 30) / 2, 30, 30);
+      const id = `k-${name}`;
+      const data = g.getImageData(0, 0, S, S);
+      if (map.hasImage(id)) map.updateImage(id, data); else map.addImage(id, data, { pixelRatio: 2 });
+      res();
+    };
+    img.onerror = () => res();
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  })));
+}
 
 /** Soft edge: rings inside the bathymetry bbox, increasingly opaque open-water colour towards the edge, plus an
  *  opaque frame just outside it (the contoured raster reaches half a DTM cell beyond the bbox). */
@@ -162,7 +200,8 @@ const map = new maplibregl.Map({
   fitBoundsOptions: { padding: { top: 50, bottom: 20, left: 10, right: 10 } },
   minZoom: 8,
   maxZoom: 16,
-  maxBounds: [[28.3, 40.1], [29.6, 40.8]],
+  // V1.5: west edge past the Karacabey spots (lon 28.19); at 28.3 the camera could not reach them (no marker, ring or label)
+  maxBounds: [[27.95, 40.1], [29.6, 40.8]],
   style: {
     version: 8,
     glyphs: `${OFM}/fonts/{fontstack}/{range}.pbf`,
@@ -173,11 +212,11 @@ const map = new maplibregl.Map({
       labels: { type: 'geojson', data: '/tiles/labels.geojson' },
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': OPEN_WATER } },
+      { id: 'bg', type: 'background', paint: { 'background-color': PAL.open } },
       {
         id: 'bands', type: 'fill', source: 'bathy', 'source-layer': 'bands',
         // P0: the ~115 m DTM must not look like close-range detail — the fill fades out from zoom 15 to 16
-        paint: { 'fill-color': ['step', ['get', 'dmin'], DEPTH_STOPS[0]![1], ...DEPTH_STOPS.slice(1).flatMap(([d, c]) => [d, c])] as never, 'fill-antialias': false, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 15, 1, 16, 0] as never },
+        paint: { 'fill-color': depthColor() as never, 'fill-antialias': false, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], 15, 1, 16, 0] as never },
       },
       // G5: "belirsiz derinlik" (interpolated DTM) is optional, off by default; the hatch image is registered on
       // load before the layer can be shown (tiles laid out before the image existed drew no hatch).
@@ -185,8 +224,9 @@ const map = new maplibregl.Map({
       {
         id: 'contours', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['!=', ['get', 'q'], 0], maxzoom: 15,
         paint: {
-          'line-color': '#dbe6ea',
-          'line-opacity': ['match', ['get', 'depth'], [10, 20, 50, 100], 0.55, 0.28],
+          'line-color': PAL.contour,
+          // V1.5: readable 5 / 10 / 20 / 50 m lines, the others faint
+          'line-opacity': ['match', ['get', 'depth'], [5, 10, 20, 50], 1, 0.45],
           'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1.2],
         },
       },
@@ -194,8 +234,8 @@ const map = new maplibregl.Map({
         // contours over interpolated (GEBCO-filled) cells: dashed and faint
         id: 'contours-i', type: 'line', source: 'bathy', 'source-layer': 'contours', filter: ['==', ['get', 'q'], 0], maxzoom: 15,
         paint: {
-          'line-color': '#dbe6ea',
-          'line-opacity': ['match', ['get', 'depth'], [10, 20, 50, 100], 0.3, 0.16],
+          'line-color': PAL.contour,
+          'line-opacity': ['match', ['get', 'depth'], [5, 10, 20, 50], 0.6, 0.3],
           'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1],
           'line-dasharray': [3, 3],
         },
@@ -203,24 +243,24 @@ const map = new maplibregl.Map({
       {
         // P0: close in, only the shallowest contours stay — dashed and faint (the DTM cannot resolve this scale)
         id: 'contours-near', type: 'line', source: 'bathy', 'source-layer': 'contours', minzoom: 15, filter: ['<=', ['get', 'depth'], 10],
-        paint: { 'line-color': '#dbe6ea', 'line-opacity': 0.22, 'line-width': 1, 'line-dasharray': [3, 3] },
+        paint: { 'line-color': PAL.contour, 'line-opacity': 0.5, 'line-width': 1, 'line-dasharray': [3, 3] },
       },
       {
         id: 'survey-line', type: 'line', source: 'bathy', 'source-layer': 'survey',
-        paint: { 'line-color': '#e9d9a6', 'line-opacity': 0.75, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.8, 14, 1.4] },
+        paint: { 'line-color': PAL.fg2, 'line-opacity': 0.75, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.8, 14, 1.4] },
       },
-      { id: 'fade', type: 'fill', source: 'fade', paint: { 'fill-color': OPEN_WATER, 'fill-opacity': ['get', 'a'], 'fill-antialias': false } },
-      { id: 'land', type: 'fill', source: 'bathy', 'source-layer': 'land', paint: { 'fill-color': LAND } },
-      { id: 'lakes', type: 'fill', source: 'ofm', 'source-layer': 'water', filter: ['in', ['get', 'class'], ['literal', ['lake', 'river', 'pond']]], paint: { 'fill-color': '#1b3a4d' } },
+      { id: 'fade', type: 'fill', source: 'fade', paint: { 'fill-color': PAL.open, 'fill-opacity': ['get', 'a'], 'fill-antialias': false } },
+      { id: 'land', type: 'fill', source: 'bathy', 'source-layer': 'land', paint: { 'fill-color': PAL.land, 'fill-outline-color': PAL.landLine } },
+      { id: 'lakes', type: 'fill', source: 'ofm', 'source-layer': 'water', filter: ['in', ['get', 'class'], ['literal', ['lake', 'river', 'pond']]], paint: { 'fill-color': PAL.sea4 } },
       {
         id: 'roads', type: 'line', source: 'ofm', 'source-layer': 'transportation', minzoom: 9,
         filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
-        paint: { 'line-color': '#55697a', 'line-width': ['interpolate', ['linear'], ['zoom'], 9, ['match', ['get', 'class'], ['motorway', 'trunk'], 1.2, 0.5], 14, ['match', ['get', 'class'], ['motorway', 'trunk'], 3, 1.6]] },
+        paint: { 'line-color': PAL.landLine, 'line-width': ['interpolate', ['linear'], ['zoom'], 9, ['match', ['get', 'class'], ['motorway', 'trunk'], 1.2, 0.5], 14, ['match', ['get', 'class'], ['motorway', 'trunk'], 3, 1.6]] },
       },
       {
         id: 'water-names', type: 'symbol', source: 'ofm', 'source-layer': 'water_name',
         layout: { 'text-field': NAME as never, 'text-font': ['Noto Sans Italic'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 12, 13, 15], 'text-letter-spacing': 0.08, 'text-max-width': 8 },
-        paint: { 'text-color': '#9fc3d6', 'text-halo-color': OPEN_WATER, 'text-halo-width': 1.2 },
+        paint: { 'text-color': PAL.fg2, 'text-halo-color': PAL.open, 'text-halo-width': 1.2 },
       },
       {
         id: 'places', type: 'symbol', source: 'ofm', 'source-layer': 'place',
@@ -230,7 +270,7 @@ const map = new maplibregl.Map({
           'text-size': ['match', ['get', 'class'], ['city', 'town'], 14, 11.5],
           'symbol-sort-key': ['match', ['get', 'class'], 'city', 0, 'town', 1, 'village', 2, 3],
         },
-        paint: { 'text-color': '#c9d6dc', 'text-halo-color': LAND, 'text-halo-width': 1.4 },
+        paint: { 'text-color': PAL.labelLand, 'text-halo-color': PAL.land, 'text-halo-width': 1.4 },
       },
       {
         id: 'capes', type: 'symbol', source: 'labels', minzoom: 10,
@@ -238,12 +278,12 @@ const map = new maplibregl.Map({
           'text-field': ['get', 'name'], 'text-font': ['Noto Sans Italic'], 'text-size': 11, 'text-max-width': 7,
           'text-variable-anchor': ['left', 'right', 'top', 'bottom'], 'text-radial-offset': 0.4,
         },
-        paint: { 'text-color': ['match', ['get', 'kind'], 'cape', '#e7d7b0', '#9fc3d6'], 'text-halo-color': '#0e1c27', 'text-halo-width': 1.2 },
+        paint: { 'text-color': ['match', ['get', 'kind'], 'cape', PAL.labelLand, PAL.fg2], 'text-halo-color': PAL.ink0, 'text-halo-width': 1.2 },
       },
       {
         id: 'survey-label', type: 'symbol', source: 'bathy', 'source-layer': 'survey',
         layout: { 'symbol-placement': 'line', 'symbol-spacing': 420, 'text-field': 'ölçülmüş alan', 'text-font': ['Noto Sans Italic'], 'text-size': 11, 'text-offset': [0, 0.9] },
-        paint: { 'text-color': '#e9d9a6', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.2 },
+        paint: { 'text-color': PAL.fg2, 'text-halo-color': PAL.ink0, 'text-halo-width': 1.2 },
       },
     ],
   },
@@ -329,7 +369,7 @@ map.on('load', async () => {
   map.addSource('forbidden', { type: 'geojson', data: forb });
   addForbHatch();
   map.addLayer({ id: 'forb-fill', type: 'fill', source: 'forbidden', paint: { 'fill-pattern': 'hatch-forb', 'fill-opacity': 0.9 } });
-  map.addLayer({ id: 'forb-line', type: 'line', source: 'forbidden', paint: { 'line-color': '#d65048', 'line-width': 1.2, 'line-opacity': 0.8 } });
+  map.addLayer({ id: 'forb-line', type: 'line', source: 'forbidden', paint: { 'line-color': PAL.danger, 'line-width': 1.2, 'line-opacity': 0.8 } });
   // Candidates: hollow diamonds (shape differs from the scored discs, not only colour), 14–22 px.
   const D = 32;
   const diamond = new ImageData(2 * D, 2 * D);
@@ -344,12 +384,12 @@ map.on('load', async () => {
   map.addLayer({
     id: 'cands', type: 'symbol', source: 'cands',
     layout: { 'icon-image': 'diamond', 'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.45, 14, 0.7], 'icon-allow-overlap': true },
-    paint: { 'icon-color': '#b9c4c9', 'icon-halo-color': '#0e1c27', 'icon-halo-width': 1.5 },
+    paint: { 'icon-color': PAL.fg3, 'icon-halo-color': PAL.ink0, 'icon-halo-width': 1.5 },
   });
   map.addLayer({
     id: 'cand-labels', type: 'symbol', source: 'cands', minzoom: 12.5,
     layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 10.5, 'text-offset': [0, 1.2], 'text-anchor': 'top', 'text-max-width': 9 },
-    paint: { 'text-color': '#b9c4c9', 'text-halo-color': '#0e1c27', 'text-halo-width': 1.3 },
+    paint: { 'text-color': PAL.fg2, 'text-halo-color': PAL.ink0, 'text-halo-width': 1.3 },
   });
   const toggle = (box: string, layers: string[]) => {
     const el = ui(box) as HTMLInputElement | null;
@@ -491,9 +531,9 @@ map.on('load', async () => {
 
   map.addSource('spots', { type: 'geojson', data: empty });
   map.addSource('leaders', { type: 'geojson', data: empty });
-  map.addLayer({ id: 'leaders', type: 'line', source: 'leaders', paint: { 'line-color': '#dbe6ea', 'line-opacity': 0.7, 'line-width': 1 } });
-  map.addLayer({ id: 'true-pos', type: 'circle', source: 'leaders', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 2.5, 'circle-color': '#dbe6ea' } });
-  const color = ['step', ['get', 'total'], PALETTE.neutral.color, 0, PALETTE.bad.color, BANDS_V2.warn, PALETTE.warn.color, BANDS_V2.good, PALETTE.good.color];
+  map.addLayer({ id: 'leaders', type: 'line', source: 'leaders', paint: { 'line-color': PAL.fg2, 'line-opacity': 0.7, 'line-width': 1 } });
+  map.addLayer({ id: 'true-pos', type: 'circle', source: 'leaders', filter: ['==', ['geometry-type'], 'Point'], paint: { 'circle-radius': 2.5, 'circle-color': PAL.fg2 } });
+  const color = fitColor();
   const R = 32;
   const disc = new ImageData(2 * R, 2 * R);
   for (let y = 0; y < 2 * R; y++)
@@ -511,21 +551,25 @@ map.on('load', async () => {
       'text-radial-offset': ['interpolate', ['linear'], ['zoom'], 9, 1.35, 14, 1.7], 'text-max-width': 9,
       'symbol-sort-key': ['case', ['get', 'pick'], -1, ['get', 'rank']] as never,
     },
-    paint: { 'text-color': ['case', ['get', 'pick'], '#f5a83c', ['get', 'gated'], '#ffb4ab', '#f3f6f7'] as never, 'text-halo-color': '#0e1c27', 'text-halo-width': 1.6 },
+    paint: { 'text-color': ['case', ['get', 'pick'], PAL.sel, ['get', 'gated'], PAL.danger, PAL.fg1] as never, 'text-halo-color': PAL.ink0, 'text-halo-width': 1.6 },
   });
   map.addLayer({
     id: 'spots', type: 'symbol', source: 'spots',
     layout: { 'icon-image': 'disc', 'icon-size': ['interpolate', ['linear'], ['zoom'], 9, 0.55, 14, 0.85], 'icon-allow-overlap': true },
     // O3: a safety-capped score is not a plain low score: dark red disc, red halo, "!" instead of the number
-    paint: { 'icon-color': ['case', ['get', 'gated'], '#5a2a2c', color] as never, 'icon-halo-color': ['case', ['get', 'gated'], '#ff7a6b', '#0e1c27'] as never, 'icon-halo-width': 2 },
+    paint: { 'icon-color': color as never, 'icon-halo-color': ['case', ['get', 'gated'], PAL.danger, PAL.ink0] as never, 'icon-halo-width': ['case', ['get', 'gated'], 3, 1.5] as never, 'icon-opacity': ['case', ['get', 'pick'], 1, 0.9] as never },
   });
   map.addLayer({
     id: 'spot-score', type: 'symbol', source: 'spots', minzoom: 11,
     layout: { 'text-field': ['to-string', ['get', 'score']], 'text-font': ['Noto Sans Bold'], 'text-size': 10, 'text-allow-overlap': true, 'text-ignore-placement': true },
-    paint: { 'text-color': ['case', ['get', 'gated'], '#ffb4ab', '#0e1c27'] as never },
+    paint: { 'text-color': ['case', ['get', 'gated'], PAL.danger, fitInk()] as never },
   });
   // O1/O2: ring around the selected spot, drawn from the same feature as its marker and label
-  map.addLayer({ id: 'pick-ring', type: 'circle', source: 'spots', filter: ['==', ['get', 'pick'], true], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 10, 16, 18], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#f5a83c', 'circle-stroke-width': 3 } });
+  map.addLayer({ id: 'pick-ring', type: 'circle', source: 'spots', filter: ['==', ['get', 'pick'], true], paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 10, 16, 18], 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': PAL.sel, 'circle-stroke-width': 2.5 } });
+  // V1.5: structure-type glyph beside each spot (close zoom) and a small light only where the lamp is field-verified
+  map.addLayer({ id: 'spot-kind', type: 'symbol', source: 'spots', minzoom: 12.5, layout: { 'icon-image': ['concat', 'k-', ['get', 'kicon']] as never, 'icon-size': 0.5, 'icon-offset': [-30, -30], 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
+  map.addLayer({ id: 'spot-lamp', type: 'symbol', source: 'spots', minzoom: 12.5, filter: ['==', ['get', 'lamp'], true], layout: { 'icon-image': 'k-lamba', 'icon-size': 0.5, 'icon-offset': [30, -30], 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
+  void addKindImages(map);
 
   // G5: settlement badges at far zoom (visual grouping only; every spot keeps its own data and card).
   const P = 24;
@@ -546,7 +590,7 @@ map.on('load', async () => {
       'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': 12, 'text-max-width': 40, // N4: one line (merge uses the one-line size)
     },
     // N4/M3: the badge that holds the plan's pick gets an orange outline at far zoom
-    paint: { 'icon-color': color as never, 'icon-halo-color': ['case', ['get', 'pick'], '#f5a83c', '#0e1c27'] as never, 'icon-halo-width': ['case', ['get', 'pick'], 3, 1.5] as never, 'text-color': '#0e1c27' },
+    paint: { 'icon-color': color as never, 'icon-halo-color': ['case', ['get', 'pick'], PAL.sel, PAL.ink0] as never, 'icon-halo-width': ['case', ['get', 'pick'], 3, 1.5] as never, 'text-color': fitInk() as never },
   });
 
   setPick = (id) => {
@@ -588,7 +632,7 @@ map.on('load', async () => {
     });
     (map.getSource('spots') as maplibregl.GeoJSONSource).setData({
       type: 'FeatureCollection',
-      features: spotFeatures(feats.map(({ s, ll }) => ({ s: { id: s.id, name: s.name, lon: s.lon, lat: s.lat, total: s.score.total, gated: !!s.score.gated, rank: s.score.rank }, lon: ll.lng, lat: ll.lat })), pickId),
+      features: spotFeatures(feats.map(({ s, ll }) => ({ s: { id: s.id, name: s.name, lon: s.lon, lat: s.lat, total: s.score.total, gated: !!s.score.gated, rank: s.score.rank, kind: s.kind, lamp_state: s.lamp_state ?? null }, lon: ll.lng, lat: ll.lat })), pickId),
     });
     (map.getSource('leaders') as maplibregl.GeoJSONSource).setData({
       type: 'FeatureCollection',
@@ -642,9 +686,51 @@ map.on('load', async () => {
     if (!o.onSpot) showCard(f);
   }
   o.container.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
+  // V1.5: night hours soften the whole palette (a dark veil under the spots); instant with reduced motion
+  map.addSource('night', { type: 'geojson', data: { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [[[26, 39], [31, 39], [31, 42], [26, 42], [26, 39]]] } } });
+  map.addLayer({ id: 'night', type: 'fill', source: 'night', paint: { 'fill-color': '#000', 'fill-opacity': 0, 'fill-opacity-transition': { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220, delay: 0 } } }, 'leaders');
+  applyNight();
   o.container.dataset.ready = String(spots.length);
   markReady(map);
 });
+
+/** Selected hour at night (sun below −6° at the map centre) → veil; twilight half; day none. */
+function applyNight() {
+  if (!map.getLayer('night')) return;
+  const c = map.getCenter();
+  const t = at ? new Date(at) : new Date();
+  const alt = skyAt(new Date(Math.floor(t.getTime() / 3_600_000) * 3_600_000 + 1_800_000), c.lat, c.lng).sunAlt;
+  const light = document.documentElement.dataset.theme === 'light';
+  const k = alt > 0 ? 0 : alt > -6 ? 0.5 : 1;
+  map.setPaintProperty('night', 'fill-color', light ? '#142330' : '#000');
+  map.setPaintProperty('night', 'fill-opacity', k * (light ? 0.14 : 0.24));
+}
+
+/** V1.0/V1.5: the theme switch repaints the map from the tokens of the new theme. */
+function applyTheme() {
+  PAL = palette();
+  drawScale();
+  const set = (id: string, prop: string, v: unknown) => { if (map.getLayer(id)) map.setPaintProperty(id, prop, v as never); };
+  set('bg', 'background-color', PAL.open);
+  set('bands', 'fill-color', depthColor());
+  for (const id of ['contours', 'contours-i', 'contours-near']) set(id, 'line-color', PAL.contour);
+  set('fade', 'fill-color', PAL.open);
+  set('land', 'fill-color', PAL.land);
+  set('land', 'fill-outline-color', PAL.landLine);
+  set('lakes', 'fill-color', PAL.sea4);
+  set('spots', 'icon-color', fitColor());
+  set('spots', 'icon-halo-color', ['case', ['get', 'gated'], PAL.danger, PAL.ink0]);
+  set('spot-score', 'text-color', ['case', ['get', 'gated'], PAL.danger, fitInk()]);
+  set('spot-labels', 'text-color', ['case', ['get', 'pick'], PAL.sel, ['get', 'gated'], PAL.danger, PAL.fg1]);
+  set('spot-labels', 'text-halo-color', PAL.ink0);
+  set('pick-ring', 'circle-stroke-color', PAL.sel);
+  set('badges', 'icon-color', fitColor());
+  set('badges', 'icon-halo-color', ['case', ['get', 'pick'], PAL.sel, PAL.ink0]);
+  set('badges', 'text-color', fitInk());
+  void addKindImages(map);
+  applyNight();
+}
+addEventListener('av-theme', () => applyTheme());
 
 return {
   async setSpecies(next) {
@@ -656,12 +742,14 @@ return {
   },
   async setHour(next) {
     at = next;
+    applyNight();
     loading.hidden = false;
     if (!(await fetchSpots())) return; // superseded: the newer call lays out and hides the spinner
     layout();
     loading.hidden = true;
   },
   resize: () => map.resize(),
+  setPadding: (p) => map.easeTo({ padding: { left: 0, top: 0, right: 0, bottom: 0, ...p }, duration: 0 }),
   ready,
   spotsNow: () => spots.map((s) => ({ id: s.id, lat: s.lat, lon: s.lon, gated: !!s.score.gated })),
   highlight(id) {

@@ -16,6 +16,9 @@ describe('O2: one map feature and one label per spot', () => {
     expect(f[1]!.properties).toMatchObject({ score: '!', label: 'M b · güvenlik', gated: true });
     expect(f[2]!.properties).toMatchObject({ score: '–', total: -1, rank: 99 });
     expect(spotFeatures([{ s: s('a'), lon: 29, lat: 40 }], null)[0]!.properties.pick).toBe(false);
+    // V1.5: kind glyph and verified-lamp flag
+    const k = spotFeatures([{ s: s('d', { kind: 'breakwater', lamp_state: 'dogrulandi' }), lon: 29, lat: 40 }, { s: s('e', { lamp_state: 'goruldu' }), lon: 29, lat: 40 }], null);
+    expect(k.map((x) => [x.properties.kicon, x.properties.lamp])).toEqual([['mendirek', true], ['iskele', false]]);
   });
 });
 

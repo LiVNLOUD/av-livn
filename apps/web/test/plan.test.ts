@@ -169,3 +169,19 @@ describe('V1.2 decision language and three trusts', () => {
     expect(catchTrust(null).level).toBeNull();
   });
 });
+
+import { compass8, windRel } from '../src/scripts/plan';
+describe('V1.4 wind relative to the shore', () => {
+  it('seaward normal vs wind-from direction', () => {
+    expect(windRel(0, 0)).toBe('denizden');      // shore faces N, wind from N: onshore
+    expect(windRel(0, 135)).toBe('karadan');     // wind from SE onto a N-facing shore: offshore
+    expect(windRel(0, 90)).toBe('yandan');
+    expect(windRel(350, 20)).toBe('denizden');   // wraps around north
+    expect(windRel(25, 205)).toBe('karadan');
+    expect(windRel(null, 10)).toBeNull();
+    expect(windRel(10, null)).toBeNull();
+  });
+  it('compass', () => {
+    expect([0, 22, 46, 135, 180, 225, 270, 315, 359, -45].map(compass8)).toEqual(['K', 'K', 'KD', 'GD', 'G', 'GB', 'B', 'KB', 'K', 'KB']);
+  });
+});
