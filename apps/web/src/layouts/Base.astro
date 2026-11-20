@@ -101,7 +101,8 @@ const TABS: [string, string, string, boolean][] = [
         });
       }
       // E8/N5: data freshness, one rule for every page and the plan card (scripts/format.ts freshness)
-      fetch('/api/spots', { cache: 'no-cache' })
+      // V1.7: on the home page the inline request starter already has this answer (a copy): no second download
+      ((window as { __avSpots?: Promise<Response> }).__avSpots?.catch(() => fetch('/api/spots', { cache: 'no-cache' })) ?? fetch('/api/spots', { cache: 'no-cache' }))
         .then((r) => (r.ok ? r.json() : null))
         .then((b: { scored_at?: string | null; data_fetched_at?: string | null; weather_run?: WeatherRunInfo | null } | null) => {
           if (!b) return;

@@ -28,6 +28,8 @@ import Base from '../layouts/Base.astro';
         var u = api(p);
         pre[u] = fetch(u, { cache: 'no-cache' });
         if (p === '/api/windows') pre[u] = pre[u].then(function (r) { if (r.ok) r.clone().json().then(details).catch(function () {}); return r; });
+        // the header's freshness check reads the same answer (a copy) instead of downloading the spot list again
+        if (p === '/api/spots') window.__avSpots = pre[u].then(function (r) { return r.clone(); });
         pre[u].catch(function () {});
       });
       window.__avPre = pre;

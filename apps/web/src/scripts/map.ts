@@ -17,6 +17,21 @@ import { icon, type IconName } from './icons';
 // BATHY_BBOX mirrors pipeline av_pipeline/__init__.py.
 const DEPTH_EDGES = [0, 2, 5, 10, 30] as const;
 const BATHY_BBOX = { south: 40.25, west: 28.05, north: 40.65, east: 29.3 };
+/** WCAG relative luminance of a #rrggbb colour (null for anything else). */
+const lumHex = (c: string): number | null => {
+  const m = /^#([0-9a-f]{6})$/i.exec(c.trim());
+  if (!m) return null;
+  const n = parseInt(m[1]!, 16);
+  const f = (v: number) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  return 0.2126 * f(n >> 16) + 0.7152 * f((n >> 8) & 255) + 0.0722 * f(n & 255);
+};
+/** V1.8 (AA): text colour for a swatch — whichever of light / dark ink contrasts more with it. */
+export function inkOn(bg: string, light: string, dark: string): string {
+  const [b, l, d] = [lumHex(bg), lumHex(light), lumHex(dark)];
+  if (b === null || l === null || d === null) return light;
+  const ratio = (x: number, y: number) => (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  return ratio(b, l) >= ratio(b, d) ? light : dark;
+}
 type Pal = Record<'sea1' | 'sea2' | 'sea3' | 'sea4' | 'sea5' | 'open' | 'land' | 'landLine' | 'contour' | 'fg1' | 'fg2' | 'fg3' | 'ink0' | 'sel' | 'danger' | 'warn' | 'f0' | 'f1' | 'f2' | 'f3' | 'f4' | 't0' | 't1' | 't2' | 't3' | 't4' | 'labelLand', string>;
 function palette(): Pal {
   const cs = getComputedStyle(document.documentElement);
@@ -149,7 +164,7 @@ let setPick: (id: string | null) => void = () => {};
 
 const scaleEl = ui('scale');
 const drawScale = () => {
-  if (scaleEl) scaleEl.innerHTML = DEPTH_EDGES.map((d, i) => `<li style="background:${[PAL.sea1, PAL.sea2, PAL.sea3, PAL.sea4, PAL.sea5][i]};color:${PAL.fg1}">${d}${i === DEPTH_EDGES.length - 1 ? '+' : ''}</li>`).join('');
+  if (scaleEl) scaleEl.innerHTML = DEPTH_EDGES.map((d, i) => { const bg = [PAL.sea1, PAL.sea2, PAL.sea3, PAL.sea4, PAL.sea5][i]!; return `<li style="background:${bg};color:${inkOn(bg, PAL.fg1, PAL.ink0)}">${d}${i === DEPTH_EDGES.length - 1 ? '+' : ''}</li>`; }).join('');
 };
 drawScale();
 // V1 / D2: the legend starts closed at every width; its small summary (scale, unit, hour) is always visible
@@ -344,8 +359,10 @@ const empty = { type: 'FeatureCollection' as const, features: [] };
 const spotsReq = latest(); // V1.1: an older hour's answer never replaces the newer one
 /** Loads the spots for the current hour and species; false if a newer request superseded this one. */
 const fetchSpots = async (): Promise<boolean> => {
-  const res = await spotsReq.run(() => fetch(api(`/api/spots${at ? `?at=${encodeURIComponent(at)}` : ''}`, species), { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] })));
+  const reqAt = at;
+  const res = await spotsReq.run(() => fetch(api(`/api/spots${reqAt ? `?at=${encodeURIComponent(reqAt)}` : ''}`, species), { cache: 'no-cache' }).then((r) => r.json()).catch(() => ({ spots: [] })));
   if (res === STALE) return false;
+  o.container.dataset.hour = reqAt ?? 'now'; // V1.8: the hour whose spots are on the map (e2e: latest selection wins)
   spots = res.spots ?? [];
   spotCount = spots.length;
   byId = new Map(spots.map((s) => [s.id, s]));
@@ -542,16 +559,16 @@ map.on('load', async () => {
       disc.data[(y * 2 * R + x) * 4 + 3] = Math.max(0, Math.min(255, Math.round(192 - (d - R * 0.75) * 24)));
     }
   map.addImage('disc', disc, { sdf: true, pixelRatio: 2 });
+  const labelLayout = {
+    'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 10.5, 14, 13],
+    'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'bottom-right', 'bottom-left', 'top-right'],
+    'text-radial-offset': ['interpolate', ['linear'], ['zoom'], 9, 1.35, 14, 1.7], 'text-max-width': 9,
+  } as const;
   map.addLayer({
     id: 'spot-labels', type: 'symbol', source: 'spots', minzoom: 12, // M3: far zoom shows settlement badges only
-    layout: {
-      // O2: one label per spot, from the spot's own feature (the selected one in sodium, always placed)
-      'text-field': ['get', 'label'], 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 9, 10.5, 14, 13],
-      'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'top-left', 'bottom-right', 'bottom-left', 'top-right'],
-      'text-radial-offset': ['interpolate', ['linear'], ['zoom'], 9, 1.35, 14, 1.7], 'text-max-width': 9,
-      'symbol-sort-key': ['case', ['get', 'pick'], -1, ['get', 'rank']] as never,
-    },
-    paint: { 'text-color': ['case', ['get', 'pick'], PAL.sel, ['get', 'gated'], PAL.danger, PAL.fg1] as never, 'text-halo-color': PAL.ink0, 'text-halo-width': 1.6 },
+    filter: ['!=', ['get', 'pick'], true], // O2: one label per spot, from the spot's own feature; the selected one below
+    layout: { ...labelLayout, 'symbol-sort-key': ['get', 'rank'] as never } as never,
+    paint: { 'text-color': ['case', ['get', 'gated'], PAL.danger, PAL.fg1] as never, 'text-halo-color': PAL.ink0, 'text-halo-width': 1.6 },
   });
   map.addLayer({
     id: 'spots', type: 'symbol', source: 'spots',
@@ -570,6 +587,13 @@ map.on('load', async () => {
   map.addLayer({ id: 'spot-kind', type: 'symbol', source: 'spots', minzoom: 12.5, layout: { 'icon-image': ['concat', 'k-', ['get', 'kicon']] as never, 'icon-size': 0.5, 'icon-offset': [-30, -30], 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
   map.addLayer({ id: 'spot-lamp', type: 'symbol', source: 'spots', minzoom: 12.5, filter: ['==', ['get', 'lamp'], true], layout: { 'icon-image': 'k-lamba', 'icon-size': 0.5, 'icon-offset': [30, -30], 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
   void addKindImages(map);
+  // V1.8: the selected spot's label is always placed (neighbouring discs and labels could hide every anchor of it in a
+  // dense cluster); it sits above the other symbol layers, so it is placed first and the others make room for it
+  map.addLayer({
+    id: 'pick-label', type: 'symbol', source: 'spots', minzoom: 12, filter: ['==', ['get', 'pick'], true],
+    layout: { ...labelLayout, 'text-allow-overlap': true } as never,
+    paint: { 'text-color': PAL.sel, 'text-halo-color': PAL.ink0, 'text-halo-width': 1.6 },
+  });
 
   // G5: settlement badges at far zoom (visual grouping only; every spot keeps its own data and card).
   const P = 24;
@@ -721,8 +745,10 @@ function applyTheme() {
   set('spots', 'icon-color', fitColor());
   set('spots', 'icon-halo-color', ['case', ['get', 'gated'], PAL.danger, PAL.ink0]);
   set('spot-score', 'text-color', ['case', ['get', 'gated'], PAL.danger, fitInk()]);
-  set('spot-labels', 'text-color', ['case', ['get', 'pick'], PAL.sel, ['get', 'gated'], PAL.danger, PAL.fg1]);
+  set('spot-labels', 'text-color', ['case', ['get', 'gated'], PAL.danger, PAL.fg1]);
   set('spot-labels', 'text-halo-color', PAL.ink0);
+  set('pick-label', 'text-color', PAL.sel);
+  set('pick-label', 'text-halo-color', PAL.ink0);
   set('pick-ring', 'circle-stroke-color', PAL.sel);
   set('badges', 'icon-color', fitColor());
   set('badges', 'icon-halo-color', ['case', ['get', 'pick'], PAL.sel, PAL.ink0]);

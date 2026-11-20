@@ -249,11 +249,13 @@ for (const [w, h] of [[3440, 1440], [2576, 1440], [1920, 1080], [1440, 900], [39
     const chip = p.locator('#eq-pick button').nth(1);
     const target = (await chip.count()) ? (await chip.innerText()).trim() : (await p.locator('#a-where').innerText()).trim();
     if (await chip.count()) await chip.click(); else await p.locator('#pick-open').click();
-    await p.waitForTimeout(2200);
-    const m = await p.evaluate((name) => {
+    await p.waitForTimeout(1200);
+    const m = await p.evaluate(async (name) => {
       const map = document.getElementById('map').__avMap;
       if (!map) return null;
-      const feats = map.queryRenderedFeatures().filter((f) => ['spot-labels', 'cand-labels'].includes(f.layer.id) && String(f.properties.label ?? f.properties.name ?? '').startsWith(name));
+      // labels need the font ranges (Turkish letters) from the style server: wait until the map has settled
+      if (!map.loaded() || !map.areTilesLoaded()) await new Promise((r) => { map.once('idle', r); setTimeout(r, 8000); });
+      const feats = map.queryRenderedFeatures().filter((f) => ['spot-labels', 'pick-label', 'cand-labels'].includes(f.layer.id) && String(f.properties.label ?? f.properties.name ?? '').startsWith(name));
       const ring = map.queryRenderedFeatures({ layers: ['pick-ring'] }).length;
       return { zoom: map.getZoom(), labels: feats.length, ring };
     }, target);
