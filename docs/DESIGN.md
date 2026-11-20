@@ -145,3 +145,64 @@ Kaynak: `docs/REVISION-V.md` (D1–D9 düzeltmeleri geçerli). Belirteçler `app
   - **Rüzgar:** çizgi 2,75 px; hamle bandı %35 opak, üst kenarı ayrıca çizilir; lejantlıdır.
   - **Sahadayım:** 4 kayıt düğmesi ekranın altına sabittir (başparmak bölgesi, 72 px). Gece görünümü uygulamanın kırmızı modudur; kırmızılar siyah üzerinde AA'yı geçecek kadar açıktır (#ff3b2f 5,9:1, #f0362a 5,3:1). Canlı sayfadaki eski tonlar (#c0261c 3,5:1, #9c1f17 2,6:1) V2'de bu değerlere çekilecek.
   - **Bitmap görseller:** 17 adet. Teslim PNG olarak `assets-inbox/` klasörüne yapılır; `npm run assets` (`scripts/assets-check.mjs`, testli) denetler, dönüştürür ve maskable simgeyi türetir. Gözle denetim ve denetim kaydı `docs/design/assets-needed.md`'de tutulur.
+
+## V1 — canlı uygulama (20 Kasım)
+
+Bileşenler:
+
+- **Tek seçili saat** (`scripts/hour.ts`, testli). Ana sayfa ve /harita/ aynı depoyu kullanır; saat URL'de `?t=` olarak durur.
+  - `latest()`: her istek bir sıra numarası alır. Eski bir yanıt, sonra yapılan seçimin üstüne yazılmaz.
+  - Harita uyguladığı saati `data-hour` olarak gösterir (e2e bununla denetler).
+- **Karar dili** (`plan.ts verdictText`). Koşulsuz "Evet" yoktur; karar güvene göre söylenir:
+  - güven düşük → "Denemeye değer görünüyor";
+  - orta → "Uygun görünüyor";
+  - yüksek (yalnız trust-gate geçilince) → "İyi görünüyor";
+  - bugün güçlü pencere yoksa → "Bugün zayıf görünüyor".
+- **Üç güven:** hava tahmini (model uyumu), mera bilgisi (saha / uzaktan / yok, lamba durumu), av doğrulaması (kayıt sayısı n).
+- **Av zaman çizelgesi** (`scripts/timeline.ts`, saf SVG, testli). 24 sütun, şu satırlar:
+  - gün / gece;
+  - uygunluk (sıralı ölçek + yükseklik);
+  - rüzgar çizgisi, hamle bandı ve yön okları;
+  - yağış ("yağış yok" ile "veri yok" ayrı);
+  - dalga;
+  - güvenlik saatleri;
+  - önerilen pencere;
+  - seçili saat çizgisi.
+  - Bir sütuna dokunmak saati değiştirir.
+- **Ana ekran, yön A:**
+  - **≥ 1024 px:** harita sahnedir. Solda kayan karar paneli (haritanın ≤ %40'ı), altta dok (çizelge + eşdeğer seçenekler tablosu). Harita satırı kalan yüksekliği doldurur, böylece saat şeridi açıkken de çizelge ilk ekranda kalır.
+  - **< 1024 px:** ilk ekranda karar, seçili mera ve koşul satırı var. Çizelge, harita, takım ve güven birer dokunuş uzakta (D9).
+- **Eşdeğer seçenekler:**
+  - sıralama yoktur;
+  - erişim gösterilir ("bilinmiyor" hiçbir zaman "açık" sayılmaz);
+  - yapı tipi simgeyle gösterilir;
+  - rüzgara göre konum (denizden / karadan / yandan; `windRel`, testli) gösterilir;
+  - veri kalitesi gösterilir.
+- **Harita kimliği** (`map.ts`). Renkler CSS belirteçlerinden okunur ve iki temada çalışır:
+  - Taban: 5 derinlik tonu; 5/10/20/50 m konturları.
+  - İşaretler:
+    - uygunluk renginde disk;
+    - yanında yapı tipi simgesi;
+    - yalnız sahada doğrulanmış lambada küçük ışık simgesi;
+    - seçili merada ince beyaz halka. Etiketi her zaman yerleşir (ayrı katman).
+  - Gece saatinde palet yumuşakça kararır; hareket azaltmada bu geçiş anlıktır.
+  - Lejant varsayılan kapalıdır. Ölçek, birim ve saat her zaman görünür.
+- **Hava katmanları** (`layers.ts`):
+  - Katman açıkken batimetri ve konturlar söner.
+  - Ölçekler sabittir (rüzgar 0–65 km/sa) ve düşük değerler de görünür.
+  - Lejant şunları söyler: çözünürlük, örnekleme, yumuşatma, geçerli saat.
+  - Durumlar ayrıdır ve `data-state` ile işaretlenir: yükleniyor, hata, veri yok (gri), yağış yok.
+  - Dokunulan noktada o saatin değeri açılır kutuda gösterilir.
+  - Parçacıklar: en küçük adım 0,6 px/kare, soldurma 0,94, çizgi 1,5 px. Akıntı ayrı renktedir. Hareket azaltmada parçacık yoktur.
+
+Kurallar:
+
+- **Önce karar:** eşdeğer seçenek çipleri karar kartından sonra gelir (her genişlikte).
+- **Kontrast:** düz zemin üstündeki metin AA'yı geçer. `scripts/e2e-v1.mjs` ana sayfayı (koyu/açık, 1440 ve 390) ve /harita/'yı ölçer. Renkli bir zemin üstündeki yazı, açık ve koyu mürekkepten zeminle daha yüksek kontrast verenini kullanır (`inkOn`).
+- **İlk yükleme (D8):**
+  - plan istekleri `<head>`'de, stillerden önce başlar;
+  - olası meraların detayları pencereler gelir gelmez istenir;
+  - sayfanın JS parçaları `modulepreload` ile HTML'le birlikte istenir (`scripts/preload-modules.mjs`);
+  - ilk ziyarette web fontu karar kartı hazır olunca yüklenir.
+
+Ekran görüntüleri: `docs/screenshots/v1/` (canlı, dsf 2; üretici `scripts/shots-v1.mjs`).

@@ -125,6 +125,14 @@ puan(bilinmiyor) = 100 · HSI_s · [ p · HSI_d(lamba var) + (1 − p) · HSI_d(
 ```
 
 - **"Bilinmiyor" asla "yok" gibi işlenmez.** F1.1'deki "bilinmeyen = lambasız" kararının yerini alır.
+- **Arayüz dili (V1.2, 10 Kasım).** Kullanıcıya gösterilen lamba durumu üç değerden biridir:
+  - **bilinmiyor**: kanıt yok, önsel kullanılıyor;
+  - **görüldü**: fotoğrafta direk ya da aydınlatma görüldü, gece çalıştığı doğrulanmadı;
+  - **sahada doğrulandı**: saha ya da yönetici kaydı.
+- Public API'de bu durum yalnız `lamp_state` etiketi (`bilinmiyor | goruldu | dogrulandi | yok`) olarak açılır. Kimin girdiği, tarih ve notlar gizli kalır (gizlilik testi `workers/api/test/lamp.test.ts`, `api.test.ts`).
+- Gerekçe metinleri olasılık sayısını ana metinde göstermez: "iskele aydınlatması bilinmiyor (varsayım önseli 0.50)". Sayı yalnız "Neden? Ayrıntılar" altında, varsayım etiketiyle görünür.
+- Haritada küçük ışık simgesi yalnız `dogrulandi` olan merada çizilir. Işık yayılım alanı çizilmez.
+- Katsayılar ve puanlar bu değişiklikten etkilenmedi; yalnız metin ve gösterim değişti.
 - **Ay terimi de karışımın içinde:** ay ışığı lambalı kolda kontrastı azaltır, lambasız kolda ışık sağlar.
 - **Monte Carlo:** lamba her çekimde `Bernoulli(p)` senaryosu olarak çekilir. Senaryo farkı %10–90 bandını genişletir (yön testi 4: bilinmiyor 55.8, var 52.1, yok 45.2 puan genişlik).
 - **Önsel p (C):**

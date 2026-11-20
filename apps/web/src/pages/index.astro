@@ -168,6 +168,10 @@ import Base from '../layouts/Base.astro';
   .sp-pick { margin-left: auto; display: flex; align-items: center; gap: var(--s2); font-size: var(--fs-2); color: var(--mist); }
   .sp-pick select { height: 44px; padding-top: 0; padding-bottom: 0; }
   .r-win, .r-heat, .r-spots { grid-area: main; min-width: 0; }
+  /* decision first at every width (V1.4, D9): the equal-options chips follow the card */
+  .app[data-view='plan'] .r-win :global(.plan-main) { display: flex; flex-direction: column; gap: var(--s3); }
+  .app[data-view='plan'] .r-win :global(#stale-card) { order: -1; }
+  .app[data-view='plan'] .r-win :global(#eq-note), .app[data-view='plan'] .r-win :global(#eq-pick) { order: 2; margin: 0; }
   .r-dock { grid-area: dock; min-width: 0; }
   .app:not([data-view='plan']) .r-win, .app:not([data-view='heat']) .r-heat, .app:not([data-view='spots']) .r-spots, .app:not([data-view='plan']) .r-dock { display: none; }
   .r-map { grid-area: map; display: none; }
@@ -370,10 +374,7 @@ import Base from '../layouts/Base.astro';
     /* absolute inside its grid area: the floating panel never sizes the map row */
     .app[data-view='plan'] .r-win { grid-area: map; position: absolute; top: 0; left: 0; z-index: 5; width: min(470px, 40%); max-height: calc(100% - 2 * var(--s4)); margin: var(--s4); padding: var(--s3); overflow: auto; border-radius: var(--radius); background: var(--ink-1); border: 1px solid var(--line); box-shadow: 0 10px 30px rgb(0 0 0 / .35); }
     .app[data-view='plan'] .r-win :global(.plan-main) { max-width: none; }
-    /* decision first: the equal-options chips follow the card (the dock table lists the same places) */
-    .app[data-view='plan'] .r-win :global(.plan-main) { display: flex; flex-direction: column; gap: var(--s3); }
-    .app[data-view='plan'] .r-win :global(#stale-card) { order: -1; }
-    .app[data-view='plan'] .r-win :global(#eq-note), .app[data-view='plan'] .r-win :global(#eq-pick) { order: 2; margin: 0; }
+
     .app[data-view='plan'] .r-win :global(.main-pick) { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'q1' 'q2' 'q5' 'q3' 'q4' 'more' 'go'; background: var(--ink-2); }
     .app[data-view='plan'] .r-dock { grid-area: dock; grid-template-columns: minmax(0, 1fr) minmax(0, 560px); padding: var(--s3) var(--s5) var(--s5); border-top: 1px solid var(--line); background: var(--ink-1); }
     .app[data-view='plan'] .dock-rig { display: none; }

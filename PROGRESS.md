@@ -491,3 +491,73 @@ Yeni özellik yok. Rapor: `docs/audit/monitor-72h.md`.
 - **Sahadayım** gündüz/gece maketleri; ≥ 4 kg uyarısı yalnız "mevzuat doğrulanacak (V2)" yer tutucusu.
 - **`docs/design/assets-needed.md`:** 21 bitmap görsel (6 tür, 9 takım/yem, 3 boş durum, 1 OG, 2 PWA simgesi); prompt'lar ve kabul listeleriyle.
 - Canlı arayüz değişmedi; testler yeşil.
+
+## V0b düzeltmeleri ve görseller (10 Kasım)
+- C1–C7 maketlere uygulandı (`bfa8ca7`). Kapsam:
+  - kıyı dosyası özetle başlıyor; fotoğraf kuralı uygulandı;
+  - dosyada seçili saat gösteriliyor;
+  - açıklık gülü 119/119 merada (`fetch_km`);
+  - sıralı, renk körü güvenli uygunluk ölçeği;
+  - Sahadayım düğmeleri altta;
+  - 17 görsel ve `scripts/assets-check.mjs`.
+- Görseller 17/17 hazır (`0f2167c`). Uygulama simgesi `og.png` adıyla gelmişti; simge olarak işlendi, paylaşım görseli değişmedi.
+
+## Faz V1 — canlı uygulama (10–20 Kasım) ✅ DUR
+- **V1.0:** V belirteçleri bütün sayfalarda; açık "atlas" teması (başlıkta düğme); simge modülü.
+- **V1.1:** tek seçili saat (`?t=`), `latest()` yarış koruması.
+- **V1.2:**
+  - karar dili güvene göre;
+  - üç ayrı güven;
+  - public `lamp_state` (üç durum, ayrıntılar gizli);
+  - `fetch_km` liste uç noktasında;
+  - lamba metni olasılıksız.
+- **V1.3–V1.6** (`409b852`):
+  - av zaman çizelgesi;
+  - yön A yerleşimi;
+  - eşdeğer seçenekler tablosu (erişim, tip, rüzgara göre konum, veri);
+  - harita kimliği (5 ton, konturlar, tip simgeleri, gece kararması, lejant kapalı);
+  - hava katmanı durumları ve sabit ölçekler;
+  - dokunma okuması;
+  - parçacık ayarı.
+- **V1.7 (D8)**, mobil = 390 px, 4× CPU, 1,6 Mbps / 150 ms; canlı, medyan:
+
+  | Aşama | Hedef | Önce (V1.6) | Sonra |
+  |---|---|---|---|
+  | Ana sayfa iskelet, mobil soğuk | ≤ 1,5 sn | 624 ms | 668 ms |
+  | Karar kartı, mobil soğuk | ≤ 1,5 sn | 1815 ms | **1357 ms** |
+  | Karar kartı, mobil sıcak | — | 721 ms | 701 ms |
+  | /harita/ iskelet, mobil | ≤ 1,5 sn | 308 ms | 348 ms |
+  | /harita/ hazır, mobil sıcak (tekrar ziyaret) | ≤ 3 sn | 1959 ms | 1703 ms |
+  | /harita/ hazır, mobil, ana sayfadan sonra ilk açılış | — | 7840 ms | 7648 ms |
+  | Karar kartı, masaüstü soğuk | — | 919 ms | 749 ms |
+
+  - "Önce" 3 koşu, "sonra" 5 koşu.
+  - Yollar:
+    - plan istekleri stillerden önce;
+    - olası meraların detayları erken;
+    - `modulepreload`;
+    - `/api/spots` tek indirme;
+    - ilk ziyarette font karar kartından sonra.
+  - Ölçüm: `node scripts/v-audit.mjs --d8 --runs N`.
+- **V1.8 kabul** (`scripts/e2e-v1.mjs`, 24 denetim):
+  - hızlı saat değişimi;
+  - WebGL yok;
+  - hareket azaltma;
+  - lejant kapalı;
+  - kontrast AA (4 sayfa/tema);
+  - parçacıklar 5 km/sa fixture'da ≥ N piksel;
+  - 5 fixture senaryosu (kuru, yağışlı, eksik saat, sakin, sert rüzgar).
+  - Bu testlerin bulduğu kusurlar düzeltildi:
+    - derinlik ölçeğinde 3,3:1 metin;
+    - yoğun kümede seçili etiketin kaybolması;
+    - 390 px'te üst üste binen çip adları.
+- **Doğrulama:**
+  - puanlama 292 (%100), worker 166, web 78, betik 9 test; typecheck;
+  - e2e yeşil (200–201 denetim; sayı saat şeridinin açık olup olmamasına göre değişir);
+  - e2e-v1 24/24;
+  - smoke.
+- **Ekran görüntüleri:** `docs/screenshots/v1/` (20 adet).
+- **Kalan riskler:**
+  - /harita/'nın telefonda ilk açılışı 7,6 sn (MapLibre ~1,1 MB, ilk kez iniyor).
+  - 1440×900'de saat şeridi açıkken panelde "Ne kadar güvenilir?" kaydırma ister.
+  - Ölçümler emülasyondur; gerçek cihaz ölçümü yok.
