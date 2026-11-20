@@ -3,8 +3,11 @@ import Base from '../layouts/Base.astro';
 ---
 <Base title="av.livn — Av planı" app themeable>
   <!-- Q2: start the plan's data requests at once, before the page modules load (~0.6 s earlier on the critical path).
-       Same URLs as scripts/species.ts api(); the page takes each response once (preFetch) or fetches itself. -->
-  <script is:inline>
+       Same URLs as scripts/species.ts api(); the page takes each response once (preFetch) or fetches itself.
+       V1.7 (D8): in <head> before the stylesheets, and as soon as the windows arrive the details of the likely picks
+       (first three of each window list, at most six spots, ~6 KB each compressed) start too, so the decision card does
+       not wait for a second round trip after the page modules have run. -->
+  <script is:inline slot="head">
     (function () {
       var sp = 'istavrit';
       try {
@@ -14,7 +17,19 @@ import Base from '../layouts/Base.astro';
       } catch (e) {}
       var api = function (p) { return sp === 'istavrit' ? p : p + (p.indexOf('?') >= 0 ? '&' : '?') + 'species=' + sp; };
       var pre = {};
-      ['/api/windows', '/api/spots', '/api/trust-gate'].forEach(function (p) { var u = api(p); pre[u] = fetch(u, { cache: 'no-cache' }); pre[u].catch(function () {}); });
+      var details = function (d) {
+        var ids = [];
+        var take = function (b) { if (b && b.windows) b.windows.slice(0, 3).forEach(function (w) { if (ids.indexOf(w.spot_id) < 0) ids.push(w.spot_id); }); };
+        var pb = d && d.plan && d.plan.bursa;
+        [pb && pb.today, pb, d && d.today].forEach(function (g) { if (g) { take(g.all); take(g.open); } });
+        ids.slice(0, 6).forEach(function (id) { var u = api('/api/spots/' + encodeURIComponent(id) + '?model=v2'); if (!pre[u]) { pre[u] = fetch(u); pre[u].catch(function () {}); } });
+      };
+      ['/api/windows', '/api/spots', '/api/trust-gate'].forEach(function (p) {
+        var u = api(p);
+        pre[u] = fetch(u, { cache: 'no-cache' });
+        if (p === '/api/windows') pre[u] = pre[u].then(function (r) { if (r.ok) r.clone().json().then(details).catch(function () {}); return r; });
+        pre[u].catch(function () {});
+      });
       window.__avPre = pre;
     })();
   </script>
@@ -823,7 +838,7 @@ import Base from '../layouts/Base.astro';
   const details = new Map<string, Promise<Detail | null>>();
   const detailCache = new Map<string, Detail | null>(); // resolved details, for synchronous redraws (timeline)
   const detail = (id: string) => {
-    if (!details.has(id)) details.set(id, fetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species)).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d: Detail | null) => { detailCache.set(id, d); return d; }));
+    if (!details.has(id)) details.set(id, preFetch(api(`/api/spots/${encodeURIComponent(id)}?model=v2`, species)).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((d: Detail | null) => { detailCache.set(id, d); return d; }));
     return details.get(id)!;
   };
   let sumSeq = 0;

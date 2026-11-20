@@ -31,6 +31,8 @@ const TABS: [string, string, string, boolean][] = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- V1.7 (D8): page scripts that start requests go first, before any stylesheet can block them -->
+    <slot name="head" />
     <meta name="theme-color" content="#08111a" />
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

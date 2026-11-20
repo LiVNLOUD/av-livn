@@ -4,9 +4,26 @@
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
-const base = process.argv[2] ?? 'https://av.livn.tr';
+const base = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? 'https://av.livn.tr';
 const out = { base, at: new Date().toISOString() };
 const b = await chromium.launch();
+// --d8 [--runs N]: only the D8 stages (before/after table for V1.7); N runs, median per stage
+if (process.argv.includes('--d8')) {
+  const n = Number(process.argv[process.argv.indexOf('--runs') + 1]) || 1;
+  const runs = [];
+  for (let i = 0; i < n; i++) runs.push({ d8_desktop_1440: await stages(1440, 900, false), d8_mobile_390: await stages(390, 844, true) });
+  const med = (xs) => { const v = xs.filter((x) => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor(v.length / 2)] : null; };
+  const pick = (f) => med(runs.map(f));
+  const summary = {};
+  for (const dev of ['d8_desktop_1440', 'd8_mobile_390']) {
+    summary[dev] = {};
+    for (const c of ['cold', 'warm']) for (const k of ['skeleton_fcp_ms', 'decision_ms', 'map_interactive_ms']) summary[dev][`${c}.${k}`] = pick((r) => r[dev][c][k]);
+    for (const k of ['harita_skeleton_fcp_after_home_ms', 'harita_map_ready_after_home_ms', 'harita_skeleton_fcp_warm_ms', 'harita_map_ready_warm_ms']) summary[dev][k] = pick((r) => r[dev][k]);
+  }
+  console.log(JSON.stringify({ base, at: out.at, runs: n, median: summary }, null, 1));
+  await b.close();
+  process.exit(0);
+}
 
 // --- 1. particle canvas: drawn pixels with the wind layer on (desktop + phone)
 for (const [w, h] of [[1440, 900], [390, 844]]) {
@@ -95,14 +112,18 @@ async function stages(w, h, mobile) {
   };
   const cold = await run();
   const warm = await run();
-  let mapPage = null;
-  if (mobile) {
+  // /harita/: first visit after the home page (map code not cached yet on phones) and a repeat visit (warm cache)
+  const mapRun = async () => {
     const t0 = Date.now();
     await p.goto(base + '/harita/', { waitUntil: 'commit' });
-    mapPage = await p.waitForFunction(() => document.getElementById('map')?.dataset.ready, null, { timeout: 60000 }).then(() => Date.now() - t0).catch(() => null);
-  }
+    const ready = await p.waitForFunction(() => document.getElementById('map')?.dataset.ready, null, { timeout: 60000 }).then(() => Date.now() - t0).catch(() => null);
+    const fcp = await p.evaluate(() => Math.round(performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? -1));
+    return { fcp, ready };
+  };
+  const mapFirst = await mapRun();
+  const mapWarm = await mapRun();
   await ctx.close();
-  return { cold, warm, harita_map_ready_warm_ms: mapPage };
+  return { cold, warm, harita_skeleton_fcp_after_home_ms: mapFirst.fcp, harita_map_ready_after_home_ms: mapFirst.ready, harita_skeleton_fcp_warm_ms: mapWarm.fcp, harita_map_ready_warm_ms: mapWarm.ready };
 }
 out.d8_desktop_1440 = await stages(1440, 900, false);
 out.d8_mobile_390 = await stages(390, 844, true);
