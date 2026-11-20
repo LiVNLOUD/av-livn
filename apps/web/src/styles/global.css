@@ -301,3 +301,48 @@ body.app .stale.on { display: none; }
 
 /* V1.7 (D8): first visit to the home page — system font until the plan card is ready (index.astro) */
 :root[data-font-wait] { font-family: system-ui, sans-serif; }
+
+/* V2.4 method card and rig scene (scripts/methodcard.ts, scripts/rigscene.ts) */
+.mc-pick, .mc-view { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.mc-pick button, .mc-view button { min-height: 44px; padding: 4px var(--s3); border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg-1); font: inherit; font-size: var(--fs-2); font-weight: 600; cursor: pointer; white-space: normal; height: auto; text-align: left; }
+.mc-pick button[aria-selected='true'], .mc-view button[aria-selected='true'] { background: var(--act); border-color: var(--act); color: var(--act-ink); }
+.mc-why { list-style: none; margin: var(--s2) 0; padding: 0; display: grid; gap: 4px; font-size: var(--fs-2); }
+.mk { display: inline-block; font-size: var(--fs-1); font-weight: 650; padding: 0 6px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--fg-2); margin-right: 4px; }
+.mk-hipotez, .mk-varsayim { border-style: dashed; }
+.mk-saha { border-color: var(--good); color: var(--good); }
+.mk-literatur { border-color: var(--act); color: var(--act); }
+.mk-envanter { border-color: var(--warn); color: var(--warn); }
+.mc-scene { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: var(--s3); align-items: center; margin-top: var(--s2); }
+.mc-scene.big { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+.mc-scene.big .rigscene { max-height: 46vh; }
+.mc-part { margin: 0; font-size: var(--fs-2); color: var(--fg-1); }
+.mc-note { margin: var(--s2) 0 0; font-size: var(--fs-1); color: var(--fg-2); }
+.mc-min { width: 4.5em; padding: 4px 6px; display: inline-block; }
+.mc-ladder summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-size: var(--fs-2); font-weight: 600; }
+.mc-ladder ol { margin: var(--s2) 0 0; padding-left: 1.2em; font-size: var(--fs-2); display: grid; gap: 2px; }
+@media (max-width: 520px) { .mc-scene { grid-template-columns: minmax(0, 1fr); justify-items: center; } .mc-scene .rigscene { max-width: 240px; } }
+.rigscene { width: 100%; height: auto; display: block; overflow: visible; }
+.rigscene .rs-line { stroke: var(--fg-2); stroke-width: 2; fill: none; }
+.rigscene .rs-lead-l { stroke: var(--line-2); stroke-width: 1; }
+.rigscene .rs-lbl { fill: var(--fg-1); font-size: 10px; font-family: inherit; }
+.rigscene .rs-pe { stroke: var(--act); }
+.rigscene .rs-fc { stroke: var(--fg-1); stroke-dasharray: 1 0; opacity: .85; }
+.rigscene .rs-knot { fill: var(--warn); }
+.rigscene .rs-lead { fill: #8d96a0; stroke: var(--ink-0); stroke-width: 1; }
+.rigscene .rs-metal { fill: #c7cfd6; stroke: var(--ink-0); stroke-width: 1; }
+.rigscene .rs-hook { stroke: #d9dde1; stroke-width: 2.2; fill: none; stroke-linecap: round; }
+.rigscene .rs-hook.rs-hidden { stroke-dasharray: 2 2; opacity: .7; }
+.rigscene .rs-lure, .rigscene .rs-tail { stroke: var(--fg-2); stroke-width: .8; }
+.rigscene .rs-bait { fill: #c98b6b; stroke: var(--ink-0); stroke-width: .8; }
+.rigscene .rs-float { fill: #e8664f; stroke: var(--ink-0); stroke-width: 1; }
+.rigscene .rs-feather { stroke: #e8c94f; stroke-width: 1.6; }
+.rigscene .rs-dim, .rigscene .rs-tag { fill: var(--fg-2); font-size: 9px; font-family: inherit; }
+.rigscene .rs-part { cursor: pointer; outline: none; }
+.rigscene .rs-part:focus-visible, .rigscene .rs-part.on { filter: drop-shadow(0 0 3px var(--act)); }
+.rigscene .rs-water { fill: color-mix(in oklab, var(--sea-3) 55%, transparent); }
+.rigscene .rs-bed { fill: var(--land); }
+.rigscene .rs-surface { stroke: var(--fg-2); stroke-dasharray: 3 3; }
+.rigscene .rs-step circle { fill: var(--ink-1); stroke: var(--fg-2); }
+.rigscene .rs-step text { fill: var(--fg-1); font-size: 9px; text-anchor: middle; font-family: inherit; }
+.rigscene .rs-dot { fill: var(--act); }
+.rigscene .rs-route { fill: none; stroke: var(--fg-2); stroke-width: 1.2; stroke-dasharray: 3 3; }

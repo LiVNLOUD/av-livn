@@ -28,6 +28,7 @@ import Base from '../../layouts/Base.astro';
       <dl class="tk" id="tk"></dl>
       <p class="fs-1 muted tk-notes" id="tk-notes"></p>
       <details class="tk-why"><summary>Neden? Gerekçe, kanıt düzeyi ve kaynaklar</summary><ul id="tk-why"></ul></details>
+      <details class="tk-why" id="tk-method-box" hidden><summary>Yöntem, bağlama ve kullanım (suni ve doğal yem)</summary><div id="tk-method"></div></details>
     </section>
 
     <section class="chart-block">
@@ -160,8 +161,9 @@ import Base from '../../layouts/Base.astro';
   import { compass, esc, fmtAgo, fmtDay, fmtTime, fmtWeekday, KIND_TR, lampV2, STATUS_TR, swimRule } from '../../scripts/format';
   import { PALETTE } from '../../scripts/palette';
   import { adminGet, getToken } from '../../scripts/admin';
-  import { loadMy, toProfiles } from '../../scripts/mytackle';
-  import { bandOf, bandV2, fieldBand, tackleClass, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
+  import { loadMy, toOwned, toProfiles } from '../../scripts/mytackle';
+  import { mountMethodCard } from '../../scripts/methodcard';
+  import { bandOf, bandV2, fieldBand, tackleClass, leadWithRank, RANK_FIRST_WIDTH, tackle, tackleLevrek, recommendMethods, type Band, type TackleInput, type TackleProfile } from '@av-livn/scoring';
   import { api, currentSpecies, SPECIES_TR } from '../../scripts/species';
   import { forecastColumns, renderForecast, type PackedHour } from '../../scripts/forecast';
   import { loadGrid } from '../../scripts/layers';
@@ -247,6 +249,17 @@ import Base from '../../layouts/Base.astro';
     const setName = myTk.personal[t.profile] ? profiles.find((p) => p.id === t.profile)!.name : tackleClass(t.profile, t.g).label;
     $('tk').innerHTML = t.rows.map((r) => `<div><dt>${esc(r.label)}</dt><dd><b>${esc(r.key === 'takim' ? (r.value.startsWith('LRF (hafif') ? r.value : setName) : r.value)}</b></dd></div>`).join('');
     $('tk-notes').textContent = t.notes.join(' ');
+    // V2.4: method card (istavrit): primary/secondary with reasons, rig scene, change ladder
+    const mBox = $('tk-method-box');
+    mBox.hidden = species !== 'istavrit';
+    if (species === 'istavrit') {
+      const lt = tackle(tkInput(v), profiles);
+      const inv = toOwned(loadMy());
+      const month = new Date(Date.parse(H[i]![0] as string) + 3 * 3_600_000).getUTCMonth() + 1;
+      const inp = tkInput(v);
+      const advice = recommendMethods({ month, light: lt.light, depthM: inp.depthM, currentMs: inp.currentMs, gustKmh: inp.gustKmh, waveM: inp.waveM ?? null, kind: d.spot.kind, mode: inv.mode, owned: inv.owned, baits: inv.baits });
+      mountMethodCard($('tk-method'), { advice, lure: { jigG: lt.jigG, lureCm: lt.lureCm, color: lt.color, hookNo: lt.hook }, depthM: inp.depthM, currentMs: inp.currentMs });
+    }
     $('tk-why').innerHTML = t.rows
       .map((r) => `<li><b>${esc(r.label)}:</b> ${esc(r.why)} <a class="tag ev ev-${r.evidence}" href="/model/#kanit-${r.evidence}" title="Kanıt düzeyi ${r.evidence}">kanıt ${r.evidence}</a>${r.source ? `<br><span class="muted">Kaynak: ${esc(r.source)}</span>` : ''}</li>`)
       .join('');
