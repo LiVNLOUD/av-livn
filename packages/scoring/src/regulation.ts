@@ -19,23 +19,28 @@ export const OTHER_SPECIES = ['izmarit', 'mırmır'] as const;
 
 export const REG_SOURCE = '6/2 Tebliğ 2024/21, Çizelge 7 (2026/26 ile değişik)';
 
-/** Daily quantity for kg-limited species, md. 15(4): 5 kg per person, single or mixed species; with the largest
- *  fish removed the rest may not exceed 4 kg. Limits are per person — the app divides by the people on the outing. */
+/** Daily quantity for kg-limited species, 6/2 Tebliğ md. 15(4) (RG 11.08.2024/32629), verbatim in docs/REGULATION.md:
+ *  "…avlanılan tür tek veya karışık olsun 5 kg'ı geçemez. … tek bireyin 5 kg'ı geçmesi halinde, bu birey yasal limitler
+ *  dâhilinde kabul edilir. Avlanan balıklardan en büyüğünün hariç tutulduğu durumda, geri kalan balıkların toplam
+ *  ağırlığının 4 kg'ı geçmemesi halinde, avlanan balıklar alıkonulabilir miktar dâhiline kabul edilir."
+ *  Per person (md. 15(5): "bir amatör balıkçının beraberinde götürebileceği toplam balık miktarı"). */
 export const BAG_KG = 5;
 export const BAG_KG_WITHOUT_LARGEST = 4;
 
 export type BagLevel = 'ok' | 'yaklasti' | 'asti';
 /**
- * Bag check for one person's catch of kg-limited species (kg values entered by the user; never estimated here).
- * 'asti': over 5 kg, or over 4 kg once the largest fish is set aside. 'yaklasti': the rest has reached 4 kg
- * (one more fish may break the rule) or the total is within 1 kg of 5.
+ * Bag check for one person's catch of kg-limited species, on weights the user entered (never estimated here).
+ * Legal when the total is ≤ 5 kg (sentence 1), or when the rest without the largest fish is ≤ 4 kg (sentence 3; a
+ * single fish over 5 kg is its special case, sentence 2). So 'asti' only when total > 5 AND rest > 4.
+ * 'yaklasti' is an information line, not a legal threshold: total ≥ 4 or rest ≥ 3,5 while still legal.
  */
 export function bagCheck(totalKg: number, largestKg = 0): { level: BagLevel; text: string } {
-  const rest = Math.max(0, totalKg - Math.max(0, largestKg));
-  if (totalKg > BAG_KG || rest > BAG_KG_WITHOUT_LARGEST)
-    return { level: 'asti', text: `Günlük sınır aşıldı: kişi başı ${BAG_KG} kg (en büyük balık hariç ${BAG_KG_WITHOUT_LARGEST} kg), md. 15(4).` };
-  if (rest >= BAG_KG_WITHOUT_LARGEST || totalKg >= BAG_KG - 1)
-    return { level: 'yaklasti', text: `Günlük sınıra yaklaştınız: kişi başı ${BAG_KG} kg (en büyük balık hariç ${BAG_KG_WITHOUT_LARGEST} kg), md. 15(4).` };
+  const largest = Math.min(Math.max(0, largestKg), totalKg);
+  const rest = Math.max(0, totalKg - largest);
+  if (totalKg > BAG_KG && rest > BAG_KG_WITHOUT_LARGEST)
+    return { level: 'asti', text: `Günlük miktar aşıldı: toplam ${BAG_KG} kg'ı, en büyük balık hariç kalan ${BAG_KG_WITHOUT_LARGEST} kg'ı geçiyor (md. 15(4)).` };
+  if (totalKg >= BAG_KG - 1 || rest >= 3.5)
+    return { level: 'yaklasti', text: `Bilgi: kişi başı ${BAG_KG} kg; toplam ${BAG_KG} kg'ı geçerse en büyük balık hariç kalan ${BAG_KG_WITHOUT_LARGEST} kg'ı geçemez (md. 15(4)).` };
   return { level: 'ok', text: '' };
 }
 

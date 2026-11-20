@@ -16,6 +16,28 @@
 
 - md. 15(4) (5 kg / 4 kg) bu değişiklikte **değişmedi**.
 
+## Günlük miktar ve boy ölçümü — birebir metin (okuma 2026-11-20, V2.9)
+Kaynak: 6/2 Tebliğ (2024/21), RG 11.08.2024 sayı 32629. Metin, Lexpera "Resmî Gazete metin" sayfasından alındı; Resmî Gazete sayfasına konteynerden erişilemedi.
+
+**md. 15(4):**
+> "(4) Kg cinsinden limit verilen türlerde, avlanılan tür tek veya karışık olsun 5 kg'ı geçemez. Kg cinsinden sınırlama getirilen türlerde, tek bireyin 5 kg'ı geçmesi halinde, bu birey yasal limitler dâhilinde kabul edilir. Avlanan balıklardan en büyüğünün hariç tutulduğu durumda, geri kalan balıkların toplam ağırlığının 4 kg'ı geçmemesi halinde, avlanan balıklar alıkonulabilir miktar dâhiline kabul edilir."
+
+**md. 15(5) (ilk cümle):**
+> "(5) Alıkonulabilir miktar, her türün ayrı ayrı alıkonulacağı miktar olmayıp, av günü sayısına bakılmaksızın bir amatör balıkçının beraberinde götürebileceği toplam balık miktarıdır."
+
+**md. 3(1)(f), boy ölçümü:**
+> "f) Balık boyu (Toplam boy): Ölçülen metoda göre toplam boy veya çatal boy olarak yapılan balık boyu ölçümünü, tam boy; ağzı kapalı iken balık başının ön ucu ile kuyruk yüzgecinin en uzun ışınının bitim noktası arasındaki izdüşüm uzunluğunu; çatal boy; alt çene ucu ile kuyruk yüzgecinin çatalı arasındaki uzunluğu,"
+
+Notlar:
+- **5/2'deki istisna 6/2'de de var.** "tek bireyin 5 kg'ı geçmesi halinde, bu birey yasal limitler dâhilinde kabul edilir" cümlesi 6/2 md. 15(4)'te, aynı hükmün içsu karşılığı md. 11(4)'te geçiyor. 5/2 (2020/21) metnini ayrıca açamadım (RG 22.08.2020 sayfası bulunamadı), bu yüzden iki metni yan yana karşılaştırmadım.
+- **Uygulamanın okuması (`regulation.ts` `bagCheck`):**
+  - toplam ≤ 5 kg ise yasal (1. cümle);
+  - toplam > 5 kg ise en büyük balık hariç kalan ≤ 4 kg olduğunda yasal (3. cümle; tek balığın 5 kg'ı geçmesi bunun özel hâli, 2. cümle);
+  - "aşıldı" yalnız toplam > 5 **ve** kalan > 4 olduğunda gösterilir;
+  - hesap kişi başına yapılır (md. 15(5)), kullanıcının girdiği ağırlıkla; boydan ağırlık tahmini yapılmaz.
+- Önceki sürüm "kalan > 4"ü tek başına aşım sayıyordu; bu yanlıştı ve düzeltildi.
+- **Boy:** çizelgedeki sınırlar, yıldızlı satırlar (çatal boy) dışında tam boydur. Sahadayım boy sorusu bu tanımı kısaca gösterir.
+
 ## Metinden doğrulanan kurallar (2026-10-31 okuması)
 | Konu | Kural | Madde |
 |---|---|---|
@@ -43,7 +65,7 @@ Kaynak: RG 11.08.2024/32629, [20240811-4.htm](https://www.resmigazete.gov.tr/esk
 | (ilgili diğerleri) Sargos 21 cm, Çipura 20 cm, Mezgit 13 cm, Uskumru 20 cm, Palamut 25 cm (1 Nis–14 Ağu yasak) | | | | |
 
 - "kg" = md. 15(4): kişi başı toplam 5 kg (en büyük balık hariç 4 kg). Boy toleransı %5 (md. 15(2)).
-- **Boy ölçümü:** Çizelge 7 dipnotu yalnız yıldızlı satırlar (kılıç, mavi yüzgeçli orkinos) için "çatal boy" der. Diğer türlerde ölçüm biçimi tanımlar maddesinden okunmadı. Uygulama kullanıcıya "burun ucundan kuyruk ucuna" ölçmesini **önermez**; yalnız girilen boyu sınırla karşılaştırır (doğrulanmamış kural kodlanmaz, D7).
+- **Boy ölçümü:** Çizelge 7 dipnotu yalnız yıldızlı satırlar (kılıç, mavi yüzgeçli orkinos) için "çatal boy" der. Diğer türlerde ölçüm biçimi tanımlar maddesinden okunmadı. Tam boy tanımı md. 3(1)(f)'den birebir okundu (yukarıda); Sahadayım boy sorusu bu tanımı gösterir.
 - İstavrit değeri 2026/26 ile **12 cm** oldu (önceki uygulama 13 cm). Tek kaynak `packages/scoring/src/regulation.ts`; motor, worker ve web oradan okur. Av günlüğü ve Sahadayım uyarı tablosu (`LEGAL_MIN_CM`) Çizelge 7'den genişletildi: istavrit 13, levrek 25, lüfer 18, kolyoz 18, karagöz 18, sargos 21, çipura 20, mezgit 13 cm.
 - "Karagöz" adı karışıktır: çizelgede hem *T. mediterraneus* ("İstavrit (karagöz)", 13 cm) hem *Diplodus vulgaris* ("Karagöz", 18 cm) var. Av günlüğünde "karagöz" sparid kabul edilir.
 
@@ -60,9 +82,9 @@ Kaynak: RG 11.08.2024/32629, [20240811-4.htm](https://www.resmigazete.gov.tr/esk
    - Kartta ve TACKLE.md'de kalıcı not: "Mevcut aydınlatma; kendi ışığınızla balık toplamak yasak."
    - Sahadayım'daki kırmızı gece modu ekran ışığıdır; cezbetme amaçlı değildir.
 2. **Asgari boy uyarısı:** Av günlüğü ve Sahadayım'da boy girildiğinde tür başına (`LEGAL_MIN_CM`, Çizelge 7) gösterilir; kayıt engellenmez ("denize geri bırakın").
-3. **Günlük 5 kg (V2):** md. 15(4) kişi başıdır, tek ya da karışık tür toplamına uygulanır (kg ile sınırlı türler; bizim türlerin hepsi). `bagCheck` (regulation.ts):
-   - **"aşıldı":** toplam > 5 kg ya da en büyük balık hariç kalan > 4 kg;
-   - **"yaklaştı":** kalan ≥ 4 kg ya da toplam ≥ 4 kg.
+3. **Günlük 5 kg (V2.9):** md. 15(4) kişi başıdır, tek ya da karışık tür toplamına uygulanır (kg ile sınırlı türler; bizim türlerin hepsi). `bagCheck` (regulation.ts), yukarıdaki birebir metne göre:
+   - **"aşıldı":** toplam > 5 kg **ve** en büyük balık hariç kalan > 4 kg;
+   - **bilgi satırı:** yasal sınırdayken toplam ≥ 4 kg ya da kalan ≥ 3,5 kg; yasal bir eşik değildir.
    - **Ağırlık:** kullanıcının girdiği ağırlıkla hesaplanır. Kişi sayısına bölünür. Boydan ağırlık tahmini (W = a·Lᵇ) kaynaklı a, b olmadan **yapılmaz**.
    - İzmarit kg toplamına dahildir ("Diğer türler", kg).
 4. **Yüzme alanı (01.04–15.11):** Kumsal tipindeki meralar bu dönemde listede, kartta ve ısı haritasında rozet taşır: "Şamandıralı yüzme alanında avcılık yasak (1 Nis–15 Kas)". Şamandıra haritası yok; uyarı tip ve tarih bazında (E7).

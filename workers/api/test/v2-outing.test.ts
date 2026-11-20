@@ -99,9 +99,9 @@ describe('outings with method sections (D5)', () => {
     expect(v.value.sections.map((s) => [s.section_no, s.tackle_method, s.method, s.bites])).toEqual([[1, 'lrf', 'lrf', 0], [2, 'dropshot_yem', 'diger', 40]]);
     expect(v.warnings.some((w) => /^Bölüm 2: 11,5 cm istavrit/.test(w))).toBe(true);
     // 6 kg for two people = 3 kg each: under the limit, no bag warning
-    expect(v.warnings.some((w) => /Günlük sınır/.test(w))).toBe(false);
+    expect(v.warnings.some((w) => /Günlük miktar/.test(w))).toBe(false);
     const solo = validateOuting({ ...body, people: 1 }, NOW);
-    expect(solo.ok && solo.warnings.some((w) => /Günlük sınır aşıldı/.test(w))).toBe(true);
+    expect(solo.ok && solo.warnings.some((w) => /Günlük miktar aşıldı/.test(w))).toBe(true);
     expect(validateOuting({ ...body, sections: [sec('2026-11-08T22:00:00Z', '2026-11-08T22:30:00Z', { zero_catch: true })] }, NOW)).toEqual({ ok: false, error: 'section_1_outside_outing' });
     expect(validateOuting({ ...body, people: 0 }, NOW)).toEqual({ ok: false, error: 'invalid_people' });
     expect(validateOuting({ ...body, sections: [] }, NOW)).toEqual({ ok: false, error: 'invalid_sections' });

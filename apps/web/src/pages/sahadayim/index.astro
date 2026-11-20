@@ -435,7 +435,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   $('len').addEventListener('click', () => {
     const f = [...allFish()].reverse().find((x) => x.length_cm === null) ?? allFish().at(-1);
     if (!f) return;
-    const v = prompt(`Son ${f.species} boyu (cm)`, f.length_cm ? String(f.length_cm) : '');
+    const v = prompt(`Son ${f.species} boyu (cm) — tam boy: ağız kapalı, baş ucundan kuyruk yüzgecinin en uzun ışınının ucuna (md. 3)`, f.length_cm ? String(f.length_cm) : '');
     if (v === null) return;
     const n = Number(v.replace(',', '.'));
     f.length_cm = v.trim() === '' || !(n > 0 && n < 150) ? null : n;
