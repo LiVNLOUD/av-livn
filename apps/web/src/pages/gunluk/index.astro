@@ -123,6 +123,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
 
 <script>
   import { getToken, logout, mountLogin } from '../../scripts/admin';
+  import { LEGAL_MIN_CM } from '../../scripts/format';
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const QUEUE = 'av-livn-catch-queue';
   const LEGAL: Record<string, number> = { istavrit: 13 };
@@ -178,7 +179,7 @@ import AdminLogin from '../../components/AdminLogin.astro';
   function legal() {
     const small = items().filter((i) => i.length_cm !== undefined && LEGAL[i.species.toLocaleLowerCase('tr')] && i.length_cm < LEGAL[i.species.toLocaleLowerCase('tr')]!);
     $('legal').hidden = !small.length;
-    $('legal').textContent = small.length ? `${small.length} balık yasal asgari boyun altında (istavrit 13 cm). Denize geri bırakın.` : '';
+    $('legal').textContent = small.length ? `${small.length} balık yasal asgari boyun altında (istavrit ${LEGAL_MIN_CM.istavrit} cm). Denize geri bırakın.` : '';
   }
 
   function payload() {

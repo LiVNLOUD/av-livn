@@ -18,12 +18,12 @@ beforeAll(async () => {
 
 describe('validateSession', () => {
   it('defaults effort, normalises species and warns under the legal minimum size', () => {
-    const v = validateSession({ ...base, items: [{ count: 3, length_cm: 12 }, { species: 'İstavrit', count: 2 }, { species: 'Kolyoz', count: 1, length_cm: 20 }] }, NOW);
+    const v = validateSession({ ...base, items: [{ count: 3, length_cm: 11.5 }, { species: 'İstavrit', count: 2 }, { species: 'Kolyoz', count: 1, length_cm: 20 }] }, NOW);
     expect(v.ok).toBe(true);
     if (!v.ok) return;
     expect(v.value).toMatchObject({ active_min: 120, rods: 1, zero_catch: false, under_lamp: null });
     expect(v.value.items.map((i) => i.species)).toEqual(['istavrit', 'istavrit', 'kolyoz']);
-    expect(v.warnings).toEqual(['12 cm istavrit yasal asgari boyun (13 cm) altında — denize geri bırakın.']);
+    expect(v.warnings).toEqual(['11,5 cm istavrit yasal asgari boyun (12 cm) altında — denize geri bırakın.']);
   });
 
   it('I6: target species required, method checked, retro by flag or by entry delay', () => {

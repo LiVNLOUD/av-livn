@@ -114,5 +114,5 @@ export function swimRule(kind: string, iso: string | Date): string | null {
   return md >= 401 && md <= 1115 ? 'Şamandıralı yüzme alanında avcılık yasak (1 Nis–15 Kas)' : null;
 }
 
-/** Asgari boy (cm), 6/2 Tebliğ Çizelge 7 — mirrors workers/api/src/routes/catch.ts LEGAL_MIN_CM. */
-export const LEGAL_MIN_CM: Record<string, number> = { istavrit: 13, levrek: 25, 'lüfer': 18, kolyoz: 18, 'karagöz': 18, sargos: 21, 'çipura': 20, mezgit: 13 };
+/** Asgari boy (cm), 6/2 Tebliğ Çizelge 7 — one source: packages/scoring/src/regulation.ts. */
+export { LEGAL_MIN_CM } from '@av-livn/scoring';

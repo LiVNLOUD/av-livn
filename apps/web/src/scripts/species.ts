@@ -1,8 +1,9 @@
+import { LEGAL_MIN_CM } from '@av-livn/scoring';
 // H3: selected species, shared by every page: ?tur= in the URL wins, then the last choice on this device.
 export const SPECIES = ['istavrit', 'levrek'] as const;
 export type Species = (typeof SPECIES)[number];
 export const SPECIES_TR: Record<Species, string> = { istavrit: 'İstavrit', levrek: 'Levrek' };
-export const LEGAL_MIN: Record<Species, number> = { istavrit: 13, levrek: 25 };
+export const LEGAL_MIN: Record<Species, number> = { istavrit: LEGAL_MIN_CM.istavrit!, levrek: LEGAL_MIN_CM.levrek! }; // regulation.ts
 const KEY = 'av-livn-species';
 
 export const isSpecies = (x: unknown): x is Species => typeof x === 'string' && (SPECIES as readonly string[]).includes(x);

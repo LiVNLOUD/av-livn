@@ -59,11 +59,11 @@ describe('tackle (F0/G2)', () => {
     expect([hook.value, hook.evidence]).toEqual(['#8', 'C']);
     expect(hook.why).toMatch(/çapari \(el oltası\) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı \(R19b\)/);
     expect(hook.why).toMatch(/#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş/);
-    expect(hook.why).toMatch(/#10: daha çok vuruş, 13 cm altı oranı yüksek, geri bırakma/);
+    expect(hook.why).toMatch(/#10: daha çok vuruş, küçük balık oranı yüksek \(çalışmada o dönemin 13 cm sınırının altı\), geri bırakma/);
     expect(hook.why).not.toContain(R19_CITE); // M2: the citation sits under "Neden?", not in the row
     expect(hook.source).toBe(R19_CITE);
     expect(t.rows.find((r) => r.key === 'jighead')!.why).toMatch(/modelin gece kolu/);
-    expect(t.rows.find((r) => r.key === 'yasal')!.value).toBe('13 cm');
+    expect(t.rows.find((r) => r.key === 'yasal')!.value).toBe('12 cm'); // 2026/26
     expect(t.notes.join(' ')).toMatch(/yasak \(md\. 8\/8\)/);
     expect(JSON.stringify(t.rows)).not.toMatch(/fener|lamba götür|ışık götür/i);
     expect(tackleShort(t)).toBe('LRF · 1,2 g sabit · #8 · 5 cm şeffaf-simli');

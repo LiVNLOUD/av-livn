@@ -2,6 +2,7 @@
 // explicit zero catch. On save the model output for the session hours is frozen from what is already stored:
 // spot_scores_v2_history (full output of past hours) and the live list (score/band/rank of current/future
 // hours). Hours older than the history are filled by score.yml from the hourly observations ("recomputed").
+import { LEGAL_MIN_CM, sizeWarning } from '@av-livn/scoring';
 import { Hono } from 'hono';
 import type { Env } from '../env';
 import { SPECIES, type ListEntryV2 } from '../precompute_v2';
@@ -9,10 +10,8 @@ import { SPECIES, type ListEntryV2 } from '../precompute_v2';
 export const catchRoutes = new Hono<{ Bindings: Env }>();
 
 const HOUR = 3_600_000;
-export const LEGAL_MIN_CM: Record<string, number> = {
-  // 6/2 Tebliğ 2024/21 Çizelge 7 (docs/REGULATION.md)
-  istavrit: 13, levrek: 25, 'lüfer': 18, kolyoz: 18, 'karagöz': 18, sargos: 21, 'çipura': 20, mezgit: 13,
-};
+// 6/2 Tebliğ Çizelge 7, one source with the engine and the web (packages/scoring/src/regulation.ts)
+export { LEGAL_MIN_CM };
 
 export interface CatchItem {
   species: string;
@@ -105,8 +104,8 @@ export function validateSession(b: Record<string, unknown>, now: Date): { ok: tr
   if (zero && items.length) return { ok: false, error: 'zero_catch_with_items' };
   if (!zero && !items.length) return { ok: false, error: 'catch_or_zero_required' };
   const warnings = items
-    .filter((i) => i.length_cm !== null && LEGAL_MIN_CM[i.species] !== undefined && i.length_cm < LEGAL_MIN_CM[i.species]!)
-    .map((i) => `${String(i.length_cm).replace('.', ',')} cm ${i.species} yasal asgari boyun (${LEGAL_MIN_CM[i.species]} cm) altında — denize geri bırakın.`);
+    .map((i) => sizeWarning(i.species, i.length_cm))
+    .filter((w): w is string => w !== null);
   return {
     ok: true,
     warnings,

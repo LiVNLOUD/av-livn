@@ -35,6 +35,7 @@ export function tackleClass(profile: 'lrf' | 'spin', g: number): (typeof TACKLE_
   return profile === 'lrf' ? TACKLE_CLASSES.lrf : g <= 15 ? TACKLE_CLASSES.lightSpin : TACKLE_CLASSES.spin;
 }
 
+import { LEGAL_MIN_CM } from './regulation';
 import { PRIOR_REL_SD, sinkSpeed } from './v2/sink';
 
 /** RESEARCH.md R19, cited verbatim on the hook row (a test checks it against RESEARCH.md). */
@@ -98,7 +99,7 @@ export interface Tackle {
   light: LightCase;
 }
 
-export const LEGAL_MIN_ISTAVRIT_CM = 13;
+export const LEGAL_MIN_ISTAVRIT_CM = LEGAL_MIN_CM.istavrit!; // regulation.ts (2026/26: 12 cm)
 const n1 = (x: number) => x.toFixed(1).replace('.', ',').replace(',0', '');
 const nearestSize = (g: number) => JIG_SIZES.reduce((best, s) => (Math.abs(s - g) < Math.abs(best - g) ? s : best), JIG_SIZES[0]!);
 
@@ -228,7 +229,7 @@ function tackleOne(i: TackleInput, profiles: TackleProfile[], legalMinCm: number
     },
     {
       key: 'igne', label: 'İğne', value: '#8', evidence: 'C',
-      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, ${legalMinCm} cm altı oranı yüksek, geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm — çapari (el oltası) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı (R19b)`, source: R19_CITE,
+      why: `#8: daha seçici, yasal boy üstü oranı yüksek, daha az vuruş. #10: daha çok vuruş, küçük balık oranı yüksek (çalışmada o dönemin 13 cm sınırının altı), geri bırakma gerekir. Modal boy #8'de 17,7 cm, #10'da 13,4 cm — çapari (el oltası) iğnelerinde ölçüldü, LRF jighead'e aktarım; LRF için doğrulanmadı (R19b)`, source: R19_CITE,
     },
     {
       key: 'silikon', label: 'Silikon', value: `${lureCm} cm, ${shape}`, evidence: 'C',
@@ -278,7 +279,7 @@ export function crossWind(windKmh: number | null, windDir: number | null, normal
 // ---------------------------------------------------------------------------------------------------------------
 // H3: levrek tackle (docs/species/levrek/TACKLE.md). Spin by default (generic 6–30 g class); light levrek on the
 // LRF set only in calm, shallow, sheltered water. All rules C except the legal size (A).
-export const LEGAL_MIN_LEVREK_CM = 25;
+export const LEGAL_MIN_LEVREK_CM = LEGAL_MIN_CM.levrek!;
 export const SPIN_SIZES = [7, 10, 14, 18, 21, 24, 28, 32];
 
 export interface LevrekTackle {
